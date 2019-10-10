@@ -2,18 +2,34 @@
     text-align: center;
 }
 
-.intro h1 {
+.intro h2 {
     padding: 30px 0 0 0;
-    color: grey;
+}
+
+.banner {
+    width: 100%;
+    text-align: center;
 }
 
 .banner img {
     width: 300px;
-    opacity: 0.7;
-    max-width: 70%;
+    max-width: 50%;
 }
 
-.banner img:hover {
+#img-left {
+    opacity: 0.7;
+}
+
+#img-left:hover {
+    opacity: 1;
+}
+
+
+#img-right {
+    opacity: 0.7;
+}
+
+#img-right:hover {
     opacity: 1;
 }
 
@@ -22,49 +38,43 @@
     color: black;
 }
 
-.bannersub {
-    display: inline-block;
-    width: 440px;
-    vertical-align: bottom;
-    max-width: 50%;
+#button-left:hover ~ #img-left {
+    opacity: 1;
 }
 
-@media only screen and (max-width: 500px) {
-    .bannersub {
-        max-width: 100%;
-    }
-    .banner img {
-        max-width: 40%;
-    }
-  }
-
-.bannersub.left {
-    text-align: right;
-    
-}
-
-.bannersub.left .bannertext {
-    text-align: left;
-    margin-right: -50px;
-    
-}
-
-.bannersub.right .bannertext {
-    margin-left: -50px;
-    text-align: right;
+#button-right:hover ~ #img-right {
+    opacity: 1;
 }
 
 .bannertext {
-    width: 120px;
     display: inline-block;
-    padding-bottom: 10px;
+    padding:10px 15px;
+    border-radius: 5px;
+    text-align: center;
+    border: solid 1px black;
+    margin: 20px 30px 40px 30px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 16px;
+    width:160px;
+}
+
+@media screen and (max-width: 520px){
+    .bannertext {
+        margin: 10px;
+    }
+}
+
+.bannertext:hover {
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+    font-weight: 700;
 }
 
 
 .dataportal {
     text-align: center;
     width: 100%;
-    padding: 40px 0;
+    padding: 20px 0;
     color: grey;
 }
 

@@ -54,6 +54,10 @@ input.SearchBar:hover {
     background-color:black;
 }
 
+.download-multiple-title {
+    font-size: 16px;
+}
+
 .MultipleDownload button {
     border: solid 1px black;
     border-radius: 5px;

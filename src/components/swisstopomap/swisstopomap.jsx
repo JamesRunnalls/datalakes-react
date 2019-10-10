@@ -18,9 +18,12 @@ class ColorBar extends Component {
 
 class SwissTopoMap extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {addClass: false}
+  state = {
+    addClass: false
+  }
+  
+  toggle = () => {
+    this.setState({addClass: !this.state.addClass});
   }
 
   sendMap = (map) => {
@@ -101,12 +104,7 @@ class SwissTopoMap extends Component {
     }
 
     this.map.attributionControl.addAttribution('<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>');
-    this.map.attributionControl.addAttribution('<a title="Swiss Federal Office of Meteorology and Climatology" href="https://www.meteoschweiz.admin.ch/">MeteoSwiss</a>');
 
-  }
-
-  toggle() {
-    this.setState({addClass: !this.state.addClass});
   }
 
   render() {

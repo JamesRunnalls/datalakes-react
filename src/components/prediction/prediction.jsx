@@ -44,7 +44,7 @@ class Predictions extends Component {
     }
 
     keyPress = (e,data) => {
-        if(e.keyCode == 13){
+        if(e.keyCode === 13){
             var dataset = data.properties;
             if (dataset.datalakes !== ""){
                 window.location.href = dataset.datalakes;

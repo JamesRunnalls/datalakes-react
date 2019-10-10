@@ -1,0 +1,19 @@
+.heatmaptooltip {
+  position: absolute;
+  opacity: 0;
+  width: 70px;
+  padding: 5px;
+  z-index: 9999;
+  bottom: 45px;
+  left: 10px;
+}
+
+.heatmap-parent {
+    width:100%;
+    height:100%;
+}
+
+.heatmap-svg {
+    width:100%;
+    height:100%;
+}

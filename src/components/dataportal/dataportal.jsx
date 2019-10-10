@@ -37,7 +37,7 @@ class Dataset extends Component {
     render() { 
         var check = "checkbox unchecked"
         var url = "/data/"+this.props.dataset.id;
-        if (this.props.selected.includes(this.props.dataset.id)) check = "checkbox checked";
+        if (this.props.selected.includes(this.props.dataset)) check = "checkbox checked";
         var keys = Object.values(this.props.dataset.filters).join(" | ");
         return ( 
             <div key={this.props.dataset.id} className="dataset">
@@ -47,7 +47,7 @@ class Dataset extends Component {
                     type="checkbox" 
                     name={this.props.dataset.id} 
                     value={this.props.dataset.id} 
-                    onClick={() => this.props.onSelectDataset(this.props.dataset.id)}
+                    onClick={() => this.props.onSelectDataset(this.props.dataset)}
                     />
                 <Link to={url} title="Click to explore plots, lineage, downloads and metadata" className="text">
                     <div className="text-title">
@@ -109,6 +109,29 @@ class DatasetDownload extends Component {
             </div> );
     }
 }
+
+class DownloadMultiple extends Component {
+    render() { 
+        if (this.props.selected.length > 0){
+            return ( 
+                <React.Fragment>
+                    <div className="download-multiple-title">Datasets Selected:</div>
+                    <ul>
+                        { this.props.selected.map( dataset => ( <li key={dataset.id}>{dataset.label}</li> ))}
+                    </ul>
+                    <div className="MultipleDownload">
+                        <button title="Download datasets in NetCDF format">.nc</button>
+                        <button title="Download datasets in CSV format">.csv</button>
+                        <button title="Download datasets in TXT format">.txt</button>
+                    </div>
+                </React.Fragment>
+             );
+        } else {
+            return ( "No Datasets Selected" );
+        }
+        
+    }
+}
   
 class DataPortal extends Component {
     state = {
@@ -127,13 +150,13 @@ class DataPortal extends Component {
         this.setState({ search: event.target.value });
       };
 
-    selectDataset = id => {
-        if (this.state.selected.includes(id)){
-            const selected = this.state.selected.filter(c => c !== id);
+    selectDataset = dataset => {
+        if (this.state.selected.includes(dataset)){
+            const selected = this.state.selected.filter(c => c !== dataset);
             this.setState({ selected : selected});
         } else {
             const selected = this.state.selected;
-            selected.push(id);
+            selected.push(dataset);
             this.setState({ selected : selected });
         }
     };
@@ -155,7 +178,6 @@ class DataPortal extends Component {
 
     render() { 
         document.title = "Data Portal - Datalakes";
-        var download = "";
         const { search, filters, datasets } = this.state;
 
         // Filter by filters
@@ -189,7 +211,7 @@ class DataPortal extends Component {
                                                 <span> &#215; </span>
                                                 </h3>
                                             </div>
-                                            <div className="download-content">{download}</div>
+                                            <div className="download-content"><DownloadMultiple selected={this.state.selected} datasets={this.state.datasets}/></div>
                                         </div>
                                     </React.Fragment>
                                 } 

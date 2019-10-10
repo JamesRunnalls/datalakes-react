@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
-import HeatMapImage from './img/heatmap.png';
-import LineImage from './img/line.png';
+import D3HeatMap from '../heatmap/heatmap';
+import D3LineGraph from '../linegraph/linegraph';
+
 
 
 class HeatMap extends Component {
@@ -12,7 +13,7 @@ class HeatMap extends Component {
                 <SidebarLayout 
                     sidebartitle="Plot Controls"
                     left={
-                        <img src={HeatMapImage} style={{width:"100%"}} />
+                        <D3HeatMap />
                     }
                     right={""}
                 />
@@ -29,7 +30,7 @@ class LineGraph extends Component {
                 <SidebarLayout 
                     sidebartitle="Plot Controls"
                     left={
-                        <img src={LineImage} style={{width:"100%"}} />
+                        <D3LineGraph />
                     }
                     right={""}
                 />
@@ -75,8 +76,8 @@ class Data extends Component {
         this.setState({selection:selected});
       };
     
-    render() {               
-        document.title = "Data - Datalakes";
+    render() {             
+        document.title = "Example Dataset - Datalakes";
         var classHeatMap = "subnav-item";
         var classLineGraph = "subnav-item";
         var classPreview = "subnav-item";
@@ -92,7 +93,7 @@ class Data extends Component {
         if (this.state.selection === "information"){selected = <Information />; classInformation = "subnav-item active"}
          return (
              <React.Fragment>
-                 <h1>Data</h1> 
+                 <h1>Example Dataset</h1> 
                  <div className="subnav">
                      <div title="Preview data as a heat map" className={classHeatMap} onClick={() => this.updateSelectedState("heatmap")}>Heat Map</div>
                      <div title="Preview data as a line graph" className={classLineGraph} onClick={() => this.updateSelectedState("linegraph")}>Line Graph</div>

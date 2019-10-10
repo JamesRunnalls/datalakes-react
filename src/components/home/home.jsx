@@ -9,31 +9,23 @@ class Home extends Component {
         document.title = "Home - Datalakes";
          return ( 
             <React.Fragment>
-                <div className="intro"><h1>The Open Data Platform for Swiss Lakes</h1></div>
+                <div className="intro"><h2>The Open Data Platform for Swiss Lakes</h2></div>
 
                 <div className="banner">
-                    <Link to="/live" title="Explore our live observations">
-                        <div className="bannersub left">
-                            <span>
-                                <div className="bannertext">
-                                    <h2>Live</h2>
-                                    <h3>Observations</h3>
-                                </div>
-                                <img alt="Datalakes drawing left" src={LeftBanner} />
-                            </span>
-                        </div>
+                    <Link to="/live" title="Explore our live observations" id="button-left" className="bannertext">
+                        Live Observations
                     </Link>
-                    <Link to="/predictions" title="Explore our predictive lake models">
-                        <div  className="bannersub right">
-                            <span>
-                                <img alt="Datalakes drawing right" src={RightBanner} />
-                                <div className="bannertext">
-                                    <h2>Predictions</h2>
-                                    <h3>Lake Models</h3>
-                                </div>
-                            </span>
-                        </div>
+                    <Link to="/predictions" className="bannertext" id="button-right" title="Explore our predictive lake models" >
+                        Models Predictions
+                    </Link>  
+                    <br />            
+                    <Link to="/live" title="Explore our live observations" id="img-left">
+                        <img alt="Datalakes drawing left" src={LeftBanner} />
                     </Link>
+                    <Link to="/predictions" title="Explore our predictive lake models" id="img-right">
+                        <img alt="Datalakes drawing right" src={RightBanner} />
+                    </Link>
+                     
                 </div>
 
                 <div className="dataportal"><h2>Or access all data through our <Link to="/dataportal" title="Explore our data.">data portal</Link></h2></div>

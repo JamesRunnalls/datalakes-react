@@ -42,10 +42,17 @@ header {
   
   @media screen and (max-width: 500px){
   .logo {
-    top: 87px;
+    top: 50px;
   }
     .logo a {
       width: 140px;
+    }
+    .MainNav {
+      top: 40px!important;
+    }
+
+    header {
+      height: 70px;;
     }
   }
   
