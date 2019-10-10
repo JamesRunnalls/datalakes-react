@@ -1,0 +1,122 @@
+        
+    .side h3{
+    border-bottom:1px solid #C8C6BF;
+    padding: 0 0 5px;
+    margin: 0 0 16px;
+    line-height: 20px;
+    }
+    
+    /* Side Menu */
+    
+    .righthead {
+      cursor: pointer;
+    }
+    
+    .rightcontent {
+      max-width: 300px;
+      margin: auto;
+      margin-bottom: 50px;
+      height: inherit;
+    }
+
+    .rightcontent .scroll {
+      overflow: auto;
+      height: -webkit-fill-available;
+      max-height: 440px;
+    }
+    
+    .righthead span{
+    float: right;
+    font-size: 18px;
+    }
+    
+    .sidebartitle {
+    display: inline-block;
+    }
+    
+    #sidemenu {
+      display: none;
+    }
+    
+    .rightcontainer.hide {
+    width: 40px;
+    }
+    
+    .rightcontainer.hide .righthead {
+    writing-mode: vertical-rl;
+    }
+    
+    .rightcontainer.hide .rightcontent {
+     display: none;
+    }
+    
+    .rightcontainer.hide .sidebartitle {
+      padding-bottom: 10px;
+    }
+    
+    .rightcontainer.hide span {
+     transform: rotate(90deg);
+    }
+    
+    .leftcontainer.full {
+     width: 100%;
+      width: -webkit-calc(100% - 50px);
+      width: -moz-calc(100% - 50px);
+      width: calc(100% - 50px);
+      padding-right: 15px;
+    }
+    
+    @media screen and (max-width: 960px){
+      body .rightcontainer {
+        width: 100%;
+      }
+      .rightcontainer.hide {
+        position: absolute;
+        right: 10px;
+        height: auto;
+      }
+    
+      body .leftcontainer {
+        width: 100%;
+        padding-right: 10px;
+      }
+      }
+    
+      @media screen and (max-width: 800px){
+        body .leftcontainer.full {
+          width: 100%;
+          padding: 0;
+        }
+    }
+    
+    
+    
+    /* -------------- Main -------------------------  */
+    
+       
+    .leftcontainer{
+    width: 638px;
+    display: inline-block;
+    padding-left: 10px;
+    padding-right: 30px;
+    vertical-align: top;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: 500px;
+    overflow: auto;
+    position: relative;
+    }
+    
+    .rightcontainer{
+    width: 318px;
+    background-color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    vertical-align: top;
+    max-width: 100%;
+    box-sizing: border-box;
+    z-index: 9999;
+    float: right;
+    height: 500px;
+    position: relative;
+    }

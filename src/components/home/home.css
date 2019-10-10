@@ -1,0 +1,82 @@
+.intro {
+    text-align: center;
+}
+
+.intro h1 {
+    padding: 30px 0 0 0;
+    color: grey;
+}
+
+.banner img {
+    width: 300px;
+    opacity: 0.7;
+    max-width: 70%;
+}
+
+.banner img:hover {
+    opacity: 1;
+}
+
+.banner a {
+    text-decoration: none;
+    color: black;
+}
+
+.bannersub {
+    display: inline-block;
+    width: 440px;
+    vertical-align: bottom;
+    max-width: 50%;
+}
+
+@media only screen and (max-width: 500px) {
+    .bannersub {
+        max-width: 100%;
+    }
+    .banner img {
+        max-width: 40%;
+    }
+  }
+
+.bannersub.left {
+    text-align: right;
+    
+}
+
+.bannersub.left .bannertext {
+    text-align: left;
+    margin-right: -50px;
+    
+}
+
+.bannersub.right .bannertext {
+    margin-left: -50px;
+    text-align: right;
+}
+
+.bannertext {
+    width: 120px;
+    display: inline-block;
+    padding-bottom: 10px;
+}
+
+
+.dataportal {
+    text-align: center;
+    width: 100%;
+    padding: 40px 0;
+    color: grey;
+}
+
+.dataportal h2 {
+    font-weight: 100;
+}
+
+.dataportal a {
+    text-decoration: none;
+    color: black;
+}
+
+.dataportal a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,154 @@
+.dataset {
+    padding: 15px 0;
+    border-bottom: solid 1px black;
+}
+
+.dataset:hover > a > .text-title {
+    text-decoration: underline;
+}
+
+.dataset .text {
+    display: inline-block;
+    margin-left: 10px;
+    max-width: calc(100% - 50px);
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+
+.dataset .text .text-title {
+    font-weight: bold;
+    padding-bottom: 5px;
+}
+
+input.SearchBar {
+    font-size: 16px;
+    width: 100%;
+    border: solid 1px black;
+    border-radius: 5px;
+    box-sizing: border-box;
+    padding: 6px 15px;
+    margin-bottom: 20px;
+}
+
+input.SearchBar:hover {
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+}
+
+.checkbox {
+    width: 12px;
+    height: 12px;
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+    border: solid 1px black;
+    vertical-align: top;
+}
+
+.checkbox:hover {
+    border: solid 1px grey;
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+}
+
+.checkbox.checked {
+    background-color:black;
+}
+
+.MultipleDownload button {
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: white;
+    margin-right:15px;
+    margin-top: 5px;
+    cursor: pointer;
+    padding: 4px 8px;
+    width: 120px;
+}
+
+.MultipleDownload button:hover {
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+}
+
+.download-container {
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255,255,255);
+    display: none;
+}
+
+.download-container.show {
+    display: block;
+}
+
+.datalist {
+    display: none;
+}
+
+.datalist.show {
+    display: block;
+}
+
+.download-close {
+    width: 25px;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-weight: 700;
+    font-size: 40px;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.download-title {
+   display: inline-block;
+}
+
+.download-top span {
+    float: right;
+    font-size: 18px;
+}
+
+.download-top {
+    cursor: pointer;
+}
+
+.download-top h3 {
+    border-bottom: 1px solid #C8C6BF;
+    padding: 0 0 5px;
+    margin: 0 0 16px;
+    line-height: 20px;
+}
+
+.download-content {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.multi-select {
+    padding: 5px 0;
+   
+}
+
+.inner__control {
+    border-color: black!important;
+    cursor: text!important;
+}
+
+.inner__control:hover {
+    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+}
+
+.inner__indicator.inner__dropdown-indicator {
+    color: black!important;
+}
+
+.inner__indicator.inner__clear-indicator {
+    cursor: pointer;
+}

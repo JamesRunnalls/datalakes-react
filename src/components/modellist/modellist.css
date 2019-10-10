@@ -1,0 +1,35 @@
+.model.hide {
+    display: none;
+}
+
+.model:hover {
+    text-decoration: underline;
+}
+
+.modellist {
+    cursor: pointer;
+    padding-bottom: 10px;
+}
+
+.modellist a {
+    display: block;
+    text-decoration: none;
+    color: black;
+}
+
+.modellist a:hover{
+    text-decoration: underline;
+}
+
+.modellist .top {
+    padding-bottom: 5px;
+}
+
+.modellist ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.top:hover > .lakeTitle { 
+    text-decoration: underline;
+}

@@ -1,0 +1,29 @@
+main {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+  min-height: 60vh;
+}
+
+@media (min-width: 960px) {
+  .container {
+      width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0;
+  }
+}
+
+select {
+  font-size: 16px;
+  width: 100%;
+  border: solid 1px black;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 6px 15px;
+  margin-bottom: 20px;
+  background-color: white;
+}

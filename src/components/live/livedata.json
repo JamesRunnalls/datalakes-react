@@ -1,0 +1,38 @@
+[
+    {
+        "name":"LéXPLORE",
+        "url":"lexplore",
+        "imgname":"lexplore.png",
+        "description":"Live weather data from the LéXPLORE platform. Located 570m off the Pully Landing near Lausanne.",
+        "lon":6.661430,
+        "lat":46.499835,
+        "time":"13:10 21.09.2019",
+        "parameters":
+            {   "wind": {"value":6,"units":"km/hr","label":"Wind Speed"},
+                "airtemperature": {"value":21,"units":"\u00B0C","label":"Air Temperature"},
+                "watertemperature": {"value":17.8,"units":"\u00B0C","label":"Water Temperature"},
+                "pressure": {"value":970,"units":"mBar","label":"Air Pressure"},
+                "windgust": {"value":12,"units":"km/hr","label":"Wind Gust"},
+                "humidity": {"value":80,"units":"%","label":"Humidity"},
+                "solarradiation": {"value":700,"units":"W/m\u00B2","label":"Solar Radiation"}
+            }
+    },
+    {
+        "name":"Buchillon",
+        "url":"buchillion",
+        "imgname":"buch.png",
+        "description":"Live weather data from the Buchillion Field Station. Located 800m South East of the Port d'Allaman.",
+        "lon":6.399363,
+        "lat":46.458389,
+        "time":"13:10 21.09.2019",
+        "parameters":
+            {   "wind": {"value":6,"units":"km/hr","label":"Wind Speed"},
+                "airtemperature": {"value":21,"units":"\u00B0C","label":"Air Temperature"},
+                "watertemperature": {"value":18.2,"units":"\u00B0C","label":"Water Temperature"},
+                "pressure": {"value":970,"units":"mBar","label":"Air Pressure"},
+                "windgust": {"value":12,"units":"km/hr","label":"Wind Gust"},
+                "humidity": {"value":80,"units":"%","label":"Humidity"},
+                "solarradiation": {"value":700,"units":"W/m\u00B2","label":"Solar Radiation"}
+            }
+    }
+]

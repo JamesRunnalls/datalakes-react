@@ -1,0 +1,25 @@
+.sideSelect {
+    width: 100%;
+}
+
+.sideSelect-top {
+    margin-bottom: 30px;
+}
+
+.sideSelect-head {
+    width: 40%;
+    display: inline-block;
+    text-align: center;
+    padding: 5px 0;
+    margin: 0 5%;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.sideSelect-head.selected {
+    border-bottom: solid 1px black;
+}
+
+.sideSelect-content {
+    width: 100%;
+}

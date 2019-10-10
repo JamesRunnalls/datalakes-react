@@ -1,0 +1,72 @@
+/* Datalakes Stylesheet
+  ____  _____   __  _  _______      ______
+_/ __ \ \__  \  \ \/ \/ /\__  \    /  ___/
+\  ___/  / __ \_ \     /  / __ \_ /  /____
+ \___  >(____  /  \/\_/  (____  / \___  /
+	 \/      \/               \/      \/
+      Developed By James Runnalls      */
+
+/* ------------------- General --------------------------- */
+
+@font-face{
+  font-family:'The Serif Bold';
+  src:url('./font/theserifbold.woff') format('woff');
+}
+
+body {
+  color: rgb(0, 0, 0);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  margin: 0;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-family: "The Serif Bold", Arial, sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 30px;
+  margin-bottom: 34px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-top: 30px;
+  padding-bottom: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 0px;
+  text-size-adjust: 100%;
+}
+
+h3{
+font-size: 15px;
+font-weight: 500;
+}
+
+h4 {
+  margin: 5px 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.inline {
+  display: inline-block;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

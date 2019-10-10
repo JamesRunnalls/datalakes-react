@@ -1,0 +1,422 @@
+[
+  {
+    "raw": 1,
+    "rawDescription": "LexploreMeteostation",
+    "id": "1A0001",
+    "description": "LexploreMeteostationTemperature",
+    "label": "LéXPLORE Meteostation Temperature",
+    "filters": {
+      "Parameter": "Temperature",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Meteostation",
+      "Sensor": "Campbell Scientific Ltd",
+      "Maintenance": "LéXPLORE"
+    }
+  },
+  {
+    "raw": 2,
+    "rawDescription": "LexploreMeteostation",
+    "id": "1A0002",
+    "description": "LexploreMeteostationWindSpeed",
+    "label": "LéXPLORE Meteostation Wind Speed",
+    "filters": {
+      "Parameter": "Wind Speed",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Meteostation",
+      "Sensor": "Campbell Scientific Ltd",
+      "Maintenance": "LéXPLORE"
+    }
+  },
+  {
+    "raw": 3,
+    "rawDescription": "LexploreMeteostation",
+    "id": "1A0003",
+    "description": "LexploreMeteostationWindDirection",
+    "label": "LéXPLORE Meteostation Wind Direction",
+    "filters": {
+      "Parameter": "Wind Direction",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Meteostation",
+      "Sensor": "Campbell Scientific Ltd",
+      "Maintenance": "LéXPLORE"
+    }
+  },
+  {
+    "raw": 4,
+    "rawDescription": "LexploreMeteostation",
+    "id": "1A0004",
+    "description": "LexploreMeteostationRainfall",
+    "label": "LéXPLORE Meteostation Rainfall",
+    "filters": {
+      "Parameter": "Rainfall",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Meteostation",
+      "Sensor": "Campbell Scientific Ltd",
+      "Maintenance": "LéXPLORE"
+    }
+  },
+  {
+    "raw": 5,
+    "rawDescription": "LexploreMeteostation",
+    "id": "1A0005",
+    "description": "LexploreMeteostationTemperaturePressure",
+    "label": "LéXPLORE Meteostation Temperature Pressure",
+    "filters": {
+      "Parameter": "Pressure",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Meteostation",
+      "Sensor": "Campbell Scientific Ltd",
+      "Maintenance": "LéXPLORE"
+    }
+  },
+  {
+    "raw": 6,
+    "rawDescription": "LexploreMeteostation",
+    "id": "1A0006",
+    "description": "LexploreMeteostationSolarRadiation",
+    "label": "LéXPLORE Meteostation Solar Radiation",
+    "filters": {
+      "Parameter": "Solar Radiation",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Meteostation",
+      "Sensor": "Campbell Scientific Ltd",
+      "Maintenance": "LéXPLORE"
+    }
+  },
+  {
+    "raw": 2,
+    "rawDescription": "LexploreRBRchain0to30",
+    "id": "1A0007",
+    "description": "LexploreRBRchain0to30Temperature",
+    "label": "LéXPLORE RBR chain 0 to 30m Temperature",
+    "filters": {
+      "Parameter": "Temperature",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "LéXPLORE",
+      "Sensor": "RBR chain 0+AC0-30 m +AC0- 24 sensors",
+      "Maintenance": "LéXPLORE"
+    }
+  },
+  {
+    "raw": 3,
+    "rawDescription": "LexploreRBRchain30to100",
+    "id": "1A0008",
+    "description": "LexploreRBRchain30to100Temperature",
+    "label": "LéXPLORE RBR chain 30 to 100m Temperature",
+    "filters": {
+      "Parameter": "Temperature",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "PP Mooring /LéXPLORE",
+      "Sensor": "RBR chain 30+AC0-100 m +AC0- 24 sensors",
+      "Maintenance": "PP project / Carbogen"
+    }
+  },
+  {
+    "raw": 4,
+    "rawDescription": "PPMooring",
+    "id": "1A0009",
+    "description": "PPMooringDissolvedOxygen",
+    "label": "PP Mooring Dissolved Oxygen",
+    "filters": {
+      "Parameter": "Dissolved oxygen",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Chemical",
+      "Instrument": "PP Mooring",
+      "Sensor": "MiniDOt RBR +AC0- 8 in total",
+      "Maintenance": "PP project / Carbogen"
+    }
+  },
+  {
+    "raw": 5,
+    "rawDescription": "PPMooring",
+    "id": "1A0010",
+    "description": "PPMooringPAR",
+    "label": "PP Mooring PAR",
+    "filters": {
+      "Parameter": "Photosynthetically active radiation (PAR)",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "PP Mooring",
+      "Sensor": "Licor +AC0- RBR +AC0- 6 in total",
+      "Maintenance": "PP project / Carbogen"
+    }
+  },
+  {
+    "raw": 6,
+    "rawDescription": "PPMooring",
+    "id": "1A0011",
+    "description": "PPMooringPH",
+    "label": "PP Mooring PH",
+    "filters": {
+      "Parameter": "pH",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Chemical",
+      "Instrument": "PP Mooring",
+      "Sensor": "EXOsonde YSI",
+      "Maintenance": "PP project / Carbogen"
+    }
+  },
+  {
+    "raw": 7,
+    "rawDescription": "PPMooring",
+    "id": "1A0012",
+    "description": "PPMooringChlorophyllA",
+    "label": "PP Mooring Chlorophyll A",
+    "filters": {
+      "Parameter": "Chlorophyll a",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Biological",
+      "Instrument": "PP Mooring",
+      "Sensor": "EXOsonde YSI",
+      "Maintenance": "PP project / Carbogen"
+    }
+  },
+  {
+    "raw": 8,
+    "rawDescription": "PPMooring",
+    "id": "1A0013",
+    "description": "PPMooringTurbidity",
+    "label": "PP Mooring Turbidity",
+    "filters": {
+      "Parameter": "Turbidity",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "PP Mooring",
+      "Sensor": "EXOsonde YSI",
+      "Maintenance": "PP project / Carbogen"
+    }
+  },
+  {
+    "raw": 9,
+    "rawDescription": "PPMooring",
+    "id": "1A0014",
+    "description": "PPMooringConductivity",
+    "label": "PP Mooring Conductivity",
+    "filters": {
+      "Parameter": "Conductivity",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "PP Mooring",
+      "Sensor": "EXOsonde YSI",
+      "Maintenance": "PP project / Carbogen"
+    }
+  },
+  {
+    "raw": 5,
+    "rawDescription": "Idronaut",
+    "id": "1A0015",
+    "description": "IdronautPressure",
+    "label": "Idronaut Pressure",
+    "filters": {
+      "Parameter": "Pressure",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Idronaut (0 to 60 m)",
+      "Sensor": "OCEAN SEVEN 316Plus",
+      "Maintenance": "UniGE"
+    }
+  },
+  {
+    "raw": 6,
+    "rawDescription": "Idronaut",
+    "id": "1A0016",
+    "description": "IdronautTemperature",
+    "label": "Idronaut Temperature",
+    "filters": {
+      "Parameter": "Temperature",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Idronaut (0 to 60 m)",
+      "Sensor": "OCEAN SEVEN 316Plus",
+      "Maintenance": "UniGE"
+    }
+  },
+  {
+    "raw": 7,
+    "rawDescription": "Idronaut",
+    "id": "1A0017",
+    "description": "IdronautConductivity",
+    "label": "Idronaut Conductivity",
+    "filters": {
+      "Parameter": "Conductivity",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Idronaut (0 to 60 m)",
+      "Sensor": "OCEAN SEVEN 316Plus",
+      "Maintenance": "UniGE"
+    }
+  },
+  {
+    "raw": 8,
+    "rawDescription": "Idronaut",
+    "id": "1A0018",
+    "description": "IdronautDissolvedOxygen",
+    "label": "Idronaut Dissolved Oxygen",
+    "filters": {
+      "Parameter": "Dissolved oxygen",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Chemical",
+      "Instrument": "Idronaut (0 to 60 m)",
+      "Sensor": "OCEAN SEVEN 316Plus",
+      "Maintenance": "UniGE"
+    }
+  },
+  {
+    "raw": 9,
+    "rawDescription": "Idronaut",
+    "id": "1A0019",
+    "description": "IdronautPH",
+    "label": "Idronaut PH",
+    "filters": {
+      "Parameter": "pH",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Chemical",
+      "Instrument": "Idronaut (0 to 60 m)",
+      "Sensor": "OCEAN SEVEN 316Plus",
+      "Maintenance": "UniGE"
+    }
+  },
+  {
+    "raw": 10,
+    "rawDescription": "Idronaut",
+    "id": "1A0020",
+    "description": "IdronautChlorophyllA",
+    "label": "Idronaut Chlorophyll A",
+    "filters": {
+      "Parameter": "Chlorophyll a",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Biological",
+      "Instrument": "Idronaut (0 to 60 m)",
+      "Sensor": "Chelsa Trilux Fluorimeter",
+      "Maintenance": "UniGE"
+    }
+  },
+  {
+    "raw": 11,
+    "rawDescription": "Idronaut",
+    "id": "1A0021",
+    "description": "IdronautPAR",
+    "label": "Idronaut PAR",
+    "filters": {
+      "Parameter": "Photosynthetically active radiation (PAR)",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Idronaut (0 to 60 m)",
+      "Sensor": "LI+AC0-193SA spherical quantum sensor",
+      "Maintenance": "UniGE"
+    }
+  },
+  {
+    "raw": 6,
+    "rawDescription": "LexploreADCP",
+    "id": "1A0022",
+    "description": "LexploreADCP",
+    "label": "LéXPLORE ADCP",
+    "filters": {
+      "Parameter": "Current velocity +AC0- 8 top m",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "ADCP",
+      "Sensor": "RDI 600 kHz",
+      "Maintenance": "APHYS EPFL/Eawag"
+    }
+  },
+  {
+    "raw": 7,
+    "rawDescription": "LexploreTriosRamses",
+    "id": "1A0023",
+    "description": "LexploreTriosRamses",
+    "label": "LéXPLORE Trios Ramses",
+    "filters": {
+      "Parameter": "Downwelling irradiance Upwelling radiance",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Trios Ramses (air)",
+      "Sensor": "Ramses +AC0- 3 sensors",
+      "Maintenance": "ESA collaboration"
+    }
+  },
+  {
+    "raw": 8,
+    "rawDescription": "LexploreThetis",
+    "id": "1A0024",
+    "description": "LexploreThetisPressure",
+    "label": "LéXPLORE Thetis Pressure",
+    "filters": {
+      "Parameter": "Pressure +AC0APg- depth",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Vertical profiler Thetis",
+      "Sensor": "SeaBird SBE49",
+      "Maintenance": "PP project"
+    }
+  },
+  {
+    "raw": 9,
+    "rawDescription": "LexploreThetis",
+    "id": "1A0025",
+    "description": "LexploreThetisConductivity",
+    "label": "LéXPLORE Thetis Conductivity",
+    "filters": {
+      "Parameter": "Conductivity",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Vertical profiler Thetis",
+      "Sensor": "SeaBird SBE49",
+      "Maintenance": "PP project"
+    }
+  },
+  {
+    "raw": 10,
+    "rawDescription": "LexploreThetis",
+    "id": "1A0026",
+    "description": "LexploreThetisTemperature",
+    "label": "LéXPLORE Thetis Temperature",
+    "filters": {
+      "Parameter": "Temperature",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Vertical profiler Thetis",
+      "Sensor": "SeaBird SBE49",
+      "Maintenance": "PP project"
+    }
+  },
+  {
+    "raw": 11,
+    "rawDescription": "LexploreThetis",
+    "id": "1A0027",
+    "description": "LexploreThetisDissolvedOxygen",
+    "label": "LéXPLORE Thetis Dissolved Oxygen",
+    "filters": {
+      "Parameter": "Dissolved oxygen",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Chemical",
+      "Instrument": "Vertical profiler Thetis",
+      "Sensor": "SeaBird Optical SBE63",
+      "Maintenance": "PP project"
+    }
+  },
+  {
+    "raw": 12,
+    "rawDescription": "LexploreThetis",
+    "id": "1A0028",
+    "description": "LexploreThetisPAR",
+    "label": "LéXPLORE Thetis PAR",
+    "filters": {
+      "Parameter": "Photosynthetically active radiation (PAR)",
+      "Lake": "Lake Geneva",
+      "Characteristic": "Physical",
+      "Instrument": "Vertical profiler Thetis",
+      "Sensor": "WetLabs ECO PARS",
+      "Maintenance": "PP project"
+    }
+  }
+]

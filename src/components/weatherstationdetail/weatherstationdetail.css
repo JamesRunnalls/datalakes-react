@@ -1,0 +1,38 @@
+.parameter-block {
+    display: inline-block;
+    padding: 10px 20px;
+    width: 160px;
+    max-width: 50%;
+    box-sizing: border-box;
+    text-align: center;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.parameter-block:hover {
+    background-color: rgba(32, 33, 36, 0.1);
+}
+
+.parameter-block .value {
+    font-size: 50px;
+} 
+
+.parameter-block .units {
+    font-size: 20px;
+    color: grey;
+}
+
+.parameter-block .label {
+    padding: 2px 0;
+}
+
+.map-container {
+    height:150px;
+    width: 100%;
+}
+
+.graph-container {
+    height:180px;
+    margin: 20px 0;
+    background-color: grey;
+}
