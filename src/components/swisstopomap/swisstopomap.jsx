@@ -38,8 +38,9 @@ class SwissTopoMap extends Component {
       zoom: zoom,
       minZoom: 7,
       layers: [
-        L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg')
+        //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg')
         //L.tileLayer('https://wmts100.geo.admin.ch/1.0.0/ch.bafu.gefahren-basiskarte/default/current/2056/{z}/{x}/{y}.png')
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}')
       ]
     });
 
