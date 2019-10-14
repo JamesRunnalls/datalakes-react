@@ -20,7 +20,7 @@ class Footer extends Component {
                       <a href="https://www.unige.ch/sciences/terre/en/highlights/lexplore-floating-laboratory-study-lake-geneva/" target="_blank" title="Visit the UNIGE news page for the L'EXPLORE platform"><img alt="Universite de Geneve Logo" src={geneve} /></a>
                       <a href="https://www6.dijon.inra.fr/thonon/Actualites-du-CARRTEL/La-plateforme-experimentale-LeXPLORE-Exploration-du-Leman-baptisee" target="_blank" title="Visit the CARRTEL news page for the L'EXPLORE platform"><img alt="Carrtel Logo" src={carrtel} /></a>
                   </div>
-                  <div className="copyright"><div className="inline">Copyright © 2019 Datalakes | </div><div className="inline">&nbsp; Developed by <a href="https://jamesrunnalls.com/"  target="_blank">James Runnalls</a> @ Eawag</div></div>
+                  <div className="copyright"><div className="inline">Copyright © 2019 Datalakes | </div><div className="inline">&nbsp; Developed @ Eawag</div></div>
 
               </div>
           </footer>
