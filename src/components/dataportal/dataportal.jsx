@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Select from 'react-select'
+import axios from 'axios';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
-import DataSets from './datasets';
 import './dataportal.css';
 
 class DatasetList extends Component {
@@ -66,16 +66,18 @@ class Dataset extends Component {
 class DatasetFilters extends Component {
     render() { 
         var options = [];
-        for (var i of Object.keys(this.props.data[0].filters)) {
-            var inner = [];
-            var repeat = [];
-            for (var ii of this.props.data){
-                if (!String(repeat).includes(ii.filters[i])){
-                    inner.push({value:ii.filters[i],label:ii.filters[i]})
-                    repeat.push(ii.filters[i]);
+        if (this.props.datasets.length > 0){
+            for (var i of Object.keys(this.props.datasets[0].filters)) {
+                var inner = [];
+                var repeat = [];
+                for (var ii of this.props.datasets){
+                    if (!String(repeat).includes(ii.filters[i])){
+                        inner.push({value:ii.filters[i],label:ii.filters[i]})
+                        repeat.push(ii.filters[i]);
+                    }
                 }
+                options.push({key:i,options:inner});
             }
-            options.push({key:i,options:inner});
         }
         return ( 
             <div>
@@ -116,9 +118,22 @@ class DownloadMultiple extends Component {
             return ( 
                 <React.Fragment>
                     <div className="download-multiple-title">Datasets Selected:</div>
-                    <ul>
+                    <ol className="selected-data-list">
                         { this.props.selected.map( dataset => ( <li key={dataset.id}>{dataset.label}</li> ))}
-                    </ul>
+                    </ol>
+                    <div className="download-multiple-title">Licence</div>
+                    <div className="licence">
+                        Attribution 4.0 International (CC BY 4.0) https://creativecommons.org/licenses/by/4.0/
+                    </div>
+                    <div className="download-multiple-title">Citations</div>
+                    <ol className="selected-data-list">
+                        { this.props.selected.map( dataset => ( <li key={dataset.id}>Linhares, A., & Brum, P. (2007). Understanding our understanding of strategic scenarios: What role do chunks play? Cognitive Science, 31(6), 989-1007. https://doi.org/doi:10.1080/03640210701703725</li> ))}
+                    </ol>
+                    <div className="download-multiple-title">Time Period</div>
+                    <div className="licence">
+                        INSERT TIME PERIOD SLIDER HERE
+                    </div>
+                    <div className="download-multiple-title">Download</div>
                     <div className="MultipleDownload">
                         <button title="Download datasets in NetCDF format">.nc</button>
                         <button title="Download datasets in CSV format">.csv</button>
@@ -137,10 +152,15 @@ class DataPortal extends Component {
     state = {
         filters: [],
         search: "",
-        datasets : DataSets,
+        datasets : [],
         selected : [],
         addClass: false
     };
+
+    async componentDidMount(){
+        const { data: datasets} = await axios.get('http://localhost:4000/api/datasets');
+        this.setState({ datasets })
+    }
 
     toggle = () => {
         this.setState({addClass: !this.state.addClass});
@@ -216,7 +236,7 @@ class DataPortal extends Component {
                                     </React.Fragment>
                                 } 
                                right={<React.Fragment>
-                                        <DatasetFilters data={datasets} handleFilter={this.handleFilter}/>
+                                        <DatasetFilters datasets={datasets} handleFilter={this.handleFilter}/>
                                         <DatasetDownload selected={this.state.selected} clearSelected={this.clearSelected} toggle={this.toggle}/>
                                    </React.Fragment>}
                 />

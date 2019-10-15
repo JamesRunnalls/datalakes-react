@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import SwissTopoMap from '../swisstopomap/swisstopomap';
 import WeatherStations from '../weatherstations/weatherstations';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
-import datalist from './livedata';
-import meteoswiss from './meteoswiss';
 import DW from '../../../public/img/DW.svg';
 import MW from '../../../public/img/MW.svg';
 import MP from '../../../public/img/MP.svg';
@@ -16,13 +15,21 @@ import PA from '../../../public/img/PA.svg';
 import './live.css';
 
 class Live extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {addClass: false}
-      }
-      toggle() {
+    state = {
+        addClass: false,
+        meteoStations: [],
+        lakeStations: []
+    }
+
+    async componentDidMount(){
+        const { data: meteoStations } = await axios.get('http://localhost:4000/api/meteostations');
+        const { data: lakeStations } = await axios.get('http://localhost:4000/api/lakestations');
+        this.setState({ meteoStations, lakeStations });
+    }
+    
+    toggle = () => {
         this.setState({addClass: !this.state.addClass});
-      }
+    }
 
     render() { 
         document.title = "Live - Datalakes";
@@ -30,7 +37,7 @@ class Live extends Component {
         var zoom = 9;
 
         var markers=[];
-        for (var data of datalist){
+        for (var data of this.state.lakeStations){
             var marker = {
                 "lon":data.lon,
                 "lat":data.lat,
@@ -38,7 +45,7 @@ class Live extends Component {
             }
             markers.push(marker);
         }
-        for (data of meteoswiss){
+        for (data of this.state.meteoStations){
             marker = {
                 "lon":data.lon,
                 "lat":data.lat,
@@ -60,7 +67,7 @@ class Live extends Component {
                  <h1>Live Conditions</h1>
                  <SidebarLayout sidebartitle="Lake Weather Stations" 
                                 left={<React.Fragment>
-                                        <SwissTopoMap markers={markers} zoom={zoom} center={center} tooltip={true}/>
+                                        <SwissTopoMap markers={markers} zoom={zoom} center={center}/>
                                         <div className={legend}>
                                             <div className="legend-top" title="Hide legend" onClick={this.toggle.bind(this)}>
                                                 <h3>
@@ -93,7 +100,7 @@ class Live extends Component {
                                             </div>
                                         </div>
                                       </React.Fragment>} 
-                                right={<WeatherStations datalist={datalist}/>}/>
+                                right={<WeatherStations datalist={this.state.lakeStations}/>}/>
              </React.Fragment>
          
         );

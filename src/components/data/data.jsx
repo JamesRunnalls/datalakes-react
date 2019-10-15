@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import D3HeatMap from '../heatmap/heatmap';
 import D3LineGraph from '../linegraph/linegraph';
-
-
 
 class HeatMap extends Component {
     state = {  }
@@ -69,7 +68,14 @@ class Information extends Component {
  
 class Data extends Component {
     state = {
-        selection:"heatmap"
+        selection:"heatmap",
+        dataset: []
+    }
+
+    async componentDidMount(){
+        const url = window.location.href.split('/').slice(-1)[0];
+        const { data: dataset } = await axios.get('http://localhost:4000/api/datasets/'+url);
+        this.setState({ dataset })
     }
 
     updateSelectedState = selected => {
@@ -77,7 +83,7 @@ class Data extends Component {
       };
     
     render() {             
-        document.title = "Example Dataset - Datalakes";
+        document.title = this.state.dataset.label+" - Datalakes";
         var classHeatMap = "subnav-item";
         var classLineGraph = "subnav-item";
         var classPreview = "subnav-item";
@@ -93,7 +99,7 @@ class Data extends Component {
         if (this.state.selection === "information"){selected = <Information />; classInformation = "subnav-item active"}
          return (
              <React.Fragment>
-                 <h1>Example Dataset</h1> 
+                 <h1>{this.state.dataset.label}</h1> 
                  <div className="subnav">
                      <div title="Preview data as a heat map" className={classHeatMap} onClick={() => this.updateSelectedState("heatmap")}>Heat Map</div>
                      <div title="Preview data as a line graph" className={classLineGraph} onClick={() => this.updateSelectedState("linegraph")}>Line Graph</div>

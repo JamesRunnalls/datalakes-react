@@ -56,6 +56,16 @@ input.SearchBar:hover {
 
 .download-multiple-title {
     font-size: 16px;
+    font-weight: 700;
+}
+
+.licence {
+    padding: 10px 0;
+}
+
+.selected-data-list {
+    max-height: 60px;
+    overflow: auto;
 }
 
 .MultipleDownload button {

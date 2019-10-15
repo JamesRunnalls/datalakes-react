@@ -46,6 +46,9 @@ class SwissTopoMap extends Component {
       ]
     });
 
+    // set attribution
+    this.map.attributionControl.addAttribution('<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>');
+
     // set bounds
     var southWest = L.latLng(44.40,3.95);
     var northEast = L.latLng(48.55,13.06);
@@ -53,20 +56,35 @@ class SwissTopoMap extends Component {
     this.map.setMaxBounds(bounds);
 
     // draw points
-    if ('markers' in this.props) {
+    this.plotMarkers(this.props);
+
+    // draw geojson
+    this.plotGeoJSON(this.props);
+
+    if ('setMap' in this.props) {
+      this.sendMap(this.map);
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState){
+    this.plotMarkers(this.props);
+    this.plotGeoJSON(this.props);
+  }
+
+  plotMarkers = props => {
+    if ('markers' in props) {
       var Icon = L.icon({
         iconUrl: './img/DW.svg',
         iconSize:     [12, 12]
       });
 
-      for (var marker of this.props.markers) {
+      for (var marker of props.markers) {
           if ('icon' in marker) {
             Icon = L.icon({
               iconUrl: "./img/"+marker['icon']+".svg",
               iconSize:     [9, 9]
             });
           }
-
 
           var mark = new L.marker([marker["lat"],marker["lon"]], {icon: Icon}).addTo(this.map);
           
@@ -79,17 +97,18 @@ class SwissTopoMap extends Component {
           }   
       }
     }
+  }
 
-    // draw geojson
-    if ('geojson' in this.props && 'popupfunction' in this.props && 'colorbar' in this.props) {
-      let LakeStyle = this.props.geojsonstyle;
-      let GeoPopupFunction = this.props.popupfunction;
-      let mintemp = this.props.colorbar[0];
-      let maxtemp = this.props.colorbar[1];
+  plotGeoJSON = props => {
+    if ('geojson' in props && 'popupfunction' in props && 'colorbar' in props) {
+      let LakeStyle = props.geojsonstyle;
+      let GeoPopupFunction = props.popupfunction;
+      let mintemp = props.colorbar[0];
+      let maxtemp = props.colorbar[1];
       let geojson = {"type": "FeatureCollection", 
                      "name": "Swiss Lake Models", 
                      "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}}, 
-                     "features": this.props.geojson };
+                     "features": props.geojson };
       L.geoJSON(geojson, {
         style: function (layer) {
             return LakeStyle(Gradient.colors,layer.properties,mintemp,maxtemp);
@@ -98,13 +117,6 @@ class SwissTopoMap extends Component {
         return GeoPopupFunction(layer.feature.properties)
     }).addTo(this.map);
     }
-
-    if ('setMap' in this.props) {
-      this.sendMap(this.map);
-    }
-
-    this.map.attributionControl.addAttribution('<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>');
-
   }
 
   render() {
