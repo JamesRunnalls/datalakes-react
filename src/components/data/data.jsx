@@ -80,6 +80,8 @@ class Data extends Component {
         const { data: dataset } = await axios.get('http://localhost:4000/api/datasets/'+url).catch(error => {
             this.setState({ error: true});
           });
+
+        
         this.setState({ dataset })
     }
 

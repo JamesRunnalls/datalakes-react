@@ -31,6 +31,7 @@ class SwissTopoMap extends Component {
   }
 
   componentDidMount() {
+
     var center = [46.85, 7.55];
     if ('center' in this.props) { center = this.props.center };
     var zoom = 8;
@@ -41,13 +42,10 @@ class SwissTopoMap extends Component {
       zoom: zoom,
       minZoom: 7,
       layers: [
-        //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg')
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}')
+        //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'})
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'})
       ]
     });
-
-    // set attribution
-    this.map.attributionControl.addAttribution('<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>');
 
     // set bounds
     var southWest = L.latLng(44.40,3.95);
@@ -64,6 +62,11 @@ class SwissTopoMap extends Component {
     if ('setMap' in this.props) {
       this.sendMap(this.map);
     }
+
+
+    var latlngs = [[46.519592, 6.728342],[46.369809, 6.911069],[46.421523, 6.610849]];
+    L.polygon(latlngs, {color: 'red', fillOpacity:1 }).addTo(this.map);
+    
   }
 
   componentDidUpdate(prevProps, prevState){
