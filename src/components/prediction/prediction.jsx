@@ -1,16 +1,40 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import SwissTopoMap from '../swisstopomap/swisstopomap';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import ModelList from '../modellist/modellist';
-import LakeData from './lakedata';
 import './prediction.css';
 
 
 class Predictions extends Component {
     state = {
-        geojson : LakeData,
+        geojson : [],
         map : "",
-        search: ""
+        search: "",
+        MinTemp: 10,
+        MaxTemp: 25
+    }
+
+    async componentDidMount(){
+        const { data: geojson } = await axios.get('http://localhost:4000/api/lakemodels');
+
+        try {
+            const { data: simstratSurfaceTemperature } = await axios.get('http://localhost:4000/api/simstratsurfacetemperature');
+            var temp = [];
+            
+            for (var lake of geojson){
+                var laketemp = simstratSurfaceTemperature.find(c => c.urlID == lake.properties.simstrat);
+                lake.properties.surfacetemperature = parseFloat(laketemp.surfacetemperature);
+                temp.push(parseFloat(laketemp.surfacetemperature));
+            }
+
+            var MinTemp = Math.floor(Math.min(...temp));
+            var MaxTemp = Math.ceil(Math.max(...temp));
+            this.setState({ geojson, MinTemp, MaxTemp });
+        } catch (e) {
+            console.log(e);
+            this.setState({ geojson });
+        }        
     }
 
     setMap = (map) => {
@@ -57,8 +81,6 @@ class Predictions extends Component {
      }
 
     render() { 
-            let MinTemp = 10;
-            let MaxTemp = 25;
             document.title = "Predictions - Datalakes";
 
             // Filter lakes
@@ -70,10 +92,10 @@ class Predictions extends Component {
                  <h1>Model Predictions</h1>
                  <SidebarLayout 
                     sidebartitle="Lake Models" 
-                    left={<SwissTopoMap geojson={filteredData} 
+                    left={<SwissTopoMap geojson={filteredData}
                                         popupfunction={ this.propertiesPopup } 
                                         geojsonstyle={ this.lakeStyle } 
-                                        colorbar={ [MinTemp,MaxTemp] }
+                                        colorbar={ [this.state.MinTemp,this.state.MaxTemp] }
                                         setMap={this.setMap}
                                         />} 
                     right={<ModelList geojson={filteredData}

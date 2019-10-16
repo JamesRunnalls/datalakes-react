@@ -7,6 +7,7 @@
     text-align: center;
     cursor: pointer;
     margin: 10px;
+    vertical-align: top;
 }
 
 .parameter-block:hover {

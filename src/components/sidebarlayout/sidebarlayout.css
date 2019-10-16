@@ -22,7 +22,7 @@
     .rightcontent .scroll {
       overflow: auto;
       height: -webkit-fill-available;
-      max-height: 440px;
+      max-height: 400px;
     }
     
     .righthead span{
