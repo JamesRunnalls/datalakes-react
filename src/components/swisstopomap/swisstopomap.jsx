@@ -53,25 +53,37 @@ class SwissTopoMap extends Component {
     var bounds = L.latLngBounds(southWest, northEast);
     this.map.setMaxBounds(bounds);
 
-    // draw points
-    this.plotMarkers(this.props);
+    // draw polygons
+    this.plotPolygons(this.props);
 
     // draw geojson
     this.plotGeoJSON(this.props);
 
+    // draw points
+    this.plotMarkers(this.props);
+
     if ('setMap' in this.props) {
       this.sendMap(this.map);
     }
-
-
-    var latlngs = [[46.519592, 6.728342],[46.369809, 6.911069],[46.421523, 6.610849]];
-    L.polygon(latlngs, {color: 'red', fillOpacity:1 }).addTo(this.map);
     
   }
 
   componentDidUpdate(prevProps, prevState){
-    this.plotMarkers(this.props);
+    this.plotPolygons(this.props);
     this.plotGeoJSON(this.props);
+    this.plotMarkers(this.props);
+    
+  }
+
+  plotPolygons = props => {
+    if ('threeD' in props) {
+      let mintemp = props.colorbar[0];
+      let maxtemp = props.colorbar[1];
+      for (var px of props.threeD){
+        var lakecolor = props.lakeColor(Gradient.colors,px["v"],mintemp,maxtemp)
+        L.polygon(px["g"], {color: lakecolor, fillColor: lakecolor, fillOpacity: 1}).addTo(this.map);
+      }
+    }
   }
 
   plotMarkers = props => {
@@ -104,7 +116,7 @@ class SwissTopoMap extends Component {
 
   plotGeoJSON = props => {
     if ('geojson' in props && 'popupfunction' in props && 'colorbar' in props) {
-      let LakeStyle = props.geojsonstyle;
+      let LakeColor = props.lakeColor;
       let GeoPopupFunction = props.popupfunction;
       let mintemp = props.colorbar[0];
       let maxtemp = props.colorbar[1];
@@ -114,7 +126,15 @@ class SwissTopoMap extends Component {
                      "features": props.geojson };
       L.geoJSON(geojson, {
         style: function (layer) {
-            return LakeStyle(Gradient.colors,layer.properties,mintemp,maxtemp);
+            var lakeColor = LakeColor(Gradient.colors,layer.properties.surfacetemperature,mintemp,maxtemp);
+            var fillopacity = 0.8;
+            var opacity = 1;
+            if (layer.properties.meteolakes !== "" || layer.properties.datalakes !== ""){
+              fillopacity = 0;
+              opacity = 0;
+            }
+            return {color: lakeColor, fillOpacity: fillopacity , opacity: opacity}
+            
         }
     }).bindPopup(function (layer) {
         return GeoPopupFunction(layer.feature.properties)

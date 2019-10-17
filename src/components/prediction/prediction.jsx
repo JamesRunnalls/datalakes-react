@@ -4,6 +4,7 @@ import SwissTopoMap from '../swisstopomap/swisstopomap';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import ModelList from '../modellist/modellist';
 import './prediction.css';
+import test from './test';
 
 
 class Predictions extends Component {
@@ -11,8 +12,8 @@ class Predictions extends Component {
         geojson : [],
         map : "",
         search: "",
-        MinTemp: 10,
-        MaxTemp: 25
+        MinTemp: 8,
+        MaxTemp: 12
     }
 
     async componentDidMount(){
@@ -58,13 +59,9 @@ class Predictions extends Component {
         return "<div> <b>"+prop.name+"</b><br> Elevation: "+prop.elevation+"m <br> Depth: "+prop.depth+"m <br> Surface Temperature: "+prop.surfacetemperature+"°C <b>"+model+"</b>"
     }
 
-    lakeStyle = (gradient,prop,mintemp,maxtemp) => {
-        var lakecolor = gradient[parseInt(gradient.length/((maxtemp-mintemp)/(prop.surfacetemperature-mintemp)),10)];
-        var lakeopacity = 0.8;
-        if (prop.meteolakes !== "" || prop.datalakes !== ""){
-            lakeopacity = 0;
-        }
-        return {color: lakecolor, fillOpacity: lakeopacity};
+    lakeColor = (gradient,temp,mintemp,maxtemp) => {
+        var lakecolor = gradient[parseInt(gradient.length/((maxtemp-mintemp)/(temp-mintemp)),10)];
+        return lakecolor;
     }
 
     keyPress = (e,data) => {
@@ -94,9 +91,10 @@ class Predictions extends Component {
                     sidebartitle="Lake Models" 
                     left={<SwissTopoMap geojson={filteredData}
                                         popupfunction={ this.propertiesPopup } 
-                                        geojsonstyle={ this.lakeStyle } 
+                                        lakeColor={ this.lakeColor } 
                                         colorbar={ [this.state.MinTemp,this.state.MaxTemp] }
                                         setMap={this.setMap}
+                                        threeD={ test }
                                         />} 
                     right={<ModelList geojson={filteredData}
                                     panTo={ this.panTo }
