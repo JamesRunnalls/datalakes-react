@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import axios from 'axios';
 import SwissTopoMap from '../swisstopomap/swisstopomap';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import ModelList from '../modellist/modellist';
 import './prediction.css';
-import test from './test';
-
+import test from './data';
 
 class Predictions extends Component {
     state = {
         geojson : [],
         map : "",
         search: "",
-        MinTemp: 8,
-        MaxTemp: 12
+        MinTemp: "",
+        MaxTemp: "",
+        Temp: ""
     }
 
     async componentDidMount(){
@@ -24,7 +25,7 @@ class Predictions extends Component {
             var temp = [];
             
             for (var lake of geojson){
-                var laketemp = simstratSurfaceTemperature.find(c => c.urlID == lake.properties.simstrat);
+                var laketemp = simstratSurfaceTemperature.find(c => c.urlID === lake.properties.simstrat);
                 lake.properties.surfacetemperature = parseFloat(laketemp.surfacetemperature);
                 temp.push(parseFloat(laketemp.surfacetemperature));
             }
@@ -36,6 +37,30 @@ class Predictions extends Component {
             console.log(e);
             this.setState({ geojson });
         }        
+    }
+
+    isNumeric = (n) => {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+      }
+
+    setMinTemp = event => {
+        const MinTemp = parseFloat(event.target.value);
+        if (this.isNumeric(MinTemp) && MinTemp > -5){
+            this.setState({ MinTemp });
+        }
+        
+        
+    }
+
+    setTemp = Temp => {
+        ReactDOM.findDOMNode(this.refs.hoverTemp).innerHTML = Math.round(parseFloat(Temp) * 100) / 100 + "°C";
+    }
+
+    setMaxTemp = event => {
+        const MaxTemp = parseFloat(event.target.value);
+        if (this.isNumeric(MaxTemp) && MaxTemp < 40){
+            this.setState({ MaxTemp });
+        }
     }
 
     setMap = (map) => {
@@ -60,7 +85,13 @@ class Predictions extends Component {
     }
 
     lakeColor = (gradient,temp,mintemp,maxtemp) => {
-        var lakecolor = gradient[parseInt(gradient.length/((maxtemp-mintemp)/(temp-mintemp)),10)];
+        if (temp > maxtemp){
+            var lakecolor = "#000000";
+        } else if (temp < mintemp){
+            var lakecolor = "#FFFFFF";
+        } else {
+            var lakecolor = gradient[parseInt(gradient.length/((maxtemp-mintemp)/(temp-mintemp)),10)];
+        }
         return lakecolor;
     }
 
@@ -89,13 +120,24 @@ class Predictions extends Component {
                  <h1>Model Predictions</h1>
                  <SidebarLayout 
                     sidebartitle="Lake Models" 
-                    left={<SwissTopoMap geojson={filteredData}
-                                        popupfunction={ this.propertiesPopup } 
-                                        lakeColor={ this.lakeColor } 
-                                        colorbar={ [this.state.MinTemp,this.state.MaxTemp] }
-                                        setMap={this.setMap}
-                                        threeD={ test }
-                                        />} 
+                    left={<React.Fragment>
+                            <SwissTopoMap geojson={filteredData}
+                                          popupfunction={ this.propertiesPopup } 
+                                          lakeColor={ this.lakeColor } 
+                                          colorbar={ [this.state.MinTemp,this.state.MaxTemp] }
+                                          setMap={this.setMap}
+                                          setTemp={this.setTemp}
+                                          threeD={ test }
+                                        />
+                                <div id="colorbar"> 
+                                    <div ref="hoverTemp" className="hoverTemp"></div>
+                                    <div className="colorbar-inner">
+                                        <input title="Edit minimum temperature" type="text" placeholder={this.state.MinTemp} onBlur={this.setMinTemp}></input> °C 
+                                        <div id="bar" title="Legend colorbar"></div> 
+                                        <input title="Edit maximum temperature" type="text" placeholder={this.state.MaxTemp} onBlur={this.setMaxTemp}></input> °C
+                                    </div>
+                                </div>
+                            </React.Fragment>} 
                     right={<ModelList geojson={filteredData}
                                     panTo={ this.panTo }
                                     onSearch={this.searchDatasets}

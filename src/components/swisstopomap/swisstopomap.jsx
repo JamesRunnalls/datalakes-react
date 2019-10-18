@@ -1,20 +1,10 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
 import L from 'leaflet';
 import './swisstopomap.css'
 import './leaflet.css';
 import Gradient from './gradient';
 
-class ColorBar extends Component {
-  render() { 
-    if (this.props.mintemp == null){
-      return (<div></div>)
-    } else {
-      return ( 
-        <div id="colorbar" title="Legend colorbar"> { this.props.mintemp } °C <div id="bar"></div> { this.props.maxtemp } °C </div>
-      );
-    }   
-  }
-}
 
 class SwissTopoMap extends Component {
 
@@ -31,7 +21,6 @@ class SwissTopoMap extends Component {
   }
 
   componentDidMount() {
-
     var center = [46.85, 7.55];
     if ('center' in this.props) { center = this.props.center };
     var zoom = 8;
@@ -53,36 +42,50 @@ class SwissTopoMap extends Component {
     var bounds = L.latLngBounds(southWest, northEast);
     this.map.setMaxBounds(bounds);
 
-    // draw polygons
-    this.plotPolygons(this.props);
-
-    // draw geojson
-    this.plotGeoJSON(this.props);
-
-    // draw points
-    this.plotMarkers(this.props);
-
     if ('setMap' in this.props) {
       this.sendMap(this.map);
     }
-    
   }
 
   componentDidUpdate(prevProps, prevState){
-    this.plotPolygons(this.props);
     this.plotGeoJSON(this.props);
+    this.plotPolygons(this.props);
     this.plotMarkers(this.props);
-    
+  }
+
+  showPolygonTemp = e => {
+    this.props.setTemp(e.target.options.title);
+  }
+
+  showGeojsonTemp = e => {
+    this.props.setTemp(e);
   }
 
   plotPolygons = props => {
-    if ('threeD' in props) {
-      let mintemp = props.colorbar[0];
-      let maxtemp = props.colorbar[1];
-      for (var px of props.threeD){
-        var lakecolor = props.lakeColor(Gradient.colors,px["v"],mintemp,maxtemp)
-        L.polygon(px["g"], {color: lakecolor, fillColor: lakecolor, fillOpacity: 1}).addTo(this.map);
+    if ('threeD' in props && props.colorbar[0] !== "") {
+      // Remove old layers
+      if ('polygons' in this){
+        this.map.removeLayer(this.polygons);
       }
+
+      var lakes = [];
+      for (var lake of props.threeD){
+        // Plot polygons
+        var polygons = [];
+        let mintemp = props.colorbar[0];
+        let maxtemp = props.colorbar[1];
+        let GeoPopupFunction = props.popupfunction;
+        for (var px of lake.data){
+          var lakecolor = props.lakeColor(Gradient.colors,px["v"],mintemp,maxtemp)
+          polygons.push(L.polygon(px["g"], {color: lakecolor, fillColor: lakecolor, fillOpacity: 1,title:px["v"]})
+                        .on({mouseover: this.showPolygonTemp})
+          );
+        }
+        var popup = props.geojson.find(c => c.properties.name === lake.name);
+        lakes.push(L.featureGroup(polygons).bindPopup(GeoPopupFunction(popup.properties)).addTo(this.map));
+      }
+      this.polygons = L.layerGroup(lakes);
+      ReactDOM.findDOMNode(this.refs.loader).className = "map-loader hide";
     }
   }
 
@@ -111,11 +114,15 @@ class SwissTopoMap extends Component {
               mark.bindTooltip(marker["tooltip"], {permanent: true, direction:"top",interactive: true});
           }   
       }
+      ReactDOM.findDOMNode(this.refs.loader).className = "map-loader hide";
     }
   }
 
   plotGeoJSON = props => {
-    if ('geojson' in props && 'popupfunction' in props && 'colorbar' in props) {
+    if ('geojson' in props && 'popupfunction' in props && 'colorbar' in props && props.colorbar[0] !== "") {
+      if ('geojson' in this){
+        this.map.removeLayer(this.geojson);
+      }
       let LakeColor = props.lakeColor;
       let GeoPopupFunction = props.popupfunction;
       let mintemp = props.colorbar[0];
@@ -124,31 +131,30 @@ class SwissTopoMap extends Component {
                      "name": "Swiss Lake Models", 
                      "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}}, 
                      "features": props.geojson };
-      L.geoJSON(geojson, {
-        style: function (layer) {
-            var lakeColor = LakeColor(Gradient.colors,layer.properties.surfacetemperature,mintemp,maxtemp);
-            var fillopacity = 0.8;
+      this.geojson = L.geoJSON(geojson, {
+        style: layer => {
+            var lakeTemp = layer.properties.surfacetemperature;
+            var lakeColor = LakeColor(Gradient.colors,lakeTemp,mintemp,maxtemp);
+            var fillopacity = 1;
             var opacity = 1;
             if (layer.properties.meteolakes !== "" || layer.properties.datalakes !== ""){
               fillopacity = 0;
               opacity = 0;
             }
-            return {color: lakeColor, fillOpacity: fillopacity , opacity: opacity}
-            
+            return {color: lakeColor, fillOpacity: fillopacity, opacity: opacity}
         }
-    }).bindPopup(function (layer) {
+    })
+    .bindPopup(layer => {
         return GeoPopupFunction(layer.feature.properties)
     }).addTo(this.map);
-    }
+    this.geojson.eachLayer(layer => {
+      layer.on('mouseover',() => this.showGeojsonTemp(layer.feature.properties.surfacetemperature));
+    });
+   ReactDOM.findDOMNode(this.refs.loader).className = "map-loader hide";
+   }
   }
 
   render() {
-    var mintemp = null;
-    var maxtemp = null;
-    if ('colorbar' in this.props) {
-      mintemp = this.props.colorbar[0];
-      maxtemp = this.props.colorbar[1];
-    }
     var help = "";
     if ('help' in this.props) { help = this.props.help };
 
@@ -159,6 +165,7 @@ class SwissTopoMap extends Component {
 
     return <React.Fragment>
               <div id="map">
+                <div ref="loader" className="map-loader"><div className="lds-dual-ring"></div></div>
                 <div title="View user guide" onClick={this.toggle.bind(this)} className="help">?</div>
                 <div className={helpContainer}>
                   <div onClick={this.toggle.bind(this)} className="help-top" title="Click to hide user guide">
@@ -169,7 +176,7 @@ class SwissTopoMap extends Component {
                   </div>
                   <div className="help-content">{help}</div>
                 </div>
-                <ColorBar mintemp={ mintemp } maxtemp={ maxtemp }/>
+               
                 </div>
           </React.Fragment> 
   }

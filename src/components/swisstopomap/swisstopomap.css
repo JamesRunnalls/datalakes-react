@@ -1,22 +1,3 @@
-#bar {
-    background: rgb(0,0,255);
-    background: linear-gradient(90deg, rgba(0,0,255,1) 0%, rgba(255,51,0,1) 100%);
-    width:150px;
-    height: 20px;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-#colorbar {
-    z-index: 999;
-    position: absolute;
-    bottom: 0;
-    left: 0px;
-    font-size: 14px;
-    padding: 5px;
-    background-color: rgba(255, 255, 255, 0.7);
-}
-
 .leaflet-popup-content a {
     text-decoration: none!important;
     color: black!important;
@@ -25,6 +6,8 @@
 .leaflet-popup-content a:hover {
     text-decoration: underline!important;
 }
+
+
 
 .help {
     z-index: 999;
@@ -106,3 +89,43 @@
     font-size: 14px;
 }
 
+.map-loader {
+    z-index: 9999;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+.map-loader.hide {
+    display: none;
+}
+
+.lds-dual-ring {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    margin-top: calc(50% - 96px);
+  }
+  .lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 46px;
+    height: 46px;
+    margin: 1px;
+    border-radius: 50%;
+    border: 5px solid #000;
+    border-color: #000 transparent #000 transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+  }
+  @keyframes lds-dual-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
