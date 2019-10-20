@@ -3,33 +3,44 @@ import { Link } from 'react-router-dom';
 import LeftBanner from './img/leftbanner.svg';
 import RightBanner from './img/rightbanner.svg';
 import './home.css';
+import Predictions from '../prediction/prediction';
 
 class Home extends Component {
     render() { 
         document.title = "Home - Datalakes";
          return ( 
             <React.Fragment>
-                <div className="intro"><h2>The Open Data Platform for Swiss Lakes</h2></div>
-
-                <div className="banner">
-                    <Link to="/live" title="Explore our live observations" id="button-left" className="bannertext">
-                        Live Observations
-                    </Link>
-                    <Link to="/predictions" className="bannertext" id="button-right" title="Explore our predictive lake models" >
-                        Models Predictions
-                    </Link>  
-                    <br />            
-                    <Link to="/live" title="Explore our live observations" id="img-left">
-                        <img alt="Datalakes drawing left" src={LeftBanner} />
-                    </Link>
-                    <Link to="/predictions" title="Explore our predictive lake models" id="img-right">
-                        <img alt="Datalakes drawing right" src={RightBanner} />
-                    </Link>
-                     
+                <div className="home-container">
+                    <div className="home-inner" id="home-left">
+                        <div className="home-content">
+                            <div className="home-text">
+                                Explore <b>the</b> data portal for Swiss lakes.
+                            </div>
+                            <Link to="/about" title="Learn more about datalakes">
+                                <button className="home-button">Learn More</button>
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="home-inner">
+                        <div className="home-banners">
+                            <Link to="/live" title="See live lake observations">
+                                <div className="home-banner">
+                                    Live Observations
+                                </div>
+                            </Link>
+                            <Link to="/predictions" title="See model predictions">
+                                <div className="home-banner">
+                                    Model Predictions
+                                </div>
+                            </Link>
+                            <Link to="/dataportal" title="See data portal">
+                                <div className="home-banner">
+                                    Data Portal
+                                </div>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
-
-                <div className="dataportal"><h2>Or access all data through our <Link to="/dataportal" title="Explore our data.">data portal</Link></h2></div>
-
 
             </React.Fragment>
         );

@@ -132,9 +132,9 @@ class Predictions extends Component {
                                 <div id="colorbar"> 
                                     <div ref="hoverTemp" className="hoverTemp"></div>
                                     <div className="colorbar-inner">
-                                        <input title="Edit minimum temperature" type="text" placeholder={this.state.MinTemp} onBlur={this.setMinTemp}></input> °C 
+                                        <input title="Edit minimum temperature" type="text" defaultValue={this.state.MinTemp} onBlur={this.setMinTemp}></input> °C 
                                         <div id="bar" title="Legend colorbar"></div> 
-                                        <input title="Edit maximum temperature" type="text" placeholder={this.state.MaxTemp} onBlur={this.setMaxTemp}></input> °C
+                                        <input title="Edit maximum temperature" type="text" defaultValue={this.state.MaxTemp} onBlur={this.setMaxTemp}></input> °C
                                     </div>
                                 </div>
                             </React.Fragment>} 

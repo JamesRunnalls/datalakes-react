@@ -31,15 +31,25 @@ class Header extends Component {
                 
             </div>
             <div className={mainNav}>
-                    <div className="hamburger" onClick={this.toggle}><h3>{symbol} Menu</h3></div>
-                    <ul>
-                      <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/live">Live</NavLink></li>
-                      <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/predictions">Predictions</NavLink></li>
-                      <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/dataportal">Data Portal</NavLink></li>
-                      <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink></li>
-                      <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink></li>
-                    </ul>
-                  </div>
+                <div className="hamburger" onClick={this.toggle}><h3>{symbol} Menu</h3></div>
+                <ul>
+                    <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/live">Live</NavLink></li>
+                    <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/predictions">Predictions</NavLink></li>
+                    <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/dataportal">Data Portal</NavLink></li>
+                    <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink></li>
+                    <li><NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink></li>
+                </ul>
+            </div>
+            <div className="footer-nav">
+                    <NavLink activeClassName="active" onClick={this.closeMenu} to="/live">Live</NavLink>
+                    <NavLink activeClassName="active" onClick={this.closeMenu} to="/predictions">Predictions</NavLink>
+                    <NavLink activeClassName="active" onClick={this.closeMenu} to="/dataportal">Data Portal</NavLink>
+                    <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
+                    <NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink>
+            </div>
+
+
+
         </header>
         );
     }

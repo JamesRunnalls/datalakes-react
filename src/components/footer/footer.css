@@ -2,11 +2,31 @@
 
 footer {
     border-top: 1px solid #D8D6D3;
-    margin-top: 40px;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    background-color: white;
+    z-index: 999999999;
+  }
+
+  @media screen and (max-height: 850px){
+    footer {
+      position: relative;
+      margin-top: 40px;
+      z-index: 10;
+    }
+  }
+
+  @media screen and (max-width: 960px){
+    footer {
+      position: relative;
+      margin-top: 40px;
+      z-index: 10;
+    }
   }
   
   footer .container .partners {
-    padding: 30px 0;
+    padding: 30px 0 10px 0;
     text-align: center;
   }
   
@@ -29,5 +49,5 @@ footer {
     width: 100%;
     text-align: right;
     box-sizing: border-box;
-    padding: 0 10px 10px;
+    padding: 0 50px 10px 0;
   }

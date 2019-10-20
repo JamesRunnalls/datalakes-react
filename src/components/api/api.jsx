@@ -5,7 +5,7 @@ class API extends Component {
         document.title = "API - Datalakes";
          return ( 
             <div>
-                <h1>Datalakes API Documentation</h1>
+                <h1>API Documentation</h1>
                 <h3>Documentation coming soon...</h3>
             </div>
         );

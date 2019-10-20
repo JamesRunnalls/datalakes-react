@@ -6,6 +6,7 @@ main {
   padding-right: 10px;
   overflow: hidden;
   min-height: 60vh;
+  min-height: calc(100vh - 230px);
 }
 
 @media (min-width: 960px) {
@@ -14,6 +15,18 @@ main {
       margin-left: auto;
       margin-right: auto;
       padding: 0;
+  }
+}
+
+@media screen and (max-width: 960px){
+  main {
+    min-height: calc(100vh - 320px);
+  }
+}
+
+@media screen and (max-width: 600px){
+  main {
+    min-height: calc(100vh - 120px);
   }
 }
 

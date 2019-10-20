@@ -1,12 +1,11 @@
 .parameter-block {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 20px 30px;
     width: 160px;
     max-width: 50%;
     box-sizing: border-box;
     text-align: center;
     cursor: pointer;
-    margin: 10px;
     vertical-align: top;
 }
 
