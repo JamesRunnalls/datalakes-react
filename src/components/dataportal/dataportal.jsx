@@ -122,12 +122,12 @@ class DownloadMultiple extends Component {
                         { this.props.selected.map( dataset => ( <li key={dataset.id}>{dataset.label}</li> ))}
                     </ol>
                     <div className="download-multiple-title">Licence</div>
-                    <div className="licence">
-                        Attribution 4.0 International (CC BY 4.0) https://creativecommons.org/licenses/by/4.0/
-                    </div>
+                    <ol className="selected-data-list">
+                        { this.props.selected.map( dataset => ( <li key={dataset.id}>{dataset.licence}</li> ))}
+                    </ol>
                     <div className="download-multiple-title">Citations</div>
                     <ol className="selected-data-list">
-                        { this.props.selected.map( dataset => ( <li key={dataset.id}>Linhares, A., & Brum, P. (2007). Understanding our understanding of strategic scenarios: What role do chunks play? Cognitive Science, 31(6), 989-1007. https://doi.org/doi:10.1080/03640210701703725</li> ))}
+                        { this.props.selected.map( dataset => ( <li key={dataset.id}>{dataset.citation}</li> ))}
                     </ol>
                     <div className="download-multiple-title">Time Period</div>
                     <div className="licence">

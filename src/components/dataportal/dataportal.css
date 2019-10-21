@@ -59,10 +59,6 @@ input.SearchBar:hover {
     font-weight: 700;
 }
 
-.licence {
-    padding: 10px 0;
-}
-
 .selected-data-list {
     max-height: 60px;
     overflow: auto;

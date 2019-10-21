@@ -1,9 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import LeftBanner from './img/leftbanner.svg';
-import RightBanner from './img/rightbanner.svg';
 import './home.css';
-import Predictions from '../prediction/prediction';
 
 class Home extends Component {
     render() { 

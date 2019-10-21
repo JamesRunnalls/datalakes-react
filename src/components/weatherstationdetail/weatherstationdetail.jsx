@@ -13,9 +13,9 @@ class LiveParameterSummary extends Component {
                     { Object.keys(parameters).map( key => {
                         return <LiveParameter
                             key={key}
-                            value={parameters[key].value}
-                            units={parameters[key].units}
-                            label={parameters[key].label}
+                            parameter={parameters[key]}
+                            selected={this.props.selected}
+                            select={this.props.select}
                     />})}
                 </div>  
             );
@@ -25,25 +25,34 @@ class LiveParameterSummary extends Component {
 
 class LiveParameter extends Component {
     render() { 
-        var title = "See "+this.props.label+" timeseries";
+        var title = "See "+this.props.parameter.label+" timeseries";
+        var paramClass = "parameter-block"
+        if (this.props.selected.label === this.props.parameter.label){
+            paramClass = "parameter-block selected"
+        }
         return ( 
-           <div className="parameter-block" title={title}>
-               <div className="value">{this.props.value}</div>
-               <div className="units">{this.props.units}</div>
-               <div className="label">{this.props.label}</div>
+           <div className={paramClass} title={title} onClick={() => this.props.select(this.props.parameter)}>
+               <div className="value">{this.props.parameter.value}</div>
+               <div className="units">{this.props.parameter.units}</div>
+               <div className="label">{this.props.parameter.label}</div>
            </div> 
         );
     }
 }
 
 class WeatherStationRight extends Component {
-    render() { 
+    render() {
+        var link = this.props.selected.link;
         if ('time' in this.props.data){
             return ( 
-                <React.Fragment>
+                <div className="timeseries">
+                    <div>{this.props.data.update}</div>
                     <div>Last Updated: {this.props.data.time}</div>
                     <div className="graph-container"></div>
-                </React.Fragment>
+                    <a href={link}>
+                        <div className="view-download">View and Dowload Timeseries Data</div>
+                    </a>
+                </div>
              );
         } else {return ""}         
     }
@@ -52,7 +61,12 @@ class WeatherStationRight extends Component {
 class WeatherStationDetail extends Component {
     state = {
         dataset: [],
-        error: false
+        error: false,
+        selected: []
+    }
+
+    setSelectedState = selected => {
+        this.setState({ selected});
     }
 
     async componentDidMount(){
@@ -60,7 +74,8 @@ class WeatherStationDetail extends Component {
         const { data: dataset } = await axios.get('http://localhost:4000/api/lakestations/'+url).catch(error => {
             this.setState({ error: true});
           });
-        this.setState({ dataset })
+        const selected = dataset.parameters[Object.keys(dataset.parameters)[0]];
+        this.setState({ dataset, selected })
     }
 
     render() {
@@ -75,8 +90,8 @@ class WeatherStationDetail extends Component {
                     <h1>{this.state.dataset.name} Weather Station</h1>
                     <SidebarLayout 
                         sidebartitle="Time Series" 
-                        left={<LiveParameterSummary data={this.state.dataset}/>} 
-                        right={<WeatherStationRight data={this.state.dataset}/>}
+                        left={<LiveParameterSummary data={this.state.dataset} selected={this.state.selected} select={this.setSelectedState}/>} 
+                        right={<WeatherStationRight data={this.state.dataset} selected={this.state.selected}/>}
                     />
                 </React.Fragment>
             );

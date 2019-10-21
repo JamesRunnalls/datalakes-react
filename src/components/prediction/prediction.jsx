@@ -5,11 +5,11 @@ import SwissTopoMap from '../swisstopomap/swisstopomap';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import ModelList from '../modellist/modellist';
 import './prediction.css';
-import test from './data';
 
 class Predictions extends Component {
     state = {
         geojson : [],
+        meteolakes : [],
         map : "",
         search: "",
         MinTemp: "",
@@ -18,8 +18,10 @@ class Predictions extends Component {
     }
 
     async componentDidMount(){
+        // Lake Models
         const { data: geojson } = await axios.get('http://localhost:4000/api/lakemodels');
 
+        // Simstrat Data
         try {
             const { data: simstratSurfaceTemperature } = await axios.get('http://localhost:4000/api/simstratsurfacetemperature');
             var temp = [];
@@ -36,7 +38,15 @@ class Predictions extends Component {
         } catch (e) {
             console.log(e);
             this.setState({ geojson });
-        }        
+        }
+        
+        // Meteolakes Data
+        try {
+            const { data: meteolakes } = await axios.get('http://localhost:4000/api/meteolakessurfacetemperature');
+            this.setState({ meteolakes });
+        } catch (e) {
+            console.log(e);
+        }  
     }
 
     isNumeric = (n) => {
@@ -85,12 +95,13 @@ class Predictions extends Component {
     }
 
     lakeColor = (gradient,temp,mintemp,maxtemp) => {
+        var lakecolor = "";
         if (temp > maxtemp){
-            var lakecolor = "#000000";
+            lakecolor = "#000000";
         } else if (temp < mintemp){
-            var lakecolor = "#FFFFFF";
+            lakecolor = "#FFFFFF";
         } else {
-            var lakecolor = gradient[parseInt(gradient.length/((maxtemp-mintemp)/(temp-mintemp)),10)];
+            lakecolor = gradient[parseInt(gradient.length/((maxtemp-mintemp)/(temp-mintemp)),10)];
         }
         return lakecolor;
     }
@@ -127,7 +138,7 @@ class Predictions extends Component {
                                           colorbar={ [this.state.MinTemp,this.state.MaxTemp] }
                                           setMap={this.setMap}
                                           setTemp={this.setTemp}
-                                          threeD={ test }
+                                          threeD={ this.state.meteolakes }
                                         />
                                 <div id="colorbar"> 
                                     <div ref="hoverTemp" className="hoverTemp"></div>

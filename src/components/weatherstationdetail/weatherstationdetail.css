@@ -9,7 +9,7 @@
     vertical-align: top;
 }
 
-.parameter-block:hover {
+.parameter-block.selected {
     background-color: rgba(32, 33, 36, 0.1);
 }
 
@@ -35,4 +35,21 @@
     height:180px;
     margin: 20px 0;
     background-color: grey;
+}
+
+.view-download {
+    color: black;
+    width: 100%;
+    border: solid 1px black;
+    text-align: center;
+    box-sizing: border-box;
+    padding: 10px 0
+}
+
+.view-download:hover {
+    font-weight: bold;
+}
+
+.timeseries a {
+    text-decoration: none;
 }

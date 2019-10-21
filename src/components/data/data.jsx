@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import D3HeatMap from '../heatmap/heatmap';
 import D3LineGraph from '../linegraph/linegraph';
+import Sensor from './img/sensor.svg';
+import Database from './img/data.svg';
+import Python from './img/python.svg';
+import R from './img/r.svg';
+import './data.css';
 
 class HeatMap extends Component {
     state = {  }
@@ -42,28 +47,114 @@ class LineGraph extends Component {
 class Preview extends Component {
     state = {  }
     render() { 
-        return ( ""  );
+        return ( 
+            <React.Fragment>
+                <div>Data is stored in NetCDF format and is flattened for this preview.</div>
+            </React.Fragment>
+          );
     }
 }
  
 class Download extends Component {
     state = {  }
     render() { 
-        return ( ""  );
+        return ( 
+            <React.Fragment>
+                <div className="info-title">Dataset Selected:</div>
+                {this.props.dataset.label}
+
+                <div className="info-title">Licence</div>
+                {this.props.dataset.licence}
+                
+                <div className="info-title">Citations</div>
+                {this.props.dataset.citation}
+                
+                <div className="info-title">Time Period</div>
+                <div className="licence">
+                    INSERT TIME PERIOD SLIDER HERE
+                </div>
+                <div className="info-title">Download</div>
+                <div className="MultipleDownload">
+                    <button title="Download datasets in NetCDF format">.nc</button>
+                    <button title="Download datasets in CSV format">.csv</button>
+                    <button title="Download datasets in TXT format">.txt</button>
+                </div>
+            </React.Fragment>
+          );
     }
 }
+
+
 
 class Pipeline extends Component {
     state = {  }
     render() { 
-        return ( ""  );
+        return ( 
+            <div className="pipeline">
+                <div>See the <a href="">Renku Repository</a> for full details on reproducibility or click 
+                on the icons below to be directed to data and scripts stored in our <a href="">Gitlab Repository</a>.</div>
+                <div className="diagram">
+                    <a>
+                        <img src={Sensor} />
+                        <div className="">Sensor</div>
+                        <div>18.01.19</div>
+                    </a>
+                    <div className="separator full"></div>
+                    <a href="">
+                        <img src={Database} />
+                        <div className="">Level 0</div>
+                        <div>18.01.19</div>
+                    </a>
+                    <div className="separator half"></div>
+                    <a href="">
+                        <img src={Python} />
+                        <div className="">Python</div>
+                        <div>18.01.19</div>
+                    </a>
+                    <div className="separator half"></div>
+                    <a>
+                        <img src={Database} />
+                        <div className="">Level 1</div>
+                        <div>18.01.19</div>
+                    </a>
+                </div>
+            </div>
+        );
     }
 }
  
 class Information extends Component {
     state = {  }
     render() { 
-        return ( ""  );
+        return ( 
+            <React.Fragment>
+                <div className="info-inner">
+                    <div className="info-title">Dataset Properties</div>
+                    <table>
+                      <tbody>
+                        { Object.keys(this.props.dataset.filters).map( prop => ( <tr key={prop}><td>{prop}</td><td>{this.props.dataset.filters[prop]}</td></tr> ))}
+                        { Object.keys(this.props.dataset.info).map( prop => ( <tr key={prop}><td>{prop}</td><td>{this.props.dataset.info[prop]}</td></tr> ))}
+                      </tbody>
+                    </table>
+                </div>
+                <div className="info-inner">
+                    <div className="info-title">Contact</div>
+                    <table>
+                      <tbody>
+                        { Object.keys(this.props.dataset.contact).map( prop => ( <tr key={prop}><td>{prop}</td><td>{this.props.dataset.contact[prop]}</td></tr> ))}
+                      </tbody>
+                    </table>
+                    <div className="info-title">Companion Datasets</div>
+                    <table>
+                      <tbody>
+                        { Object.keys(this.props.dataset.companion).map( prop => ( <tr key={prop}><td><Link to={prop}>{this.props.dataset.companion[prop]}</Link></td></tr> ))}
+                      </tbody>
+                    </table>
+                </div>
+
+
+            </React.Fragment>
+         );
     }
 }
  
@@ -80,8 +171,6 @@ class Data extends Component {
         const { data: dataset } = await axios.get('http://localhost:4000/api/datasets/'+url).catch(error => {
             this.setState({ error: true});
           });
-
-        
         this.setState({ dataset })
     }
 
@@ -101,9 +190,9 @@ class Data extends Component {
         if (this.state.selection === "heatmap"){selected = <HeatMap />; classHeatMap = "subnav-item active"}
         if (this.state.selection === "linegraph"){selected = <LineGraph />; classLineGraph = "subnav-item active"}
         if (this.state.selection === "preview"){selected = <Preview />; classPreview = "subnav-item active"}
-        if (this.state.selection === "download"){selected = <Download />; classDownload = "subnav-item active"}
+        if (this.state.selection === "download"){selected = <Download dataset={this.state.dataset}/>; classDownload = "subnav-item active"}
         if (this.state.selection === "pipeline"){selected = <Pipeline />; classPipeline = "subnav-item active"}
-        if (this.state.selection === "information"){selected = <Information />; classInformation = "subnav-item active"}
+        if (this.state.selection === "information"){selected = <Information dataset={this.state.dataset}/>; classInformation = "subnav-item active"}
         if (this.state.error) {
             return (
                 <Redirect to="/dataportal" />
