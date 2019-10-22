@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
+import DateSlider from '../dateslider/dateslider';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import D3HeatMap from '../heatmap/heatmap';
 import D3LineGraph from '../linegraph/linegraph';
@@ -11,8 +12,8 @@ import R from './img/r.svg';
 import './data.css';
 
 class HeatMap extends Component {
-    state = {  }
     render() { 
+        const { onChange, state } = this.props;
         return ( 
             <React.Fragment>
                 <SidebarLayout 
@@ -20,7 +21,14 @@ class HeatMap extends Component {
                     left={
                         <D3HeatMap />
                     }
-                    right={""}
+                    right={
+                        <React.Fragment>
+                            <div className="info-title">Date Range</div>
+                            <div className="side-date-slider">
+                                <DateSlider onChange={onChange} state={state}/>
+                            </div>
+                        </React.Fragment>
+                    }
                 />
             </React.Fragment>
          );
@@ -28,8 +36,8 @@ class HeatMap extends Component {
 }
 
 class LineGraph extends Component {
-    state = {  }
     render() { 
+        const { onChange, state } = this.props;
         return ( 
             <React.Fragment>
                 <SidebarLayout 
@@ -37,7 +45,14 @@ class LineGraph extends Component {
                     left={
                         <D3LineGraph />
                     }
-                    right={""}
+                    right={
+                        <React.Fragment>
+                            <div className="info-title">Date Range</div>
+                            <div className="side-date-slider">
+                                <DateSlider onChange={onChange} state={state}/>
+                            </div>
+                        </React.Fragment>
+                    }
                 />
             </React.Fragment>
          );
@@ -56,11 +71,11 @@ class Preview extends Component {
 }
  
 class Download extends Component {
-    state = {  }
     render() { 
+        const { onChange, state } = this.props;
         return ( 
             <React.Fragment>
-                <div className="info-title">Dataset Selected:</div>
+                <div className="info-title">Dataset Title</div>
                 {this.props.dataset.label}
 
                 <div className="info-title">Licence</div>
@@ -70,8 +85,8 @@ class Download extends Component {
                 {this.props.dataset.citation}
                 
                 <div className="info-title">Time Period</div>
-                <div className="licence">
-                    INSERT TIME PERIOD SLIDER HERE
+                <div className="date-slider">
+                    <DateSlider onChange={onChange} state={state}/>
                 </div>
                 <div className="info-title">Download</div>
                 <div className="MultipleDownload">
@@ -147,7 +162,7 @@ class Information extends Component {
                     <div className="info-title">Companion Datasets</div>
                     <table>
                       <tbody>
-                        { Object.keys(this.props.dataset.companion).map( prop => ( <tr key={prop}><td><Link to={prop}>{this.props.dataset.companion[prop]}</Link></td></tr> ))}
+                        { Object.keys(this.props.dataset.companion).map( prop => ( <tr key={prop}><td><a href={prop}>{this.props.dataset.companion[prop]}</a></td></tr> ))}
                       </tbody>
                     </table>
                 </div>
@@ -160,11 +175,20 @@ class Information extends Component {
  
 class Data extends Component {
     state = {
-        selection:"heatmap",
+        selection:"download",
         dataset: [],
-        error: false
-        
+        error: false,
+        min: new Date('2019-06-12'),
+        max: new Date('2019-12-12'),
+        lower: new Date('2019-08-12'),
+        upper: new Date('2019-10-12')
     }
+
+    onChange = values => {
+        const lower = values[0];
+        const upper = values[1];
+        this.setState({ lower, upper });
+      }
 
     async componentDidMount(){
         const url = this.props.location.pathname.split('/').slice(-1)[0];
@@ -187,10 +211,10 @@ class Data extends Component {
         var classPipeline = "subnav-item";
         var classInformation = "subnav-item";
         var selected = "";
-        if (this.state.selection === "heatmap"){selected = <HeatMap />; classHeatMap = "subnav-item active"}
-        if (this.state.selection === "linegraph"){selected = <LineGraph />; classLineGraph = "subnav-item active"}
+        if (this.state.selection === "heatmap"){selected = <HeatMap onChange={this.onChange} state={this.state}/>; classHeatMap = "subnav-item active"}
+        if (this.state.selection === "linegraph"){selected = <LineGraph onChange={this.onChange} state={this.state}/>; classLineGraph = "subnav-item active"}
         if (this.state.selection === "preview"){selected = <Preview />; classPreview = "subnav-item active"}
-        if (this.state.selection === "download"){selected = <Download dataset={this.state.dataset}/>; classDownload = "subnav-item active"}
+        if (this.state.selection === "download"){selected = <Download dataset={this.state.dataset} onChange={this.onChange} state={this.state}/>; classDownload = "subnav-item active"}
         if (this.state.selection === "pipeline"){selected = <Pipeline />; classPipeline = "subnav-item active"}
         if (this.state.selection === "information"){selected = <Information dataset={this.state.dataset}/>; classInformation = "subnav-item active"}
         if (this.state.error) {

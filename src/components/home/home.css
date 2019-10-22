@@ -48,9 +48,27 @@
     height: 120px;
     width: 95%;
     background-color: white;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
+     /*box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);*/
     margin: 20px auto;
     cursor: pointer;
+}
+
+.home-banner.live {
+    background-image: url("img/live.png");
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+
+.home-banner.predictions {
+    background-image: url("img/predictions.png");
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+
+.home-banner.data {
+    background-image: url("img/data.png");
+    background-size: 100%;
+    background-repeat: no-repeat;
 }
 
 

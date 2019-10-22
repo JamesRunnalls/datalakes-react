@@ -14,6 +14,15 @@
     padding-top: 20px;
 }
 
+.date-slider {
+    width:550px;
+    max-width: 100%;
+}
+
+.side-date-slider {
+    width: 100%;
+}
+
 .pipeline img {
     height:75px;
 }

@@ -21,17 +21,17 @@ class Home extends Component {
                     <div className="home-inner">
                         <div className="home-banners">
                             <Link to="/live" title="See live lake observations">
-                                <div className="home-banner">
+                                <div className="home-banner live">
                                     Live Observations
                                 </div>
                             </Link>
                             <Link to="/predictions" title="See model predictions">
-                                <div className="home-banner">
+                                <div className="home-banner predictions">
                                     Model Predictions
                                 </div>
                             </Link>
                             <Link to="/dataportal" title="See data portal">
-                                <div className="home-banner">
+                                <div className="home-banner data">
                                     Data Portal
                                 </div>
                             </Link>
