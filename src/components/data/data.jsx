@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import DateSlider from '../dateslider/dateslider';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
@@ -110,25 +110,25 @@ class Pipeline extends Component {
                 on the icons below to be directed to data and scripts stored in our <a href="">Gitlab Repository</a>.</div>
                 <div className="diagram">
                     <a>
-                        <img src={Sensor} />
+                        <img src={Sensor} alt="Sensor" />
                         <div className="">Sensor</div>
                         <div>18.01.19</div>
                     </a>
                     <div className="separator full"></div>
                     <a href="">
-                        <img src={Database} />
+                        <img src={Database} alt="Database" />
                         <div className="">Level 0</div>
                         <div>18.01.19</div>
                     </a>
                     <div className="separator half"></div>
                     <a href="">
-                        <img src={Python} />
+                        <img src={Python} alt="Python" />
                         <div className="">Python</div>
                         <div>18.01.19</div>
                     </a>
                     <div className="separator half"></div>
                     <a>
-                        <img src={Database} />
+                        <img src={Database} alt="Database" />
                         <div className="">Level 1</div>
                         <div>18.01.19</div>
                     </a>

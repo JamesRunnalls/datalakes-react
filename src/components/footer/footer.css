@@ -34,6 +34,7 @@ footer {
     height: 30px;
     margin: 5px 25px;
   }
+
   
   footer .container .copyright {
     text-align: right;
@@ -42,7 +43,6 @@ footer {
   footer a {
       text-decoration: none;
       color: black;
-      font-weight: 700;
   }
 
   footer .copyright {
@@ -50,4 +50,34 @@ footer {
     text-align: right;
     box-sizing: border-box;
     padding: 0 50px 10px 0;
+  }
+
+  .partner-logo .black {
+    display: inline-block;
+  }
+
+  .partner-logo .color {
+    display: none;
+  }
+
+  .partner-logo:hover .black {
+    display: none;
+  }
+
+  .partner-logo:hover .color {
+    display: inline-block;
+  }
+
+  .copyright .contact {
+    float: left;
+    padding-left: 50px
+  }
+
+  .copyright .contact a {
+    text-decoration: none;
+    color: black;
+  }
+
+  .copyright .contact a:hover {
+    color: rgb(70, 70, 70);
   }

@@ -24,7 +24,7 @@
 }
 
 .home-button:hover {
-    font-weight: bold;
+    color: rgb(70, 70, 70);
 }
 
 .home-content {
@@ -32,7 +32,7 @@
     box-sizing: border-box;
     padding-right: 30px;
     box-sizing: border-box;
-    padding-top: 40%;
+    padding-top: 45%;
 }
 
 .home-text {
@@ -41,16 +41,57 @@
 }
 
 .home-banners {
-    padding-top: 50px;
+    padding-top: 20%;
+}
+
+.home-banners a {
+    text-decoration: none;
 }
 
 .home-banner {
     height: 120px;
-    width: 95%;
+    width: 100%;
     background-color: white;
-     /*box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);*/
     margin: 20px auto;
     cursor: pointer;
+    color: black;
+}
+
+.home-banner:hover .inner-banner.right {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.2s linear;
+} 
+
+.inner-banner {
+    display: inline-block;
+    width: 50%;
+    box-sizing: border-box;
+    vertical-align: top;
+    font-size: 16px;
+    position: relative;
+}
+
+.inner-banner.left {
+    font-size: 30px;
+    font-family: "The Serif Bold", serif;
+    padding:20px;
+}
+
+.inner-banner.right {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.2s, opacity 0.2s linear;
+    height: 100%;
+    padding: 0 20px;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 5%, rgba(255,255,255,0.8) 100%);
+}
+
+.inner-banner-vert {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    padding: inherit;
 }
 
 .home-banner.live {
@@ -72,12 +113,35 @@
 }
 
 
-@media screen and (max-width: 550px){
+@media screen and (max-width: 960px){
     #home-left {
-        display: none;
+        display: block;
+    }
+    .home-content {
+        padding: 0;
+        padding-top: 10vh;
     }
     .home-inner {
         width: 100%;
+        min-height:initial;
+    }
+    .home-banners {
+        padding-top: 5vh;
+    }
+    .home-button {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 550px){
+    .home-content {
+        padding-top: 25px;
+    }
+    .home-banners {
+        padding-top: 10px;
+    }
+    .home-text {
+        font-size: 25px;
     }
 }
 
@@ -98,10 +162,10 @@
     }
 
     30%, 50%, 70% {
-    transform: translate3d(-4px, 0, 0);
+    transform: translate3d(-3px, 0, 0);
     }
 
     40%, 60% {
-    transform: translate3d(4px, 0, 0);
+    transform: translate3d(3px, 0, 0);
     }
 }

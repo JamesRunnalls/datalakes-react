@@ -20,19 +20,40 @@ class Home extends Component {
                     </div>
                     <div className="home-inner">
                         <div className="home-banners">
-                            <Link to="/live" title="See live lake observations">
+                            <Link to="/live">
                                 <div className="home-banner live">
-                                    Live Observations
+                                    <div className="inner-banner left">
+                                        Live<br />Observations
+                                    </div>
+                                    <div className="inner-banner right">
+                                        <div className="inner-banner-vert">
+                                            Real time access to water temperature and weather observations across Switzerland.
+                                        </div>
+                                    </div>
                                 </div>
                             </Link>
-                            <Link to="/predictions" title="See model predictions">
+                            <Link to="/predictions">
                                 <div className="home-banner predictions">
-                                    Model Predictions
+                                    <div className="inner-banner left">
+                                        Model<br />Predictions
+                                    </div>
+                                    <div className="inner-banner right">
+                                        <div className="inner-banner-vert">
+                                            Hydrodynamic model now-casts and forecasts for lakes across Switzerland.
+                                        </div>
+                                    </div>
                                 </div>
                             </Link>
-                            <Link to="/dataportal" title="See data portal">
+                            <Link to="/dataportal">
                                 <div className="home-banner data">
-                                    Data Portal
+                                    <div className="inner-banner left">
+                                        Data<br />Portal
+                                    </div>
+                                    <div className="inner-banner right">
+                                        <div className="inner-banner-vert">
+                                            Visualise, download and see the lineage of our limnological data.
+                                        </div>
+                                    </div>
                                 </div>
                             </Link>
                         </div>

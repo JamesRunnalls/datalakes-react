@@ -29,10 +29,11 @@
   
 .railInnerStyle {
     position: absolute;
-    width: 100%;
+    width: calc(100% + 60px);
     height: 5px;
     transform: translate(0%, -50%);
     border-radius: 7px;
     pointer-events: none;
     background-color: rgb(184, 184, 184);
+    left: -30px;
   }
