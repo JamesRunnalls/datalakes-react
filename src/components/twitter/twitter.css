@@ -1,0 +1,33 @@
+.twitter img {
+    height: 20px;
+    padding-right: 20px;
+    vertical-align: bottom;
+}
+
+.twitter.hide {
+    display: none;
+}
+
+.twitter {
+    font-size: 15px;
+}
+
+.twitter a {
+    text-decoration-line: none;
+    color: rgb(27, 149, 224);
+}
+
+.twitter a:hover {
+    text-decoration: underline;
+}
+
+.twitter .twitter-text {
+    display: inline-block;
+    line-height: 20px;
+    padding-right: 20px;
+}
+
+.twitter .twitter-date {
+    display: inline-block;
+    line-height: 20px;
+}

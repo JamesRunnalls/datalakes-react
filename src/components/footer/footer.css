@@ -73,6 +73,12 @@ footer {
     padding-left: 50px
   }
 
+  .copyright .contact img {
+    height: 20px;
+    margin-top: -4px;
+    padding-right: 20px;
+  }
+
   .copyright .contact a {
     text-decoration: none;
     color: black;
@@ -80,4 +86,20 @@ footer {
 
   .copyright .contact a:hover {
     color: rgb(70, 70, 70);
+  }
+
+  .copyright .contact .contact-inner .black {
+    display: inline-block;
+  }
+
+  .copyright .contact .contact-inner .color {
+    display: none;
+  }
+
+  .copyright .contact .contact-inner:hover .black {
+    display: none;
+  }
+
+  .copyright .contact .contact-inner:hover .color {
+    display: inline-block;
   }
