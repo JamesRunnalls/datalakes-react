@@ -95,10 +95,9 @@ render() {
             transform: 'translate(-50%, -50%)',
             WebkitTapHighlightColor: 'rgba(0,0,0,0)',
             zIndex: 300,
-            width: 20,
+            width: 2,
             height: 20,
             border: 0,
-            borderRadius: '50%',
             backgroundColor: disabled ? '#666' : '#000',
         }}
         />
