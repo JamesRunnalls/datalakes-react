@@ -10,15 +10,18 @@ class SidebarLayout extends Component {
         this.setState({addClass: !this.state.addClass});
       }
 
+      componentDidUpdate() {
+        window.dispatchEvent(new Event('resize'));
+      }
+
       render() { 
         let rightClass = ["rightcontainer"];
         let leftClass = ["leftcontainer"];
         if(this.state.addClass) {
           rightClass.push('hide');
           leftClass.push('full');
-          window.dispatchEvent(new Event('resize'));
+          
         }
-
         var rightNoScroll = "";
         if ("rightNoScroll" in this.props) {rightNoScroll = this.props.rightNoScroll}
 
