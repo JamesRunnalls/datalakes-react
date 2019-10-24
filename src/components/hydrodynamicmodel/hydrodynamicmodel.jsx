@@ -23,7 +23,11 @@ class Slice extends Component {
             right={
                 <React.Fragment>
                     <ParameterSelect />
-                    <SideSelect left="Forecast" right="Historical" leftcontent={""} rightcontent={""}/>
+                    <SideSelect 
+                        left="Forecast" 
+                        right="Historical" 
+                        leftcontent={""} 
+                        rightcontent={""}/>
                 </React.Fragment>
             }
             />

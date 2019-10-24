@@ -99,8 +99,6 @@ class Download extends Component {
     }
 }
 
-
-
 class Pipeline extends Component {
     state = {  }
     render() { 
@@ -175,7 +173,7 @@ class Information extends Component {
  
 class Data extends Component {
     state = {
-        selection:"download",
+        selection:"linegraph",
         dataset: [],
         error: false,
         min: new Date('2019-06-12'),
