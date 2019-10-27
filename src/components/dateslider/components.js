@@ -58,7 +58,7 @@ render() {
             left: `${percent}%`,
             position: 'absolute',
             marginLeft: '-25px',
-            marginTop: '-35px',
+            marginTop: '-28px',
             }}
         >
             <div className="tooltip">
@@ -97,7 +97,7 @@ render() {
             zIndex: 300,
             width: 2,
             height: 20,
-            border: 0,
+            border: 0,   
             backgroundColor: disabled ? '#666' : '#000',
         }}
         />
@@ -131,7 +131,7 @@ return (
     style={{
         position: 'absolute',
         transform: 'translate(0%, -50%)',
-        height: 7,
+        height: 5,
         zIndex: 1,
         backgroundColor: disabled ? '#999' : '#000',
         borderRadius: 7,

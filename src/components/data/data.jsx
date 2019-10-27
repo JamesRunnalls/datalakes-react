@@ -11,6 +11,8 @@ import Python from './img/python.svg';
 import R from './img/r.svg';
 import './data.css';
 
+import data from './data.json';
+
 class HeatMap extends Component {
     render() { 
         const { onChange, state } = this.props;
@@ -43,7 +45,15 @@ class LineGraph extends Component {
                 <SidebarLayout 
                     sidebartitle="Plot Controls"
                     left={
-                        <D3LineGraph />
+                        <D3LineGraph 
+                            data={data} 
+                            graphtype="time" 
+                            xunits="" 
+                            xlabel="" 
+                            yunits="°C" 
+                            ylabel="Temperature" 
+                            sequential="x"
+                        />
                     }
                     right={
                         <React.Fragment>

@@ -57,7 +57,6 @@ class D3LineGraph extends Component {
         // Adds the svg canvas
         var svg = d3.select("#vis")
             .append("svg")
-            .attr("id", "svg" )
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
@@ -126,10 +125,9 @@ class D3LineGraph extends Component {
 
         svg.append("text")
             .attr("transform", "rotate(-90)")
-            .attr("y", 0 - margin.left)
-            .attr("x",0 - (height / 2))
+            .attr("y", 6)
             .attr("dy", "1em")
-            .style("text-anchor", "middle")
+            .style("text-anchor", "end")
             .text(yLabel);
 
         // Add the line
@@ -199,27 +197,22 @@ class D3LineGraph extends Component {
         }
 
         function mousemove() {
-            var selectedData = "";
             if (sequential === "y"){
-                var y0 = y.invert(d3.mouse(this)[1]);
-                var selectedData = data.sort(function(a,b){ 
-                    return Math.abs(a.y-y0) - Math.abs(b.y-y0)
-                })[0];
             } else {
                 var x0 = x.invert(d3.mouse(this)[0]);
                 var i = bisectx(data, x0, 1);
 
                 var selectedData = data[i];
-            }
-            focus
+                focus
                 .attr("cx", x(selectedData.x))
                 .attr("cy", y(selectedData.y))
 
-            if (graphtype === "time"){
-                document.getElementById("value").innerHTML = format(new Date(selectedData.x), "hh:mm dd MMM yy") + " - " + selectedData.y + yunits;
-            } else {
-                document.getElementById("value").innerHTML = selectedData.x + xunits+ " - " + selectedData.y + yunits;
-            }      
+                if (graphtype === "time"){
+                    document.getElementById("value").innerHTML = format(new Date(selectedData.x), "hh:mm dd MMM yy") + " - " + selectedData.y + yunits;
+                } else {
+                    document.getElementById("value").innerHTML = selectedData.x + xunits+ " - " + selectedData.y + yunits;
+                }
+            }
         }
        
         function idled() {
@@ -235,17 +228,22 @@ class D3LineGraph extends Component {
         }
 
         d3.select("#save").on("click", function(){
-            var s = new XMLSerializer();
-            var str = s.serializeToString(document.getElementById("svg"));
+            console.log("Firing");
+            var html = d3.select("svg")
+                    .attr("version", 1.1)
+                    .attr("xmlns", "http://www.w3.org/2000/svg")
+                    .node().parentNode.innerHTML;
 
+            var imgsrc = 'data:image/svg+xml;base64,'+ btoa(html);
             var canvas = document.createElement("canvas"),
                 context = canvas.getContext("2d");
 
             canvas.width = viswidth;
             canvas.height = visheight;
 
+
             context.fillStyle = "white";
-            context.fillRect(0, 0, canvas.width, canvas.height);        
+            context.fillRect(0, 0, canvas.width, canvas.height);          
 
             var image = new Image;
             image.onload = function() {
@@ -254,8 +252,9 @@ class D3LineGraph extends Component {
                 a.download = "downloadgraph.png";
                 a.href = canvas.toDataURL("image/png");
                 a.click();
+                console.log("complete");
             };
-            image.src = 'data:image/svg+xml;charset=utf8,' + encodeURIComponent(str);            
+            image.src = imgsrc;
         });
     }
 
@@ -275,7 +274,7 @@ class D3LineGraph extends Component {
                     <div className="vis-data" id="value"></div>
                     <img className="vis-download" src={download} id="save" title="Download plot as .png"/>
                 </div>
-                <div id="vis"></div>           
+                <div id="vis"></div>                
             </React.Fragment>
         );
     }
