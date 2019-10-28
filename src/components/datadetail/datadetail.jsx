@@ -5,6 +5,7 @@ import DateSlider from '../dateslider/dateslider';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import D3HeatMap from '../heatmap/heatmap';
 import D3LineGraph from '../linegraph/linegraph';
+import ColorSelect from '../colorselect/colorselect';
 import Sensor from './img/sensor.svg';
 import Database from './img/data.svg';
 import Python from './img/python.svg';
@@ -12,6 +13,7 @@ import R from './img/r.svg';
 import './data.css';
 
 import datas from './data1.json';
+
 
 class HeatMap extends Component {
     render() { 
@@ -44,12 +46,12 @@ class LineGraph extends Component {
         bcolor:"none"
     }
     onChangeBcolor = (event) => {
-        var bcolor = event.target.value;
+        var bcolor = event.hex;
         this.setState({ bcolor })
         document.getElementById("bcolor").style.backgroundColor=bcolor;
     }
     onChangeLcolor = (event) => {
-        var lcolor = event.target.value;
+        var lcolor = event.hex;
         this.setState({ lcolor })
         document.getElementById("lcolor").style.backgroundColor=lcolor;
     }
@@ -78,28 +80,12 @@ class LineGraph extends Component {
                         <React.Fragment>
                             <div className="info-title">Date Range</div>
                             <div className="side-date-slider">
-                                <DateSlider onChange={onChange} state={state}/>
+                                <DateSlider onchange={onChange} state={state}/>
                             </div>
                             <div className="info-title">Background Color</div>
-                            <select id="bcolor" onChange={this.onChangeBcolor}>
-                                <option value="none" style={{backgroundColor:"none"}}></option>
-                                <option value="white" style={{backgroundColor:"white"}}></option>
-                                <option value="lightgray" style={{backgroundColor:"lightgray"}}></option>
-                                <option value="red" style={{backgroundColor:"red"}}></option>
-                                <option value="blue" style={{backgroundColor:"blue"}}></option>
-                                <option value="green" style={{backgroundColor:"green"}}></option>
-                                <option value="yellow" style={{backgroundColor:"yellow"}}></option>
-                            </select>
+                                <ColorSelect id="bcolor" onchange={this.onChangeBcolor} defaultcolor="none" />
                             <div className="info-title">Line Color</div>
-                            <select id="lcolor" onChange={this.onChangeLcolor}>
-                                <option value="black">Black</option>
-                                <option value="white">White</option>
-                                <option value="lightgray">Grey</option>
-                                <option value="red">Red</option>
-                                <option value="blue">Blue</option>
-                                <option value="green">Green</option>
-                                <option value="yellow">Yellow</option>
-                            </select>
+                                <ColorSelect id="lcolor" onchange={this.onChangeLcolor} defaultcolor="black" />
                         </React.Fragment>
                     }
                 />

@@ -268,15 +268,20 @@ class D3LineGraph extends Component {
     }
 
     componentDidMount() {
-        this.plotLineGraph();
         window.addEventListener("resize", this.plotLineGraph);
+        this.plotLineGraph();
     }
 
-    componentWillUnmount (){
+    componentWillUnmount() {
         window.removeEventListener("resize", this.plotLineGraph);
+    }
+
+    componentDidUpdate() {
+        this.plotLineGraph();
     }
   
     render() {
+        
         return(
             <React.Fragment>
                 <div className="vis-header">

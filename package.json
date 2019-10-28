@@ -11,6 +11,7 @@
     "leaflet": "^1.5.1",
     "prop-types": "^15.7.2",
     "react": "^16.9.0",
+    "react-color": "^2.17.3",
     "react-compound-slider": "^2.3.0",
     "react-dom": "^16.9.0",
     "react-native-hyperlink": "0.0.16",

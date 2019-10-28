@@ -13,6 +13,8 @@ class D3HeatMap extends Component {
           const data = res.data.monthlyVariance,
                 baseTemperature = res.data.baseTemperature,
                 yearRange = d3.extent(data, d => {return d.year; });
+
+          console.log(data)
           
           const legendData = [
             {'interval': 2.7, 'color': 'purple'},

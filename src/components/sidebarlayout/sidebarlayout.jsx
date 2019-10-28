@@ -3,15 +3,32 @@ import './sidebarlayout.css';
 
 class SidebarLayout extends Component {
       state = {
-        addClass: window.innerWidth < 960
+        addClass: window.innerWidth < 960,
+        toggle: true
       }
 
       toggle = () => {
+        this.setState({ toggle: false }, () => {
+            window.dispatchEvent(new Event('resize'));
+            this.setState({ toggle: true });
+        });
         this.setState({addClass: !this.state.addClass});
       }
 
-      componentDidUpdate() {
-        window.dispatchEvent(new Event('resize'));
+      hideOnResize = () => {
+        if (this.state.toggle){
+          if (document.body.clientWidth < 960){
+            this.setState({ addClass: true});
+          } 
+        }
+      }
+
+      componentDidMount() {
+        window.addEventListener("resize", this.hideOnResize);
+      }
+
+      componentWillUnmount() {
+        window.removeEventListener("resize", this.hideOnResize);
       }
 
       render() { 
