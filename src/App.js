@@ -12,7 +12,7 @@ import HydrodynamicModel from './components/hydrodynamicmodel/hydrodynamicmodel'
 import WeatherStationDetail from './components/weatherstationdetail/weatherstationdetail';
 import About from './components/about/about';
 import API from './components/api/api';
-import Data from './components/data/data';
+import DataDetail from './components/datadetail/datadetail';
 
 class App extends Component {
   render() {
@@ -28,7 +28,7 @@ class App extends Component {
                 <Route path='/predictions' component={HydrodynamicModel} />
 
                 <Route path='/dataportal' component={DataPortal} />
-                <Route path='/data' component={Data} />
+                <Route path='/data' component={DataDetail} />
 
                 <Route path='/API' component={API} />
                 

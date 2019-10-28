@@ -11,7 +11,7 @@ import Python from './img/python.svg';
 import R from './img/r.svg';
 import './data.css';
 
-import data from './data.json';
+import datas from './data1.json';
 
 class HeatMap extends Component {
     render() { 
@@ -38,6 +38,22 @@ class HeatMap extends Component {
 }
 
 class LineGraph extends Component {
+    state = {
+        lcolor:"black",
+        lweight:"0.5",
+        bcolor:"none"
+    }
+    onChangeBcolor = (event) => {
+        var bcolor = event.target.value;
+        this.setState({ bcolor })
+        document.getElementById("bcolor").style.backgroundColor=bcolor;
+    }
+    onChangeLcolor = (event) => {
+        var lcolor = event.target.value;
+        this.setState({ lcolor })
+        document.getElementById("lcolor").style.backgroundColor=lcolor;
+    }
+
     render() { 
         const { onChange, state } = this.props;
         return ( 
@@ -46,13 +62,16 @@ class LineGraph extends Component {
                     sidebartitle="Plot Controls"
                     left={
                         <D3LineGraph 
-                            data={data} 
+                            data={datas} 
                             graphtype="time" 
                             xunits="" 
                             xlabel="" 
                             yunits="°C" 
                             ylabel="Temperature" 
                             sequential="x"
+                            lcolor={this.state.lcolor}
+                            lweight={this.state.lweight}
+                            bcolor={this.state.bcolor}
                         />
                     }
                     right={
@@ -61,6 +80,26 @@ class LineGraph extends Component {
                             <div className="side-date-slider">
                                 <DateSlider onChange={onChange} state={state}/>
                             </div>
+                            <div className="info-title">Background Color</div>
+                            <select id="bcolor" onChange={this.onChangeBcolor}>
+                                <option value="none" style={{backgroundColor:"none"}}></option>
+                                <option value="white" style={{backgroundColor:"white"}}></option>
+                                <option value="lightgray" style={{backgroundColor:"lightgray"}}></option>
+                                <option value="red" style={{backgroundColor:"red"}}></option>
+                                <option value="blue" style={{backgroundColor:"blue"}}></option>
+                                <option value="green" style={{backgroundColor:"green"}}></option>
+                                <option value="yellow" style={{backgroundColor:"yellow"}}></option>
+                            </select>
+                            <div className="info-title">Line Color</div>
+                            <select id="lcolor" onChange={this.onChangeLcolor}>
+                                <option value="black">Black</option>
+                                <option value="white">White</option>
+                                <option value="lightgray">Grey</option>
+                                <option value="red">Red</option>
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="yellow">Yellow</option>
+                            </select>
                         </React.Fragment>
                     }
                 />
@@ -180,8 +219,8 @@ class Information extends Component {
          );
     }
 }
- 
-class Data extends Component {
+
+class DataDetail extends Component {
     state = {
         selection:"linegraph",
         dataset: [],
@@ -209,8 +248,8 @@ class Data extends Component {
     updateSelectedState = selected => {
         this.setState({selection:selected});
       };
-    
-    render() {             
+
+    render() { 
         document.title = this.state.dataset.label+" - Datalakes";
         var classHeatMap = "subnav-item";
         var classLineGraph = "subnav-item";
@@ -245,8 +284,7 @@ class Data extends Component {
                 </React.Fragment>
            );
         }
-         
     }
 }
  
-export default Data;
+export default DataDetail;

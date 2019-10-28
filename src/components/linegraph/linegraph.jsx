@@ -11,7 +11,7 @@ class D3LineGraph extends Component {
             d3.select("svg").remove();
         } catch (e) {};
 
-        var { data, graphtype, sequential } = this.props;
+        var { data, graphtype, sequential, bcolor, lcolor, lweight } = this.props;
 
         // Set graph size
         var margin = {top: 20, right: 20, bottom: 50, left: 50}
@@ -63,6 +63,14 @@ class D3LineGraph extends Component {
             .append("g")
             .attr("transform", 
                 "translate(" + margin.left + "," + margin.top + ")");
+
+        // Background color
+        svg.append("rect")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .attr("fill", bcolor)
+            .attr("transform", 
+                "translate(-" + margin.left + ",-" + margin.top + ")");
 
         // Set clip 
         var clip = svg.append("defs").append("svg:clipPath")
@@ -138,7 +146,7 @@ class D3LineGraph extends Component {
             .attr("clip-path", "url(#clip)");
         
         line.append("path")
-            .attr("style", "fill:none; stroke:black; stroke-width:0.5; fill-opacity:0; stroke-opacity:1;")
+            .attr("style", "fill:none;stroke:"+lcolor+"; stroke-width:"+lweight+"; fill-opacity:0; stroke-opacity:1;")
             .attr("d", valueline(data));
 
         // Brushing
@@ -160,7 +168,6 @@ class D3LineGraph extends Component {
             .style("opacity", 0)
 
         var bisectx = d3.bisector(function(d) { return d.x; }).left;
-        var bisecty = d3.bisector(function(d) { return d.y; }).left;
 
          // Add cursor catcher
          svg.select('.overlay')
@@ -244,10 +251,11 @@ class D3LineGraph extends Component {
             canvas.width = viswidth;
             canvas.height = visheight;
 
-            context.fillStyle = "white";
-            context.fillRect(0, 0, canvas.width, canvas.height);        
 
             var image = new Image;
+            image.onerror = function() {
+                alert("Appologies .png download failed. Please download as .svg.");
+            }
             image.onload = function() {
                 context.drawImage(image, 0, 0);
                 var a = document.createElement("a");
