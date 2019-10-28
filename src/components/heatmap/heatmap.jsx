@@ -1,150 +1,202 @@
 import React, { Component } from 'react';
-import axios from 'axios';
 import * as d3 from 'd3';
-import './heatmap.css'
+import { format } from "date-fns";
+import { generateColor } from '../gradients/gradients';
+import './heatmap.css';
 
 class D3HeatMap extends Component {
 
-    componentDidMount() {
-        const url = 'https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json';
-        
-        axios.get(url).then( res => {
-          
-          const data = res.data.monthlyVariance,
-                baseTemperature = res.data.baseTemperature,
-                yearRange = d3.extent(data, d => {return d.year; });
+    plotHeatMap = () => {
+      try {
+        d3.select("svg").remove();
+      } catch (e) {};
 
-          console.log(data)
-          
-          const legendData = [
-            {'interval': 2.7, 'color': 'purple'},
-            {'interval': 3.9, 'color': 'darkorchid'},
-            {'interval': 6.1, 'color': 'mediumpurple'},
-            {'interval': 7.2, 'color': 'lightskyblue'},
-            {'interval': 8.3, 'color': 'khaki'},
-            {'interval': 9.4, 'color': 'orange'},
-            {'interval': 10.5, 'color': 'salmon'},
-            {'interval': 11.6, 'color': 'indianred'},
-            {'interval': 15,'color': 'darkred'}
-          ];
-          
-          const width = 548,
-                height = 360,
-                margins = {top:20, right: 0, bottom: 100, left: 50};
-          
-          const yScale = d3.scaleLinear()
-            .range([height,0])
-            .domain([12,0]);
-          
-          const xScale = d3.scaleLinear()
-            .range([0,width])
-            .domain(d3.extent(data, d => {return d.year; }));
-          
-          //Setting chart width and adjusting for margins
-          const chart = d3.select('#heatmap')
-            .attr('width', width + margins.right + margins.left)
-            .attr('height', height + margins.top + margins.bottom)
-            .attr("preserveAspectRatio", "xMinYMin meet")
-            .attr(
-                "viewBox",
-                "0 0 "
-                .concat(width + margins.left + margins.right)
-                .concat(" ")
-                .concat(height + margins.top + margins.bottom)
-            )
-            .classed("svg-content", true)
-            .append('g')
-            .attr('transform','translate(' + margins.left + ',' + margins.top + ')');
-          
-          const tooltip = d3.select('.heatmap-parent').append('div')
-            .attr('class','heatmaptooltip')
-            .html('Tooltip')
-          
-          const barWidth = width / (yearRange[1] - yearRange[0]),
-                barHeight = height / 12;
-          
-          //Return dynamic color based on intervals in legendData
-          const colorScale = d => {
-            for (let i = 0; i < legendData.length; i++) {
-              if (d.variance + baseTemperature < legendData[i].interval) {
-                return legendData[i].color;
-              }
-            }
-            return 'darkred';
-          };
-          
-          //Return abbreviate month string from month decimal
-          const timeParseFormat = d => {
-            if (d === 0) return '';
-            return d3.timeFormat('%b')(d3.timeParse('%m')(d));
-          };
-          
-          //Append heatmap bars, styles, and mouse events
-          chart.selectAll('g')
-            .data(data).enter().append('g')
-            .append('rect')
-            .attr('x', d => {return (d.year - yearRange[0]) * barWidth})
-            .attr('y', d => {return (d.month - 1) * barHeight})
-            .style('fill', colorScale)
-            .attr('width', barWidth)
-            .attr('height', barHeight)
-            .on('mouseover', d => {
-              tooltip.html(timeParseFormat(d.month) + ' ' + d.year + ' ' +
-                d3.format('.4r')(baseTemperature + d.variance) + ' &degC')
-                .style('opacity', 1);
-            }).on('mouseout', () => {
-              tooltip.style('opacity', 0)
+      var { data, graphtype, bcolor, sgradient, egradient, yint, xint } = this.props;
+
+      // Set graph size
+      var margin = {top: 20, right: 20, bottom: 50, left: 50}
+      , viswidth = d3.select("#heatmap").node().getBoundingClientRect().width
+      , visheight = d3.select("#heatmap").node().getBoundingClientRect().height
+      , width =  viswidth - margin.left - margin.right
+      , height = visheight - margin.top - margin.bottom;
+
+      // Get data extents
+      if (graphtype === 'time') {
+        var parseDate = d3.timeParse("%Y");
+        var xdomain = d3.extent(data, function(d) {
+                d.x = parseDate(d.x);
+                return d.x; 
             });
+      } else {
+          var xdomain = d3.extent(data, function(d) {
+              d.x = parseFloat(d.x);
+              return d.x; 
+          });
           
-          //Append x axis
-          chart.append('g')
-            .attr('transform','translate(0,' + height + ')')
-            .call(d3.axisBottom(xScale).tickFormat(d3.format('.4')));
-          
-          //Append y axis
-          chart.append('g')
-            .attr('transform','translate(0,-' + barHeight / 2 + ')')
-            .call(d3.axisLeft(yScale).tickFormat(timeParseFormat))
-            .attr('class','yAxis');
-          
-          //Append y axis label
-          chart.append('text')
-            .attr('transform','translate(-40,' + (height / 2)  + ') rotate(-90)')
-            .style('text-anchor','middle')
-            .text('Month');
-          
-          //Append x axis label
-          chart.append('text')
-            .attr('transform','translate(' + (width / 2) + ',' + (height + 40) + ')')
-            .style('text-anchor','middle')
-            .text('Year');
-          
-          //Append color legend using legendData
-          chart.append('g')
-            .selectAll('g')
-            .data(legendData).enter()
-            .append('rect')
-            .attr('width', 30)
-            .attr('height', 20)
-            .attr('x', (d, i) => { return i * 30 + width * .7;})
-            .attr('y', height + margins.top)
-            .style('fill', d => {return d.color; });
-          
-          //Append text labels for legend from legendData
-          chart.append('g')
-            .selectAll('text')
-            .data(legendData).enter().append('text')
-            .attr('x', (d,i) => {return i * 30 + width * .7})
-            .attr('y', height + margins.top * 3)
-            .text(d => {return d.interval; });
-            
-        });
       }
+      xdomain[0] = xdomain[0] - (parseDate(xint)/2);
+      xdomain[1] = xdomain[1] + (parseDate(xint)/2);
+      console.log(xdomain);
+
+      var ydomain = d3.extent(data, function(d) {
+              d.y = parseFloat(d.y);
+              return d.y; 
+          });
+      ydomain[0] = ydomain[0] - (yint/2);
+      ydomain[1] = ydomain[1] + (yint/2);
+      
+      var vdomain = d3.extent(data, function(d) {
+            d.v = parseFloat(d.v);
+            return d.v; 
+        });
+
+      // Set bar width and height
+      var barWidth = width / (xdomain[1] - xdomain[0] +1 ),
+      barHeight = height / (ydomain[1] - ydomain[0] +1 );
+
+      // Set color gradients
+      var ncolors = 100;
+      var gradient = generateColor(this.props.sgradient,this.props.egradient,ncolors);
+      var colorScale = d => {
+          var i = Math.round(((d.v - vdomain[0])/(vdomain[1] - vdomain[0]))*(ncolors-1));
+          return gradient[i];
+      }
+
+      // Format X-axis
+      if (graphtype === 'time') {
+        var parseDate = d3.timeParse("%Y");
+        var x = d3.scaleTime()
+            .range([0, width])
+            .domain(xdomain);
+      } else {
+          var x = d3.scaleLinear()
+          .range([0, width])
+          .domain(xdomain);
+      }  
+
+      // Format Y-axis
+      var y = d3.scaleLinear()
+          .range([height, 0])
+          .domain(ydomain);
+
+      // Define the axes
+      var xAxis = d3.axisBottom(x).ticks(5);
+      var yAxis = d3.axisLeft(y).ticks(5);
+
+      // Adds the svg canvas
+      var svg = d3.select("#heatmap")
+          .append("svg")
+          .attr("id", "svg" )
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", 
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      // Background color
+      svg.append("rect")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("fill", bcolor)
+        .attr("transform", 
+            "translate(-" + margin.left + ",-" + margin.top + ")");
+
+    // Set clip 
+    var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width )
+        .attr("height", height )
+        .attr("x", 0) 
+        .attr("y", 0)
+
+      // Add the X Axis
+      if (graphtype === 'time') {
+        svg.append("g")
+        .attr("class", "x axis")
+        .attr('id', "axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+    } else {
+        var xLabel = "";
+        if ('xlabel' in this.props){
+            xLabel = this.props.xlabel;
+        }
+
+        var xunits = "";
+        if ('xunits' in this.props){
+            xunits = this.props.xunits;
+            xLabel = this.props.xlabel + " (" + xunits + ")";
+        }
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr('id', "axis--x")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("text")
+            .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.bottom/1.5) + ")")
+            .attr("x", 6)
+            .attr("dx", "1em")
+            .style("text-anchor", "end")
+            .text(xLabel);
+    }
+
+    // Add the Y Axis
+    var yLabel = "";
+    if ('ylabel' in this.props){
+        yLabel = this.props.ylabel;
+    }
+
+    var yunits = "";
+    if ('yunits' in this.props){
+        yunits = this.props.yunits;
+        yLabel = this.props.ylabel + " (" + yunits + ")";
+    }
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .attr('id', "axis--y")
+        .call(yAxis);
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text(yLabel);
+    
+  
+    //Append heatmap bars, styles, and mouse events
+    svg.selectAll('g')
+      .data(data).enter().append('g')
+      .append('rect')
+      .attr('x', d => {return (d.x - xdomain[0]) * barWidth})
+      .attr('y', d => {return (d.y - ydomain[0]) * barHeight})
+      .style('fill', colorScale)
+      .attr('width', barWidth)
+      .attr('height', barHeight);
+    }
+
+    componentDidMount() {
+      window.addEventListener("resize", this.plotHeatMap);
+      this.plotHeatMap();
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.plotHeatMap);
+    }
+
+    componentDidUpdate() {
+        this.plotHeatMap();
+    }
 
   render() {
         return(
-            <div className="heatmap-parent">
-              <svg className="heatmap-svg" id='heatmap'></svg>
+            <div id="heatmap">
+
             </div>
           );
   }

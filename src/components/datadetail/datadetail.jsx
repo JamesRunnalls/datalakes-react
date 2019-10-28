@@ -13,9 +13,21 @@ import R from './img/r.svg';
 import './data.css';
 
 import datas from './data1.json';
+import datas2 from './heatdata.json';
 
 
 class HeatMap extends Component {
+    state = {
+        lweight:"0.5",
+        bcolor:"none",
+        sgradient:"#0000ff",
+        egradient:"#ff0000"
+    }
+    onChangeBcolor = (event) => {
+        var bcolor = event.hex;
+        this.setState({ bcolor })
+    }
+
     render() { 
         const { onChange, state } = this.props;
         return ( 
@@ -23,7 +35,19 @@ class HeatMap extends Component {
                 <SidebarLayout 
                     sidebartitle="Plot Controls"
                     left={
-                        <D3HeatMap />
+                        <D3HeatMap
+                            data={datas2} 
+                            graphtype="time" 
+                            xunits="" 
+                            xlabel="" 
+                            yunits="m" 
+                            ylabel="Depth" 
+                            bcolor={this.state.bcolor}
+                            sgradient={this.state.sgradient}
+                            egradient={this.state.egradient}
+                            xint="1"
+                            yint="1"
+                        />
                     }
                     right={
                         <React.Fragment>
@@ -48,12 +72,10 @@ class LineGraph extends Component {
     onChangeBcolor = (event) => {
         var bcolor = event.hex;
         this.setState({ bcolor })
-        document.getElementById("bcolor").style.backgroundColor=bcolor;
     }
     onChangeLcolor = (event) => {
         var lcolor = event.hex;
         this.setState({ lcolor })
-        document.getElementById("lcolor").style.backgroundColor=lcolor;
     }
 
     render() { 
@@ -83,9 +105,9 @@ class LineGraph extends Component {
                                 <DateSlider onchange={onChange} state={state}/>
                             </div>
                             <div className="info-title">Background Color</div>
-                                <ColorSelect id="bcolor" onchange={this.onChangeBcolor} defaultcolor="none" />
+                                <ColorSelect onchange={this.onChangeBcolor} color={this.state.bcolor} />
                             <div className="info-title">Line Color</div>
-                                <ColorSelect id="lcolor" onchange={this.onChangeLcolor} defaultcolor="black" />
+                                <ColorSelect onchange={this.onChangeLcolor} color={this.state.lcolor} />
                         </React.Fragment>
                     }
                 />
@@ -208,7 +230,7 @@ class Information extends Component {
 
 class DataDetail extends Component {
     state = {
-        selection:"linegraph",
+        selection:"heatmap",
         dataset: [],
         error: false,
         min: new Date('2019-06-12'),

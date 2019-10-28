@@ -36,8 +36,9 @@ class D3LineGraph extends Component {
                 d.x = parseFloat(d.x);
                 return d.x; 
             }));
-        }      
+        }  
 
+        // Format Y-axis
         var y = d3.scaleLinear()
             .range([height, 0])
             .domain(d3.extent(data, function(d) {
