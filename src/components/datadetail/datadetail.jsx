@@ -45,8 +45,6 @@ class HeatMap extends Component {
                             bcolor={this.state.bcolor}
                             sgradient={this.state.sgradient}
                             egradient={this.state.egradient}
-                            xint="1"
-                            yint="1"
                         />
                     }
                     right={
