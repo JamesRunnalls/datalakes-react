@@ -13,13 +13,13 @@ import R from './img/r.svg';
 import './data.css';
 
 import datas from './data1.json';
-import datas2 from './heatdata.json';
+import datas2 from './heatdatar.json';
 
 
 class HeatMap extends Component {
     state = {
         lweight:"0.5",
-        bcolor:"none",
+        bcolor:"green",
         sgradient:"#0000ff",
         egradient:"#ff0000"
     }
@@ -45,6 +45,7 @@ class HeatMap extends Component {
                             bcolor={this.state.bcolor}
                             sgradient={this.state.sgradient}
                             egradient={this.state.egradient}
+                            xint={new Date }
                         />
                     }
                     right={

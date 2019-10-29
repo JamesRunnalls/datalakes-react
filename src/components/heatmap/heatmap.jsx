@@ -16,9 +16,7 @@ class D3HeatMap extends Component {
       graphtype,
       bcolor,
       sgradient,
-      egradient,
-      yint,
-      xint
+      egradient
     } = this.props;
 
     // Set graph size
@@ -40,7 +38,7 @@ class D3HeatMap extends Component {
       var xdomain = d3.extent(data, function(d) {
         if (d.x instanceof Date) {
         } else {
-          d.x = parseDate(d.x.toString());
+          d.x = new Date(d.x*1000);
         }
         return d.x;
       });
@@ -61,20 +59,6 @@ class D3HeatMap extends Component {
       return d.v;
     });
 
-    // Set color gradients
-    var ncolors = 100;
-    var gradient = generateColorRGB(
-      this.props.sgradient,
-      this.props.egradient,
-      ncolors
-    );
-    var colorScale = v => {
-      var i = Math.round(
-        ((v - vdomain[0]) / (vdomain[1] - vdomain[0])) * (ncolors - 1)
-      );
-      return gradient[i];
-    };
-
     // Get axis arrays
     var xarray = [];
     var yarray = [];
@@ -87,44 +71,42 @@ class D3HeatMap extends Component {
       }
     }
 
-    yarray.sort(function(a, b) {
-      return a - b;
-    });
-    if (graphtype === "time") {
-      xarray.sort(function(a, b) {
-        return a.valueOf() - b.valueOf();
-      });
-    } else {
-      xarray.sort(function(a, b) {
-        return a - b;
-      });
-    }
+    var barwidth = width / xarray.length;
+    console.log(width,xarray.length,barwidth)
+    var barheight = height / yarray.length;
+
+
+    // Set color gradients
+    var ncolors = 100;
+    var gradient = generateColorRGB(
+      this.props.sgradient,
+      this.props.egradient,
+      ncolors
+    );
+    var colorScale = v => {
+      if (isNaN(v)){
+        return "rgba(255,255,255,0)";
+      }
+      var i = Math.round(
+        ((v - vdomain[0]) / (vdomain[1] - vdomain[0])) * (ncolors - 1)
+      );
+      return gradient[i];
+    };
 
     // Format X-axis
     var x = d3
-      .scaleBand()
+      .scaleTime()
       .range([0, width])
-      .domain(xarray)
-      .padding(-0.001);
+      .domain(xdomain)
 
     // Format Y-axis
     var y = d3
-      .scaleBand()
+      .scaleLinear()
       .range([height, 0])
-      .domain(yarray)
-      .padding(-0.001);
-
+      .domain(ydomain)
+      
     // Define the axes
-    var maxticks = 8;
-    var xticks = Math.round(xarray.length / maxticks / 10);
-    var xAxis = d3
-      .axisBottom(x)
-      .tickFormat(d3.timeFormat("%d-%b-%Y"))
-      .tickValues(
-        x.domain().filter(function(d, i) {
-          return !(i % xticks);
-        })
-      );
+    var xAxis = d3.axisBottom(x).ticks(5);
     var yAxis = d3.axisLeft(y).ticks(5);
 
     // Adds the svg
@@ -147,7 +129,11 @@ class D3HeatMap extends Component {
       .style("margin-top", margin.top + "px")
       .style("position", "absolute")
       .style("left", "10px")
-      .attr("class", "canvas-plot");
+      .attr("class", "canvas-plot")
+      .call(d3.zoom()
+        .scaleExtent([1, 20]) 
+        .extent([[0, 0], [width, height]])
+        .on("zoom", updateChart));
 
     const context = canvas.node().getContext('2d');
 
@@ -172,7 +158,7 @@ class D3HeatMap extends Component {
 
     // Add the X Axis
     if (graphtype === "time") {
-      svg
+      var gxAxis = svg
         .append("g")
         .attr("class", "x axis")
         .attr("id", "axis--x")
@@ -190,7 +176,7 @@ class D3HeatMap extends Component {
         xLabel = this.props.xlabel + " (" + xunits + ")";
       }
 
-      svg
+      var gxAxis = svg
         .append("g")
         .attr("class", "x axis")
         .attr("id", "axis--x")
@@ -221,7 +207,7 @@ class D3HeatMap extends Component {
       yLabel = this.props.ylabel + " (" + yunits + ")";
     }
 
-    svg
+    var gyAxis = svg
       .append("g")
       .attr("class", "y axis")
       .attr("id", "axis--y")
@@ -239,31 +225,23 @@ class D3HeatMap extends Component {
     // Plot data to canvas
     data.forEach(d => {
       drawRect(d);
-    });
+     });
 
     function drawRect(d) {
+      //console.log(x(d.x), y(d.y), barwidth, barheight);
       context.fillStyle = colorScale(d.v);
-      context.fillRect(x(d.x), y(d.y), x.bandwidth(), y.bandwidth());
+      context.fillRect(x(d.x), y(d.y), 9.265682417026128, barheight);
     }
 
-    //var context = canvas.node().getContext("2d");
+    function updateChart() {
+      console.log(d3.event.transform)
+      var newX = d3.event.transform.rescaleX(x);
+      var newY = d3.event.transform.rescaleY(y);
 
-    // Plot data
-    /*
-    var heat = svg.selectAll()
-        .data(data, function(d) {return d.x+':'+d.y;})
-        .enter()
-        .append("g")
-        .attr("id", "scatterplot")
-        .attr("clip-path", "url(#clip)");
-
-    heat.append("rect")
-        .attr("x", function(d) { return x(d.x) })
-        .attr("y", function(d) { return y(d.y) })
-        .attr("width", x.bandwidth() )
-        .attr("height", y.bandwidth() )
-        .style("fill", function(d) { return colorScale(d.v)} )
-    */
+      gxAxis.call(d3.axisBottom(newX))
+      gyAxis.call(d3.axisLeft(newY))
+    };
+    
   };
 
   componentDidMount() {
