@@ -49,7 +49,6 @@ export const generateColorHEX = (colorStart,colorEnd,colorCount) => {
           c[2] = end[2] * alpha + (1 - alpha) * start[2];
   
           saida.push(convertToHex (c));
-          console.log(c)
           
       }
       saida.push(colorEnd);
@@ -97,7 +96,7 @@ export const generateColorRGB = (colorStart,colorEnd,colorCount) => {
     //Alpha blending amount
     var alpha = 0.0;
 
-    var saida = [start];
+    var saida = ['rgb('+start[0]+','+start[1]+','+start[2]+')'];
     
     for (var i = 0; i < len; i++) {
         var c = [];
@@ -112,7 +111,7 @@ export const generateColorRGB = (colorStart,colorEnd,colorCount) => {
         saida.push(rgb);
         
     }
-    saida.push(end);
+    saida.push('rgb('+end[0]+','+end[1]+','+end[2]+')');
     
     return saida;
 }

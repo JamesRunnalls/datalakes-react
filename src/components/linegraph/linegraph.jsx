@@ -224,9 +224,9 @@ class D3LineGraph extends Component {
                 .attr("cy", y(selectedData.y))
 
             if (graphtype === "time"){
-                document.getElementById("value").innerHTML = format(new Date(selectedData.x), "hh:mm dd MMM yy") + " - " + selectedData.y + yunits;
+                document.getElementById("value").innerHTML = format(new Date(selectedData.x), "hh:mm dd MMM yy") + " | " + selectedData.y + yunits;
             } else {
-                document.getElementById("value").innerHTML = selectedData.x + xunits+ " - " + selectedData.y + yunits;
+                document.getElementById("value").innerHTML = selectedData.x + xunits+ " | " + selectedData.y + yunits;
             }      
         }
        
@@ -287,7 +287,6 @@ class D3LineGraph extends Component {
             <React.Fragment>
                 <div className="vis-header">
                     <div className="vis-data" id="value"></div>
-                    <img className="vis-download" src={download} id="save" title="Download plot as .png"/>
                 </div>
                 <div id="vis"></div>           
             </React.Fragment>

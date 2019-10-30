@@ -13,15 +13,16 @@ import R from './img/r.svg';
 import './data.css';
 
 import datas from './data1.json';
-import datas2 from './heatdatar.json';
+import datas2 from './heatdatas.json';
 
 
 class HeatMap extends Component {
     state = {
-        lweight:"0.5",
         bcolor:"none",
         sgradient:"#0000ff",
-        egradient:"#ff0000"
+        egradient:"#ff0000",
+        mintemp:"",
+        maxtemp:""
     }
     onChangeBcolor = (event) => {
         var bcolor = event.hex;
@@ -30,6 +31,7 @@ class HeatMap extends Component {
 
     render() { 
         const { onChange, state } = this.props;
+        const { bcolor, sgradient, egradient, mintemp, maxtemp } = this.state;
         return ( 
             <React.Fragment>
                 <SidebarLayout 
@@ -37,15 +39,18 @@ class HeatMap extends Component {
                     left={
                         <D3HeatMap
                             data={datas2} 
-                            graphtype="time" 
-                            xunits="" 
-                            xlabel="" 
+                            graphtype="time"  
+                            xlabel=""
+                            ylabel="Depth"
+                            zlabel="Temperature"
+                            xunits=""
                             yunits="m" 
-                            ylabel="Depth" 
-                            bcolor={this.state.bcolor}
-                            sgradient={this.state.sgradient}
-                            egradient={this.state.egradient}
-                            xint={new Date }
+                            zunits="°C"
+                            bcolor={bcolor}
+                            sgradient={sgradient}
+                            egradient={egradient}
+                            mintemp={mintemp}
+                            maxtemp={maxtemp}
                         />
                     }
                     right={
@@ -79,6 +84,7 @@ class LineGraph extends Component {
 
     render() { 
         const { onChange, state } = this.props;
+        const { lweight, bcolor, lcolor } = this.state;
         return ( 
             <React.Fragment>
                 <SidebarLayout 
@@ -92,9 +98,9 @@ class LineGraph extends Component {
                             yunits="°C" 
                             ylabel="Temperature" 
                             sequential="x"
-                            lcolor={this.state.lcolor}
-                            lweight={this.state.lweight}
-                            bcolor={this.state.bcolor}
+                            lcolor={lcolor}
+                            lweight={lweight}
+                            bcolor={bcolor}
                         />
                     }
                     right={
@@ -104,9 +110,9 @@ class LineGraph extends Component {
                                 <DateSlider onchange={onChange} state={state}/>
                             </div>
                             <div className="info-title">Background Color</div>
-                                <ColorSelect onchange={this.onChangeBcolor} color={this.state.bcolor} />
+                                <ColorSelect onchange={this.onChangeBcolor} color={bcolor} />
                             <div className="info-title">Line Color</div>
-                                <ColorSelect onchange={this.onChangeLcolor} color={this.state.lcolor} />
+                                <ColorSelect onchange={this.onChangeLcolor} color={lcolor} />
                         </React.Fragment>
                     }
                 />
@@ -256,8 +262,9 @@ class DataDetail extends Component {
         this.setState({selection:selected});
       };
 
-    render() { 
-        document.title = this.state.dataset.label+" - Datalakes";
+    render() {
+        const { selection, dataset, error, min, max, lower, upper } = this.state;
+        document.title = dataset.label+" - Datalakes";
         var classHeatMap = "subnav-item";
         var classLineGraph = "subnav-item";
         var classPreview = "subnav-item";
@@ -265,20 +272,20 @@ class DataDetail extends Component {
         var classPipeline = "subnav-item";
         var classInformation = "subnav-item";
         var selected = "";
-        if (this.state.selection === "heatmap"){selected = <HeatMap onChange={this.onChange} state={this.state}/>; classHeatMap = "subnav-item active"}
-        if (this.state.selection === "linegraph"){selected = <LineGraph onChange={this.onChange} state={this.state}/>; classLineGraph = "subnav-item active"}
-        if (this.state.selection === "preview"){selected = <Preview />; classPreview = "subnav-item active"}
-        if (this.state.selection === "download"){selected = <Download dataset={this.state.dataset} onChange={this.onChange} state={this.state}/>; classDownload = "subnav-item active"}
-        if (this.state.selection === "pipeline"){selected = <Pipeline />; classPipeline = "subnav-item active"}
-        if (this.state.selection === "information"){selected = <Information dataset={this.state.dataset}/>; classInformation = "subnav-item active"}
-        if (this.state.error) {
+        if (selection === "heatmap"){selected = <HeatMap onChange={this.onChange} state={this.state}/>; classHeatMap = "subnav-item active"}
+        if (selection === "linegraph"){selected = <LineGraph onChange={this.onChange} state={this.state}/>; classLineGraph = "subnav-item active"}
+        if (selection === "preview"){selected = <Preview />; classPreview = "subnav-item active"}
+        if (selection === "download"){selected = <Download dataset={dataset} onChange={this.onChange} state={this.state}/>; classDownload = "subnav-item active"}
+        if (selection === "pipeline"){selected = <Pipeline />; classPipeline = "subnav-item active"}
+        if (selection === "information"){selected = <Information dataset={dataset}/>; classInformation = "subnav-item active"}
+        if (error) {
             return (
                 <Redirect to="/dataportal" />
             );
         } else {
             return (
                 <React.Fragment>
-                    <h1>{this.state.dataset.label}</h1> 
+                    <h1>{dataset.label}</h1> 
                     <div className="subnav">
                         <div title="Preview data as a heat map" className={classHeatMap} onClick={() => this.updateSelectedState("heatmap")}>Heat Map</div>
                         <div title="Preview data as a line graph" className={classLineGraph} onClick={() => this.updateSelectedState("linegraph")}>Line Graph</div>
