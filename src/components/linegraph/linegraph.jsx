@@ -16,7 +16,7 @@ class D3LineGraph extends Component {
         // Set graph size
         var margin = {top: 20, right: 20, bottom: 50, left: 50}
         , viswidth = d3.select("#vis").node().getBoundingClientRect().width
-        , visheight = d3.select("#vis").node().getBoundingClientRect().height
+        , visheight = d3.select("#vis").node().getBoundingClientRect().height - 5
         , width =  viswidth - margin.left - margin.right
         , height = visheight - margin.top - margin.bottom;
 

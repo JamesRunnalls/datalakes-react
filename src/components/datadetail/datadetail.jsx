@@ -61,6 +61,7 @@ class HeatMap extends Component {
                             </div>
                         </React.Fragment>
                     }
+                    open="False"
                 />
             </React.Fragment>
          );
@@ -115,6 +116,7 @@ class LineGraph extends Component {
                                 <ColorSelect onchange={this.onChangeLcolor} color={lcolor} />
                         </React.Fragment>
                     }
+                    open="False"
                 />
             </React.Fragment>
          );

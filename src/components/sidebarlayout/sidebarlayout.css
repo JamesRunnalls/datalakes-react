@@ -82,11 +82,37 @@
       }
       }
     
-      @media screen and (max-width: 800px){
+      @media screen and (max-width: 500px){
         body .leftcontainer.full {
           width: 100%;
           padding: 0;
         }
+
+        .rightcontainer.hide .side-img {
+          display: block!important;
+        }
+
+        .rightcontainer.hide .sidebartitle {
+          display: none;
+        }
+
+        .rightcontainer.hide #closeside {
+          display: none;
+        }
+
+        .rightcontainer.hide .side h3{
+          border-bottom:none;
+          }
+
+        .rightcontainer.hide {
+            background-color: transparent;
+            margin-top: -10px;
+          }
+    }
+
+    .side-img {
+      display: none;
+      height:20px;
     }
     
     

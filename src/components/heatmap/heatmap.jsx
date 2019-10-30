@@ -73,7 +73,7 @@ class D3HeatMap extends Component {
       visheight = d3
         .select("#heatmap")
         .node()
-        .getBoundingClientRect().height,
+        .getBoundingClientRect().height - 5,
       width = viswidth - margin.left - margin.right,
       height = visheight - margin.top - margin.bottom;
 
@@ -371,7 +371,7 @@ class D3HeatMap extends Component {
     svg
       .append("text")
       .attr("x", width + 2 + margin.right / 3)
-      .attr("y", 3)
+      .attr("y", 10)
       .style("font-size", "12px")
       .text(t1+zunits);
 
@@ -399,7 +399,7 @@ class D3HeatMap extends Component {
     svg
       .append("text")
       .attr("x", width + 2 + margin.right / 3)
-      .attr("y", height + 3)
+      .attr("y", height )
       .style("font-size", "12px")
       .text(t5+zunits);
 

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import settings from './img/settings.svg';
 import './sidebarlayout.css';
 
 class SidebarLayout extends Component {
@@ -24,6 +25,11 @@ class SidebarLayout extends Component {
       }
 
       componentDidMount() {
+        if (this.props.open === "False"){
+          this.setState({ addClass: true }, () => {
+            window.dispatchEvent(new Event('resize'));
+          });
+        }
         window.addEventListener("resize", this.hideOnResize);
       }
 
@@ -46,7 +52,7 @@ class SidebarLayout extends Component {
              <React.Fragment>
               <div className={rightClass.join(' ')} id="rightcontainer">
                   <div className="righthead side" id="side" title="Click to hide sidebar" onClick={this.toggle}>
-                      <h3><div className="sidebartitle">{this.props.sidebartitle}</div> <span id="closeside"> > </span></h3>
+                      <h3><div className="sidebartitle">{this.props.sidebartitle}</div> <span id="closeside"> > </span><img src={settings} className="side-img" /></h3>
                   </div>
                   <div className="rightcontent">
                     {rightNoScroll}
