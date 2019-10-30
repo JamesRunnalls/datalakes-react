@@ -19,7 +19,7 @@ import datas2 from './heatdatar.json';
 class HeatMap extends Component {
     state = {
         lweight:"0.5",
-        bcolor:"green",
+        bcolor:"none",
         sgradient:"#0000ff",
         egradient:"#ff0000"
     }

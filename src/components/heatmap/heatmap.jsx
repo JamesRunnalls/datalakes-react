@@ -5,19 +5,18 @@ import { generateColorRGB } from "../gradients/gradients";
 import "./heatmap.css";
 
 class D3HeatMap extends Component {
+  formatDate = raw => {
+    return new Date(raw * 1000);
+  };
+
   plotHeatMap = () => {
     try {
       d3.select("svg").remove();
       d3.select("canvas").remove();
     } catch (e) {}
 
-    var {
-      data,
-      graphtype,
-      bcolor,
-      sgradient,
-      egradient
-    } = this.props;
+    var { data, graphtype, bcolor, sgradient, egradient } = this.props;
+    const formatDate = this.formatDate;
 
     // Set graph size
     var margin = { top: 20, right: 20, bottom: 50, left: 50 },
@@ -33,58 +32,32 @@ class D3HeatMap extends Component {
       height = visheight - margin.top - margin.bottom;
 
     // Get data extents
-    if (graphtype === "time") {
-      var parseDate = d3.timeParse("%Y");
-      var xdomain = d3.extent(data, function(d) {
-        if (d.x instanceof Date) {
-        } else {
-          d.x = new Date(d.x*1000);
-        }
-        return d.x;
-      });
+    if (graphtype == "time") {
+      var xe = d3.extent(data.x);
+      var xdomain = [this.formatDate(xe[0]), this.formatDate(xe[1])];
     } else {
-      var xdomain = d3.extent(data, function(d) {
-        d.x = parseFloat(d.x);
-        return d.x;
-      });
+      var xdomain = d3.extent(data.x);
     }
+    var ydomain = d3.extent(data.y);
+    var vdomain = d3.extent(
+      [].concat.apply([], data.v).filter(f => {
+        return !isNaN(parseFloat(f)) && isFinite(f);
+      })
+    );
 
-    var ydomain = d3.extent(data, function(d) {
-      d.y = parseFloat(d.y);
-      return d.y;
-    });
+    // Calculate bar widths
+    // x
+    var bwa = [];
+    var bha = [];
 
-    var vdomain = d3.extent(data, function(d) {
-      d.v = parseFloat(d.v);
-      return d.v;
-    });
-
-    // Get axis arrays
-    var xarray = [];
-    var yarray = [];
-    for (var d of data) {
-      if (!xarray.includes(d.x)) {
-        xarray.push(d.x);
-      }
-      if (!yarray.includes(d.y)) {
-        yarray.push(parseFloat(d.y));
-      }
-    }
-
-    var barwidth = width / xarray.length;
-    console.log(width,xarray.length,barwidth)
-    var barheight = height / yarray.length;
-
+    bwa = Array(data.x.length).fill(2);
+    bha = Array(data.y.length).fill(10);
 
     // Set color gradients
     var ncolors = 100;
-    var gradient = generateColorRGB(
-      this.props.sgradient,
-      this.props.egradient,
-      ncolors
-    );
+    var gradient = generateColorRGB(sgradient, egradient, ncolors);
     var colorScale = v => {
-      if (isNaN(v)){
+      if (isNaN(v)) {
         return "rgba(255,255,255,0)";
       }
       var i = Math.round(
@@ -97,14 +70,14 @@ class D3HeatMap extends Component {
     var x = d3
       .scaleTime()
       .range([0, width])
-      .domain(xdomain)
+      .domain(xdomain);
 
     // Format Y-axis
     var y = d3
       .scaleLinear()
       .range([height, 0])
-      .domain(ydomain)
-      
+      .domain(ydomain);
+
     // Define the axes
     var xAxis = d3.axisBottom(x).ticks(5);
     var yAxis = d3.axisLeft(y).ticks(5);
@@ -130,12 +103,24 @@ class D3HeatMap extends Component {
       .style("position", "absolute")
       .style("left", "10px")
       .attr("class", "canvas-plot")
-      .call(d3.zoom()
-        .scaleExtent([1, 20]) 
-        .extent([[0, 0], [width, height]])
-        .on("zoom", updateChart));
+      .call(
+        d3
+          .zoom()
+          .scaleExtent([1, 20])
+          .extent([[0, 0], [width, height]])
+          .on("zoom", () => {
+            context.save();
+            updateChart(d3.event.transform);
+            context.restore();
+          })
+      );
+    
+    // Change double click behavior from zoom to reset
+    canvas.on("dblclick.zoom", null).on("dblclick", () => {
+      updateChart(d3.zoomIdentity);
+    });
 
-    const context = canvas.node().getContext('2d');
+    const context = canvas.node().getContext("2d");
 
     // Background color
     var background = svg
@@ -223,25 +208,41 @@ class D3HeatMap extends Component {
       .text(yLabel);
 
     // Plot data to canvas
-    data.forEach(d => {
-      drawRect(d);
-     });
+    updateChart(d3.zoomIdentity);
 
-    function drawRect(d) {
-      //console.log(x(d.x), y(d.y), barwidth, barheight);
-      context.fillStyle = colorScale(d.v);
-      context.fillRect(x(d.x), y(d.y), 9.265682417026128, barheight);
+    function fillCanvas(scaleX,scaleY,k) {
+      for (var xx in data.x) {
+        for (var yy in data.y) {
+          if (graphtype == "time") {
+            var dx = scaleX(formatDate(data.x[xx]));
+          } else {
+            var dx = scaleX(data.x[xx]);
+          }
+          var dy = scaleY(data.y[yy]);
+          var dv = data.v[yy][xx];
+          var bw = bwa[xx]*k;
+          var bh = bha[yy]*k;
+          drawRect(dx, dy, dv, bw, bh);
+        }
+      }
     }
 
-    function updateChart() {
-      console.log(d3.event.transform)
-      var newX = d3.event.transform.rescaleX(x);
-      var newY = d3.event.transform.rescaleY(y);
+    function drawRect(dx, dy, dv, bw, bh) {
+      context.fillStyle = colorScale(dv);
+      context.fillRect(dx, dy, bw, bh);
+    }
 
-      gxAxis.call(d3.axisBottom(newX))
-      gyAxis.call(d3.axisLeft(newY))
-    };
-    
+    function updateChart(transform) {
+      var scaleX = transform.rescaleX(x);
+      var scaleY = transform.rescaleY(y);
+
+      gxAxis.call(xAxis.scale(scaleX));
+      gyAxis.call(yAxis.scale(scaleY));
+
+      context.clearRect(0, 0, width, height);
+
+      fillCanvas(scaleX,scaleY,transform.k);
+    }
   };
 
   componentDidMount() {
