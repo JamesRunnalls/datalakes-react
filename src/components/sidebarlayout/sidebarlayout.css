@@ -116,6 +116,7 @@
     height: 30px;
     border-top: 1px solid #D8D6D3;
     z-index: 99999;
+    background-color: white;
   }
 
   .rightcontainer.hide .sidebartitle {
@@ -141,7 +142,6 @@
 
 .rightcontainer {
   width: 318px;
-  background-color: white;
   padding-left: 10px;
   padding-right: 10px;
   vertical-align: top;

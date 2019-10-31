@@ -2,6 +2,7 @@
   display: inline-block;
   width: 50%;
   vertical-align: top;
+  min-width: 350px;
 }
 
 .info-inner td {
@@ -94,7 +95,7 @@
     vertical-align: top;
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 960px) {
     .data-subnav .subnav-item .subnav-text {
         display:none;
     }
@@ -105,6 +106,51 @@
         margin:0 0 -1px 0;
     }
     .data-subnav {
-        margin:0;
+        margin: 0 0 10px 0;
     }
   }
+
+
+.colors-table .color-value {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    border-bottom: 1px solid black;
+}
+
+.colors-table {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.colors-table td {
+    padding-right: 15px;
+}
+
+.color-buttons {
+    padding-top:10px;
+    text-align: center;
+}
+
+.color-button {
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: white;
+    margin-right: 15px;
+    margin-top: 5px;
+    cursor: pointer;
+    padding: 4px 8px;
+    width: 120px;
+}
+
+.download-button {
+    border: solid 1px black;
+    border-radius: 5px;
+    background-color: white;
+    margin-right: 15px;
+    margin-top: 15px;
+    cursor: pointer;
+    padding: 4px 8px;
+    width: 120px;
+}

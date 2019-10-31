@@ -27,8 +27,12 @@ input.SearchBar {
     border: none;
     border-bottom: solid 1px black;
     box-sizing: border-box;
-    padding: 6px 15px;
+    padding: 6px 15px 6px 43px;
     margin-bottom: 20px;
+    background: url("img/search.svg") top left no-repeat;
+    background-position: 10px;
+    background-size: 25px;
+    outline: none;
 }
 
 .checkbox {

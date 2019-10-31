@@ -242,7 +242,7 @@ class D3LineGraph extends Component {
                 .attr("d", valueline(data));
         }
 
-        d3.select("#save").on("click", function(){
+        d3.select("#linegraph-download").on("click", function(){
             var s = new XMLSerializer();
             var str = s.serializeToString(document.getElementById("svg"));
 

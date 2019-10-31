@@ -58,8 +58,8 @@ class D3HeatMap extends Component {
       bcolor,
       sgradient,
       egradient,
-      mintemp,
-      maxtemp
+      minz,
+      maxz
     } = this.props;
     const { formatDate, unformatDate, closest, median, gaps } = this;
     var currentZoom = d3.zoomIdentity;
@@ -70,10 +70,11 @@ class D3HeatMap extends Component {
         .select("#heatmap")
         .node()
         .getBoundingClientRect().width,
-      visheight = d3
-        .select("#heatmap")
-        .node()
-        .getBoundingClientRect().height - 5,
+      visheight =
+        d3
+          .select("#heatmap")
+          .node()
+          .getBoundingClientRect().height - 5,
       width = viswidth - margin.left - margin.right,
       height = visheight - margin.top - margin.bottom;
 
@@ -90,8 +91,12 @@ class D3HeatMap extends Component {
         return !isNaN(parseFloat(f)) && isFinite(f);
       })
     );
-    if (mintemp != "" ){vdomain[0] = mintemp}
-    if (maxtemp != "" ){vdomain[1] = maxtemp}
+    if (minz != "") {
+      vdomain[0] = minz;
+    }
+    if (maxz != "") {
+      vdomain[1] = maxz;
+    }
 
     // Set color gradients
     var ncolors = 100;
@@ -101,13 +106,15 @@ class D3HeatMap extends Component {
         return "rgba(255,255,255,0)";
       }
       var i = 0;
-      if (parseFloat(v) < parseFloat(mintemp)) {
+      if (parseFloat(v) < parseFloat(minz)) {
         i = 0;
-      } else if (parseFloat(v) > parseFloat(maxtemp)) {
+      } else if (parseFloat(v) > parseFloat(maxz)) {
         i = gradient.length - 1;
       } else {
-        i = Math.round(((v - vdomain[0]) / (vdomain[1] - vdomain[0])) * (ncolors - 1));
-      } 
+        i = Math.round(
+          ((v - vdomain[0]) / (vdomain[1] - vdomain[0])) * (ncolors - 1)
+        );
+      }
       return gradient[i];
     };
 
@@ -124,8 +131,8 @@ class D3HeatMap extends Component {
       .domain(ydomain);
 
     // Define the axes
-    var xAxis = d3.axisBottom(x).ticks(5);
-    var yAxis = d3.axisLeft(y).ticks(5);
+    var xAxis = d3.axisBottom(x);
+    var yAxis = d3.axisLeft(y);
 
     // Calculate bar widths
     var xp = [];
@@ -183,6 +190,7 @@ class D3HeatMap extends Component {
       .style("margin-top", margin.top + "px")
       .style("position", "absolute")
       .style("left", "10px")
+      .attr("id","canvas")
       .attr("class", "canvas-plot");
     const context = canvas.node().getContext("2d");
     context.globalCompositeOperation = "lighter";
@@ -360,51 +368,76 @@ class D3HeatMap extends Component {
       .attr("height", height)
       .attr("x", width + margin.right / 6)
       .attr("y", 0)
-      .attr("fill","url(#svgGradient)");
+      .attr("fill", "url(#svgGradient)");
 
-    var t1 = Math.round(vdomain[1]*100)/100,
-    t5 = Math.round(vdomain[0]*100)/100,
-    t3 = Math.round(((t1 + t5)/2)*100)/100,
-    t2 = Math.round(((t1 + t3)/2)*100)/100,
-    t4 = Math.round(((t3 + t5)/2)*100)/100;
-    
+    var t1 = Math.round(vdomain[1] * 100) / 100,
+      t5 = Math.round(vdomain[0] * 100) / 100,
+      t3 = Math.round(((t1 + t5) / 2) * 100) / 100,
+      t2 = Math.round(((t1 + t3) / 2) * 100) / 100,
+      t4 = Math.round(((t3 + t5) / 2) * 100) / 100;
+
     svg
       .append("text")
       .attr("x", width + 2 + margin.right / 3)
       .attr("y", 10)
       .style("font-size", "12px")
-      .text(t1+zunits);
+      .text(t1 + zunits);
 
     svg
       .append("text")
       .attr("x", width + 2 + margin.right / 3)
-      .attr("y", height*0.25 + 3)
+      .attr("y", height * 0.25 + 3)
       .style("font-size", "12px")
-      .text(t2+zunits);
+      .text(t2 + zunits);
 
     svg
       .append("text")
       .attr("x", width + 2 + margin.right / 3)
-      .attr("y", height*0.5 + 3)
+      .attr("y", height * 0.5 + 3)
       .style("font-size", "12px")
-      .text(t3+zunits);
+      .text(t3 + zunits);
 
     svg
       .append("text")
       .attr("x", width + 2 + margin.right / 3)
-      .attr("y", height*0.75 + 3)
+      .attr("y", height * 0.75 + 3)
       .style("font-size", "12px")
-      .text(t4+zunits);
+      .text(t4 + zunits);
 
     svg
       .append("text")
       .attr("x", width + 2 + margin.right / 3)
-      .attr("y", height )
+      .attr("y", height)
       .style("font-size", "12px")
-      .text(t5+zunits);
+      .text(t5 + zunits);
 
     // Plot data to canvas
     updateChart(d3.zoomIdentity);
+
+    d3.select("#heatmap-download").on("click", function() {
+      var s = new XMLSerializer();
+      var str = s.serializeToString(document.getElementById("svg"));
+
+      var canvasout = document.createElement("canvas"),
+        contextout = canvasout.getContext("2d");
+
+      canvasout.width = viswidth;
+      canvasout.height = visheight;
+
+      var image = new Image();
+      image.onerror = function() {
+        alert("Appologies .png download failed. Please download as .svg.");
+      };
+      image.onload = function() {
+        contextout.drawImage(image, 0, 0);
+        contextout.drawImage(document.getElementById("canvas"),margin.left,margin.top);
+        var a = document.createElement("a");
+        a.download = "downloadgraph.png";
+        a.href = canvasout.toDataURL("image/png");
+        a.click();
+      };
+      image.src = "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
+    });
 
     function fillCanvas(scaleX, scaleY, k) {
       for (var xx in data.x) {
@@ -468,8 +501,8 @@ class D3HeatMap extends Component {
       bcolor,
       sgradient,
       egradient,
-      mintemp,
-      maxtemp
+      minz,
+      maxz
     } = this.props;
     return (
       <React.Fragment>

@@ -58,8 +58,6 @@ class Predictions extends Component {
         if (this.isNumeric(MinTemp) && MinTemp > -5){
             this.setState({ MinTemp });
         }
-        
-        
     }
 
     setTemp = Temp => {
