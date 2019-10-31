@@ -90,7 +90,7 @@
 
 .data-subnav .subnav-item .subnav-img {
     height:16px;
-    padding-right: 5px;
+    padding-right: 10px;
     vertical-align: top;
 }
 
@@ -99,7 +99,7 @@
         display:none;
     }
     .data-subnav .subnav-item .subnav-img {
-        padding: 0;
+        padding: 0 5px;
     }
     .data-subnav .subnav-item {
         margin:0 0 -1px 0;

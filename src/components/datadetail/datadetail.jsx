@@ -10,7 +10,12 @@ import Sensor from './img/sensor.svg';
 import Database from './img/data.svg';
 import Python from './img/python.svg';
 import R from './img/r.svg';
-import example from './img/example.svg';
+import heat from './img/heat.svg';
+import line from './img/line.svg';
+import preview from './img/preview.svg';
+import download from './img/download.svg';
+import pipe from './img/pipe.svg';
+import info from './img/info.svg';
 import './datadetail.css';
 
 import datas from './data1.json';
@@ -291,22 +296,22 @@ class DataDetail extends Component {
                     <h1>{dataset.label}</h1> 
                     <div className="data-subnav">
                         <div title="Preview data as a heat map" className={classHeatMap} onClick={() => this.updateSelectedState("heatmap")}>
-                            <img src={example} className="subnav-img" /><div className="subnav-text">Heat Map</div>
+                            <img src={heat} className="subnav-img" /><div className="subnav-text">Heat Map</div>
                         </div>
                         <div title="Preview data as a line graph" className={classLineGraph} onClick={() => this.updateSelectedState("linegraph")}>
-                            <img src={example} className="subnav-img" /><div className="subnav-text">Line Graph</div>
+                            <img src={line} className="subnav-img" /><div className="subnav-text">Line Graph</div>
                         </div>
                         <div title="Preview data as a table" className={classPreview} onClick={() => this.updateSelectedState("preview")}>
-                            <img src={example} className="subnav-img" /><div className="subnav-text">Preview</div>
+                            <img src={preview} className="subnav-img" /><div className="subnav-text">Preview</div>
                         </div>
                         <div title="Download data" className={classDownload} onClick={() => this.updateSelectedState("download")}>
-                            <img src={example} className="subnav-img" /><div className="subnav-text">Download</div>
+                            <img src={download} className="subnav-img" /><div className="subnav-text">Download</div>
                         </div>
                         <div title="See the data lineage" className={classPipeline} onClick={() => this.updateSelectedState("pipeline")}>
-                            <img src={example} className="subnav-img" /><div className="subnav-text">Pipeline</div>
+                            <img src={pipe} className="subnav-img" /><div className="subnav-text">Pipeline</div>
                         </div>
                         <div title="See meta data for dataset" className={classInformation} onClick={() => this.updateSelectedState("information")}>
-                            <img src={example} className="subnav-img" /><div className="subnav-text">Information</div>
+                            <img src={info} className="subnav-img" /><div className="subnav-text">Information</div>
                         </div>
                     </div>
                     {selected}

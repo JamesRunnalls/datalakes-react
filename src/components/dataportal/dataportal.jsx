@@ -219,7 +219,7 @@ class DataPortal extends Component {
          return ( 
              <React.Fragment>
                 <h1>Data Portal</h1>
-                <input onChange={this.searchDatasets} className="SearchBar" placeholder="Search for a dataset" type="search"></input>
+                <input onChange={this.searchDatasets} className="SearchBar" placeholder="      Search for a dataset" type="search"></input>
                 <SidebarLayout sidebartitle="Filter Datasets" 
                                left={
                                    <React.Fragment>
