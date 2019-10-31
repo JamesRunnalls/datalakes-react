@@ -1,10 +1,10 @@
-.subnav-item {
+.hydro-subnav .subnav-item {
     display: inline-block;
     margin-right: 20px;
     cursor: pointer;
 }
 
-.subnav {
+.hydro-subnav {
     font-size: 16px;
     width: 100%;
     border: solid 1px black;

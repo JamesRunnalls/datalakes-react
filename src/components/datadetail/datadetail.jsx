@@ -10,7 +10,8 @@ import Sensor from './img/sensor.svg';
 import Database from './img/data.svg';
 import Python from './img/python.svg';
 import R from './img/r.svg';
-import './data.css';
+import example from './img/example.svg';
+import './datadetail.css';
 
 import datas from './data1.json';
 import datas2 from './heatdatas.json';
@@ -288,15 +289,29 @@ class DataDetail extends Component {
             return (
                 <React.Fragment>
                     <h1>{dataset.label}</h1> 
-                    <div className="subnav">
-                        <div title="Preview data as a heat map" className={classHeatMap} onClick={() => this.updateSelectedState("heatmap")}>Heat Map</div>
-                        <div title="Preview data as a line graph" className={classLineGraph} onClick={() => this.updateSelectedState("linegraph")}>Line Graph</div>
-                        <div title="Preview data as a table" className={classPreview} onClick={() => this.updateSelectedState("preview")}>Preview</div>
-                        <div title="Download data" className={classDownload} onClick={() => this.updateSelectedState("download")}>Download</div>
-                        <div title="See the data lineage" className={classPipeline} onClick={() => this.updateSelectedState("pipeline")}>Pipeline</div>
-                        <div title="See meta data for dataset" className={classInformation} onClick={() => this.updateSelectedState("information")}>Information</div>
+                    <div className="data-subnav">
+                        <div title="Preview data as a heat map" className={classHeatMap} onClick={() => this.updateSelectedState("heatmap")}>
+                            <img src={example} className="subnav-img" /><div className="subnav-text">Heat Map</div>
+                        </div>
+                        <div title="Preview data as a line graph" className={classLineGraph} onClick={() => this.updateSelectedState("linegraph")}>
+                            <img src={example} className="subnav-img" /><div className="subnav-text">Line Graph</div>
+                        </div>
+                        <div title="Preview data as a table" className={classPreview} onClick={() => this.updateSelectedState("preview")}>
+                            <img src={example} className="subnav-img" /><div className="subnav-text">Preview</div>
+                        </div>
+                        <div title="Download data" className={classDownload} onClick={() => this.updateSelectedState("download")}>
+                            <img src={example} className="subnav-img" /><div className="subnav-text">Download</div>
+                        </div>
+                        <div title="See the data lineage" className={classPipeline} onClick={() => this.updateSelectedState("pipeline")}>
+                            <img src={example} className="subnav-img" /><div className="subnav-text">Pipeline</div>
+                        </div>
+                        <div title="See meta data for dataset" className={classInformation} onClick={() => this.updateSelectedState("information")}>
+                            <img src={example} className="subnav-img" /><div className="subnav-text">Information</div>
+                        </div>
                     </div>
-                    {selected}           
+                    {selected}
+
+                               
                 </React.Fragment>
            );
         }

@@ -1,46 +1,59 @@
 input.modelSearch {
-    font-size: 14px;
-    width: 100%;
-    border: solid 1px grey;
-    border-radius: 5px;
-    box-sizing: border-box;
-    padding: 5px 10px;
-    margin-bottom: 20px;
+  font-size: 14px;
+  width: 100%;
+  border: solid 1px grey;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 5px 10px;
+  margin-bottom: 20px;
 }
 
 input[type="search"]::-webkit-search-cancel-button {
-    cursor: pointer;
-  }
+  cursor: pointer;
+}
 
-  #bar {
-    background: rgb(0,0,255);
-    background: linear-gradient(90deg, rgba(0,0,255,1) 0%, rgba(255,51,0,1) 100%);
-    width:150px;
-    height: 20px;
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 5px;
+#bar {
+  background: rgb(0, 0, 255);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 255, 1) 0%,
+    rgba(255, 51, 0, 1) 100%
+  );
+  width: 150px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 5px;
 }
 
 #colorbar {
-    z-index: 999;
-    position: absolute;
-    bottom: 0;
-    left: 0px;
-    font-size: 14px;
-    padding: 5px;
-    background-color: rgba(255, 255, 255, 0.7);
+  z-index: 999;
+  position: absolute;
+  bottom: 0;
+  left: 0px;
+  font-size: 14px;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+@media screen and (max-width: 500px) {
+  #colorbar {
+    box-sizing: border-box;
+    bottom: 16px;
+    width: 100%;
+    text-align: center;
+  }
 }
 
 #colorbar input {
-    border:none;
-    background: none;
-    width: 15px;
-    text-align: right;
+  border: none;
+  background: none;
+  width: 15px;
+  text-align: right;
 }
 
 .hoverTemp {
-    color: grey;
-    width: 100%;
-    text-align: center;
+  color: grey;
+  width: 100%;
+  text-align: center;
 }

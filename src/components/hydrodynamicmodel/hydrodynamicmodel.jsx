@@ -125,7 +125,7 @@ class HydrodynamicModel extends Component {
          return (
              <React.Fragment>
                  <h1>Lake Geneva Hydrodynamic Model</h1>
-                 <div className="subnav">
+                 <div className="hydro-subnav">
                      <div title="2D horizontal slices" className={classSlice} onClick={() => this.updateSelectedState("slice")}>Slice</div>
                      <div title="2D vertical slices" className={classTransect} onClick={() => this.updateSelectedState("transect")}>Transect</div>
                      <div title="Fly through of vertical slices" className={classMri} onClick={() => this.updateSelectedState("mri")}>MRI</div>

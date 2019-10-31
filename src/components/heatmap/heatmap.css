@@ -14,13 +14,9 @@
   top: 0;
 }
 
-#heatbar {
-  background: rgb(0,0,255);
-  background: linear-gradient(90deg, rgba(0,0,255,1) 0%, rgba(255,51,0,1) 100%);
-  width:150px;
-  height: 20px;
-  display: inline-block;
-  vertical-align: middle;
-  margin: 0 5px;
+@media screen and (max-width: 500px) {
+  .heat-header {
+    display: none;
+  }
 }
 

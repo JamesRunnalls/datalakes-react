@@ -1,105 +1,118 @@
 /* -------------- Footer -------------------------  */
 
 footer {
-    border-top: 1px solid #D8D6D3;
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    background-color: white;
-    z-index: 999999999;
-  }
+  border-top: 1px solid #d8d6d3;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  background-color: white;
+  z-index: 999999999;
+}
 
-  @media screen and (max-height: 850px){
-    footer {
-      position: relative;
-      margin-top: 40px;
-      z-index: 10;
-    }
+@media screen and (max-height: 850px) {
+  footer {
+    position: relative;
+    margin-top: 40px;
+    z-index: 10;
   }
+}
 
-  @media screen and (max-width: 960px){
-    footer {
-      position: relative;
-      margin-top: 40px;
-      z-index: 10;
-    }
+@media screen and (max-width: 960px) {
+  footer {
+    position: relative;
+    margin-top: 40px;
+    z-index: 10;
   }
-  
-  footer .container .partners {
-    padding: 30px 0 10px 0;
-    text-align: center;
-  }
-  
-  footer .container .partners img {
-    height: 30px;
-    margin: 5px 25px;
-  }
+}
 
-  
+@media screen and (max-width: 500px) {
   footer .container .copyright {
-    text-align: right;
-  }
-
-  footer a {
-      text-decoration: none;
-      color: black;
-  }
-
-  footer .copyright {
-    width: 100%;
-    text-align: right;
-    box-sizing: border-box;
-    padding: 0 50px 10px 0;
-  }
-
-  .partner-logo .black {
-    display: inline-block;
-  }
-
-  .partner-logo .color {
-    display: none;
-  }
-
-  .partner-logo:hover .black {
-    display: none;
-  }
-
-  .partner-logo:hover .color {
-    display: inline-block;
-  }
-
-  .copyright .contact {
-    float: left;
-    padding-left: 50px
-  }
-
-  .copyright .contact img {
-    height: 20px;
-    margin-top: -4px;
+    text-align: center;
+    margin-bottom: 65px;
     padding-right: 20px;
   }
-
-  .copyright .contact a {
-    text-decoration: none;
-    color: black;
+  .copyright .contact {
+    padding-left: 20px !important;
   }
-
-  .copyright .contact a:hover {
-    color: rgb(70, 70, 70);
+  footer .container .partners img {
+    margin: 5px 10px !important;
   }
+}
 
-  .copyright .contact .contact-inner .black {
-    display: inline-block;
-  }
+footer .container .partners {
+  padding: 30px 0 10px 0;
+  text-align: center;
+}
 
-  .copyright .contact .contact-inner .color {
-    display: none;
-  }
+footer .container .partners img {
+  height: 30px;
+  margin: 5px 25px;
+}
 
-  .copyright .contact .contact-inner:hover .black {
-    display: none;
-  }
+footer .container .copyright {
+  text-align: right;
+}
 
-  .copyright .contact .contact-inner:hover .color {
-    display: inline-block;
-  }
+footer a {
+  text-decoration: none;
+  color: black;
+}
+
+footer .copyright {
+  width: 100%;
+  text-align: right;
+  box-sizing: border-box;
+  padding: 0 50px 10px 0;
+}
+
+.partner-logo .black {
+  display: inline-block;
+}
+
+.partner-logo .color {
+  display: none;
+}
+
+.partner-logo:hover .black {
+  display: none;
+}
+
+.partner-logo:hover .color {
+  display: inline-block;
+}
+
+.copyright .contact {
+  float: left;
+  padding-left: 50px;
+}
+
+.copyright .contact img {
+  height: 20px;
+  margin-top: -4px;
+  padding-right: 20px;
+}
+
+.copyright .contact a {
+  text-decoration: none;
+  color: black;
+}
+
+.copyright .contact a:hover {
+  color: rgb(70, 70, 70);
+}
+
+.copyright .contact .contact-inner .black {
+  display: inline-block;
+}
+
+.copyright .contact .contact-inner .color {
+  display: none;
+}
+
+.copyright .contact .contact-inner:hover .black {
+  display: none;
+}
+
+.copyright .contact .contact-inner:hover .color {
+  display: inline-block;
+}

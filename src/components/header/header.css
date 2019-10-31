@@ -40,9 +40,9 @@ header {
     }
   }
   
-  @media screen and (max-width: 420px){
+  @media screen and (max-width: 500px){
   .logo {
-    top: 50px;
+    top: 25px;
   }
     .logo a {
       width: 140px;
@@ -52,7 +52,7 @@ header {
     }
 
     header {
-      height: 70px;;
+      height: 40px;;
     }
 
     .footer-nav {
@@ -173,7 +173,7 @@ header {
     width: 100%;
     height: 40px;
     background-color: white;
-    z-index: 999;
+    z-index: 99999;
     text-align: center;
     border-top: 1px solid #D8D6D3;
   }
