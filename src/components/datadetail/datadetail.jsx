@@ -18,9 +18,6 @@ import pipe from "./img/pipe.svg";
 import info from "./img/info.svg";
 import "./datadetail.css";
 
-import datas from "./data1.json";
-import datas2 from "./heatdatas.json";
-
 class HeatMap extends Component {
   state = {
     bcolor: "#ffffff",
@@ -34,14 +31,14 @@ class HeatMap extends Component {
     this.setState({ bcolor });
   };
 
-  update = () =>{
+  update = () => {
     var sgradient = document.getElementById("sgradient").value;
     var egradient = document.getElementById("egradient").value;
     var minz = document.getElementById("minz").value;
     var maxz = document.getElementById("maxz").value;
     var bcolor = document.getElementById("bcolor").value;
     this.setState({ sgradient, egradient, minz, maxz, bcolor });
-  }
+  };
 
   reset = () => {
     this.setState({
@@ -61,6 +58,7 @@ class HeatMap extends Component {
 
   render() {
     const { onChange, state } = this.props;
+    const { data } = this.props.state;
     const { bcolor, sgradient, egradient, minz, maxz } = this.state;
     const graphtype = "time",
       xlabel = "",
@@ -75,7 +73,7 @@ class HeatMap extends Component {
           sidebartitle="Plot Controls"
           left={
             <D3HeatMap
-              data={datas2}
+              data={data}
               graphtype={graphtype}
               xlabel={xlabel}
               ylabel={ylabel}
@@ -92,7 +90,9 @@ class HeatMap extends Component {
           }
           right={
             <React.Fragment>
-              <div className="info-title" style={{paddingTop:'0'}}>Set Date Range</div>
+              <div className="info-title" style={{ paddingTop: "0" }}>
+                Set Date Range
+              </div>
               <div className="side-date-slider">
                 <DateSlider onChange={onChange} state={state} />
               </div>
@@ -100,7 +100,8 @@ class HeatMap extends Component {
               <table className="colors-table">
                 <tbody>
                   <tr>
-                    <td></td><td></td>
+                    <td></td>
+                    <td></td>
                     <td>Color</td>
                     <td>Value ({zunits})</td>
                   </tr>
@@ -125,38 +126,46 @@ class HeatMap extends Component {
                   <tr>
                     <td>Min</td>
                     <td>
-                    <input
+                      <input
                         type="color"
                         id="sgradient"
                         defaultValue={sgradient}
                       />
                     </td>
                     <td>
-                      <input id="minz" type="number" className="color-value"></input>
+                      <input
+                        id="minz"
+                        type="number"
+                        className="color-value"
+                      ></input>
                     </td>
                   </tr>
                   <tr>
                     <td colSpan="2">Background</td>
                     <td>
-                    <input
-                        type="color"
-                        id="bcolor"
-                        defaultValue={bcolor}
-                      />
+                      <input type="color" id="bcolor" defaultValue={bcolor} />
                     </td>
-                    <td>
-                    </td>
+                    <td></td>
                   </tr>
                 </tbody>
               </table>
               <div className="color-buttons">
-                <button className="color-button" onClick={this.update}>Update</button>
-                <button className="color-button" onClick={this.reset}>Reset</button>
+                <button className="color-button" onClick={this.update}>
+                  Update
+                </button>
+                <button className="color-button" onClick={this.reset}>
+                  Reset
+                </button>
               </div>
-              
-              <div className="info-title">Download Image</div>
-              <button id="heatmap-download" className="download-button" onClick={this.download}>Download</button>
 
+              <div className="info-title">Download Image</div>
+              <button
+                id="heatmap-download"
+                className="download-button"
+                onClick={this.download}
+              >
+                Download
+              </button>
             </React.Fragment>
           }
           open="False"
@@ -173,12 +182,12 @@ class LineGraph extends Component {
     bcolor: "#ffffff"
   };
 
-  update = () =>{
+  update = () => {
     var lcolor = document.getElementById("lcolor").value;
     var lweight = document.getElementById("lweight").value;
     var bcolor = document.getElementById("bcolor").value;
     this.setState({ lcolor, lweight, bcolor });
-  }
+  };
 
   reset = () => {
     this.setState({
@@ -191,6 +200,7 @@ class LineGraph extends Component {
 
   render() {
     const { onChange, state } = this.props;
+    const { data } = this.props.state;
     const { lweight, bcolor, lcolor } = this.state;
     return (
       <React.Fragment>
@@ -198,7 +208,7 @@ class LineGraph extends Component {
           sidebartitle="Plot Controls"
           left={
             <D3LineGraph
-              data={datas}
+              data={data}
               graphtype="time"
               xunits=""
               xlabel=""
@@ -212,7 +222,9 @@ class LineGraph extends Component {
           }
           right={
             <React.Fragment>
-              <div className="info-title" style={{paddingTop:'0'}}>Set Date Range</div>
+              <div className="info-title" style={{ paddingTop: "0" }}>
+                Set Date Range
+              </div>
               <div className="side-date-slider">
                 <DateSlider onChange={onChange} state={state} />
               </div>
@@ -227,11 +239,7 @@ class LineGraph extends Component {
                   <tr>
                     <td>Line</td>
                     <td>
-                      <input
-                        type="color"
-                        id="lcolor"
-                        defaultValue={lcolor}
-                      />
+                      <input type="color" id="lcolor" defaultValue={lcolor} />
                     </td>
                     <td>
                       <input
@@ -245,24 +253,29 @@ class LineGraph extends Component {
                   <tr>
                     <td>Background</td>
                     <td>
-                    <input
-                        type="color"
-                        id="bcolor"
-                        defaultValue={bcolor}
-                      />
+                      <input type="color" id="bcolor" defaultValue={bcolor} />
                     </td>
-                    <td>
-                    </td>
+                    <td></td>
                   </tr>
                 </tbody>
               </table>
               <div className="color-buttons">
-                <button className="color-button" onClick={this.update}>Update</button>
-                <button className="color-button" onClick={this.reset}>Reset</button>
+                <button className="color-button" onClick={this.update}>
+                  Update
+                </button>
+                <button className="color-button" onClick={this.reset}>
+                  Reset
+                </button>
               </div>
-              
+
               <div className="info-title">Download Image</div>
-              <button id="linegraph-download" className="download-button" onClick={this.download}>Download</button>
+              <button
+                id="linegraph-download"
+                className="download-button"
+                onClick={this.download}
+              >
+                Download
+              </button>
             </React.Fragment>
           }
           open="False"
@@ -408,9 +421,69 @@ class Information extends Component {
   }
 }
 
+class DataSubMenu extends Component {
+  render() {
+    const { menu, updateSelectedState } = this.props
+    return (
+      <React.Fragment>
+        <div className="data-subnav">
+          <div
+            title="Preview data as a heat map"
+            className={menu["heatmap"][0]}
+            onClick={() => updateSelectedState("heatmap")}
+          >
+            <img src={heat} className="subnav-img" />
+            <div className="subnav-text">Heat Map</div>
+          </div>
+          <div
+            title="Preview data as a line graph"
+            className={menu["linegraph"][0]}
+            onClick={() => updateSelectedState("linegraph")}
+          >
+            <img src={line} className="subnav-img" />
+            <div className="subnav-text">Line Graph</div>
+          </div>
+          <div
+            title="Preview data as a table"
+            className={menu["preview"][0]}
+            onClick={() => updateSelectedState("preview")}
+          >
+            <img src={preview} className="subnav-img" />
+            <div className="subnav-text">Preview</div>
+          </div>
+          <div
+            title="Download data"
+            className={menu["download"][0]}
+            onClick={() => updateSelectedState("download")}
+          >
+            <img src={download} className="subnav-img" />
+            <div className="subnav-text">Download</div>
+          </div>
+          <div
+            title="See the data lineage"
+            className={menu["pipeline"][0]}
+            onClick={() => updateSelectedState("pipeline")}
+          >
+            <img src={pipe} className="subnav-img" />
+            <div className="subnav-text">Pipeline</div>
+          </div>
+          <div
+            title="See meta data for dataset"
+            className={menu["information"][0]}
+            onClick={() => updateSelectedState("information")}
+          >
+            <img src={info} className="subnav-img" />
+            <div className="subnav-text">Information</div>
+          </div>
+        </div>
+      </React.Fragment>
+    );
+  }
+}
+
 class DataDetail extends Component {
   state = {
-    selection: "heatmap",
+    selection: "",
     dataset: [],
     error: false,
     min: new Date("2019-06-12"),
@@ -433,6 +506,13 @@ class DataDetail extends Component {
         this.setState({ error: true });
       });
     this.setState({ dataset });
+
+    const { data } = await axios
+      .get("http://localhost:4000/api/data/json/" + url)
+      .catch(error => {
+        this.setState({ error: true });
+      });
+    this.setState({ data });
   }
 
   updateSelectedState = selected => {
@@ -440,102 +520,54 @@ class DataDetail extends Component {
   };
 
   render() {
-    const { selection, dataset, error, min, max, lower, upper } = this.state;
+    const { selection, dataset, error } = this.state;
     document.title = dataset.label + " - Datalakes";
-    var classHeatMap = "subnav-item";
-    var classLineGraph = "subnav-item";
-    var classPreview = "subnav-item";
-    var classDownload = "subnav-item";
-    var classPipeline = "subnav-item";
-    var classInformation = "subnav-item";
-    var selected = "";
-    if (selection === "heatmap") {
-      selected = <HeatMap onChange={this.onChange} state={this.state} />;
-      classHeatMap = "subnav-item active";
+    var inner = "";
+    var menu = {
+      heatmap: ["subnav-item hide",<HeatMap onChange={this.onChange} state={this.state}  />],
+      linegraph: ["subnav-item hide",<LineGraph onChange={this.onChange} state={this.state} />],
+      preview: ["subnav-item",<Preview />],
+      download: ["subnav-item",<Download dataset={dataset} onChange={this.onChange} state={this.state}/>],
+      pipeline: ["subnav-item",<Pipeline />],
+      information: ["subnav-item",<Information dataset={dataset} />]
+    };
+    if ("plot" in dataset){
+      if (dataset.plot.includes("2D") && dataset.plot.includes("1D")){
+        if (selection === ""){
+          menu.heatmap[0] = "subnav-item active";
+          inner = menu.heatmap[1];
+        } else {
+          menu.heatmap[0] = "subnav-item";
+        }
+        menu.linegraph[0] = "subnav-item";
+      } else if (dataset.plot.includes("2D")){
+        if (selection === ""){
+          menu.heatmap[0] = "subnav-item active";
+          inner = menu.heatmap[1];
+        } else {
+          menu.heatmap[0] = "subnav-item";
+        }
+      } else if (dataset.plot.includes("1D")){
+        if (selection === ""){
+          menu.linegraph[0] = "subnav-item active";
+          inner = menu.linegraph[1];
+        } else {
+          menu.linegraph[0] = "subnav-item";
+        }
+      };
     }
-    if (selection === "linegraph") {
-      selected = <LineGraph onChange={this.onChange} state={this.state} />;
-      classLineGraph = "subnav-item active";
-    }
-    if (selection === "preview") {
-      selected = <Preview />;
-      classPreview = "subnav-item active";
-    }
-    if (selection === "download") {
-      selected = (
-        <Download
-          dataset={dataset}
-          onChange={this.onChange}
-          state={this.state}
-        />
-      );
-      classDownload = "subnav-item active";
-    }
-    if (selection === "pipeline") {
-      selected = <Pipeline />;
-      classPipeline = "subnav-item active";
-    }
-    if (selection === "information") {
-      selected = <Information dataset={dataset} />;
-      classInformation = "subnav-item active";
-    }
+    if (selection !== ""){
+      menu[selection][0] = "subnav-item active"
+      inner = menu[selection][1]
+    } 
     if (error) {
       return <Redirect to="/dataportal" />;
     } else {
       return (
         <React.Fragment>
           <h1>{dataset.label}</h1>
-          <div className="data-subnav">
-            <div
-              title="Preview data as a heat map"
-              className={classHeatMap}
-              onClick={() => this.updateSelectedState("heatmap")}
-            >
-              <img src={heat} className="subnav-img" />
-              <div className="subnav-text">Heat Map</div>
-            </div>
-            <div
-              title="Preview data as a line graph"
-              className={classLineGraph}
-              onClick={() => this.updateSelectedState("linegraph")}
-            >
-              <img src={line} className="subnav-img" />
-              <div className="subnav-text">Line Graph</div>
-            </div>
-            <div
-              title="Preview data as a table"
-              className={classPreview}
-              onClick={() => this.updateSelectedState("preview")}
-            >
-              <img src={preview} className="subnav-img" />
-              <div className="subnav-text">Preview</div>
-            </div>
-            <div
-              title="Download data"
-              className={classDownload}
-              onClick={() => this.updateSelectedState("download")}
-            >
-              <img src={download} className="subnav-img" />
-              <div className="subnav-text">Download</div>
-            </div>
-            <div
-              title="See the data lineage"
-              className={classPipeline}
-              onClick={() => this.updateSelectedState("pipeline")}
-            >
-              <img src={pipe} className="subnav-img" />
-              <div className="subnav-text">Pipeline</div>
-            </div>
-            <div
-              title="See meta data for dataset"
-              className={classInformation}
-              onClick={() => this.updateSelectedState("information")}
-            >
-              <img src={info} className="subnav-img" />
-              <div className="subnav-text">Information</div>
-            </div>
-          </div>
-          {selected}
+          <DataSubMenu menu={menu} updateSelectedState={this.updateSelectedState} />
+          {inner}
         </React.Fragment>
       );
     }
