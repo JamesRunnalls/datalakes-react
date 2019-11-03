@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { format } from "date-fns";
-import { scaleTime } from "d3-scale";
+import * as d3 from "d3";
 import './dateslider.css';
 
 const sliderStyle = {
@@ -22,7 +22,7 @@ class DateSlider extends Component {
     render() {
       const { min, max, lower, upper } = this.props.state;
       const onChange = this.props.onChange;
-      const dateTicks = scaleTime()
+      const dateTicks = d3.scaleTime()
       .domain([min, max])
       .ticks(8)
       .map(d => +d);
