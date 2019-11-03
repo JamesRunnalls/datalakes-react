@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
 import { format } from "date-fns";
-import download from "./img/download.svg";
 import "./linegraph.css";
 
 class D3LineGraph extends Component {
@@ -28,9 +27,10 @@ class D3LineGraph extends Component {
         height = visheight - margin.top - margin.bottom;
 
       // Format X-axis
+      var x;
       if (graphtype === "time") {
         var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S");
-        var x = d3
+        x = d3
           .scaleTime()
           .range([0, width])
           .domain(
@@ -42,7 +42,7 @@ class D3LineGraph extends Component {
             })
           );
       } else {
-        var x = d3
+        x = d3
           .scaleLinear()
           .range([0, width])
           .domain(
@@ -271,14 +271,14 @@ class D3LineGraph extends Component {
         var selectedData = "";
         if (sequential === "y") {
           var y0 = y.invert(d3.mouse(this)[1]);
-          var selectedData = data.sort(function(a, b) {
+          selectedData = data.sort(function(a, b) {
             return Math.abs(a.y - y0) - Math.abs(b.y - y0);
           })[0];
         } else {
           var x0 = x.invert(d3.mouse(this)[0]);
           var i = bisectx(data, x0, 1);
 
-          var selectedData = data[i];
+          selectedData = data[i];
         }
         focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
 

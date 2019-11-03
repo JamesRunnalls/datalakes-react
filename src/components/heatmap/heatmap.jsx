@@ -80,11 +80,12 @@ class D3HeatMap extends Component {
         height = visheight - margin.top - margin.bottom;
 
       // Get data extents
-      if (graphtype == "time") {
+      if (graphtype === "time") {
+        var xdomain = "";
         var xe = d3.extent(data.x);
-        var xdomain = [this.formatDate(xe[0]), this.formatDate(xe[1])];
+        xdomain = [this.formatDate(xe[0]), this.formatDate(xe[1])];
       } else {
-        var xdomain = d3.extent(data.x);
+        xdomain = d3.extent(data.x);
       }
       var ydomain = d3.extent(data.y);
       var vdomain = d3.extent(
@@ -92,10 +93,10 @@ class D3HeatMap extends Component {
           return !isNaN(parseFloat(f)) && isFinite(f);
         })
       );
-      if (minz != "") {
+      if (minz !== "") {
         vdomain[0] = minz;
       }
-      if (maxz != "") {
+      if (maxz !== "") {
         vdomain[1] = maxz;
       }
 
@@ -142,12 +143,12 @@ class D3HeatMap extends Component {
         yp.push(y(i));
       }
       if (graphtype === "time") {
-        for (var i of data.x) {
-          xp.push(x(formatDate(i)));
+        for (var j of data.x) {
+          xp.push(x(formatDate(j)));
         }
       } else {
-        for (var i of data.x) {
-          xp.push(x(i));
+        for (var k of data.x) {
+          xp.push(x(k));
         }
       }
       var bwa = gaps(xp);
@@ -226,8 +227,9 @@ class D3HeatMap extends Component {
         var hoverY = scaleY.invert(d3.event.layerY || d3.event.offsetY);
         var yi = closest(hoverY, data.y);
 
+        var xi;
         if (graphtype === "time") {
-          var xi = closest(unformatDate(hoverX), data.x);
+          xi = closest(unformatDate(hoverX), data.x);
           document.getElementById("value").innerHTML =
             format(formatDate(data.x[xi]), "hh:mm dd MMM yy") +
             " | " +
@@ -241,7 +243,7 @@ class D3HeatMap extends Component {
             Math.round(data.v[yi][xi] * 100) / 100 +
             zunits;
         } else {
-          var xi = closest(hoverX, data.x);
+          xi = closest(hoverX, data.x);
           document.getElementById("value").innerHTML =
             xlabel +
             ": " +
@@ -264,7 +266,7 @@ class D3HeatMap extends Component {
       });
 
       // Background color
-      var background = svg
+      svg
         .append("rect")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -275,8 +277,9 @@ class D3HeatMap extends Component {
         );
 
       // Add the X Axis
+      var gxAxis;
       if (graphtype === "time") {
-        var gxAxis = svg
+        gxAxis = svg
           .append("g")
           .attr("class", "x axis")
           .attr("id", "axis--x")
@@ -288,13 +291,13 @@ class D3HeatMap extends Component {
           xLabel = this.props.xlabel;
         }
 
-        var xunits = "";
+        xunits = "";
         if ("xunits" in this.props) {
           xunits = this.props.xunits;
           xLabel = this.props.xlabel + " (" + xunits + ")";
         }
 
-        var gxAxis = svg
+        gxAxis = svg
           .append("g")
           .attr("class", "x axis")
           .attr("id", "axis--x")
@@ -323,7 +326,7 @@ class D3HeatMap extends Component {
         yLabel = this.props.ylabel;
       }
 
-      var yunits = "";
+      yunits = "";
       if ("yunits" in this.props) {
         yunits = this.props.yunits;
         yLabel = this.props.ylabel + " (" + yunits + ")";
@@ -455,10 +458,11 @@ class D3HeatMap extends Component {
       function fillCanvas(scaleX, scaleY, k) {
         for (var xx in data.x) {
           for (var yy in data.y) {
-            if (graphtype == "time") {
-              var dx = scaleX(formatDate(data.x[xx]));
+            var dx;
+            if (graphtype === "time") {
+              dx = scaleX(formatDate(data.x[xx]));
             } else {
-              var dx = scaleX(data.x[xx]);
+              dx = scaleX(data.x[xx]);
             }
             var dy = scaleY(data.y[yy]);
             var dv = data.v[yy][xx];
@@ -505,21 +509,6 @@ class D3HeatMap extends Component {
   }
 
   render() {
-    var {
-      data,
-      graphtype,
-      xlabel,
-      ylabel,
-      zlabel,
-      xunits,
-      yunits,
-      zunits,
-      bcolor,
-      sgradient,
-      egradient,
-      minz,
-      maxz
-    } = this.props;
     return (
       <React.Fragment>
         <div className="heat-header">

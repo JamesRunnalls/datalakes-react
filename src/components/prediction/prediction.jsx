@@ -25,9 +25,11 @@ class Predictions extends Component {
         try {
             const { data: simstratSurfaceTemperature } = await axios.get('http://localhost:4000/api/simstratsurfacetemperature');
             var temp = [];
+
+            const simfind = (sim,lake) => {return sim.find(c => c.urlID === lake.properties.simstrat)}
             
             for (var lake of geojson){
-                var laketemp = simstratSurfaceTemperature.find(c => c.urlID === lake.properties.simstrat);
+                var laketemp = simfind(simstratSurfaceTemperature,lake);
                 lake.properties.surfacetemperature = parseFloat(laketemp.surfacetemperature);
                 temp.push(parseFloat(laketemp.surfacetemperature));
             }

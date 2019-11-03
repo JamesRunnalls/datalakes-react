@@ -69,6 +69,7 @@ class SwissTopoMap extends Component {
       }
 
       var lakes = [];
+      const findLake = (geo,lake) => {return geo.find(c => c.properties.name === lake.name)}
       for (var lake of props.threeD){
         // Plot polygons
         var polygons = [];
@@ -81,7 +82,7 @@ class SwissTopoMap extends Component {
                         .on({mouseover: this.showPolygonTemp})
           );
         }
-        var popup = props.geojson.find(c => c.properties.name === lake.name);
+        var popup = findLake(props.geojson,lake);
         lakes.push(L.featureGroup(polygons).bindPopup(GeoPopupFunction(popup.properties)).addTo(this.map));
       }
       this.polygons = L.layerGroup(lakes);

@@ -5,11 +5,10 @@ import DateSlider from "../dateslider/dateslider";
 import SidebarLayout from "../sidebarlayout/sidebarlayout";
 import D3HeatMap from "../heatmap/heatmap";
 import D3LineGraph from "../linegraph/linegraph";
-import ColorSelect from "../colorselect/colorselect";
 import Sensor from "./img/sensor.svg";
 import Database from "./img/data.svg";
 import Python from "./img/python.svg";
-import R from "./img/r.svg";
+//import R from "./img/r.svg";
 import heat from "./img/heat.svg";
 import line from "./img/line.svg";
 import preview from "./img/preview.svg";
@@ -432,7 +431,7 @@ class DataSubMenu extends Component {
             className={menu["heatmap"][0]}
             onClick={() => updateSelectedState("heatmap")}
           >
-            <img src={heat} className="subnav-img" />
+            <img src={heat} className="subnav-img" alt="Heatmap"/>
             <div className="subnav-text">Heat Map</div>
           </div>
           <div
@@ -440,7 +439,7 @@ class DataSubMenu extends Component {
             className={menu["linegraph"][0]}
             onClick={() => updateSelectedState("linegraph")}
           >
-            <img src={line} className="subnav-img" />
+            <img src={line} className="subnav-img" alt="Line Graph"/>
             <div className="subnav-text">Line Graph</div>
           </div>
           <div
@@ -448,7 +447,7 @@ class DataSubMenu extends Component {
             className={menu["preview"][0]}
             onClick={() => updateSelectedState("preview")}
           >
-            <img src={preview} className="subnav-img" />
+            <img src={preview} className="subnav-img" alt="Preview"/>
             <div className="subnav-text">Preview</div>
           </div>
           <div
@@ -456,7 +455,7 @@ class DataSubMenu extends Component {
             className={menu["download"][0]}
             onClick={() => updateSelectedState("download")}
           >
-            <img src={download} className="subnav-img" />
+            <img src={download} className="subnav-img" alt="Download"/>
             <div className="subnav-text">Download</div>
           </div>
           <div
@@ -464,7 +463,7 @@ class DataSubMenu extends Component {
             className={menu["pipeline"][0]}
             onClick={() => updateSelectedState("pipeline")}
           >
-            <img src={pipe} className="subnav-img" />
+            <img src={pipe} className="subnav-img" alt="Data Pipeline"/>
             <div className="subnav-text">Pipeline</div>
           </div>
           <div
@@ -472,7 +471,7 @@ class DataSubMenu extends Component {
             className={menu["information"][0]}
             onClick={() => updateSelectedState("information")}
           >
-            <img src={info} className="subnav-img" />
+            <img src={info} className="subnav-img" alt="Information"/>
             <div className="subnav-text">Information</div>
           </div>
         </div>

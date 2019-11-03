@@ -27,13 +27,13 @@ class Twitter extends Component {
     var twitterTextLink = [];
     var id = 0;
     for (var work of twitterText.split(" ")){
-        id = id + 1;
+        id += 1;
         if (work.includes("http")){
             twitterTextLink.push(<React.Fragment key={id}><a href={work}>here</a></React.Fragment>);
         } else {
             twitterTextLink.push(<React.Fragment key={id}>{work}</React.Fragment>);
         }
-        id = id + 1
+        id += 1;
         twitterTextLink.push(<React.Fragment key={id}> </React.Fragment>);
     }
     twitterTextLink = twitterTextLink.slice(0, -1);

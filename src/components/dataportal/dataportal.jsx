@@ -203,8 +203,9 @@ class DataPortal extends Component {
 
         // Filter by filters
         var filteredData = datasets;
+        const filterData = (data,f) => {return data.filter(item => item.filters[f.key] === f.value)}
         for (var f of filters) {
-            filteredData = filteredData.filter(item => item.filters[f.key] === f.value);
+            filteredData = filterData(filteredData,f)
         }
 
         // Filter by search
