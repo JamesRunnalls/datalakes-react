@@ -4,6 +4,7 @@ import axios from 'axios';
 import SwissTopoMap from '../swisstopomap/swisstopomap';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import ModelList from '../modellist/modellist';
+import { apiUrl } from '../../../config.json';
 import './prediction.css';
 
 class Predictions extends Component {
@@ -19,11 +20,11 @@ class Predictions extends Component {
 
     async componentDidMount(){
         // Lake Models
-        const { data: geojson } = await axios.get('http://localhost:4000/api/lakemodels');
+        const { data: geojson } = await axios.get(apiUrl+'/api/lakemodels');
 
         // Simstrat Data
         try {
-            const { data: simstratSurfaceTemperature } = await axios.get('http://localhost:4000/api/simstratsurfacetemperature');
+            const { data: simstratSurfaceTemperature } = await axios.get(apiUrl+'/api/simstratsurfacetemperature');
             var temp = [];
 
             const simfind = (sim,lake) => {return sim.find(c => c.urlID === lake.properties.simstrat)}
@@ -44,7 +45,7 @@ class Predictions extends Component {
         
         // Meteolakes Data
         try {
-            const { data: meteolakes } = await axios.get('http://localhost:4000/api/meteolakessurfacetemperature');
+            const { data: meteolakes } = await axios.get(apiUrl+'/api/meteolakessurfacetemperature');
             this.setState({ meteolakes });
         } catch (e) {
             console.log(e);

@@ -5,6 +5,7 @@ import DateSlider from "../dateslider/dateslider";
 import SidebarLayout from "../sidebarlayout/sidebarlayout";
 import D3HeatMap from "../heatmap/heatmap";
 import D3LineGraph from "../linegraph/linegraph";
+import { apiUrl } from '../../../config.json';
 import Sensor from "./img/sensor.svg";
 import Database from "./img/data.svg";
 import Python from "./img/python.svg";
@@ -500,14 +501,14 @@ class DataDetail extends Component {
   async componentDidMount() {
     const url = this.props.location.pathname.split("/").slice(-1)[0];
     const { data: dataset } = await axios
-      .get("http://localhost:4000/api/datasets/" + url)
+      .get(apiUrl + "/api/datasets/" + url)
       .catch(error => {
         this.setState({ error: true });
       });
     this.setState({ dataset });
 
     const { data } = await axios
-      .get("http://localhost:4000/api/data/json/" + url)
+      .get(apiUrl + "/api/data/json/" + url)
       .catch(error => {
         this.setState({ error: true });
       });

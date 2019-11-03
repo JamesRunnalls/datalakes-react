@@ -3,6 +3,7 @@ import axios from 'axios';
 import SwissTopoMap from '../swisstopomap/swisstopomap';
 import WeatherStations from '../weatherstations/weatherstations';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
+import { apiUrl } from '../../../config.json';
 import DW from '../../../public/img/DW.svg';
 import MW from '../../../public/img/MW.svg';
 import MP from '../../../public/img/MP.svg';
@@ -22,8 +23,8 @@ class Live extends Component {
     }
 
     async componentDidMount(){
-        const { data: meteoStations } = await axios.get('http://localhost:4000/api/meteostations');
-        const { data: lakeStations } = await axios.get('http://localhost:4000/api/lakestations');
+        const { data: meteoStations } = await axios.get(apiUrl+'/api/meteostations');
+        const { data: lakeStations } = await axios.get(apiUrl+'/api/lakestations');
         this.setState({ meteoStations, lakeStations });
     }
     

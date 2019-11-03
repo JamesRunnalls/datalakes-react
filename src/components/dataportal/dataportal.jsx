@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Select from 'react-select'
 import axios from 'axios';
+import { apiUrl } from '../../../config.json';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
 import './dataportal.css';
 
@@ -158,8 +159,7 @@ class DataPortal extends Component {
     };
 
     async componentDidMount(){
-        console.log(process.env);
-        const { data: datasets} = await axios.get(process.env.REACT_APP_API+'api/datasets');
+        const { data: datasets} = await axios.get(apiUrl+'/api/datasets');
         this.setState({ datasets })
     }
 

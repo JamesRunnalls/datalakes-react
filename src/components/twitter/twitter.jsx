@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from 'axios';
 import { format } from "date-fns";
+import { apiUrl } from '../../../config.json';
 import twitterImg from './img/twitter.svg';
 import "./twitter.css";
 
@@ -12,7 +13,7 @@ class Twitter extends Component {
         
     }
     async componentDidMount(){
-        const { data: response } = await axios.get('http://localhost:4000/api/twitter').catch(error => {
+        const { data: response } = await axios.get(apiUrl+'/api/twitter').catch(error => {
             this.setState({ error: true});
           });;
         var twitterText = response[0].text;
