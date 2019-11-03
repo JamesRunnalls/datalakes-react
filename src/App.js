@@ -13,7 +13,6 @@ import WeatherStationDetail from './components/weatherstationdetail/weatherstati
 import About from './components/about/about';
 import API from './components/api/api';
 import DataDetail from './components/datadetail/datadetail';
-require('dotenv').config();
 
 class App extends Component {
   render() {
