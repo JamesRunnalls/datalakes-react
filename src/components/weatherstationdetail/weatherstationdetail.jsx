@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import axios from 'axios';
 import SidebarLayout from '../sidebarlayout/sidebarlayout';
+import { apiUrl } from '../../../config.json';
 import './weatherstationdetail.css';
 
 class LiveParameterSummary extends Component {
@@ -71,7 +72,7 @@ class WeatherStationDetail extends Component {
 
     async componentDidMount(){
         const url = this.props.location.pathname.split('/').slice(-1)[0];
-        const { data: dataset } = await axios.get('http://localhost:4000/api/lakestations/'+url).catch(error => {
+        const { data: dataset } = await axios.get(apiUrl+'/api/lakestations/'+url).catch(error => {
             this.setState({ error: true});
           });
         const selected = dataset.parameters[Object.keys(dataset.parameters)[0]];
