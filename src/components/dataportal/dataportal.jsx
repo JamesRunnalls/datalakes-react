@@ -158,7 +158,8 @@ class DataPortal extends Component {
     };
 
     async componentDidMount(){
-        const { data: datasets} = await axios.get('http://localhost:4000/api/datasets');
+        console.log(process.env);
+        const { data: datasets} = await axios.get(process.env.REACT_APP_API+'api/datasets');
         this.setState({ datasets })
     }
 
