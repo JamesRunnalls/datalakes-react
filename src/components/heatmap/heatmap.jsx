@@ -49,7 +49,6 @@ class D3HeatMap extends Component {
     try {
       var {
         data,
-        graphtype,
         xlabel,
         ylabel,
         zlabel,
@@ -80,7 +79,7 @@ class D3HeatMap extends Component {
         height = visheight - margin.top - margin.bottom;
 
       // Get data extents
-      if (graphtype === "time") {
+      if (xlabel === "Time") {
         var xdomain = "";
         var xe = d3.extent(data.x);
         xdomain = [this.formatDate(xe[0]), this.formatDate(xe[1])];
@@ -88,16 +87,16 @@ class D3HeatMap extends Component {
         xdomain = d3.extent(data.x);
       }
       var ydomain = d3.extent(data.y);
-      var vdomain = d3.extent(
-        [].concat.apply([], data.v).filter(f => {
+      var zdomain = d3.extent(
+        [].concat.apply([], data.z).filter(f => {
           return !isNaN(parseFloat(f)) && isFinite(f);
         })
       );
       if (minz !== "") {
-        vdomain[0] = minz;
+        zdomain[0] = minz;
       }
       if (maxz !== "") {
-        vdomain[1] = maxz;
+        zdomain[1] = maxz;
       }
 
       // Set color gradients
@@ -114,7 +113,7 @@ class D3HeatMap extends Component {
           i = gradient.length - 1;
         } else {
           i = Math.round(
-            ((v - vdomain[0]) / (vdomain[1] - vdomain[0])) * (ncolors - 1)
+            ((v - zdomain[0]) / (zdomain[1] - zdomain[0])) * (ncolors - 1)
           );
         }
         return gradient[i];
@@ -142,7 +141,7 @@ class D3HeatMap extends Component {
       for (var i of data.y) {
         yp.push(y(i));
       }
-      if (graphtype === "time") {
+      if (xlabel === "Time") {
         for (var j of data.x) {
           xp.push(x(formatDate(j)));
         }
@@ -228,7 +227,7 @@ class D3HeatMap extends Component {
         var yi = closest(hoverY, data.y);
 
         var xi;
-        if (graphtype === "time") {
+        if (xlabel === "Time") {
           xi = closest(unformatDate(hoverX), data.x);
           document.getElementById("value").innerHTML =
             format(formatDate(data.x[xi]), "hh:mm dd MMM yy") +
@@ -240,7 +239,7 @@ class D3HeatMap extends Component {
             " | " +
             zlabel +
             ": " +
-            Math.round(data.v[yi][xi] * 100) / 100 +
+            Math.round(data.z[yi][xi] * 100) / 100 +
             zunits;
         } else {
           xi = closest(hoverX, data.x);
@@ -257,7 +256,7 @@ class D3HeatMap extends Component {
             " | " +
             zlabel +
             ": " +
-            Math.round(data.v[yi][xi] * 100) / 100 +
+            Math.round(data.z[yi][xi] * 100) / 100 +
             zunits;
         }
       });
@@ -278,7 +277,7 @@ class D3HeatMap extends Component {
 
       // Add the X Axis
       var gxAxis;
-      if (graphtype === "time") {
+      if (xlabel === "Time") {
         gxAxis = svg
           .append("g")
           .attr("class", "x axis")
@@ -381,8 +380,8 @@ class D3HeatMap extends Component {
         .attr("y", 0)
         .attr("fill", "url(#svgGradient)");
 
-      var t1 = Math.round(vdomain[1] * 100) / 100,
-        t5 = Math.round(vdomain[0] * 100) / 100,
+      var t1 = Math.round(zdomain[1] * 100) / 100,
+        t5 = Math.round(zdomain[0] * 100) / 100,
         t3 = Math.round(((t1 + t5) / 2) * 100) / 100,
         t2 = Math.round(((t1 + t3) / 2) * 100) / 100,
         t4 = Math.round(((t3 + t5) / 2) * 100) / 100;
@@ -392,35 +391,38 @@ class D3HeatMap extends Component {
         .attr("x", width + 2 + margin.right / 3)
         .attr("y", 10)
         .style("font-size", "12px")
-        .text(t1 + zunits);
+        .text(t1);
 
       svg
         .append("text")
         .attr("x", width + 2 + margin.right / 3)
         .attr("y", height * 0.25 + 3)
         .style("font-size", "12px")
-        .text(t2 + zunits);
+        .text(t2);
 
       svg
         .append("text")
-        .attr("x", width + 2 + margin.right / 3)
-        .attr("y", height * 0.5 + 3)
+        .attr("transform", "rotate(-90)")
+        .attr("y", width + margin.right - 5)
+        .attr("x", 0 - height / 2)
+        .attr("dz", "1em")
+        .style("text-anchor", "middle")
         .style("font-size", "12px")
-        .text(t3 + zunits);
+        .text(zlabel + " (" + zunits + ")");
 
       svg
         .append("text")
         .attr("x", width + 2 + margin.right / 3)
         .attr("y", height * 0.75 + 3)
         .style("font-size", "12px")
-        .text(t4 + zunits);
+        .text(t4);
 
       svg
         .append("text")
         .attr("x", width + 2 + margin.right / 3)
         .attr("y", height)
         .style("font-size", "12px")
-        .text(t5 + zunits);
+        .text(t5);
 
       // Plot data to canvas
       updateChart(d3.zoomIdentity);
@@ -459,13 +461,13 @@ class D3HeatMap extends Component {
         for (var xx in data.x) {
           for (var yy in data.y) {
             var dx;
-            if (graphtype === "time") {
+            if (xlabel === "Time") {
               dx = scaleX(formatDate(data.x[xx]));
             } else {
               dx = scaleX(data.x[xx]);
             }
             var dy = scaleY(data.y[yy]);
-            var dv = data.v[yy][xx];
+            var dv = data.z[yy][xx];
             var bw = bwa[xx] * k;
             var bh = bha[yy] * k;
             drawRect(dx, dy, dv, bw, bh);

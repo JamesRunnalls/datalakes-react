@@ -58,15 +58,15 @@ class HeatMap extends Component {
 
   render() {
     const { onChange, state } = this.props;
-    const { data } = this.props.state;
+    const { data } = state;
+    const { units, axis } = state.dataset;
     const { bcolor, sgradient, egradient, minz, maxz } = this.state;
-    const graphtype = "time",
-      xlabel = "",
-      ylabel = "Depth",
-      zlabel = "Temperature",
-      xunits = "",
-      yunits = "m",
-      zunits = "°C";
+    const xlabel = axis.x,
+      ylabel = axis.y,
+      zlabel = axis.z,
+      xunits = units.x,
+      yunits = units.y,
+      zunits = units.z;
     return (
       <React.Fragment>
         <SidebarLayout
@@ -74,7 +74,6 @@ class HeatMap extends Component {
           left={
             <D3HeatMap
               data={data}
-              graphtype={graphtype}
               xlabel={xlabel}
               ylabel={ylabel}
               zlabel={zlabel}
@@ -200,8 +199,13 @@ class LineGraph extends Component {
 
   render() {
     const { onChange, state } = this.props;
-    const { data } = this.props.state;
+    const { units, axis } = state.dataset;
+    const { data } = state;
     const { lweight, bcolor, lcolor } = this.state;
+    const xlabel = axis.x,
+      ylabel = axis.y,
+      xunits = units.x,
+      yunits = units.y;
     return (
       <React.Fragment>
         <SidebarLayout
@@ -209,11 +213,10 @@ class LineGraph extends Component {
           left={
             <D3LineGraph
               data={data}
-              graphtype="time"
-              xunits=""
-              xlabel=""
-              yunits="°C"
-              ylabel="Temperature"
+              xlabel={xlabel}
+              ylabel={ylabel}
+              xunits={xunits}
+              yunits={yunits}
               sequential="x"
               lcolor={lcolor}
               lweight={lweight}

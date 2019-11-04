@@ -4,13 +4,17 @@ import { format } from "date-fns";
 import "./linegraph.css";
 
 class D3LineGraph extends Component {
+  formatDate = raw => {
+    return new Date(raw * 1000);
+  };
+
   plotLineGraph = () => {
     try {
       d3.select("svg").remove();
     } catch (e) {}
 
     try {
-      var { data, graphtype, sequential, bcolor, lcolor, lweight } = this.props;
+      var { data, xlabel, xunits, sequential, bcolor, lcolor, lweight } = this.props;
 
       // Set graph size
       var margin = { top: 20, right: 20, bottom: 50, left: 50 },
@@ -28,52 +32,39 @@ class D3LineGraph extends Component {
 
       // Format X-axis
       var x;
-      if (graphtype === "time") {
-        var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S");
+      var xdomain;
+      if (xlabel === "Time") {
+        var xe = d3.extent(data.x);
+        xdomain = [this.formatDate(xe[0]), this.formatDate(xe[1])];
         x = d3
           .scaleTime()
           .range([0, width])
           .domain(
-            d3.extent(data, function(d) {
-              if (typeof d.x === "string") {
-                d.x = parseDate(d.x);
-              }
-              return d.x;
-            })
+            d3.extent(xdomain)
           );
       } else {
+        xdomain = d3.extent(data.x);
         x = d3
           .scaleLinear()
           .range([0, width])
           .domain(
-            d3.extent(data, function(d) {
-              d.x = parseFloat(d.x);
-              return d.x;
-            })
+            d3.extent(xdomain)
           );
       }
 
       // Format Y-axis
+      var ydomain = d3.extent(
+        [].concat.apply([], data.y).filter(f => {
+          return !isNaN(parseFloat(f)) && isFinite(f);
+        })
+      );
       var y = d3
         .scaleLinear()
         .range([height, 0])
         .domain(
-          d3.extent(data, function(d) {
-            d.y = parseFloat(d.y);
-            return d.y;
-          })
+          d3.extent(ydomain)
         );
-
-      // Define the line
-      var valueline = d3
-        .line()
-        .x(function(d) {
-          return x(d.x);
-        })
-        .y(function(d) {
-          return y(d.y);
-        });
-
+ 
       // Define the axes
       var xAxis = d3.axisBottom(x).ticks(5);
       var yAxis = d3.axisLeft(y).ticks(5);
@@ -111,7 +102,7 @@ class D3LineGraph extends Component {
         .attr("y", 0);
 
       // Add the X Axis
-      if (graphtype === "time") {
+      if (xlabel === "Time") {
         svg
           .append("g")
           .attr("class", "x axis")
@@ -180,6 +171,23 @@ class D3LineGraph extends Component {
         .style("text-anchor", "middle")
         .text(yLabel);
 
+      // Transform Data
+      var xy = []; // start empty, add each element one at a time
+      for(var i = 0; i < data.x.length; i++ ) {
+        xy.push({x: this.formatDate(data.x[i]), y: data.y[i]});
+      }
+
+      // Define the line
+      var valueline = d3
+        .line()
+        .defined(d => !isNaN(d.y))
+        .x(function(d) {
+          return x(d.x);
+        })
+        .y(function(d) {
+          return y(d.y);
+        });
+
       // Add the line
       var line = svg
         .append("g")
@@ -196,7 +204,7 @@ class D3LineGraph extends Component {
             lweight +
             "; fill-opacity:0; stroke-opacity:1;"
         )
-        .attr("d", valueline(data));
+        .attr("d", valueline(xy));
 
       // Brushing
       var brush = d3
@@ -237,15 +245,15 @@ class D3LineGraph extends Component {
         if (!s) {
           if (!idleTimeout) return (idleTimeout = setTimeout(idled, idleDelay));
           x.domain(
-            d3.extent(data, function(d) {
+            d3.extent(xy, function(d) {
               if (typeof d.x === "string") {
-                d.x = parseDate(d.x);
+                d.x = this.formatDate(d.x);
               }
               return d.x;
             })
           );
           y.domain(
-            d3.extent(data, function(d) {
+            d3.extent(xy, function(d) {
               d.y = parseFloat(d.y);
               return d.y;
             })
@@ -271,18 +279,18 @@ class D3LineGraph extends Component {
         var selectedData = "";
         if (sequential === "y") {
           var y0 = y.invert(d3.mouse(this)[1]);
-          selectedData = data.sort(function(a, b) {
+          selectedData = xy.sort(function(a, b) {
             return Math.abs(a.y - y0) - Math.abs(b.y - y0);
           })[0];
         } else {
           var x0 = x.invert(d3.mouse(this)[0]);
-          var i = bisectx(data, x0, 1);
+          var i = bisectx(xy, x0, 1);
 
-          selectedData = data[i];
+          selectedData = xy[i];
         }
         focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
 
-        if (graphtype === "time") {
+        if (xlabel === "Time") {
           document.getElementById("value").innerHTML =
             format(new Date(selectedData.x), "hh:mm dd MMM yy") +
             " | " +
@@ -311,7 +319,7 @@ class D3LineGraph extends Component {
         line
           .selectAll("path")
           .transition(t)
-          .attr("d", valueline(data));
+          .attr("d", valueline(xy));
       }
 
       d3.select("#linegraph-download").on("click", function() {
