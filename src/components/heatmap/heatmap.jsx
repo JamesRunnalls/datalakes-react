@@ -45,8 +45,7 @@ class D3HeatMap extends Component {
       d3.select("svg").remove();
       d3.select("canvas").remove();
     } catch (e) {}
-
-    try {
+    if (this.props.data !== undefined) { try {
       var {
         data,
         xlabel,
@@ -495,6 +494,7 @@ class D3HeatMap extends Component {
     } catch (e) {
       console.log("Heatmap failed to plot", e);
     }
+  }
   };
 
   componentDidMount() {

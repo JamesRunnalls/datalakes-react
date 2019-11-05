@@ -13,7 +13,7 @@ class D3LineGraph extends Component {
       d3.select("svg").remove();
     } catch (e) {}
 
-    try {
+    if (this.props.data !== undefined) {try {
       var { data, xlabel, xunits, sequential, bcolor, lcolor, lweight } = this.props;
 
       // Set graph size
@@ -349,6 +349,7 @@ class D3LineGraph extends Component {
     } catch (e) {
       console.log("Error plotting line graph", e);
     }
+  }
   };
 
   componentDidMount() {

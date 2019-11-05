@@ -289,12 +289,36 @@ class LineGraph extends Component {
 }
 
 class Preview extends Component {
-  state = {};
   render() {
+    const { data, dataset } = this.props.state;
+    var inner = [];
+    var row;
+    if (dataset.plot.includes("2D")){
+      row = [<td></td>];
+      for (var k = 0; k < Math.min(20,data.x.length); k++){
+        row.push(<th>{data.x[k]}</th>)
+      }
+      inner.push(<tr>{row}</tr>);
+
+      for (var i = 0; i < Math.min(20,data.y.length); i++){
+        row = [<th>{data.y[i]}</th>];
+        for (var j = 0; j < Math.min(20,data.x.length); j++){
+          row.push(<td>{data.z[i][j]}</td>)
+        }
+        inner.push(<tr>{row}</tr>);
+      }
+    } else if (dataset.plot.includes("1D")){
+
+    }
     return (
       <React.Fragment>
         <div>
-          Data is stored in NetCDF format and is flattened for this preview.
+          Data is flattened for this preview.
+          <table>
+            <tbody>
+              {inner}
+            </tbody>
+          </table>
         </div>
       </React.Fragment>
     );
@@ -303,17 +327,21 @@ class Preview extends Component {
 
 class Download extends Component {
   render() {
-    const { onChange, state } = this.props;
+    const { onChange, state, dataset, url, apiUrl } = this.props;
+    const jsonUrl = apiUrl + "/api/data/json/" + url;
+    const ncUrl = apiUrl + "/api/data/nc/" + url;
+    const csvUrl = apiUrl + "/api/data/csv/" + url;
+    const txtUrl = apiUrl + "/api/data/txt/" + url;
     return (
       <React.Fragment>
         <div className="info-title">Dataset Title</div>
-        {this.props.dataset.label}
+        {dataset.label}
 
         <div className="info-title">Licence</div>
-        {this.props.dataset.licence}
+        {dataset.licence}
 
         <div className="info-title">Citations</div>
-        {this.props.dataset.citation}
+        {dataset.citation}
 
         <div className="info-title">Time Period</div>
         <div className="date-slider">
@@ -321,9 +349,10 @@ class Download extends Component {
         </div>
         <div className="info-title">Download</div>
         <div className="MultipleDownload">
-          <button title="Download datasets in NetCDF format">.nc</button>
-          <button title="Download datasets in CSV format">.csv</button>
-          <button title="Download datasets in TXT format">.txt</button>
+          <a href={ncUrl}><button title="Download datasets in NetCDF format">.nc</button></a>
+          <a href={csvUrl}><button title="Download datasets in CSV format">.csv</button></a>
+          <a href={txtUrl}><button title="Download datasets in TXT format">.txt</button></a>
+          <a href={jsonUrl}><button title="Download datasets in JSON format">.json</button></a>
         </div>
       </React.Fragment>
     );
@@ -525,12 +554,13 @@ class DataDetail extends Component {
   render() {
     const { selection, dataset, error } = this.state;
     document.title = dataset.label + " - Datalakes";
+    const url = this.props.location.pathname.split("/").slice(-1)[0];
     var inner = "";
     var menu = {
       heatmap: ["subnav-item hide",<HeatMap onChange={this.onChange} state={this.state}  />],
-      linegraph: ["subnav-item hide",<LineGraph onChange={this.onChange} state={this.state} />],
-      preview: ["subnav-item",<Preview />],
-      download: ["subnav-item",<Download dataset={dataset} onChange={this.onChange} state={this.state}/>],
+      linegraph: ["subnav-item hide",<LineGraph onChange={this.onChange} state={this.state}/>],
+      preview: ["subnav-item",<Preview state={this.state}/>],
+      download: ["subnav-item",<Download dataset={dataset} onChange={this.onChange} state={this.state}  url={url} apiUrl={apiUrl}/>],
       pipeline: ["subnav-item",<Pipeline />],
       information: ["subnav-item",<Information dataset={dataset} />]
     };

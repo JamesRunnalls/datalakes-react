@@ -1,4 +1,4 @@
 {
-    "apiUrls":"http://localhost:4000",
-    "apiUrl":"https://datalakes-api.herokuapp.com"
+    "apiUrl":"http://localhost:4000",
+    "apiUrls":"https://datalakes-api.herokuapp.com"
 }
