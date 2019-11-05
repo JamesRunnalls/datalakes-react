@@ -292,28 +292,43 @@ class Preview extends Component {
   render() {
     const { data, dataset } = this.props.state;
     var inner = [];
+    var axis = [];
     var row;
     if (dataset.plot.includes("2D")){
-      row = [<td></td>];
-      for (var k = 0; k < Math.min(20,data.x.length); k++){
-        row.push(<th>{data.x[k]}</th>)
+      axis.push(<div key="xaxis">X-axis: {dataset.axis.x + " (" + dataset.units.x + ")"}</div>);
+      axis.push(<div key="yaxis">Y-axis: {dataset.axis.y + " (" + dataset.units.y + ")"}</div>);
+      axis.push(<div key="zaxis">Z-axis: {dataset.axis.z + " (" + dataset.units.z + ")"}</div>);
+      row = [<td key="blank"> </td>];
+      for (var k = 0; k < Math.min(10,data.x.length); k++){
+        row.push(<th key={"h"+k}>{data.x[k]}</th>)
       }
-      inner.push(<tr>{row}</tr>);
+      inner.push(<tr key="head">{row}</tr>);
 
-      for (var i = 0; i < Math.min(20,data.y.length); i++){
-        row = [<th>{data.y[i]}</th>];
-        for (var j = 0; j < Math.min(20,data.x.length); j++){
-          row.push(<td>{data.z[i][j]}</td>)
+      for (var i = 0; i < Math.min(200,data.y.length); i++){
+        row = [<th key={"r"+i}>{data.y[i]}</th>];
+        for (var j = 0; j < Math.min(10,data.x.length); j++){
+          row.push(<td key={"r"+i+j}>{data.z[i][j]}</td>)
         }
-        inner.push(<tr>{row}</tr>);
+        inner.push(<tr key={"k"+i}>{row}</tr>);
       }
     } else if (dataset.plot.includes("1D")){
-
+      axis.push(<div key="xaxis">X-axis: {dataset.axis.x + " (" + dataset.units.x + ")"}</div>);
+      axis.push(<div key="yaxis">Y-axis: {dataset.axis.y + " (" + dataset.units.y + ")"}</div>);
+      inner = [<tr key="h"><th>x</th><th>y</th></tr>];
+      for (var l = 0; l < Math.min(200,data.y.length); l++){
+        inner.push(<tr key={"h"+l}><td>{data.x[l]}</td><td>{data.y[l]}</td></tr>)
+      }
     }
+
+
+
     return (
       <React.Fragment>
-        <div>
-          Data is flattened for this preview.
+        <div className="preview-flat">
+          <b>Data is flattened for this preview.</b>
+          {axis}
+        </div>
+        <div className="preview-table"> 
           <table>
             <tbody>
               {inner}

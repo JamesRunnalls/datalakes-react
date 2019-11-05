@@ -158,3 +158,22 @@
     padding: 4px 8px;
     width: 120px;
 }
+
+.preview-table {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 500px;
+}
+
+.preview-flat {
+  margin-bottom: 20px;
+}
+
+.preview-table table td {
+  padding: 0 15px;
+  text-align: center;
+}
+
+.preview-table table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
