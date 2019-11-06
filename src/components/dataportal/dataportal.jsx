@@ -139,6 +139,7 @@ class DownloadMultiple extends Component {
                         <button title="Download datasets in NetCDF format">.nc</button>
                         <button title="Download datasets in CSV format">.csv</button>
                         <button title="Download datasets in TXT format">.txt</button>
+                        <button title="Download datasets in json format">.json</button>
                     </div>
                 </React.Fragment>
              );

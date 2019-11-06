@@ -64,7 +64,13 @@ class Predictions extends Component {
     }
 
     setTemp = Temp => {
+        ReactDOM.findDOMNode(this.refs.hoverTemp).style.display = "block";
         ReactDOM.findDOMNode(this.refs.hoverTemp).innerHTML = Math.round(parseFloat(Temp) * 100) / 100 + "°C";
+    }
+
+    hideTemp = () => {
+        ReactDOM.findDOMNode(this.refs.hoverTemp).style.display = "none";
+        ReactDOM.findDOMNode(this.refs.hoverTemp).innerHTML = "";
     }
 
     setMaxTemp = event => {
@@ -139,10 +145,11 @@ class Predictions extends Component {
                                           colorbar={ [this.state.MinTemp,this.state.MaxTemp] }
                                           setMap={this.setMap}
                                           setTemp={this.setTemp}
+                                          hideTemp={this.hideTemp}
                                           threeD={ this.state.meteolakes }
                                         />
+                                <div ref="hoverTemp" className="hoverTemp"></div>
                                 <div id="colorbar"> 
-                                    <div ref="hoverTemp" className="hoverTemp"></div>
                                     <div className="colorbar-inner">
                                         <input title="Edit minimum temperature" type="text" defaultValue={this.state.MinTemp} onBlur={this.setMinTemp}></input> °C 
                                         <div id="bar" title="Legend colorbar"></div> 

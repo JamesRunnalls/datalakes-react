@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import axios from "axios";
+import * as d3 from "d3";
 import DateSlider from "../dateslider/dateslider";
 import SidebarLayout from "../sidebarlayout/sidebarlayout";
 import D3HeatMap from "../heatmap/heatmap";
@@ -57,9 +58,23 @@ class HeatMap extends Component {
   };
 
   render() {
-    const { onChange, state } = this.props;
-    const { data } = state;
-    const { units, axis } = state.dataset;
+    var { onChange, dataset, data, lower, upper, max, min } = this.props;
+    if ((lower !== min && lower !== "") || (upper !== max && upper !== "")){
+      var l = 0;
+      var u = data.x.length - 1;
+      for (var i = 0; i < data.x.length; i++){
+          if (data.x[i] < lower){l = i}
+          if (data.x[i] > upper && u == data.x.length - 1){u = i}
+      }
+      var x = data.x.slice(l,u);
+      var y = data.y;
+      var z = [];
+      for (var zl of data.z){
+        z.push(zl.slice(l,u))
+      }
+      data = {x: x, y: y, z:z};
+    }
+    const { units, axis } = dataset;
     const { bcolor, sgradient, egradient, minz, maxz } = this.state;
     const xlabel = axis.x,
       ylabel = axis.y,
@@ -93,7 +108,7 @@ class HeatMap extends Component {
                 Set Date Range
               </div>
               <div className="side-date-slider">
-                <DateSlider onChange={onChange} state={state} />
+                <DateSlider onChange={onChange} min={min} max={max} lower={lower} upper={upper}/>
               </div>
               <div className="info-title">Adjust Colors</div>
               <table className="colors-table">
@@ -198,9 +213,20 @@ class LineGraph extends Component {
   };
 
   render() {
-    const { onChange, state } = this.props;
-    const { units, axis } = state.dataset;
-    const { data } = state;
+    var { onChange, dataset, data, lower, upper, max, min } = this.props;
+    if ((lower !== min && lower !== "") || (upper !== max && upper !== "")){
+      var l = 0;
+      var u = data.x.length - 1;
+      for (var i = 0; i < data.x.length; i++){
+          if (data.x[i] < lower){l = i}
+          if (data.x[i] > upper && u == data.x.length - 1){u = i}
+      }
+      var x = data.x.slice(l,u);
+      var y = data.y.slice(l,u);
+      var z = [];
+      data = {x: x, y: y};
+    }
+    const { units, axis } = dataset;
     const { lweight, bcolor, lcolor } = this.state;
     const xlabel = axis.x,
       ylabel = axis.y,
@@ -229,7 +255,7 @@ class LineGraph extends Component {
                 Set Date Range
               </div>
               <div className="side-date-slider">
-                <DateSlider onChange={onChange} state={state} />
+                <DateSlider onChange={onChange} min={min} max={max} lower={lower} upper={upper}/>
               </div>
               <div className="info-title">Adjust Colors</div>
               <table className="colors-table">
@@ -342,7 +368,7 @@ class Preview extends Component {
 
 class Download extends Component {
   render() {
-    const { onChange, state, dataset, url, apiUrl } = this.props;
+    const { onChange, lower, upper, max, min, dataset, url, apiUrl } = this.props;
     const jsonUrl = apiUrl + "/api/data/json/" + url;
     const ncUrl = apiUrl + "/api/data/nc/" + url;
     const csvUrl = apiUrl + "/api/data/csv/" + url;
@@ -360,11 +386,11 @@ class Download extends Component {
 
         <div className="info-title">Time Period</div>
         <div className="date-slider">
-          <DateSlider onChange={onChange} state={state} />
+          <DateSlider onChange={onChange} min={min} max={max} lower={lower} upper={upper}/>
         </div>
         <div className="info-title">Download</div>
         <div className="MultipleDownload">
-          <a href={ncUrl}><button title="Download datasets in NetCDF format">.nc</button></a>
+          <a><button title="Not Currently Available">.nc</button></a>
           <a href={csvUrl}><button title="Download datasets in CSV format">.csv</button></a>
           <a href={txtUrl}><button title="Download datasets in TXT format">.txt</button></a>
           <a href={jsonUrl}><button title="Download datasets in JSON format">.json</button></a>
@@ -380,9 +406,9 @@ class Pipeline extends Component {
     return (
       <div className="pipeline">
         <div>
-          See the <a href="">Renku Repository</a> for full details on
+          See the <a href="https://renkulab.io/gitlab/damien.bouffard/datalakes">Renku Repository</a> for full details on
           reproducibility or click on the icons below to be directed to data and
-          scripts stored in our <a href="">Gitlab Repository</a>.
+          scripts stored in our <a href="https://renkulab.io/gitlab/damien.bouffard/datalakes">Gitlab Repository</a>.
         </div>
         <div className="diagram">
           <a>
@@ -391,13 +417,13 @@ class Pipeline extends Component {
             <div>18.01.19</div>
           </a>
           <div className="separator full"></div>
-          <a href="">
+          <a>
             <img src={Database} alt="Database" />
             <div className="">Level 0</div>
             <div>18.01.19</div>
           </a>
           <div className="separator half"></div>
-          <a href="">
+          <a>
             <img src={Python} alt="Python" />
             <div className="">Python</div>
             <div>18.01.19</div>
@@ -533,16 +559,19 @@ class DataDetail extends Component {
     selection: "",
     dataset: [],
     error: false,
-    min: new Date("2019-06-12"),
-    max: new Date("2019-12-12"),
-    lower: new Date("2019-08-12"),
-    upper: new Date("2019-10-12")
+    min: "",
+    max: "",
+    lower: "",
+    upper: "",
+    data: ""
   };
 
   onChange = values => {
-    const lower = values[0];
-    const upper = values[1];
-    this.setState({ lower, upper });
+    const lower = values[0]/1000;
+    const upper = values[1]/1000;
+    if (Math.round(lower) !== Math.round(this.state.lower) || Math.round(upper) !== Math.round(this.state.upper)){
+      this.setState({ lower, upper });
+    }
   };
 
   async componentDidMount() {
@@ -552,14 +581,19 @@ class DataDetail extends Component {
       .catch(error => {
         this.setState({ error: true });
       });
-    this.setState({ dataset });
-
     const { data } = await axios
       .get(apiUrl + "/api/data/json/" + url)
       .catch(error => {
         this.setState({ error: true });
       });
-    this.setState({ data });
+
+    var xe = d3.extent(data.x),
+    min = xe[0],
+    max = xe[1],
+    lower = xe[0],
+    upper = xe[1];
+    
+    this.setState({ dataset, data, min, max, lower, upper });
   }
 
   updateSelectedState = selected => {
@@ -567,15 +601,15 @@ class DataDetail extends Component {
   };
 
   render() {
-    const { selection, dataset, error } = this.state;
+    const { selection, dataset, error, data, min, max, lower, upper } = this.state;
     document.title = dataset.label + " - Datalakes";
     const url = this.props.location.pathname.split("/").slice(-1)[0];
     var inner = "";
     var menu = {
-      heatmap: ["subnav-item hide",<HeatMap onChange={this.onChange} state={this.state}  />],
-      linegraph: ["subnav-item hide",<LineGraph onChange={this.onChange} state={this.state}/>],
+      heatmap: ["subnav-item hide",<HeatMap onChange={this.onChange} dataset={dataset} data={data} lower={lower} upper={upper} max={max} min={min}/>],
+      linegraph: ["subnav-item hide",<LineGraph onChange={this.onChange} dataset={dataset} data={data} lower={lower} upper={upper} max={max} min={min}/>],
       preview: ["subnav-item",<Preview state={this.state}/>],
-      download: ["subnav-item",<Download dataset={dataset} onChange={this.onChange} state={this.state}  url={url} apiUrl={apiUrl}/>],
+      download: ["subnav-item",<Download dataset={dataset} onChange={this.onChange} lower={lower} upper={upper} max={max} min={min} url={url} apiUrl={apiUrl}/>],
       pipeline: ["subnav-item",<Pipeline />],
       information: ["subnav-item",<Information dataset={dataset} />]
     };

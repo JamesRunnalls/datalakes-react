@@ -61,6 +61,10 @@ class SwissTopoMap extends Component {
     this.props.setTemp(e);
   }
 
+  hideGeojsonTemp = () => {
+    this.props.hideTemp();
+  }
+
   plotPolygons = props => {
     if ('threeD' in props && props.colorbar[0] !== "") {
       // Remove old layers
@@ -79,7 +83,7 @@ class SwissTopoMap extends Component {
         for (var px of lake.data){
           var lakecolor = props.lakeColor(Gradient.colors,px["v"],mintemp,maxtemp)
           polygons.push(L.polygon(px["g"], {color: lakecolor, fillColor: lakecolor, fillOpacity: 1,title:px["v"]})
-                        .on({mouseover: this.showPolygonTemp})
+                        .on({mouseover: this.showPolygonTemp}).on({mouseout: this.hideGeojsonTemp})
           );
         }
         var popup = findLake(props.geojson,lake);
@@ -150,6 +154,7 @@ class SwissTopoMap extends Component {
     }).addTo(this.map);
     this.geojson.eachLayer(layer => {
       layer.on('mouseover',() => this.showGeojsonTemp(layer.feature.properties.surfacetemperature));
+      layer.on('mouseout',this.hideGeojsonTemp);
     });
    ReactDOM.findDOMNode(this.refs.loader).className = "map-loader hide";
    }
