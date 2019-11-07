@@ -190,6 +190,7 @@ class D3HeatMap extends Component {
         .style("margin-top", margin.top + "px")
         .style("position", "absolute")
         .style("left", "10px")
+        .style("cursor", "grab")
         .attr("id", "canvas")
         .attr("class", "canvas-plot");
       const context = canvas.node().getContext("2d");
@@ -261,6 +262,16 @@ class D3HeatMap extends Component {
       });
       canvas.on("mouseout", () => {
         document.getElementById("value").innerHTML = "";
+      });
+
+      // Add cursor change
+      window.addEventListener("keydown", function (event) {
+        if (event.ctrlKey) {
+          canvas.style("cursor", "crosshair");
+        }
+      });
+      window.addEventListener("keyup", function (event) {        
+          canvas.style("cursor", "grab");
       });
 
       // Background color
@@ -424,7 +435,10 @@ class D3HeatMap extends Component {
         .text(t5);
 
       // Plot data to canvas
-      updateChart(d3.zoomIdentity);
+      setTimeout( () => {
+        context.clearRect(0, 0, width, height);
+        fillCanvas(x,y,1);
+      }, 10);
 
       d3.select("#heatmap-download").on("click", function() {
         var s = new XMLSerializer();
@@ -498,8 +512,8 @@ class D3HeatMap extends Component {
   };
 
   componentDidMount() {
-    window.addEventListener("resize", this.plotHeatMap);
     this.plotHeatMap();
+    window.addEventListener("resize", this.plotHeatMap);
   }
 
   componentWillUnmount() {
