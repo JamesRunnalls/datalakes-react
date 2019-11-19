@@ -139,7 +139,7 @@ class Predictions extends Component {
                  <SidebarLayout 
                     sidebartitle="Lake Models" 
                     left={<React.Fragment>
-                            <SwissTopoMap geojson={filteredData}
+                            <SwissTopoMap geojson={ this.state.geojson }
                                           popupfunction={ this.propertiesPopup } 
                                           lakeColor={ this.lakeColor } 
                                           colorbar={ [this.state.MinTemp,this.state.MaxTemp] }
