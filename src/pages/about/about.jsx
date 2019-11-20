@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import SidebarLayout from '../sidebarlayout/sidebarlayout';
-import ContactForm from '../contactform/contactform';
+import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
+import ContactForm from '../../components/contactform/contactform';
 
 class About extends Component {
     render() { 

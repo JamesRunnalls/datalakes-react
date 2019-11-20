@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Select from 'react-select'
 import axios from 'axios';
 import { apiUrl } from '../../../config.json';
-import SidebarLayout from '../sidebarlayout/sidebarlayout';
+import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
 import './dataportal.css';
 
 class DatasetList extends Component {

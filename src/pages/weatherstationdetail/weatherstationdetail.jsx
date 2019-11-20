@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import axios from 'axios';
-import SidebarLayout from '../sidebarlayout/sidebarlayout';
+import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
 import { apiUrl } from '../../../config.json';
 import './weatherstationdetail.css';
 

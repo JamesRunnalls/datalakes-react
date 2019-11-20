@@ -89,3 +89,25 @@
 .legend-small.hide {
     display: none;
 }
+
+.weatherstation img {
+    width: 100%;
+}
+
+.weatherstation h4 {
+    margin: 5px 0;
+}
+
+.weatherstation a {
+    color: black;
+    text-decoration: none;
+}
+
+.desc {
+    padding-bottom: 20px;
+    text-decoration: none!important;
+}
+
+.weatherstation:hover > a > h4 {
+    text-decoration: underline;
+}

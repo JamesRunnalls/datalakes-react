@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import Play from './play.svg';
-import Pause from './pause.svg';
-import Forward from './forward.svg';
-import Backward from './backward.svg';
+import Play from './img/play.svg';
+import Pause from './img/pause.svg';
+import Forward from './img/forward.svg';
+import Backward from './img/backward.svg';
 import './animationcontrols.css'
 
 class AnimationControls extends Component {

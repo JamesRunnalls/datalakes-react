@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import './App.css';
-import Header from './components/header/header';
-import Footer from './components/footer/footer';
-import Live from './components/live/live';
-import Home from './components/home/home';
-import Predictions from './components/prediction/prediction';
-import NotFound from './components/notfound/notfound';
-import DataPortal from './components/dataportal/dataportal';
-import HydrodynamicModel from './components/hydrodynamicmodel/hydrodynamicmodel';
-import WeatherStationDetail from './components/weatherstationdetail/weatherstationdetail';
-import About from './components/about/about';
-import API from './components/api/api';
-import DataDetail from './components/datadetail/datadetail';
+import Header from './format/header/header';
+import Footer from './format/footer/footer';
+import Live from './pages/live/live';
+import Home from './pages/home/home';
+import Predictions from './pages/prediction/prediction';
+import NotFound from './pages/notfound/notfound';
+import DataPortal from './pages/dataportal/dataportal';
+import HydrodynamicModel from './pages/hydrodynamicmodel/hydrodynamicmodel';
+import WeatherStationDetail from './pages/weatherstationdetail/weatherstationdetail';
+import About from './pages/about/about';
+import API from './pages/api/api';
+import DataDetail from './pages/datadetail/datadetail';
 
 class App extends Component {
   render() {

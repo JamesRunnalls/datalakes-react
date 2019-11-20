@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import SwissTopoMap from '../swisstopomap/swisstopomap';
-import SidebarLayout from '../sidebarlayout/sidebarlayout';
+import SwissTopoMap from '../../maps/swisstopomap/swisstopomap';
+import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
 import './hydrodynamicmodel.css';
-import AnimationControls from '../animationcontrols/animationcontrols';
-import SideSelect from '../sideselect/sideselect';
+import AnimationControls from '../../components/animationcontrols/animationcontrols';
+import SideSelect from '../../components/sideselect/sideselect';
 
 class Slice extends Component {
     render() { 

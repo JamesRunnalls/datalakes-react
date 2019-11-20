@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import SwissTopoMap from '../swisstopomap/swisstopomap';
-import WeatherStations from '../weatherstations/weatherstations';
-import SidebarLayout from '../sidebarlayout/sidebarlayout';
+import SwissTopoMap from '../../maps/swisstopomap/swisstopomap';
+import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
 import { apiUrl } from '../../../config.json';
 import DW from '../../../public/img/DW.svg';
 import MW from '../../../public/img/MW.svg';
@@ -14,6 +14,31 @@ import PP from '../../../public/img/PP.svg';
 import PR from '../../../public/img/PR.svg';
 import PA from '../../../public/img/PA.svg';
 import './live.css';
+
+class WeatherStation extends Component {
+    render() { 
+        var link = "/live/"+String(this.props.url);
+         return (
+             <div className="weatherstation" title="See live data">
+                <Link to={link}>
+                    <img alt={this.props.name} src={require('./img/'+this.props.imgname)} />
+                    <h4>{this.props.name}</h4>
+                    <div className="desc">{this.props.desc}</div>
+                </Link>
+            </div>
+        );
+    }
+}
+
+class WeatherStations extends Component {
+    render() { 
+          return ( 
+            <React.Fragment>
+                { this.props.datalist.map(data => <WeatherStation key={data.name} url={data.url} name={data.name} desc={data.description} imgname={data.imgname}/>) }
+            </React.Fragment>
+        );
+    }
+}
 
 class Live extends Component {
     state = {
