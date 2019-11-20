@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import L from 'leaflet';
-import './swisstopomap.css'
+import './custommap.css'
 import './leaflet.css';
 import Gradient from './gradient';
 

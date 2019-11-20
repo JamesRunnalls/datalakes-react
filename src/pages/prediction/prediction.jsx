@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import SwissTopoMap from '../../maps/swisstopomap/swisstopomap';
+import SwissTopoMap from '../../graphs/leaflet/custommap';
 import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
 import { apiUrl } from '../../../config.json';
 import './prediction.css';

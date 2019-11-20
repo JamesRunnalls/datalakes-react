@@ -5,7 +5,7 @@ import * as d3 from "d3";
 import DateSlider from "../../components/dateslider/dateslider";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import D3HeatMap from "../../graphs/heatmap/heatmap";
-import D3LineGraph from "../../graphs/linegraph/linegraph";
+import D3LineGraph from "../../graphs/d3/linegraph/linegraph";
 import { apiUrl } from '../../../config.json';
 import Sensor from "./img/sensor.svg";
 import Database from "./img/data.svg";

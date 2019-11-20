@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import SwissTopoMap from '../../maps/swisstopomap/swisstopomap';
+import SwissTopoMap from '../../graphs/leaflet/custommap';
 import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
 import './hydrodynamicmodel.css';
 import AnimationControls from '../../components/animationcontrols/animationcontrols';
