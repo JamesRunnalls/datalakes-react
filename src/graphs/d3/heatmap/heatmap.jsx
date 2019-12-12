@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
 import { format } from "date-fns";
-import { generateColorRGB } from "../../components/gradients/gradients";
+import { generateColorRGB } from "../../../components/gradients/gradients";
 import "./heatmap.css";
 
 class D3HeatMap extends Component {

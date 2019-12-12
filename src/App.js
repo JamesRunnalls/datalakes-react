@@ -13,6 +13,7 @@ import WeatherStationDetail from './pages/weatherstationdetail/weatherstationdet
 import About from './pages/about/about';
 import API from './pages/api/api';
 import DataDetail from './pages/datadetail/datadetail';
+import AddDataset from './pages/adddataset/adddataset';
 
 class App extends Component {
   render() {
@@ -33,6 +34,8 @@ class App extends Component {
                 <Route path='/API' component={API} />
                 
                 <Route path='/about' component={About} />
+
+                <Route path='/adddataset' component={AddDataset} />
                 
                 <Route path='/' exact component={Home} />
                 <Route path='/' component={NotFound} />
