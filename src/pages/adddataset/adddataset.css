@@ -155,4 +155,16 @@ form input {
       transform: rotate(360deg);
     }
   }
+
+  table.datareview{
+    width:100%;
+    margin-top:80px;
+    margin-bottom: 40px;
+  }
+
+  table.datareview th {
+    padding: 10px 0;
+    width: 16.66%;
+
+  }
   

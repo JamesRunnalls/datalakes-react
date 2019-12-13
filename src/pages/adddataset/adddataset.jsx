@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
 import "./adddataset.css";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
@@ -26,9 +26,9 @@ class AddData extends Component {
             />
           </div>
           <div id="process">
-          <div ref="loader1" className="loader">
-            <div className="lds-dual-ring"></div>Analysing file.
-          </div> 
+            <div ref="loader1" className="loader">
+              <div className="lds-dual-ring"></div>Analysing file.
+            </div>
           </div>
           <div className="buttonnav">
             <button onClick={this.analyseFile}>Analyse File</button>
@@ -40,9 +40,9 @@ class AddData extends Component {
 }
 
 class ReviewData extends Component {
-  next = e => {
+  parseData = e => {
     e.preventDefault();
-    this.props.nextStep();
+    this.props.parseData();
   };
   back = e => {
     e.preventDefault();
@@ -52,19 +52,56 @@ class ReviewData extends Component {
   render() {
     const { values, data } = this.props;
     var rows = [];
-    for (var key in data.file){
-      rows.push(<tr><td>{key}</td></tr>)
+    for (var key in data.file) {
+      rows.push(
+        <tr>
+          <td>{key}</td>
+          <td>{data.file[key].attributes.units.value}</td>
+          <td>
+            <select>
+              <option>Unix Time</option>
+              <option>Rainfall Depth</option>
+            </select>
+          </td>
+          <td>
+            <select>
+              <option>M</option>
+              <option>y</option>
+              <option>x</option>
+              <option>y2</option>
+              <option>x2</option>
+            </select>
+          </td>
+          <td>
+            <select>
+              <option>mm</option>
+              <option>seconds since 1970-01-01 00:00:00</option>
+            </select>
+          </td>
+          <td>
+            <select>
+              <option>mm</option>
+              <option>s</option>
+            </select>
+          </td>
+        </tr>
+      );
     }
 
     return (
       <React.Fragment>
         <form>
-          <table>
+          <table className="datareview">
             <tbody>
               <tr>
+                <th colSpan="2">From file</th>
+                <th colSpan="4">Confirm parse</th>
+              </tr>
+              <tr>
                 <th>Variable</th>
+                <th>Units</th>
                 <th>Parameter</th>
-                <th>Co-ordinate</th>
+                <th>Axis</th>
                 <th>Units</th>
                 <th>Short Units</th>
               </tr>
@@ -73,7 +110,7 @@ class ReviewData extends Component {
           </table>
           <div className="buttonnav">
             <button onClick={this.back}>Back</button>
-            <button onClick={this.next}>Next </button>
+            <button onClick={this.parseData}>Parse Data </button>
           </div>
         </form>
       </React.Fragment>
@@ -249,8 +286,9 @@ class ProgressBar extends Component {
 class AddDataset extends Component {
   state = {
     step: 1,
-    allowedStep: [1,1,1,1,1],
-    gitUrl: "https://renkulab.io/gitlab/james.runnalls/lexploremeteostation/blob/master/data/1A0004_LexploreMeteostationRainfall/LeXPLORE_WS_Lexplore_Weather_data.nc",
+    allowedStep: [1, 1, 1, 1, 1],
+    gitUrl:
+      "https://renkulab.io/gitlab/james.runnalls/lexploremeteostation/blob/master/data/1A0004_LexploreMeteostationRainfall/LeXPLORE_WS_Lexplore_Weather_data.nc",
     data: "",
     firstName: "",
     lastName: "",
@@ -274,20 +312,29 @@ class AddDataset extends Component {
     });
   };
 
+  parseData = () => {
+    this.renkuData();
+    this.setState({ allowedStep: [1, 2, 3, 0, 0] });
+    const { step } = this.state;
+    this.setState({
+      step: step + 1
+    });
+  }
+
   analyseFile = () => {
     const url =
       apiUrl + "/api/git/file/" + encodeURIComponent(this.state.gitUrl);
     this.getFileData(url).then(data => {
       console.log(data);
-      if (data.stdout == 0){
-        this.setState({allowedStep: [1,2,0,0,0]})
-        this.setState({ data })
+      if (data.stdout == 0) {
+        this.setState({ allowedStep: [1, 2, 0, 0, 0] });
+        this.setState({ data });
         const { step } = this.state;
         this.setState({
           step: step + 1
         });
       } else {
-        this.setState({allowedStep: [1,0,0,0,0]})
+        this.setState({ allowedStep: [1, 0, 0, 0, 0] });
       }
     });
   };
@@ -297,8 +344,21 @@ class AddDataset extends Component {
     return data;
   }
 
+  renkuData = () => {
+    const url =
+      apiUrl + "/api/git/renku/" + encodeURIComponent(this.state.gitUrl);
+    this.getRenkuData(url).then(data => {
+      console.log(data);
+    })
+  }
+
+  async getRenkuData(url) {
+    const { data } = await axios.get(url);
+    return data;
+  }
+
   setStep = step => {
-    if (step !== 0){
+    if (step !== 0) {
       this.setState({ step });
     }
   };
@@ -315,7 +375,11 @@ class AddDataset extends Component {
       case 1:
         return (
           <React.Fragment>
-            <ProgressBar step={step} setStep={this.setStep} allowedStep={allowedStep}/>
+            <ProgressBar
+              step={step}
+              setStep={this.setStep}
+              allowedStep={allowedStep}
+            />
             <AddData
               analyseFile={this.analyseFile}
               handleChange={this.handleChange}
@@ -326,10 +390,14 @@ class AddDataset extends Component {
       case 2:
         return (
           <React.Fragment>
-            <ProgressBar step={step} setStep={this.setStep} allowedStep={allowedStep} />
+            <ProgressBar
+              step={step}
+              setStep={this.setStep}
+              allowedStep={allowedStep}
+            />
             <ReviewData
               data={data}
-              nextStep={this.nextStep}
+              parseData={this.parseData}
               prevStep={this.prevStep}
               handleChange={this.handleChange}
               values={values}
@@ -339,7 +407,11 @@ class AddDataset extends Component {
       case 3:
         return (
           <React.Fragment>
-            <ProgressBar step={step} setStep={this.setStep} allowedStep={allowedStep} />
+            <ProgressBar
+              step={step}
+              setStep={this.setStep}
+              allowedStep={allowedStep}
+            />
             <ReviewLineage
               nextStep={this.nextStep}
               prevStep={this.prevStep}
@@ -351,7 +423,11 @@ class AddDataset extends Component {
       case 4:
         return (
           <React.Fragment>
-            <ProgressBar step={step} setStep={this.setStep} allowedStep={allowedStep} />
+            <ProgressBar
+              step={step}
+              setStep={this.setStep}
+              allowedStep={allowedStep}
+            />
             <AddMetadata
               nextStep={this.nextStep}
               prevStep={this.prevStep}
@@ -363,7 +439,11 @@ class AddDataset extends Component {
       case 5:
         return (
           <React.Fragment>
-            <ProgressBar step={step} setStep={this.setStep} allowedStep={allowedStep} />
+            <ProgressBar
+              step={step}
+              setStep={this.setStep}
+              allowedStep={allowedStep}
+            />
             <Publish
               prevStep={this.prevStep}
               handleChange={this.handleChange}
