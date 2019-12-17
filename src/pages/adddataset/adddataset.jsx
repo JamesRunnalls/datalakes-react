@@ -18,7 +18,7 @@ class AddDataset extends Component {
     parameters: "",
     values: {
       gitUrl:
-        "https://renkulab.io/gitlab/james.runnalls/lexploremeteostation/blob/master/data/1A0002_LexploreMeteostationWindSpeed/LeXPLORE_WS_Lexplore_Weather_data.nc"
+        "https://renkulab.io/gitlab/james.runnalls/exampleproccess/blob/master/data/1A0001_LexploreMeteostationTemperature/LeXPLORE_WS_Lexplore_Weather_data.nc"
     }
   };
 

@@ -15,6 +15,7 @@ class Publish extends Component {
       return (
         <React.Fragment>
           <form>
+            Summary
             <div className="buttonnav">
               <button onClick={this.prevStep}>Back</button>
               <button onClick={this.nextStep}>Publish </button>

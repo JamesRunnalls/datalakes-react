@@ -139,6 +139,8 @@ table.datareview th {
 .text-lineage {
   max-width: 60%;
   margin: auto;
+  width: fit-content;
+  margin-bottom: 30px;
 }
 
 .container-fluid {

@@ -15,7 +15,7 @@ class ReviewLineage extends Component {
     var content = [];
     if (renkuResponse.stdout === 0 && renkuResponse.log.data.lineage !== null) {
       content.push(
-        <div className="text-lineage">
+        <div key="success" className="text-lineage">
           <div>Lineage successfully recieved from Renku.</div>
           <div>Click next to add metadata.</div>
         </div>
@@ -23,7 +23,7 @@ class ReviewLineage extends Component {
     } else {
       if (renkuResponse.stdout === 0) {
         content.push(
-          <div className="text-lineage">
+          <div key="renku" className="text-lineage">
             File stored in <a href="https://renkulab.io/">Renku</a> but no
             lineage information available. Please add some lineage information
             below or reprocess you data using the renku run command then return
@@ -32,7 +32,7 @@ class ReviewLineage extends Component {
         );
       } else {
         content.push(
-          <div className="text-lineage">
+          <div key="notrenku" className="text-lineage">
             File not stored using <a href="https://renkulab.io/">Renku</a>.
             Please consider using <a href="https://renkulab.io/">Renku</a> to
             automatically track your files lineage. If you do not want to use
@@ -41,7 +41,7 @@ class ReviewLineage extends Component {
         );
       }
       content.push(
-        <div className="input-lineage">
+        <div key="addlineage" className="input-lineage">
           <div className="form-group">
             <label htmlFor="scriptLineage">Link to processing script</label>
             <input
