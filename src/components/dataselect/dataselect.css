@@ -1,0 +1,16 @@
+.inner__value-container {
+  position: static !important;
+}
+
+.inner__indicator-separator {
+  display: none !important;
+}
+
+.inner__single-value {
+  color: black !important;
+}
+
+.inner__dropdown-indicator {
+  padding: 0 !important;
+  padding-right: 8px !important;
+}

@@ -76,95 +76,153 @@ button {
 }
 
 .buttonnav {
-    width: 100%;
-    text-align: center;
+  width: 100%;
+  text-align: center;
 }
 
 .adddataform {
-    margin-top: 50px;
-    text-align: center;
+  text-align: center;
 }
 
 form select {
-    font-size: 14px;
-    width: 150px;
-    border: solid 1px black;
-    border-radius: 5px;
-    box-sizing: border-box;
-    padding: 3px 5px;
-    margin-bottom: 30px;
-    background-color: white;
+  font-size: 14px;
+  width: 100%;
+  border: solid 1px black;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 6px 5px;
+  margin-bottom: 0;
+  background-color: white;
 }
 
 form .form-group {
-    display: inline-block;
-    text-align: center;
-    padding: 0 20px;
-    width: 100%;
-    box-sizing: border-box;
+  display: inline-block;
+  text-align: center;
+  padding: 10px 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 form .form-group label {
-    display: block;
-    color: grey;
-    padding-bottom: 3px;
+  display: block;
+  color: grey;
+  padding-bottom: 3px;
 }
 
 form input {
-    font-size: 14px;
-    width: 100%;
-    border: solid 1px black;
-    border-radius: 5px;
-    box-sizing: border-box;
-    padding: 6px 5px;
-    margin-bottom: 30px;
-    background-color: white;
+  font-size: 14px;
+  width: 100%;
+  border: solid 1px black;
+  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 7px 5px;
+  margin-bottom: 0;
+  background-color: white;
 }
 
-.loader {
-    display: none;
-    margin-bottom: 30px;
+table.datareview {
+  width: 100%;
+  margin-bottom: 40px;
+  border-spacing: 10px;
 }
 
-.loader.show {
-    display: inline-block;
+table.datareview th {
+  padding: 5px 0;
+  width: 16.66%;
+  border-bottom: solid 1px black;
 }
 
-.lds-dual-ring {
-    display: inline-block;
-    width: 64px;
-    height: 64px;
-    margin-top: 0;
-  }
-  .lds-dual-ring:after {
-    content: " ";
-    display: block;
-    width: 46px;
-    height: 46px;
-    margin: 1px;
-    border-radius: 50%;
-    border: 5px solid #000;
-    border-color: #000 transparent #000 transparent;
-    animation: lds-dual-ring 1.2s linear infinite;
-  }
-  @keyframes lds-dual-ring {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
+.input-lineage {
+  margin: 30px 0;
+}
 
-  table.datareview{
-    width:100%;
-    margin-top:80px;
-    margin-bottom: 40px;
-  }
+.text-lineage {
+  max-width: 60%;
+  margin: auto;
+}
 
-  table.datareview th {
-    padding: 10px 0;
-    width: 16.66%;
+.container-fluid {
+  margin-bottom: 50px;
+}
 
+.error-message {
+  margin: 20px 0;
+  min-height:80px;
+}
+
+.sk-cube-grid {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 20px auto;
+}
+
+.sk-cube-grid .sk-cube {
+  width: 33%;
+  height: 33%;
+  background-color: black;
+  float: left;
+  -webkit-animation: sk-cubeGridScaleDelay 2s infinite ease-in-out;
+  animation: sk-cubeGridScaleDelay 2s infinite ease-in-out;
+}
+.sk-cube-grid .sk-cube1 {
+  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
+}
+.sk-cube-grid .sk-cube2 {
+  -webkit-animation-delay: 0.3s;
+  animation-delay: 0.3s;
+}
+.sk-cube-grid .sk-cube3 {
+  -webkit-animation-delay: 0.4s;
+  animation-delay: 0.4s;
+}
+.sk-cube-grid .sk-cube4 {
+  -webkit-animation-delay: 0.1s;
+  animation-delay: 0.1s;
+}
+.sk-cube-grid .sk-cube5 {
+  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
+}
+.sk-cube-grid .sk-cube6 {
+  -webkit-animation-delay: 0.3s;
+  animation-delay: 0.3s;
+}
+.sk-cube-grid .sk-cube7 {
+  -webkit-animation-delay: 0s;
+  animation-delay: 0s;
+}
+.sk-cube-grid .sk-cube8 {
+  -webkit-animation-delay: 0.1s;
+  animation-delay: 0.1s;
+}
+.sk-cube-grid .sk-cube9 {
+  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
+}
+
+@-webkit-keyframes sk-cubeGridScaleDelay {
+  0%,
+  70%,
+  100% {
+    -webkit-transform: scale3D(1, 1, 1);
+    transform: scale3D(1, 1, 1);
   }
-  
+  35% {
+    -webkit-transform: scale3D(0, 0, 1);
+    transform: scale3D(0, 0, 1);
+  }
+}
+
+@keyframes sk-cubeGridScaleDelay {
+  0%,
+  70%,
+  100% {
+    -webkit-transform: scale3D(1, 1, 1);
+    transform: scale3D(1, 1, 1);
+  }
+  35% {
+    -webkit-transform: scale3D(0, 0, 1);
+    transform: scale3D(0, 0, 1);
+  }
+}

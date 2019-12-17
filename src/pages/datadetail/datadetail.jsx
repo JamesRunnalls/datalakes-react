@@ -64,7 +64,7 @@ class HeatMap extends Component {
       var u = data.x.length - 1;
       for (var i = 0; i < data.x.length; i++){
           if (data.x[i] < lower){l = i}
-          if (data.x[i] > upper && u == data.x.length - 1){u = i}
+          if (data.x[i] > upper && u === data.x.length - 1){u = i}
       }
       var x = data.x.slice(l,u);
       var y = data.y;
@@ -219,7 +219,7 @@ class LineGraph extends Component {
       var u = data.x.length - 1;
       for (var i = 0; i < data.x.length; i++){
           if (data.x[i] < lower){l = i}
-          if (data.x[i] > upper && u == data.x.length - 1){u = i}
+          if (data.x[i] > upper && u === data.x.length - 1){u = i}
       }
       var x = data.x.slice(l,u);
       var y = data.y.slice(l,u);
