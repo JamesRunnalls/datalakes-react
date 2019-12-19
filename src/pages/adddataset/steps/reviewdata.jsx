@@ -1,12 +1,33 @@
 import React, { Component } from "react";
 import Fuse from "fuse.js";
-import DataSelect from '../../../components/dataselect/dataselect';
+import DataSelect from "../../../components/dataselect/dataselect";
 
 class ReviewData extends Component {
   state = {};
 
+  fuseSearch = (keys,list,find) => {
+    var options = {
+      keys: keys,
+      shouldSort: true,
+      threshold: 0.9,
+      location: 0,
+      distance: 100,
+      maxPatternLength: 32,
+      minMatchCharLength: 1
+    };
+    var fuse = new Fuse(list, options);
+    var match = find.split("_").join(" ");
+    var search = fuse.search(match);
+    var defaultValue = "";
+    if (search.length !== 0) {
+      defaultValue = search[0].name;
+    }
+    return defaultValue;
+  };
+
   componentDidMount() {
     const { values, fileInformation, parameters } = this.props;
+    console.log(fileInformation);
     var name = "";
     var unit = "";
     var att = "";
@@ -30,23 +51,8 @@ class ReviewData extends Component {
       fileUnits = "fileUnits" + i;
       this.setState({ [fileName]: name, [fileUnits]: unit });
 
-      var options = {
-        keys: ["name"],
-        shouldSort: true,
-        threshold: 0.9,
-        location: 0,
-        distance: 100,
-        maxPatternLength: 32,
-        minMatchCharLength: 1
-      };
-      var fuse = new Fuse(parameters, options);
-      var match = key.split("_").join(" ");
-      var search = fuse.search(match);
-      var defaultValue = "";
-      if (search.length !== 0) {
-        defaultValue = search[0].name;
-      }
-
+      var defaultValue = this.fuseSearch(["name"],parameters,key);
+      
       if ("unit" + i in values) {
       } else {
         this.props.initialChange("unit" + i, unit);
@@ -78,6 +84,10 @@ class ReviewData extends Component {
 
   render() {
     const { values, fileInformation, parameters } = this.props;
+    var noFiles = 0;
+    if ("folderFiles" in fileInformation) {
+      noFiles = fileInformation.folderFiles.length - 1;
+    }
     var rows = [];
     var name = "";
     var unit = "";
@@ -117,6 +127,12 @@ class ReviewData extends Component {
               onChange={this.props.handleChange("unit" + i)}
             ></input>
           </td>
+          <td>
+            <input
+              defaultValue={values["instrument" + i]}
+              onChange={this.props.handleChange("instrument" + i)}
+            ></input>
+          </td>
         </tr>
       );
       i++;
@@ -129,18 +145,24 @@ class ReviewData extends Component {
             <tbody>
               <tr>
                 <th colSpan="2">Read from file</th>
-                <th colSpan="3">Check and adjust auto-parse</th>
+                <th colSpan="4">Check and adjust auto-parse</th>
               </tr>
               <tr>
                 <th>Variable</th>
                 <th>Units</th>
-                <th>Parameter</th>
-                <th>Axis</th>
+                <th style={{ width: "25%" }}>Parameter</th>
+                <th style={{ width: "8%" }}>Axis</th>
                 <th>Units</th>
+                <th>Instrument</th>
               </tr>
               {rows}
             </tbody>
           </table>
+          {noFiles} additional files have been detected in the same folder as
+          your dataset.
+          <input type="checkbox" name="combineFiles" value="combineFiles" />
+          All the files in the folder are of consistent format and I would like
+          to emalgamate the data.
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>
             <button onClick={this.nextStep}>Parse Data </button>
