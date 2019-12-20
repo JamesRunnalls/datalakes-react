@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import "./adddataset.css";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
-import AddData from './steps/adddata';
-import ReviewData from './steps/reviewdata';
-import ReviewLineage from './steps/reviewlineage';
-import AddMetadata from './steps/addmetadata';
-import Publish from './steps/publish';
-import ProgressBar from './progressbar';
+import AddData from "./steps/adddata";
+import ReviewData from "./steps/reviewdata";
+import ReviewLineage from "./steps/reviewlineage";
+import AddMetadata from "./steps/addmetadata";
+import Publish from "./steps/publish";
+import ProgressBar from "./progressbar";
 
 class AddDataset extends Component {
   state = {
@@ -16,6 +16,11 @@ class AddDataset extends Component {
     fileInformation: "",
     renkuResponse: "",
     parameters: "",
+    organisations: "",
+    persons: "",
+    projects: "",
+    sensors: "",
+    units: "",
     values: {
       gitUrl:
         "https://renkulab.io/gitlab/james.runnalls/exampleproccess/blob/master/data/1A0001_LexploreMeteostationTemperature/LeXPLORE_WS_Lexplore_Weather_data.nc"
@@ -26,7 +31,30 @@ class AddDataset extends Component {
     const { data: parameters } = await axios.get(
       apiUrl + "/api/database/read/parameters"
     );
-    this.setState({ parameters: parameters.log });
+    console.log(parameters)
+    const { data: organisations } = await axios.get(
+      apiUrl + "/api/database/read/organisations"
+    );
+    const { data: persons } = await axios.get(
+      apiUrl + "/api/database/read/persons"
+    );
+    const { data: projects } = await axios.get(
+      apiUrl + "/api/database/read/projects"
+    );
+    const { data: sensors } = await axios.get(
+      apiUrl + "/api/database/read/sensors"
+    );
+    const { data: units } = await axios.get(
+      apiUrl + "/api/database/read/units"
+    );
+    this.setState({
+      parameters: parameters.log,
+      organisations: organisations.log,
+      persons: persons.log,
+      projects: projects.log,
+      sensors: sensors.log,
+      units: units.log
+    });
   }
 
   // 1) Process input file
@@ -59,7 +87,7 @@ class AddDataset extends Component {
     this.setState({
       step: step + 1
     });
-  }
+  };
 
   // 3) Validate lineage
 
@@ -130,8 +158,14 @@ class AddDataset extends Component {
       fileInformation,
       renkuResponse,
       values,
-      parameters
+      parameters,
+      organisations,
+      persons,
+      projects,
+      sensors,
+      units
     } = this.state;
+    const axis = [{ name: "M" }, { name: "x" }, { name: "y" }, { name: "z" }];
     switch (step) {
       case 1:
         return (
@@ -158,6 +192,9 @@ class AddDataset extends Component {
             />
             <ReviewData
               parameters={parameters}
+              axis={axis}
+              sensors={sensors}
+              units={units}
               fileInformation={fileInformation}
               nextStep={this.validateData}
               prevStep={this.prevStep}
@@ -194,9 +231,14 @@ class AddDataset extends Component {
               allowedStep={allowedStep}
             />
             <AddMetadata
+              lakes={parameters}
+              persons={persons}
+              projects={projects}
+              organisations={organisations}
               nextStep={this.validateMetadata}
               prevStep={this.prevStep}
               handleChange={this.handleChange}
+              handleSelect={this.handleSelect}
               values={values}
             />
           </React.Fragment>

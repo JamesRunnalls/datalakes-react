@@ -132,6 +132,20 @@ table.datareview th {
   border-bottom: solid 1px black;
 }
 
+table.datareview th {
+  padding: 5px 0;
+  width: 16.66%;
+  border-bottom: solid 1px black;
+}
+
+table.addmetadata {
+  margin: auto;
+}
+
+table.addmetadata th {
+  text-align: left;
+}
+
 .input-lineage {
   margin: 30px 0;
 }

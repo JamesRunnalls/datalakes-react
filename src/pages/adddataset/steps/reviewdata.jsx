@@ -5,7 +5,7 @@ import DataSelect from "../../../components/dataselect/dataselect";
 class ReviewData extends Component {
   state = {};
 
-  fuseSearch = (keys,list,find) => {
+  fuseSearch = (keys, list, find) => {
     var options = {
       keys: keys,
       shouldSort: true,
@@ -51,8 +51,8 @@ class ReviewData extends Component {
       fileUnits = "fileUnits" + i;
       this.setState({ [fileName]: name, [fileUnits]: unit });
 
-      var defaultValue = this.fuseSearch(["name"],parameters,key);
-      
+      var defaultValue = this.fuseSearch(["name"], parameters, key);
+
       if ("unit" + i in values) {
       } else {
         this.props.initialChange("unit" + i, unit);
@@ -83,7 +83,7 @@ class ReviewData extends Component {
   };
 
   render() {
-    const { values, fileInformation, parameters } = this.props;
+    const { values, fileInformation, parameters, axis, units, sensors } = this.props;
     var noFiles = 0;
     if ("folderFiles" in fileInformation) {
       noFiles = fileInformation.folderFiles.length - 1;
@@ -105,33 +105,35 @@ class ReviewData extends Component {
           <td>{unit}</td>
           <td>
             <DataSelect
+              child="name"
               dataList={parameters}
               defaultValue={values["parameter" + i]}
               onChange={this.props.handleSelect("parameter" + i)}
             />
           </td>
           <td>
-            <select
-              value={values["axis" + i]}
-              onChange={this.props.handleChange("axis" + i)}
-            >
-              <option value="M">M</option>
-              <option value="y">y</option>
-              <option value="x">x</option>
-              <option value="z">z</option>
-            </select>
+            <DataSelect
+              child="name"
+              dataList={axis}
+              defaultValue={values["axis" + i]}
+              onChange={this.props.handleSelect("axis" + i)}
+            />
           </td>
           <td>
-            <input
+            <DataSelect
+              child="name"
+              dataList={units}
               defaultValue={values["unit" + i]}
-              onChange={this.props.handleChange("unit" + i)}
-            ></input>
+              onChange={this.props.handleSelect("unit" + i)}
+            />
           </td>
           <td>
-            <input
-              defaultValue={values["instrument" + i]}
-              onChange={this.props.handleChange("instrument" + i)}
-            ></input>
+            <DataSelect
+              child="name"
+              dataList={sensors}
+              defaultValue={values["sensor" + i]}
+              onChange={this.props.handleSelect("sensor" + i)}
+            />
           </td>
         </tr>
       );
@@ -153,7 +155,7 @@ class ReviewData extends Component {
                 <th style={{ width: "25%" }}>Parameter</th>
                 <th style={{ width: "8%" }}>Axis</th>
                 <th>Units</th>
-                <th>Instrument</th>
+                <th>Sensor</th>
               </tr>
               {rows}
             </tbody>
