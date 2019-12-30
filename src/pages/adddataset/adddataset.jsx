@@ -27,11 +27,11 @@ class AddDataset extends Component {
     }
   };
 
-  async componentDidMount() {
+  getDropdowns = async () => {
     const { data: parameters } = await axios.get(
       apiUrl + "/api/database/read/parameters"
     );
-    console.log(parameters)
+    console.log(parameters);
     const { data: organisations } = await axios.get(
       apiUrl + "/api/database/read/organisations"
     );
@@ -55,6 +55,10 @@ class AddDataset extends Component {
       sensors: sensors.log,
       units: units.log
     });
+  }
+
+  componentDidMount() {
+    this.getDropdowns()
   }
 
   // 1) Process input file
@@ -202,6 +206,7 @@ class AddDataset extends Component {
               handleChange={this.handleChange}
               handleSelect={this.handleSelect}
               values={values}
+              getDropdowns={this.getDropdowns}
             />
           </React.Fragment>
         );
@@ -240,6 +245,7 @@ class AddDataset extends Component {
               handleChange={this.handleChange}
               handleSelect={this.handleSelect}
               values={values}
+              getDropdowns={this.getDropdowns}
             />
           </React.Fragment>
         );

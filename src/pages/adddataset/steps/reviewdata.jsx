@@ -1,9 +1,21 @@
 import React, { Component } from "react";
 import Fuse from "fuse.js";
 import DataSelect from "../../../components/dataselect/dataselect";
+import AddDropdownItem from "../adddropdownitem";
 
 class ReviewData extends Component {
-  state = {};
+  state = {
+    modal: false,
+    modalValue: ""
+  };
+
+  // Modal for adding to dropdown lists
+  showModal = value => {
+    this.setState({
+      modal: !this.state.modal,
+      modalValue: value
+    });
+  };
 
   fuseSearch = (keys, list, find) => {
     var options = {
@@ -26,8 +38,7 @@ class ReviewData extends Component {
   };
 
   componentDidMount() {
-    const { values, fileInformation, parameters } = this.props;
-    console.log(fileInformation);
+    const { values, fileInformation, parameters, units } = this.props;
     var name = "";
     var unit = "";
     var att = "";
@@ -51,15 +62,16 @@ class ReviewData extends Component {
       fileUnits = "fileUnits" + i;
       this.setState({ [fileName]: name, [fileUnits]: unit });
 
-      var defaultValue = this.fuseSearch(["name"], parameters, key);
+      var defaultParameter = this.fuseSearch(["name"], parameters, key);
+      var defaultUnit = this.fuseSearch(["name"], units, unit);
 
       if ("unit" + i in values) {
       } else {
-        this.props.initialChange("unit" + i, unit);
+        this.props.initialChange("unit" + i, defaultUnit);
       }
       if ("axis" + i in values) {
       } else {
-        if (defaultValue.toLowerCase().includes("time")) {
+        if (defaultParameter.toLowerCase().includes("time")) {
           this.props.initialChange("axis" + i, "x");
         } else {
           this.props.initialChange("axis" + i, "y");
@@ -67,7 +79,7 @@ class ReviewData extends Component {
       }
       if ("parameter" + i in values) {
       } else {
-        this.props.initialChange("parameter" + i, defaultValue);
+        this.props.initialChange("parameter" + i, defaultParameter);
       }
       i++;
     }
@@ -83,7 +95,17 @@ class ReviewData extends Component {
   };
 
   render() {
-    const { values, fileInformation, parameters, axis, units, sensors } = this.props;
+    const {
+      values,
+      fileInformation,
+      parameters,
+      axis,
+      units,
+      sensors,
+      getDropdowns
+    } = this.props;
+    const modalInfo = {parameter: parameters, unit: units, sensor: sensors}
+    const { modal, modalValue } = this.state;
     var noFiles = 0;
     if ("folderFiles" in fileInformation) {
       noFiles = fileInformation.folderFiles.length - 1;
@@ -105,10 +127,12 @@ class ReviewData extends Component {
           <td>{unit}</td>
           <td>
             <DataSelect
+              table="parameter"
               child="name"
               dataList={parameters}
               defaultValue={values["parameter" + i]}
               onChange={this.props.handleSelect("parameter" + i)}
+              showModal={this.showModal}
             />
           </td>
           <td>
@@ -121,18 +145,22 @@ class ReviewData extends Component {
           </td>
           <td>
             <DataSelect
+              table="unit"
               child="name"
               dataList={units}
               defaultValue={values["unit" + i]}
               onChange={this.props.handleSelect("unit" + i)}
+              showModal={this.showModal}
             />
           </td>
           <td>
             <DataSelect
+              table="sensor"
               child="name"
               dataList={sensors}
               defaultValue={values["sensor" + i]}
               onChange={this.props.handleSelect("sensor" + i)}
+              showModal={this.showModal}
             />
           </td>
         </tr>
@@ -152,8 +180,8 @@ class ReviewData extends Component {
               <tr>
                 <th>Variable</th>
                 <th>Units</th>
-                <th style={{ width: "25%" }}>Parameter</th>
-                <th style={{ width: "8%" }}>Axis</th>
+                <th style={{ width: "calc(33.33% - 55px)" }}>Parameter</th>
+                <th style={{ width: "55px" }}>Axis</th>
                 <th>Units</th>
                 <th>Sensor</th>
               </tr>
@@ -162,14 +190,13 @@ class ReviewData extends Component {
           </table>
           {noFiles} additional files have been detected in the same folder as
           your dataset.
-          <input type="checkbox" name="combineFiles" value="combineFiles" />
-          All the files in the folder are of consistent format and I would like
-          to emalgamate the data.
+          
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>
             <button onClick={this.nextStep}>Parse Data </button>
           </div>
         </form>
+        <AddDropdownItem show={modal} showModal={this.showModal} modalValue={modalValue} modalInfo={modalInfo} getDropdowns={getDropdowns}/>
       </React.Fragment>
     );
   }

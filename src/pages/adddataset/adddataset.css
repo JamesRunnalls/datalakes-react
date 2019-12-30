@@ -242,3 +242,11 @@ table.addmetadata th {
     transform: scale3D(0, 0, 1);
   }
 }
+
+.dropdownadd {
+  text-align: center;
+}
+
+.dropdownadd table {
+  margin: auto;
+}

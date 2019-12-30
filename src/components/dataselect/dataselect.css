@@ -7,10 +7,18 @@
 }
 
 .inner__single-value {
-  color: black !important;
+  color: black !important;  
 }
 
 .inner__dropdown-indicator {
   padding: 0 !important;
   padding-right: 8px !important;
+}
+
+.css-26l3qy-menu {
+  width: auto!important;
+}
+
+.inner__single-value {
+  max-width: calc(100% - 30px)!important;
 }

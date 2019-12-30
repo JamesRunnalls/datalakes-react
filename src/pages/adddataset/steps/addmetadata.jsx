@@ -1,8 +1,22 @@
 import React, { Component } from "react";
 import DataSelect from "../../../components/dataselect/dataselect";
+import AddDropdownItem from "../adddropdownitem";
 import qm from "./img/qm.svg";
 
 class AddMetadata extends Component {
+  state = {
+    modal: false,
+    modalValue: ""
+  };
+
+  // Modal for adding to dropdown lists
+  showModal = value => {
+    this.setState({
+      modal: !this.state.modal,
+      modalValue: value
+    });
+  };
+
   nextStep = e => {
     e.preventDefault();
     this.props.nextStep();
@@ -13,7 +27,14 @@ class AddMetadata extends Component {
   };
 
   render() {
-    const { values, lakes, persons, projects, organisations } = this.props;
+    const { values, lakes, persons, projects, organisations, getDropdowns } = this.props;
+    const modalInfo = {
+      person: persons,
+      project: projects,
+      lake: lakes,
+      organisation: organisations
+    };
+    const { modal, modalValue } = this.state;
     var parameters = "";
     return (
       <React.Fragment>
@@ -47,7 +68,7 @@ class AddMetadata extends Component {
                     type="number"
                     name="latitude"
                     defaultValue={values["latitude"]}
-                    style={{ width: "50%" }}
+                    style={{ width: "calc(50% - 3px)", marginRight: "3px" }}
                     placeholder="Latitude"
                     onChange={this.props.handleChange("latitude")}
                   />
@@ -55,7 +76,7 @@ class AddMetadata extends Component {
                     type="number"
                     name="longitude"
                     defaultValue={values["longitude"]}
-                    style={{ width: "50%" }}
+                    style={{ width: "calc(50% - 3px)", marginLeft: "3px" }}
                     placeholder="Longitude"
                     onChange={this.props.handleChange("longitude")}
                   />
@@ -77,10 +98,12 @@ class AddMetadata extends Component {
                 <th>Lake</th>
                 <td>
                   <DataSelect
+                    table="lake"
                     child="name"
                     dataList={lakes}
                     defaultValue={values["lake"]}
                     onChange={this.props.handleSelect("lake")}
+                    showModal={this.showModal}
                   />
                 </td>
               </tr>
@@ -100,10 +123,12 @@ class AddMetadata extends Component {
                 <th>Project</th>
                 <td>
                   <DataSelect
+                    table="project"
                     child="name"
                     dataList={projects}
                     defaultValue={values["project"]}
                     onChange={this.props.handleSelect("project")}
+                    showModal={this.showModal}
                   />
                 </td>
               </tr>
@@ -112,10 +137,12 @@ class AddMetadata extends Component {
                 <th>Person</th>
                 <td>
                   <DataSelect
+                    table="person"
                     child="name"
                     dataList={persons}
                     defaultValue={values["person"]}
                     onChange={this.props.handleSelect("person")}
+                    showModal={this.showModal}
                   />
                 </td>
               </tr>
@@ -123,10 +150,12 @@ class AddMetadata extends Component {
                 <th>Organisation</th>
                 <td>
                   <DataSelect
+                    table="organisation"
                     child="name"
                     dataList={organisations}
                     defaultValue={values["organisation"]}
                     onChange={this.props.handleSelect("organisation")}
+                    showModal={this.showModal}
                   />
                 </td>
               </tr>
@@ -137,6 +166,13 @@ class AddMetadata extends Component {
             <button onClick={this.nextStep}>Next </button>
           </div>
         </form>
+        <AddDropdownItem
+          show={modal}
+          showModal={this.showModal}
+          modalValue={modalValue}
+          modalInfo={modalInfo}
+          getDropdowns={getDropdowns}
+        />
       </React.Fragment>
     );
   }

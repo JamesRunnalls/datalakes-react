@@ -3,14 +3,18 @@ import Select from "react-select";
 import "./dataselect.css";
 
 class DataSelect extends Component {
+  addNew = table => {
+    this.props.showModal(table);
+  };
+
   render() {
     const customStyles = {
-        control: base => ({
-          ...base,
-          height: 30,
-          minHeight: 30
-        })
-      };
+      control: base => ({
+        ...base,
+        height: 30,
+        minHeight: 30
+      })
+    };
     var { dataList, defaultValue, child } = this.props;
     var list = [];
     try {
@@ -31,6 +35,14 @@ class DataSelect extends Component {
           classNamePrefix="inner"
           onChange={this.props.onChange}
           styles={customStyles}
+          noOptionsMessage={() => (
+            <a
+              style={{ cursor: "pointer" }}
+              onClick={() => this.addNew(this.props.table)}
+            >
+              Add new
+            </a>
+          )}
         />
       </div>
     );
