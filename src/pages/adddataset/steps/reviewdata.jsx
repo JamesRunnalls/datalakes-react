@@ -6,7 +6,8 @@ import AddDropdownItem from "../adddropdownitem";
 class ReviewData extends Component {
   state = {
     modal: false,
-    modalValue: ""
+    modalValue: "",
+    message: ""
   };
 
   // Modal for adding to dropdown lists
@@ -65,6 +66,11 @@ class ReviewData extends Component {
       var defaultParameter = this.fuseSearch(["name"], parameters, key);
       var defaultUnit = this.fuseSearch(["name"], units, unit);
 
+      if ("variable" + i in values) {
+      } else {
+        this.props.initialChange("variable" + i, key);
+      }
+
       if ("unit" + i in values) {
       } else {
         this.props.initialChange("unit" + i, defaultUnit);
@@ -86,8 +92,13 @@ class ReviewData extends Component {
   }
 
   nextStep = e => {
+    this.setState({ message: "Working" });
     e.preventDefault();
-    this.props.nextStep();
+    this.props.nextStep().then(data => {
+      if (data.stdout === 1) {
+        this.setState({ message: data.message });
+      }
+    });
   };
   prevStep = e => {
     e.preventDefault();
@@ -104,8 +115,26 @@ class ReviewData extends Component {
       sensors,
       getDropdowns
     } = this.props;
-    const modalInfo = {parameter: parameters, unit: units, sensor: sensors}
-    const { modal, modalValue } = this.state;
+    const modalInfo = { parameter: parameters, unit: units, sensor: sensors };
+    var { modal, modalValue, message } = this.state;
+    if (message === "Working") {
+      message = (
+        <div>
+          <div className="sk-cube-grid">
+            <div className="sk-cube sk-cube1"></div>
+            <div className="sk-cube sk-cube2"></div>
+            <div className="sk-cube sk-cube3"></div>
+            <div className="sk-cube sk-cube4"></div>
+            <div className="sk-cube sk-cube5"></div>
+            <div className="sk-cube sk-cube6"></div>
+            <div className="sk-cube sk-cube7"></div>
+            <div className="sk-cube sk-cube8"></div>
+            <div className="sk-cube sk-cube9"></div>
+          </div>
+          Parsing data to JSON format. This might take a while for large files. 
+        </div>
+      );
+    }
     var noFiles = 0;
     if ("folderFiles" in fileInformation) {
       noFiles = fileInformation.folderFiles.length - 1;
@@ -190,13 +219,19 @@ class ReviewData extends Component {
           </table>
           {noFiles} additional files have been detected in the same folder as
           your dataset.
-          
+          <div className="error-message">{message}</div>
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>
             <button onClick={this.nextStep}>Parse Data </button>
           </div>
         </form>
-        <AddDropdownItem show={modal} showModal={this.showModal} modalValue={modalValue} modalInfo={modalInfo} getDropdowns={getDropdowns}/>
+        <AddDropdownItem
+          show={modal}
+          showModal={this.showModal}
+          modalValue={modalValue}
+          modalInfo={modalInfo}
+          getDropdowns={getDropdowns}
+        />
       </React.Fragment>
     );
   }

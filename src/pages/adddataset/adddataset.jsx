@@ -31,7 +31,6 @@ class AddDataset extends Component {
     const { data: parameters } = await axios.get(
       apiUrl + "/api/database/read/parameters"
     );
-    console.log(parameters);
     const { data: organisations } = await axios.get(
       apiUrl + "/api/database/read/organisations"
     );
@@ -55,10 +54,10 @@ class AddDataset extends Component {
       sensors: sensors.log,
       units: units.log
     });
-  }
+  };
 
   componentDidMount() {
-    this.getDropdowns()
+    this.getDropdowns();
   }
 
   // 1) Process input file
@@ -83,14 +82,37 @@ class AddDataset extends Component {
   // 2) Validate data parse and get lineage from Renku
 
   validateData = async () => {
-    const url =
+    const { values, fileInformation } = this.state;
+    const { ID, location } = fileInformation;
+    const urla = apiUrl + "/api/convert/nc";
+    const urlb =
       apiUrl + "/api/git/renku/" + encodeURIComponent(this.state.values.gitUrl);
-    const { data } = await axios.get(url);
-    this.setState({ renkuResponse: data, allowedStep: [1, 2, 3, 0, 0] });
-    const { step } = this.state;
-    this.setState({
-      step: step + 1
-    });
+    var variables = [];
+    for (var i = 0; i < Object.keys(values).length; i++) {
+      if ("axis" + i in values && "variable" + i in values) {
+        variables.push({
+          variable: values["variable" + i],
+          axis: values["axis" + i]
+        });
+      }
+    }
+    const message = {
+      id: ID,
+      location: location,
+      variables: variables
+    };
+    var { data: datab } = await axios.get(urlb);
+    var { data: dataa } = await axios.post(urla, message);
+    if (dataa.stdout === 0) {
+      this.setState({ renkuResponse: datab, allowedStep: [1, 2, 3, 0, 0] });
+      const { step } = this.state;
+      this.setState({
+        step: step + 1
+      });
+    } else {
+      this.setState({ allowedStep: [1, 2, 0, 0, 0] });
+    }
+    return dataa;
   };
 
   // 3) Validate lineage
