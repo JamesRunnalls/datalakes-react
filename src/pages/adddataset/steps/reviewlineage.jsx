@@ -11,7 +11,7 @@ class ReviewLineage extends Component {
   };
 
   render() {
-    const { values, renkuResponse } = this.props;
+    const { folder, renkuResponse } = this.props;
     var content = [];
     if (renkuResponse.stdout === 0 && renkuResponse.log.data.lineage !== null) {
       content.push(
@@ -47,8 +47,8 @@ class ReviewLineage extends Component {
             <input
               id="scriptLineage"
               type="text"
-              onChange={this.props.handleChange("scriptLineage")}
-              defaultValue={values.scriptLineage}
+              onChange={this.props.handleChange("pre_script")}
+              defaultValue={folder["pre_script"]}
             />
           </div>
           <div className="form-group">
@@ -56,8 +56,8 @@ class ReviewLineage extends Component {
             <input
               id="fileLineage"
               type="text"
-              onChange={this.props.handleChange("fileLineage")}
-              defaultValue={values.fileLineage}
+              onChange={this.props.handleChange("pre_file")}
+              defaultValue={folder["pre_file"]}
             />
           </div>
         </div>

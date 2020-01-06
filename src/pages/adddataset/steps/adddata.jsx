@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
+import Loading from "../../../components/loading/loading";
 
 class AddData extends Component {
     state = {
@@ -23,23 +24,13 @@ class AddData extends Component {
     }
   
     render() {
-      const { values } = this.props;
+      const { folder } = this.props;
       var { message } = this.state;
   
       if (message === "Working") {
         message = (
           <div>
-            <div className="sk-cube-grid">
-              <div className="sk-cube sk-cube1"></div>
-              <div className="sk-cube sk-cube2"></div>
-              <div className="sk-cube sk-cube3"></div>
-              <div className="sk-cube sk-cube4"></div>
-              <div className="sk-cube sk-cube5"></div>
-              <div className="sk-cube sk-cube6"></div>
-              <div className="sk-cube sk-cube7"></div>
-              <div className="sk-cube sk-cube8"></div>
-              <div className="sk-cube sk-cube9"></div>
-            </div>
+            <Loading />
             Downloading and analysing file. This might take a while for large files. 
           </div>
         );
@@ -55,7 +46,7 @@ class AddData extends Component {
                 type="text"
                 ref="gitUrl"
                 onChange={this.props.handleChange("gitUrl")}
-                defaultValue={values.gitUrl}
+                defaultValue={folder.git}
               />
             </div>
             <div className="error-message">{message}</div>

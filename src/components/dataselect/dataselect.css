@@ -17,6 +17,7 @@
 
 .css-26l3qy-menu {
   width: auto!important;
+  min-width: 100%!important;
 }
 
 .inner__single-value {

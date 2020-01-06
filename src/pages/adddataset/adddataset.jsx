@@ -15,21 +15,35 @@ class AddDataset extends Component {
     allowedStep: [1, 1, 1, 1, 1],
     fileInformation: "",
     renkuResponse: "",
-    parameters: "",
-    organisations: "",
-    persons: "",
-    projects: "",
-    sensors: "",
-    units: "",
-    values: {
-      gitUrl:
-        "https://renkulab.io/gitlab/james.runnalls/exampleproccess/blob/master/data/1A0001_LexploreMeteostationTemperature/LeXPLORE_WS_Lexplore_Weather_data.nc"
-    }
+    dropdown: {},
+    folder: {
+      git:
+        "https://renkulab.io/gitlab/james.runnalls/exampleproccess/blob/master/data/1A0001_LexploreMeteostationTemperature/LeXPLORE_WS_Lexplore_Weather_data.nc",
+      folder: "",
+      start_time: "",
+      end_time: "",
+      latitude: "",
+      longitude: "",
+      depth_below_surface: "",
+      lake_id: "",
+      person_id: "",
+      project_id: "",
+      organisation_id: "",
+      title: "",
+      renku: "",
+      pre_file: "",
+      pre_script: ""
+    },
+    parameter_list: [],
+    files_list: []
   };
 
   getDropdowns = async () => {
     const { data: parameters } = await axios.get(
       apiUrl + "/api/database/read/parameters"
+    );
+    const { data: lakes } = await axios.get(
+      apiUrl + "/api/database/read/lakes"
     );
     const { data: organisations } = await axios.get(
       apiUrl + "/api/database/read/organisations"
@@ -47,12 +61,16 @@ class AddDataset extends Component {
       apiUrl + "/api/database/read/units"
     );
     this.setState({
-      parameters: parameters.log,
-      organisations: organisations.log,
-      persons: persons.log,
-      projects: projects.log,
-      sensors: sensors.log,
-      units: units.log
+      dropdown: {
+        lakes: lakes.log,
+        parameters: parameters.log,
+        organisations: organisations.log,
+        persons: persons.log,
+        projects: projects.log,
+        sensors: sensors.log,
+        units: units.log,
+        axis: [{ name: "M" }, { name: "x" }, { name: "y" }, { name: "z" }]
+      }
     });
   };
 
@@ -63,15 +81,16 @@ class AddDataset extends Component {
   // 1) Process input file
 
   validateFile = async () => {
-    const url =
-      apiUrl + "/api/git/file/" + encodeURIComponent(this.state.values.gitUrl);
+    var { folder, step } = this.state;
+    const url = apiUrl + "/api/git/file/" + encodeURIComponent(folder.git);
     const { data } = await axios.get(url);
     if (data.stdout === 0) {
-      this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-      this.setState({ fileInformation: data });
-      const { step } = this.state;
+      folder["folder"] = data.id
       this.setState({
-        step: step + 1
+        allowedStep: [1, 2, 0, 0, 0],
+        fileInformation: data,
+        step: step + 1,
+        folder
       });
     } else {
       this.setState({ allowedStep: [1, 0, 0, 0, 0] });
@@ -82,57 +101,52 @@ class AddDataset extends Component {
   // 2) Validate data parse and get lineage from Renku
 
   validateData = async () => {
-    const { values, fileInformation } = this.state;
-    const { ID, location } = fileInformation;
-    const urla = apiUrl + "/api/convert/nc";
-    const urlb =
-      apiUrl + "/api/git/renku/" + encodeURIComponent(this.state.values.gitUrl);
-    var variables = [];
-    for (var i = 0; i < Object.keys(values).length; i++) {
-      if ("axis" + i in values && "variable" + i in values) {
-        variables.push({
-          variable: values["variable" + i],
-          axis: values["axis" + i]
-        });
-      }
+    const { parameter_list, folder, fileInformation } = this.state;
+    const { id, location } = fileInformation;
+
+    // Lineage from Renku
+    var url = apiUrl + "/api/git/renku/" + encodeURIComponent(folder.git);
+    var { data: renkuData } = await axios.get(url);
+    folder["renku"] = renkuData.stdout;
+    if (renkuData.stdout === 0 && renkuData.log.data.lineage !== null) {
+      folder["pre_file"] = "NA";
+      folder["pre_script"] = "NA";
     }
+
+    // Send nc file to convertion api
+    url = apiUrl + "/api/convert/nc";
     const message = {
-      id: ID,
+      id: id,
       location: location,
-      variables: variables
+      variables: parameter_list
     };
-    var { data: datab } = await axios.get(urlb);
-    var { data: dataa } = await axios.post(urla, message);
-    if (dataa.stdout === 0) {
-      this.setState({ renkuResponse: datab, allowedStep: [1, 2, 3, 0, 0] });
+    var { data: conversion } = await axios.post(url, message);
+    if (conversion.stdout === 0) {
       const { step } = this.state;
       this.setState({
+        renkuResponse: renkuData,
+        allowedStep: [1, 2, 3, 0, 0],
+        folder,
         step: step + 1
       });
     } else {
       this.setState({ allowedStep: [1, 2, 0, 0, 0] });
     }
-    return dataa;
+    return conversion;
   };
 
   // 3) Validate lineage
 
   validateLineage = () => {
-    this.setState({ allowedStep: [1, 2, 3, 4, 0] });
     const { step } = this.state;
-    this.setState({
-      step: step + 1
-    });
+    this.setState({ allowedStep: [1, 2, 3, 4, 0], step: step + 1 });
   };
 
   // 4) Validate metadata
 
   validateMetadata = () => {
-    this.setState({ allowedStep: [1, 2, 3, 4, 5] });
     const { step } = this.state;
-    this.setState({
-      step: step + 1
-    });
+    this.setState({ allowedStep: [1, 2, 3, 4, 5], step: step + 1 });
   };
 
   // 5) Publish
@@ -164,16 +178,26 @@ class AddDataset extends Component {
     this.setState({ values });
   };
 
-  handleSelect = input => event => {
-    var values = this.state.values;
-    values[input] = event.value;
-    this.setState({ values });
+  handleFolderChange = input => event => {
+    var folder = this.state.folder;
+    folder[input] = event.target.value;
+    this.setState({ folder });
   };
 
-  initialChange = (input, value) => {
-    var values = this.state.values;
-    values[input] = value;
-    this.setState({ values });
+  handleParameterSelect = (a, b) => event => {
+    var parameter_list = this.state.parameter_list;
+    parameter_list[a][b] = event.value;
+    this.setState({ parameter_list });
+  };
+
+  handleFolderSelect = input => event => {
+    var folder = this.state.folder;
+    folder[input] = event.value;
+    this.setState({ folder });
+  };
+
+  initialParameterChange = (input, value) => {
+    this.setState({ [input]: value });
   };
 
   render() {
@@ -183,15 +207,12 @@ class AddDataset extends Component {
       allowedStep,
       fileInformation,
       renkuResponse,
-      values,
-      parameters,
-      organisations,
-      persons,
-      projects,
-      sensors,
-      units
+      dropdown,
+      folder,
+      parameter_list,
+      files_list
     } = this.state;
-    const axis = [{ name: "M" }, { name: "x" }, { name: "y" }, { name: "z" }];
+
     switch (step) {
       case 1:
         return (
@@ -204,7 +225,7 @@ class AddDataset extends Component {
             <AddData
               nextStep={this.validateFile}
               handleChange={this.handleChange}
-              values={values}
+              folder={folder}
             />
           </React.Fragment>
         );
@@ -217,17 +238,16 @@ class AddDataset extends Component {
               allowedStep={allowedStep}
             />
             <ReviewData
-              parameters={parameters}
-              axis={axis}
-              sensors={sensors}
-              units={units}
+              parameter_list={parameter_list}
+              parameters={dropdown.parameters}
+              axis={dropdown.axis}
+              sensors={dropdown.sensors}
+              units={dropdown.units}
               fileInformation={fileInformation}
               nextStep={this.validateData}
               prevStep={this.prevStep}
-              initialChange={this.initialChange}
-              handleChange={this.handleChange}
-              handleSelect={this.handleSelect}
-              values={values}
+              initialChange={this.initialParameterChange}
+              handleSelect={this.handleParameterSelect}
               getDropdowns={this.getDropdowns}
             />
           </React.Fragment>
@@ -241,11 +261,11 @@ class AddDataset extends Component {
               allowedStep={allowedStep}
             />
             <ReviewLineage
+              folder={folder}
               renkuResponse={renkuResponse}
               nextStep={this.validateLineage}
               prevStep={this.prevStep}
-              handleChange={this.handleChange}
-              values={values}
+              handleChange={this.handleFolderChange}
             />
           </React.Fragment>
         );
@@ -258,15 +278,15 @@ class AddDataset extends Component {
               allowedStep={allowedStep}
             />
             <AddMetadata
-              lakes={parameters}
-              persons={persons}
-              projects={projects}
-              organisations={organisations}
+              folder={folder}
+              lakes={dropdown.lakes}
+              persons={dropdown.persons}
+              projects={dropdown.projects}
+              organisations={dropdown.organisations}
               nextStep={this.validateMetadata}
               prevStep={this.prevStep}
-              handleChange={this.handleChange}
-              handleSelect={this.handleSelect}
-              values={values}
+              handleChange={this.handleFolderChange}
+              handleSelect={this.handleFolderSelect}
               getDropdowns={this.getDropdowns}
             />
           </React.Fragment>
@@ -282,8 +302,6 @@ class AddDataset extends Component {
             <Publish
               nextStep={this.publish}
               prevStep={this.prevStep}
-              handleChange={this.handleChange}
-              values={values}
             />
           </React.Fragment>
         );

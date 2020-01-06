@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Fuse from "fuse.js";
 import DataSelect from "../../../components/dataselect/dataselect";
 import AddDropdownItem from "../adddropdownitem";
+import Loading from "../../../components/loading/loading";
 
 class ReviewData extends Component {
   state = {
@@ -33,61 +34,79 @@ class ReviewData extends Component {
     var search = fuse.search(match);
     var defaultValue = "";
     if (search.length !== 0) {
-      defaultValue = search[0].name;
+      defaultValue = search[0].id;
     }
     return defaultValue;
   };
 
   componentDidMount() {
-    const { values, fileInformation, parameters, units } = this.props;
-    var name = "";
-    var unit = "";
-    var att = "";
-    var fileName = "";
-    var fileUnits = "";
-    var i = 0;
-    for (var key in fileInformation.file) {
-      name = key;
-      unit = "";
-      att = fileInformation.file[key].attributes;
-      if ("units" in att) {
-        unit = att.units.value;
-      }
-      if ("standard_name" in att) {
-        name = att["standard_name"].value;
-      }
-      if ("long_name" in att) {
-        name = att["long_name"].value;
-      }
-      fileName = "fileName" + i;
-      fileUnits = "fileUnits" + i;
-      this.setState({ [fileName]: name, [fileUnits]: unit });
+    const {
+      fileInformation,
+      parameters,
+      units,
+      sensors,
+      axis
+    } = this.props;
+    var { parameter_list, initialChange } = this.props;
+    const { file, attributes } = fileInformation;
 
-      var defaultParameter = this.fuseSearch(["name"], parameters, key);
-      var defaultUnit = this.fuseSearch(["name"], units, unit);
+    // Initial data parse and auto field matching
+    if (parameter_list.length === 0) {
+      var parseParameter = "";
+      var parseUnit = "";
+      var parseSensor = "";
+      var variableAttributes = "";
+      var variable = {};
 
-      if ("variable" + i in values) {
-      } else {
-        this.props.initialChange("variable" + i, key);
-      }
+      // Loop over variables in nc file
+      for (var key in file) {
+        parseParameter = key;
+        parseUnit = "";
+        parseSensor = "";
+        variableAttributes = file[key].attributes;
 
-      if ("unit" + i in values) {
-      } else {
-        this.props.initialChange("unit" + i, defaultUnit);
-      }
-      if ("axis" + i in values) {
-      } else {
-        if (defaultParameter.toLowerCase().includes("time")) {
-          this.props.initialChange("axis" + i, "x");
-        } else {
-          this.props.initialChange("axis" + i, "y");
+        // Look for names in nc file.
+        if ("units" in variableAttributes) {
+          parseUnit = variableAttributes["units"].value;
         }
+        if ("standard_name" in variableAttributes) {
+          parseParameter = variableAttributes["standard_name"].value;
+        }
+        if ("long_name" in variableAttributes) {
+          parseParameter = variableAttributes["long_name"].value;
+        }
+        if ("sensor" in attributes) {
+          parseSensor = attributes["sensor"].value;
+        }
+
+        // Search for matching names in database to define default values
+        var defaultParameter = this.fuseSearch(
+          ["name"],
+          parameters,
+          parseParameter
+        );
+        var defaultUnit = this.fuseSearch(["name"], units, parseUnit);
+        var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
+        var defaultAxis = "y";
+
+        // Logic for default axis assignment
+        if (defaultParameter == 1) {
+          defaultAxis = "x";
+        }
+
+        // Summarise data
+        variable = {
+          parseParameter: key,
+          parseUnit: parseUnit,
+          parseSensor: parseSensor,
+          parameter: defaultParameter,
+          unit: defaultUnit,
+          axis: defaultAxis,
+          sensor: defaultSensor
+        };
+        parameter_list.push(variable);
       }
-      if ("parameter" + i in values) {
-      } else {
-        this.props.initialChange("parameter" + i, defaultParameter);
-      }
-      i++;
+      initialChange(parameter_list)
     }
   }
 
@@ -107,94 +126,88 @@ class ReviewData extends Component {
 
   render() {
     const {
-      values,
       fileInformation,
       parameters,
       axis,
       units,
       sensors,
-      getDropdowns
+      getDropdowns,
+      parameter_list
     } = this.props;
-    const modalInfo = { parameter: parameters, unit: units, sensor: sensors };
     var { modal, modalValue, message } = this.state;
-    if (message === "Working") {
-      message = (
-        <div>
-          <div className="sk-cube-grid">
-            <div className="sk-cube sk-cube1"></div>
-            <div className="sk-cube sk-cube2"></div>
-            <div className="sk-cube sk-cube3"></div>
-            <div className="sk-cube sk-cube4"></div>
-            <div className="sk-cube sk-cube5"></div>
-            <div className="sk-cube sk-cube6"></div>
-            <div className="sk-cube sk-cube7"></div>
-            <div className="sk-cube sk-cube8"></div>
-            <div className="sk-cube sk-cube9"></div>
-          </div>
-          Parsing data to JSON format. This might take a while for large files. 
-        </div>
-      );
-    }
-    var noFiles = 0;
-    if ("folderFiles" in fileInformation) {
-      noFiles = fileInformation.folderFiles.length - 1;
-    }
+
+    // Create dynamic table
     var rows = [];
-    var name = "";
-    var unit = "";
     var i = 0;
-    for (var key in fileInformation.file) {
-      if ("fileName" + i in this.state) {
-        name = this.state["fileName" + i];
-      }
-      if ("fileUnits" + i in this.state) {
-        unit = this.state["fileUnits" + i];
-      }
+    for (var row of parameter_list) {
       rows.push(
         <tr key={"row" + i}>
-          <td>{name}</td>
-          <td>{unit}</td>
+          <td>{row.parseParameter}</td>
+          <td>{row.parseUnit}</td>
           <td>
             <DataSelect
               table="parameter"
-              child="name"
+              value="id"
+              label="name"
               dataList={parameters}
-              defaultValue={values["parameter" + i]}
-              onChange={this.props.handleSelect("parameter" + i)}
+              defaultValue={row.parameter}
+              onChange={this.props.handleSelect(i,"parameter")}
               showModal={this.showModal}
             />
           </td>
           <td>
             <DataSelect
-              child="name"
+              value="name"
+              label="name"
               dataList={axis}
-              defaultValue={values["axis" + i]}
-              onChange={this.props.handleSelect("axis" + i)}
+              defaultValue={row.axis}
+              onChange={this.props.handleSelect(i,"axis")}
             />
           </td>
           <td>
             <DataSelect
               table="unit"
-              child="name"
+              value="id"
+              label="name"
               dataList={units}
-              defaultValue={values["unit" + i]}
-              onChange={this.props.handleSelect("unit" + i)}
+              defaultValue={row.unit}
+              onChange={this.props.handleSelect(i,"unit")}
               showModal={this.showModal}
             />
           </td>
           <td>
             <DataSelect
               table="sensor"
-              child="name"
+              value="id"
+              label="name"
               dataList={sensors}
-              defaultValue={values["sensor" + i]}
-              onChange={this.props.handleSelect("sensor" + i)}
+              defaultValue={row.sensor}
+              onChange={this.props.handleSelect(i,"sensor")}
               showModal={this.showModal}
             />
           </td>
         </tr>
       );
       i++;
+    }
+
+    // Modal data
+    const modalInfo = { parameter: parameters, unit: units, sensor: sensors };
+    
+    // Loading message when parsing data
+    if (message === "Working") {
+      message = (
+        <div>
+          <Loading />
+          Parsing data to JSON format. This might take a while for large files.
+        </div>
+      );
+    }
+
+    // Number of files in folder - to be expanded in future
+    var noFiles = 0;
+    if ("folderFiles" in fileInformation) {
+      noFiles = fileInformation.folderFiles.length - 1;
     }
 
     return (

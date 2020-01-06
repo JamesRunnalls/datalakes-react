@@ -15,17 +15,17 @@ class DataSelect extends Component {
         minHeight: 30
       })
     };
-    var { dataList, defaultValue, child } = this.props;
+    var { dataList, defaultValue, value, label } = this.props;
     var list = [];
     try {
       if (dataList.length > 0) {
         list = [];
         for (var param of dataList) {
-          list.push({ value: param[child], label: param[child] });
+          list.push({ value: param[value], label: param[label] });
         }
       }
     } catch (e) {}
-    var dValue = { value: defaultValue, label: defaultValue };
+    var dValue = list.find(x => x.value === defaultValue);
     return (
       <div>
         <Select

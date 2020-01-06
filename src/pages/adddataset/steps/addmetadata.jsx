@@ -27,7 +27,15 @@ class AddMetadata extends Component {
   };
 
   render() {
-    const { values, lakes, persons, projects, organisations, getDropdowns } = this.props;
+    const {
+      values,
+      lakes,
+      persons,
+      projects,
+      organisations,
+      getDropdowns,
+      folder
+    } = this.props;
     const modalInfo = {
       person: persons,
       project: projects,
@@ -35,7 +43,6 @@ class AddMetadata extends Component {
       organisation: organisations
     };
     const { modal, modalValue } = this.state;
-    var parameters = "";
     return (
       <React.Fragment>
         <form>
@@ -43,7 +50,7 @@ class AddMetadata extends Component {
             <tbody>
               <tr>
                 <th>
-                  Unix Time
+                  Start Time
                   <a href="https://www.unixtimestamp.com/" target="_blank">
                     <img
                       src={qm}
@@ -54,10 +61,30 @@ class AddMetadata extends Component {
                 <td>
                   <input
                     type="number"
-                    name="unixtime"
-                    defaultValue={values["time"]}
+                    name="starttime"
+                    defaultValue={folder["start_time"]}
                     placeholder="Seconds since 1970-01-01 00:00:00"
-                    onChange={this.props.handleChange("time")}
+                    onChange={this.props.handleChange("start_time")}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  End Time
+                  <a href="https://www.unixtimestamp.com/" target="_blank">
+                    <img
+                      src={qm}
+                      style={{ paddingLeft: "6px", height: "14px" }}
+                    />
+                  </a>
+                </th>
+                <td>
+                  <input
+                    type="number"
+                    name="endtime"
+                    defaultValue={folder["end_time"]}
+                    placeholder="Seconds since 1970-01-01 00:00:00"
+                    onChange={this.props.handleChange("end_time")}
                   />
                 </td>
               </tr>
@@ -67,7 +94,7 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="latitude"
-                    defaultValue={values["latitude"]}
+                    defaultValue={folder["latitude"]}
                     style={{ width: "calc(50% - 3px)", marginRight: "3px" }}
                     placeholder="Latitude"
                     onChange={this.props.handleChange("latitude")}
@@ -75,7 +102,7 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="longitude"
-                    defaultValue={values["longitude"]}
+                    defaultValue={folder["longitude"]}
                     style={{ width: "calc(50% - 3px)", marginLeft: "3px" }}
                     placeholder="Longitude"
                     onChange={this.props.handleChange("longitude")}
@@ -88,9 +115,9 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="depth"
-                    defaultValue={values["depth"]}
+                    defaultValue={folder["depth"]}
                     placeholder="Meters below lake surface"
-                    onChange={this.props.handleChange("depth")}
+                    onChange={this.props.handleChange("depth_below_surface")}
                   />
                 </td>
               </tr>
@@ -99,10 +126,11 @@ class AddMetadata extends Component {
                 <td>
                   <DataSelect
                     table="lake"
-                    child="name"
+                    value="id"
+                    label="name"
                     dataList={lakes}
-                    defaultValue={values["lake"]}
-                    onChange={this.props.handleSelect("lake")}
+                    defaultValue={folder["lake"]}
+                    onChange={this.props.handleSelect("lake_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -113,7 +141,7 @@ class AddMetadata extends Component {
                   <input
                     type="text"
                     name="title"
-                    defaultValue={values["title"]}
+                    defaultValue={folder["title"]}
                     placeholder="Use a descriptive title to help others"
                     onChange={this.props.handleChange("title")}
                   />
@@ -124,10 +152,11 @@ class AddMetadata extends Component {
                 <td>
                   <DataSelect
                     table="project"
-                    child="name"
+                    value="id"
+                    label="name"
                     dataList={projects}
-                    defaultValue={values["project"]}
-                    onChange={this.props.handleSelect("project")}
+                    defaultValue={folder["project"]}
+                    onChange={this.props.handleSelect("project_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -138,10 +167,11 @@ class AddMetadata extends Component {
                 <td>
                   <DataSelect
                     table="person"
-                    child="name"
+                    value="id"
+                    label="name"
                     dataList={persons}
-                    defaultValue={values["person"]}
-                    onChange={this.props.handleSelect("person")}
+                    defaultValue={folder["person"]}
+                    onChange={this.props.handleSelect("person_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -151,10 +181,11 @@ class AddMetadata extends Component {
                 <td>
                   <DataSelect
                     table="organisation"
-                    child="name"
+                    value="id"
+                    label="name"
                     dataList={organisations}
-                    defaultValue={values["organisation"]}
-                    onChange={this.props.handleSelect("organisation")}
+                    defaultValue={folder["organisation"]}
+                    onChange={this.props.handleSelect("organisation_id")}
                     showModal={this.showModal}
                   />
                 </td>
