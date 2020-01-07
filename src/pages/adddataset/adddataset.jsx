@@ -17,9 +17,9 @@ class AddDataset extends Component {
     renkuResponse: "",
     dropdown: {},
     folder: {
+      id: "",
       git:
         "https://renkulab.io/gitlab/james.runnalls/exampleproccess/blob/master/data/1A0001_LexploreMeteostationTemperature/LeXPLORE_WS_Lexplore_Weather_data.nc",
-      folder: "",
       start_time: "",
       end_time: "",
       latitude: "",
@@ -85,7 +85,7 @@ class AddDataset extends Component {
     const url = apiUrl + "/api/git/file/" + encodeURIComponent(folder.git);
     const { data } = await axios.get(url);
     if (data.stdout === 0) {
-      folder["folder"] = data.id
+      folder["id"] = data.id;
       this.setState({
         allowedStep: [1, 2, 0, 0, 0],
         fileInformation: data,
@@ -104,13 +104,22 @@ class AddDataset extends Component {
     const { parameter_list, folder, fileInformation } = this.state;
     const { id, location } = fileInformation;
 
+    // Check all table filled
+    var filled = true;
+    for (var row of parameter_list) {
+      filled = this.noEmptyString(row);
+    }
+
     // Lineage from Renku
     var url = apiUrl + "/api/git/renku/" + encodeURIComponent(folder.git);
     var { data: renkuData } = await axios.get(url);
-    folder["renku"] = renkuData.stdout;
+    
     if (renkuData.stdout === 0 && renkuData.log.data.lineage !== null) {
+      folder["renku"] = renkuData.stdout;
       folder["pre_file"] = "NA";
       folder["pre_script"] = "NA";
+    } else {
+      folder["renku"] = 1;
     }
 
     // Send nc file to convertion api
@@ -121,8 +130,16 @@ class AddDataset extends Component {
       variables: parameter_list
     };
     var { data: conversion } = await axios.post(url, message);
-    if (conversion.stdout === 0) {
+
+    // Logic for continuing to next step
+    if (conversion.stdout === 0 && filled) {
       const { step } = this.state;
+      var { start_time, end_time, depth, longitude, latitude } = conversion.out;
+      folder["start_time"] = start_time;
+      folder["end_time"] = end_time;
+      folder["depth_below_surface"] = depth;
+      folder["longitude"] = longitude;
+      folder["latitude"] = latitude;
       this.setState({
         renkuResponse: renkuData,
         allowedStep: [1, 2, 3, 0, 0],
@@ -132,21 +149,29 @@ class AddDataset extends Component {
     } else {
       this.setState({ allowedStep: [1, 2, 0, 0, 0] });
     }
-    return conversion;
+    return [conversion, filled];
   };
 
   // 3) Validate lineage
 
   validateLineage = () => {
-    const { step } = this.state;
-    this.setState({ allowedStep: [1, 2, 3, 4, 0], step: step + 1 });
+    const { folder, step } = this.state;
+    if (folder["pre_script"] !== "" && folder["pre_file"] !== "") {
+      this.setState({ allowedStep: [1, 2, 3, 4, 0], step: step + 1 });
+    } else {
+      return true;
+    }
   };
 
   // 4) Validate metadata
 
   validateMetadata = () => {
-    const { step } = this.state;
-    this.setState({ allowedStep: [1, 2, 3, 4, 5], step: step + 1 });
+    const { folder, step } = this.state;
+    if (this.noEmptyString(folder)) {
+      this.setState({ allowedStep: [1, 2, 3, 4, 5], step: step + 1 });
+    } else {
+      return true;
+    }
   };
 
   // 5) Publish
@@ -168,6 +193,17 @@ class AddDataset extends Component {
     if (step !== 0) {
       this.setState({ step });
     }
+  };
+
+  // Check nothing in dictionary is empty string
+  noEmptyString = dict => {
+    var out = true;
+    for (var key of Object.keys(dict)) {
+      if (dict[key] === "") {
+        out = false;
+      }
+    }
+    return out;
   };
 
   // Handle changes to inputs
@@ -302,6 +338,9 @@ class AddDataset extends Component {
             <Publish
               nextStep={this.publish}
               prevStep={this.prevStep}
+              parameter_list={parameter_list}
+              folder={folder}
+              dropdown={dropdown}
             />
           </React.Fragment>
         );

@@ -6,7 +6,8 @@ import qm from "./img/qm.svg";
 class AddMetadata extends Component {
   state = {
     modal: false,
-    modalValue: ""
+    modalValue: "",
+    message: ""
   };
 
   // Modal for adding to dropdown lists
@@ -19,7 +20,10 @@ class AddMetadata extends Component {
 
   nextStep = e => {
     e.preventDefault();
-    this.props.nextStep();
+    var data = this.props.nextStep();
+    if (data){
+      this.setState({ message: "Please complete all the fields." });
+    }
   };
   prevStep = e => {
     e.preventDefault();
@@ -28,7 +32,6 @@ class AddMetadata extends Component {
 
   render() {
     const {
-      values,
       lakes,
       persons,
       projects,
@@ -42,7 +45,7 @@ class AddMetadata extends Component {
       lake: lakes,
       organisation: organisations
     };
-    const { modal, modalValue } = this.state;
+    const { modal, modalValue, message } = this.state;
     return (
       <React.Fragment>
         <form>
@@ -129,7 +132,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={lakes}
-                    defaultValue={folder["lake"]}
+                    defaultValue={folder["lake_id"]}
                     onChange={this.props.handleSelect("lake_id")}
                     showModal={this.showModal}
                   />
@@ -155,7 +158,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={projects}
-                    defaultValue={folder["project"]}
+                    defaultValue={folder["project_id"]}
                     onChange={this.props.handleSelect("project_id")}
                     showModal={this.showModal}
                   />
@@ -170,7 +173,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={persons}
-                    defaultValue={folder["person"]}
+                    defaultValue={folder["person_id"]}
                     onChange={this.props.handleSelect("person_id")}
                     showModal={this.showModal}
                   />
@@ -184,7 +187,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={organisations}
-                    defaultValue={folder["organisation"]}
+                    defaultValue={folder["organisation_id"]}
                     onChange={this.props.handleSelect("organisation_id")}
                     showModal={this.showModal}
                   />
@@ -192,6 +195,7 @@ class AddMetadata extends Component {
               </tr>
             </tbody>
           </table>
+          <div className="error-message">{message}</div>
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>
             <button onClick={this.nextStep}>Next </button>

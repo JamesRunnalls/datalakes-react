@@ -40,13 +40,7 @@ class ReviewData extends Component {
   };
 
   componentDidMount() {
-    const {
-      fileInformation,
-      parameters,
-      units,
-      sensors,
-      axis
-    } = this.props;
+    const { fileInformation, parameters, units, sensors, axis } = this.props;
     var { parameter_list, initialChange } = this.props;
     const { file, attributes } = fileInformation;
 
@@ -61,8 +55,8 @@ class ReviewData extends Component {
       // Loop over variables in nc file
       for (var key in file) {
         parseParameter = key;
-        parseUnit = "";
-        parseSensor = "";
+        parseUnit = "NA";
+        parseSensor = "NA";
         variableAttributes = file[key].attributes;
 
         // Look for names in nc file.
@@ -106,7 +100,7 @@ class ReviewData extends Component {
         };
         parameter_list.push(variable);
       }
-      initialChange(parameter_list)
+      initialChange(parameter_list);
     }
   }
 
@@ -114,8 +108,10 @@ class ReviewData extends Component {
     this.setState({ message: "Working" });
     e.preventDefault();
     this.props.nextStep().then(data => {
-      if (data.stdout === 1) {
-        this.setState({ message: data.message });
+      if (data[1] === false) {
+        this.setState({ message: "Please complete all the fields." });
+      } else if (data[0].stdout === 1) {
+        this.setState({ message: "Parse failed please try again." });
       }
     });
   };
@@ -151,7 +147,7 @@ class ReviewData extends Component {
               label="name"
               dataList={parameters}
               defaultValue={row.parameter}
-              onChange={this.props.handleSelect(i,"parameter")}
+              onChange={this.props.handleSelect(i, "parameter")}
               showModal={this.showModal}
             />
           </td>
@@ -161,7 +157,7 @@ class ReviewData extends Component {
               label="name"
               dataList={axis}
               defaultValue={row.axis}
-              onChange={this.props.handleSelect(i,"axis")}
+              onChange={this.props.handleSelect(i, "axis")}
             />
           </td>
           <td>
@@ -171,7 +167,7 @@ class ReviewData extends Component {
               label="name"
               dataList={units}
               defaultValue={row.unit}
-              onChange={this.props.handleSelect(i,"unit")}
+              onChange={this.props.handleSelect(i, "unit")}
               showModal={this.showModal}
             />
           </td>
@@ -182,7 +178,7 @@ class ReviewData extends Component {
               label="name"
               dataList={sensors}
               defaultValue={row.sensor}
-              onChange={this.props.handleSelect(i,"sensor")}
+              onChange={this.props.handleSelect(i, "sensor")}
               showModal={this.showModal}
             />
           </td>
@@ -193,13 +189,20 @@ class ReviewData extends Component {
 
     // Modal data
     const modalInfo = { parameter: parameters, unit: units, sensor: sensors };
-    
+
     // Loading message when parsing data
+    var notification = "";
     if (message === "Working") {
-      message = (
-        <div>
+      notification = (
+        <div className="loading">
           <Loading />
           Parsing data to JSON format. This might take a while for large files.
+        </div>
+      );
+    } else if (message !== "") {
+      notification = (
+        <div>
+          {message}
         </div>
       );
     }
@@ -232,7 +235,7 @@ class ReviewData extends Component {
           </table>
           {noFiles} additional files have been detected in the same folder as
           your dataset.
-          <div className="error-message">{message}</div>
+          <div className="error-message">{notification}</div>
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>
             <button onClick={this.nextStep}>Parse Data </button>

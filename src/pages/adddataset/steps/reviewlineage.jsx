@@ -1,9 +1,16 @@
 import React, { Component } from "react";
 
 class ReviewLineage extends Component {
+  state = {
+    message: ""
+  };
+
   nextStep = e => {
     e.preventDefault();
-    this.props.nextStep();
+    var data = this.props.nextStep();
+    if (data) {
+      this.setState({ message: "Please complete all the fields." });
+    }
   };
   prevStep = e => {
     e.preventDefault();
@@ -12,6 +19,7 @@ class ReviewLineage extends Component {
 
   render() {
     const { folder, renkuResponse } = this.props;
+    const { message } = this.state;
     var content = [];
     if (renkuResponse.stdout === 0 && renkuResponse.log.data.lineage !== null) {
       content.push(
@@ -67,6 +75,7 @@ class ReviewLineage extends Component {
       <React.Fragment>
         <form>
           {content}
+          <div className="error-message">{message}</div>
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>
             <button onClick={this.nextStep}>Next </button>

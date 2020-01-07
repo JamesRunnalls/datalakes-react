@@ -29,7 +29,7 @@ class AddData extends Component {
   
       if (message === "Working") {
         message = (
-          <div>
+          <div className="loading">
             <Loading />
             Downloading and analysing file. This might take a while for large files. 
           </div>

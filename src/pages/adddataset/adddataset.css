@@ -68,8 +68,7 @@ button {
   border: solid 1px black;
   border-radius: 5px;
   background-color: white;
-  margin-right: 15px;
-  margin-top: 5px;
+  margin: 5px;
   cursor: pointer;
   padding: 4px 8px;
   width: 120px;
@@ -146,6 +145,43 @@ table.addmetadata th {
   text-align: left;
 }
 
+table.parameter {
+  width: 650px;
+  max-width: 100%;
+  margin: auto;
+  margin-bottom: 40px;
+}
+
+table.parameter th {
+  padding: 5px 0;
+  border-bottom: solid 1px black;
+}
+
+
+table.metadata {
+  width: 650px;
+  max-width: 100%;
+  margin: auto;
+  margin-bottom: 40px;
+  table-layout:fixed;
+  overflow: hidden;
+}
+
+table.metadata th {
+  width:50%;
+  text-align: right;
+  padding-right: 10px;
+  box-sizing: border-box;
+}
+
+table.metadata td {
+  width:50%;
+  text-align: left;
+  padding-left: 10px;
+  box-sizing: border-box;
+  word-wrap: break-word;
+}
+
 .input-lineage {
   margin: 30px 0;
 }
@@ -165,6 +201,11 @@ table.addmetadata th {
   margin: 20px 0;
   min-height:80px;
   text-align: center;
+  color: red;
+}
+
+.loading {
+  color: black;
 }
 
 .dropdownadd {
@@ -173,4 +214,8 @@ table.addmetadata th {
 
 .dropdownadd table {
   margin: auto;
+}
+
+.publish {
+  text-align: center;
 }
