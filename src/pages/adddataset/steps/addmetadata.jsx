@@ -120,7 +120,7 @@ class AddMetadata extends Component {
                     name="depth"
                     defaultValue={folder["depth"]}
                     placeholder="Meters below lake surface"
-                    onChange={this.props.handleChange("depth_below_surface")}
+                    onChange={this.props.handleChange("depth")}
                   />
                 </td>
               </tr>

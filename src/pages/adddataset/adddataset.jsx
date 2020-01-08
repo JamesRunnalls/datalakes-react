@@ -24,7 +24,7 @@ class AddDataset extends Component {
       end_time: "",
       latitude: "",
       longitude: "",
-      depth_below_surface: "",
+      depth: "",
       lake_id: "",
       person_id: "",
       project_id: "",
@@ -137,7 +137,7 @@ class AddDataset extends Component {
       var { start_time, end_time, depth, longitude, latitude } = conversion.out;
       folder["start_time"] = start_time;
       folder["end_time"] = end_time;
-      folder["depth_below_surface"] = depth;
+      folder["depth"] = depth;
       folder["longitude"] = longitude;
       folder["latitude"] = latitude;
       this.setState({
@@ -176,8 +176,17 @@ class AddDataset extends Component {
 
   // 5) Publish
 
-  publish = () => {
-    alert("Published");
+  publish = async () => {
+    const { folder, parameter_list } = this.state;
+    var url = apiUrl + "/api/adddataset";
+    const message = {
+      folder: folder,
+      parameter_list: parameter_list
+    };
+    var { data } = await axios.post(url, message);
+    if (data.stdout === 0){
+      window.location.href = '/data/'+folder.id;
+    }
   };
 
   // Progress Bar
