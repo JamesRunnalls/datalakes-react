@@ -269,7 +269,7 @@ class AddDataset extends Component {
             />
             <AddData
               nextStep={this.validateFile}
-              handleChange={this.handleChange}
+              handleChange={this.handleFolderChange}
               folder={folder}
             />
           </React.Fragment>

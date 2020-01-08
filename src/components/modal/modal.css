@@ -14,12 +14,14 @@
   /* Modal Content/Box */
   .modal-content {
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
-    padding: 20px;
-    width: 960px; /* Could be more or less, depending on screen size */
-    max-width: 100%;
-    min-height: 500px;
-    box-sizing: border-box;
+    padding-bottom: 60px;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+  }
+
+  .modal-content span {
+    padding: 10px;
   }
   
   /* The Close Button */

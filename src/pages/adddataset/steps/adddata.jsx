@@ -45,7 +45,7 @@ class AddData extends Component {
                 id="gitUrl"
                 type="text"
                 ref="gitUrl"
-                onChange={this.props.handleChange("gitUrl")}
+                onChange={this.props.handleChange("git")}
                 defaultValue={folder.git}
               />
             </div>
