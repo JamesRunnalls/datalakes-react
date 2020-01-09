@@ -19,8 +19,8 @@ class AddData extends Component {
   
     componentDidMount() {
       // Put cursor in input box.
-      ReactDOM.findDOMNode(this.refs.gitUrl).focus();
-      ReactDOM.findDOMNode(this.refs.gitUrl).select();
+      ReactDOM.findDOMNode(this.refs.git).focus();
+      ReactDOM.findDOMNode(this.refs.git).select();
     }
   
     render() {
@@ -40,11 +40,11 @@ class AddData extends Component {
         <React.Fragment>
           <form className="adddataform">
             <div className="form-group">
-              <label htmlFor="gitUrl">Link to Git File</label>
+              <label htmlFor="git">Link to Git File</label>
               <input
-                id="gitUrl"
+                id="git"
                 type="text"
-                ref="gitUrl"
+                ref="git"
                 onChange={this.props.handleChange("git")}
                 defaultValue={folder.git}
               />

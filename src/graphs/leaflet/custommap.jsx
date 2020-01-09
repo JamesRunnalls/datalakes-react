@@ -170,9 +170,10 @@ class SwissTopoMap extends Component {
       }
 
     return <React.Fragment>
-              <div id="map">
+              <div id="map" className="">
                 <div ref="loader" className="map-loader"><div className="lds-dual-ring"></div></div>
                 <div title="View user guide" onClick={this.toggle.bind(this)} className="help">?</div>
+                <div title="Full screen" className="fullscreen">f</div>
                 <div className={helpContainer}>
                   <div onClick={this.toggle.bind(this)} className="help-top" title="Click to hide user guide">
                     <h3>
