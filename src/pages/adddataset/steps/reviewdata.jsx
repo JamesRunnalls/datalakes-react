@@ -40,7 +40,8 @@ class ReviewData extends Component {
   };
 
   componentDidMount() {
-    const { fileInformation, parameters, units, sensors, axis } = this.props;
+    const { fileInformation, dropdown } = this.props;
+    const { parameter, sensor } = dropdown;
     var { parameter_list, initialChange } = this.props;
     const { file, attributes } = fileInformation;
 
@@ -76,15 +77,23 @@ class ReviewData extends Component {
         // Search for matching names in database to define default values
         var defaultParameter = this.fuseSearch(
           ["name"],
-          parameters,
+          parameter,
           parseParameter
         );
-        var defaultUnit = this.fuseSearch(["name"], units, parseUnit);
-        var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
+        
+        var defaultSensor = this.fuseSearch(["name"], sensor, parseSensor);
         var defaultAxis = "y";
 
+        // Fallback to parameter units if none provided in nc file
+        var defaultUnit
+        if (parseUnit === "NA"){
+          defaultUnit = parameter.find(x => x.id === defaultParameter).unit;
+        } else {
+          defaultUnit = parseUnit;
+        }
+
         // Logic for default axis assignment
-        if (defaultParameter == 1) {
+        if (defaultParameter === 1) {
           defaultAxis = "x";
         }
 
@@ -123,19 +132,79 @@ class ReviewData extends Component {
   render() {
     const {
       fileInformation,
-      parameters,
-      axis,
-      units,
-      sensors,
+      dropdown,
       getDropdowns,
-      parameter_list
+      parameter_list,
+      handleChange,
+      handleSelect
     } = this.props;
+    const { parameter, sensor, axis } = dropdown;
     var { modal, modalValue, message } = this.state;
 
     // Create dynamic table
     var rows = [];
     var i = 0;
+    var unit;
+    var time = [{ name: "seconds since 1970-01-01 00:00:00" }];
+    var depth = [{ name: "m" }];
+    var longitude = [{ name: "degrees" }];
+    var latitude = [{ name: "degrees" }];
     for (var row of parameter_list) {
+      // Logic to restrict key parameter units
+      if (row.parameter === 1) {
+        // Time
+        unit = (
+          <DataSelect
+            value="name"
+            label="name"
+            dataList={time}
+            defaultValue={"seconds since 1970-01-01 00:00:00"}
+            onChange={handleSelect(i, "unit")}
+          />
+        );
+      } else if (row.parameter === 2) {
+        // Depth
+        unit = (
+          <DataSelect
+            value="name"
+            label="name"
+            dataList={depth}
+            defaultValue={"m"}
+            onChange={handleSelect(i, "unit")}
+          />
+        );
+      } else if (row.parameter === 3) {
+        // Longitude
+        unit = (
+          <DataSelect
+            value="name"
+            label="name"
+            dataList={longitude}
+            defaultValue={"degrees"}
+            onChange={handleSelect(i, "unit")}
+          />
+        );
+      } else if (row.parameter === 4) {
+        // Latitude
+        unit = (
+          <DataSelect
+            value="name"
+            label="name"
+            dataList={latitude}
+            defaultValue={"degrees"}
+            onChange={handleSelect(i, "unit")}
+          />
+        );
+      } else {
+        unit = (
+          <input
+            type="text"
+            name="unit"
+            defaultValue={row.unit}
+            onChange={handleChange(i, "unit")}
+          />
+        );
+      }
       rows.push(
         <tr key={"row" + i}>
           <td>{row.parseParameter}</td>
@@ -145,9 +214,9 @@ class ReviewData extends Component {
               table="parameter"
               value="id"
               label="name"
-              dataList={parameters}
+              dataList={parameter}
               defaultValue={row.parameter}
-              onChange={this.props.handleSelect(i, "parameter")}
+              onChange={handleSelect(i, "parameter")}
               showModal={this.showModal}
             />
           </td>
@@ -157,28 +226,18 @@ class ReviewData extends Component {
               label="name"
               dataList={axis}
               defaultValue={row.axis}
-              onChange={this.props.handleSelect(i, "axis")}
+              onChange={handleSelect(i, "axis")}
             />
           </td>
-          <td>
-            <DataSelect
-              table="unit"
-              value="id"
-              label="name"
-              dataList={units}
-              defaultValue={row.unit}
-              onChange={this.props.handleSelect(i, "unit")}
-              showModal={this.showModal}
-            />
-          </td>
+          <td>{unit}</td>
           <td>
             <DataSelect
               table="sensor"
               value="id"
               label="name"
-              dataList={sensors}
+              dataList={sensor}
               defaultValue={row.sensor}
-              onChange={this.props.handleSelect(i, "sensor")}
+              onChange={handleSelect(i, "sensor")}
               showModal={this.showModal}
             />
           </td>
@@ -188,7 +247,7 @@ class ReviewData extends Component {
     }
 
     // Modal data
-    const modalInfo = { parameter: parameters, unit: units, sensor: sensors };
+    const modalInfo = { parameter: parameter, sensor: sensor };
 
     // Loading message when parsing data
     var notification = "";
@@ -200,11 +259,7 @@ class ReviewData extends Component {
         </div>
       );
     } else if (message !== "") {
-      notification = (
-        <div>
-          {message}
-        </div>
-      );
+      notification = <div>{message}</div>;
     }
 
     // Number of files in folder - to be expanded in future

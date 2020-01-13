@@ -24,10 +24,10 @@ class Publish extends Component {
     for (var row of parameter_list) {
       rows.push(
         <tr key={"row" + i}>
-          <td>{this.getDropdownLabel("parameters",row.parameter)}</td>
+          <td>{this.getDropdownLabel("parameter",row.parameter)}</td>
           <td>{row.axis}</td>
-          <td>{this.getDropdownLabel("units",row.unit)}</td>
-          <td>{this.getDropdownLabel("sensors",row.sensor)}</td>
+          <td>{row.unit}</td>
+          <td>{this.getDropdownLabel("sensor",row.sensor)}</td>
         </tr>
       );
       i++;
@@ -82,7 +82,7 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Lake</th>
-              <td>{this.getDropdownLabel("lakes",folder["lake_id"])}</td>
+              <td>{this.getDropdownLabel("lake",folder["lake_id"])}</td>
             </tr>
             <tr>
               <th>Title</th>
@@ -90,16 +90,24 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Project</th>
-              <td>{this.getDropdownLabel("projects",folder["project_id"])}</td>
+              <td>{this.getDropdownLabel("project",folder["project_id"])}</td>
             </tr>
 
             <tr>
               <th>Person</th>
-              <td>{this.getDropdownLabel("persons",folder["person_id"])}</td>
+              <td>{this.getDropdownLabel("person",folder["person_id"])}</td>
             </tr>
             <tr>
               <th>Organisation</th>
-              <td>{this.getDropdownLabel("organisations",folder["organisation_id"])}</td>
+              <td>{this.getDropdownLabel("organisation",folder["organisation_id"])}</td>
+            </tr>
+            <tr>
+              <th>License</th>
+              <td>{this.getDropdownLabel("license",folder["license_id"])}</td>
+            </tr>
+            <tr>
+              <th>Citation</th>
+              <td>{folder["citation"]}</td>
             </tr>
             <tr>
               <th>Renku</th>

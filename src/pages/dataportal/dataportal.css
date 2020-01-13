@@ -1,164 +1,218 @@
 .dataset {
-    padding: 15px 0;
-    border-bottom: solid 1px black;
+  padding: 15px 0;
+  border-bottom: solid 1px rgb(169, 169, 169);
 }
 
 .dataset:hover > a > .text-title {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .dataset .text {
-    display: inline-block;
-    margin-left: 10px;
-    max-width: calc(100% - 50px);
-    cursor: pointer;
-    text-decoration: none;
-    color: black;
+  display: inline-block;
+  margin-left: 10px;
+  max-width: calc(100% - 50px);
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
 }
 
 .dataset .text .text-title {
-    font-weight: bold;
-    padding-bottom: 5px;
+  font-weight: bold;
+  padding-bottom: 5px;
 }
 
 input.SearchBar {
-    font-size: 16px;
-    width: 100%;
-    border: none;
-    border-bottom: solid 1px black;
-    box-sizing: border-box;
-    padding: 6px 15px 6px 43px;
-    margin-bottom: 20px;
-    background: url("img/search.svg") top left no-repeat;
-    background-position: 10px;
-    background-size: 25px;
-    outline: none;
+  font-size: 16px;
+  width: 100%;
+  border: solid 1px rgb(169, 169, 169);
+  box-sizing: border-box;
+  padding: 3px 15px 3px 10px;
+  margin-bottom: 3px;
+  background: url(/static/media/search.24bedc74.svg) top right no-repeat;
 }
 
 .checkbox {
-    width: 12px;
-    height: 12px;
-    display: inline-block;
-    margin: 5px;
-    cursor: pointer;
-    border: solid 1px black;
-    vertical-align: top;
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin: 5px;
+  cursor: pointer;
+  border: solid 1px black;
+  vertical-align: top;
 }
 
 .checkbox:hover {
-    border: solid 1px grey;
-    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+  border: solid 1px grey;
+  box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
 }
 
 .checkbox.checked {
-    background-color:black;
+  background-color: black;
 }
 
 .download-multiple-title {
-    font-size: 16px;
-    font-weight: 700;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .selected-data-list {
-    max-height: 60px;
-    overflow: auto;
+  max-height: 60px;
+  overflow: auto;
 }
 
 .MultipleDownload button {
-    border: solid 1px black;
-    border-radius: 5px;
-    background-color: white;
-    margin-right:15px;
-    margin-top: 5px;
-    cursor: pointer;
-    padding: 4px 8px;
-    width: 120px;
+  border: solid 1px black;
+  border-radius: 5px;
+  background-color: white;
+  margin-right: 15px;
+  margin-top: 5px;
+  cursor: pointer;
+  padding: 4px 8px;
+  width: 120px;
 }
 
 .MultipleDownload button:hover {
-    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+  box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
 }
 
 .download-container {
-    z-index: 9999;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgb(255,255,255);
-    display: none;
+  z-index: 9999;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(255, 255, 255);
+  display: none;
 }
 
 .download-container.show {
-    display: block;
+  display: block;
 }
 
 .datalist {
-    display: none;
+  display: none;
 }
 
 .datalist.show {
-    display: block;
+  display: block;
 }
 
 .download-close {
-    width: 25px;
-    font-family: "Lucida Console", Monaco, monospace;
-    font-weight: 700;
-    font-size: 40px;
-    display: inline-block;
-    text-align: center;
-    cursor: pointer;
-    margin-right: 10px;
+  width: 25px;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: 700;
+  font-size: 40px;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  margin-right: 10px;
 }
 
 .download-title {
-   display: inline-block;
+  display: inline-block;
 }
 
 .download-top span {
-    float: right;
-    font-size: 18px;
+  float: right;
+  font-size: 18px;
 }
 
 .download-top {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .download-top h3 {
-    border-bottom: 1px solid #C8C6BF;
-    padding: 0 0 5px;
-    margin: 0 0 16px;
-    line-height: 20px;
+  border-bottom: 1px solid #c8c6bf;
+  padding: 0 0 5px;
+  margin: 0 0 16px;
+  line-height: 20px;
 }
 
 .download-content {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
 }
 
 .multi-select {
-    padding: 5px 0;
-   
+  padding: 5px 0;
 }
 
 .inner__control {
-    border-color: black!important;
-    cursor: text!important;
+  border-color: black !important;
+  cursor: text !important;
 }
 
 .inner__control:hover {
-    box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+  box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
 }
 
 .inner__indicator.inner__dropdown-indicator {
-    color: black!important;
+  color: black !important;
 }
 
 .inner__indicator.inner__clear-indicator {
+  cursor: pointer;
+}
+
+table.sortbar {
+  width: 100%;
+  table-layout: fixed;
+  margin-bottom: 10px;
+}
+
+table.sortbar .numberofdatasets {
+}
+
+table.sortbar .numberofselected {
+  text-align: center;
+}
+
+table.sortbar .sortby {
+  text-align: right;
+}
+
+table.sortbar .sortby select {
+  display: inline-block;
+  margin-right: -2px;
+  background-color: white;
+  margin-left: 5px;
+}
+
+.characteristics :hover {
+    font-weight: bold;
     cursor: pointer;
+}
+
+.characteristics {
+    border-bottom: 1px solid #c8c6bf;
+    padding-bottom: 16px;
+}
+
+/* Filter Box */
+
+.filterbox {
+    padding: 16px 0px;
+    border-bottom: 1px solid #c8c6bf;
+}
+
+.filterbox .toprow {
+    cursor: pointer;
+    line-height: 22px;
+}
+
+.filterbox .title {
+    display: inline-block;
+}
+
+.filterbox .symbol {
+    float: right;
+    font-size: 22px;
+}
+
+.filterbox .content {
+    padding-top: 10px;
 }

@@ -21,7 +21,7 @@ class AddMetadata extends Component {
   nextStep = e => {
     e.preventDefault();
     var data = this.props.nextStep();
-    if (data){
+    if (data) {
       this.setState({ message: "Please complete all the fields." });
     }
   };
@@ -31,19 +31,14 @@ class AddMetadata extends Component {
   };
 
   render() {
-    const {
-      lakes,
-      persons,
-      projects,
-      organisations,
-      getDropdowns,
-      folder
-    } = this.props;
+    const { dropdown, getDropdowns, folder } = this.props;
+    const { lake, person, project, organisation, license } = dropdown;
     const modalInfo = {
-      person: persons,
-      project: projects,
-      lake: lakes,
-      organisation: organisations
+      person: person,
+      project: project,
+      lake: lake,
+      organisation: organisation,
+      license: license
     };
     const { modal, modalValue, message } = this.state;
     return (
@@ -58,6 +53,7 @@ class AddMetadata extends Component {
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}
+                      alt="Information on Unix Time"
                     />
                   </a>
                 </th>
@@ -78,6 +74,7 @@ class AddMetadata extends Component {
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}
+                      alt="Information on Unix Time"
                     />
                   </a>
                 </th>
@@ -131,7 +128,7 @@ class AddMetadata extends Component {
                     table="lake"
                     value="id"
                     label="name"
-                    dataList={lakes}
+                    dataList={lake}
                     defaultValue={folder["lake_id"]}
                     onChange={this.props.handleSelect("lake_id")}
                     showModal={this.showModal}
@@ -157,7 +154,7 @@ class AddMetadata extends Component {
                     table="project"
                     value="id"
                     label="name"
-                    dataList={projects}
+                    dataList={project}
                     defaultValue={folder["project_id"]}
                     onChange={this.props.handleSelect("project_id")}
                     showModal={this.showModal}
@@ -172,7 +169,7 @@ class AddMetadata extends Component {
                     table="person"
                     value="id"
                     label="name"
-                    dataList={persons}
+                    dataList={person}
                     defaultValue={folder["person_id"]}
                     onChange={this.props.handleSelect("person_id")}
                     showModal={this.showModal}
@@ -186,10 +183,45 @@ class AddMetadata extends Component {
                     table="organisation"
                     value="id"
                     label="name"
-                    dataList={organisations}
+                    dataList={organisation}
                     defaultValue={folder["organisation_id"]}
                     onChange={this.props.handleSelect("organisation_id")}
                     showModal={this.showModal}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  License
+                  <a href="https://choosealicense.com/licenses/" target="_blank">
+                    <img
+                      src={qm}
+                      style={{ paddingLeft: "6px", height: "14px" }}
+                      alt="Information on licenses"
+                    />
+                  </a>
+                </th>
+                <td>
+                  <DataSelect
+                    table="license"
+                    value="id"
+                    label="name"
+                    dataList={license}
+                    defaultValue={folder["license_id"]}
+                    onChange={this.props.handleSelect("license_id")}
+                    showModal={this.showModal}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>Citation</th>
+                <td>
+                  <input
+                    type="text"
+                    name="citation"
+                    defaultValue={folder["citation"]}
+                    placeholder="How should others reference your data"
+                    onChange={this.props.handleChange("citation")}
                   />
                 </td>
               </tr>

@@ -37,14 +37,3 @@ main {
     min-height: calc(100vh - 120px);
   }
 }
-
-select {
-  font-size: 16px;
-  width: 100%;
-  border: solid 1px black;
-  border-radius: 5px;
-  box-sizing: border-box;
-  padding: 6px 15px;
-  margin-bottom: 20px;
-  background-color: white;
-}

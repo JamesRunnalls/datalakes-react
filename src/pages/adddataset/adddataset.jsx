@@ -32,45 +32,20 @@ class AddDataset extends Component {
       title: "",
       renku: "",
       pre_file: "",
-      pre_script: ""
+      pre_script: "",
+      license_id: "",
+      citation: ""
     },
     parameter_list: [],
     files_list: []
   };
 
   getDropdowns = async () => {
-    const { data: parameters } = await axios.get(
-      apiUrl + "/api/database/read/parameters"
-    );
-    const { data: lakes } = await axios.get(
-      apiUrl + "/api/database/read/lakes"
-    );
-    const { data: organisations } = await axios.get(
-      apiUrl + "/api/database/read/organisations"
-    );
-    const { data: persons } = await axios.get(
-      apiUrl + "/api/database/read/persons"
-    );
-    const { data: projects } = await axios.get(
-      apiUrl + "/api/database/read/projects"
-    );
-    const { data: sensors } = await axios.get(
-      apiUrl + "/api/database/read/sensors"
-    );
-    const { data: units } = await axios.get(
-      apiUrl + "/api/database/read/units"
+    const { data: dropdown } = await axios.get(
+      apiUrl + "/api/database/dropdowns"
     );
     this.setState({
-      dropdown: {
-        lakes: lakes.log,
-        parameters: parameters.log,
-        organisations: organisations.log,
-        persons: persons.log,
-        projects: projects.log,
-        sensors: sensors.log,
-        units: units.log,
-        axis: [{ name: "M" }, { name: "x" }, { name: "y" }, { name: "z" }]
-      }
+      dropdown
     });
   };
 
@@ -229,6 +204,12 @@ class AddDataset extends Component {
     this.setState({ folder });
   };
 
+  handleParameterChange = (a, b) => event => {
+    var parameter_list = this.state.parameter_list;
+    parameter_list[a][b] = event.target.value;
+    this.setState({ parameter_list });
+  }
+
   handleParameterSelect = (a, b) => event => {
     var parameter_list = this.state.parameter_list;
     parameter_list[a][b] = event.value;
@@ -284,15 +265,13 @@ class AddDataset extends Component {
             />
             <ReviewData
               parameter_list={parameter_list}
-              parameters={dropdown.parameters}
-              axis={dropdown.axis}
-              sensors={dropdown.sensors}
-              units={dropdown.units}
+              dropdown = {dropdown}
               fileInformation={fileInformation}
               nextStep={this.validateData}
               prevStep={this.prevStep}
               initialChange={this.initialParameterChange}
               handleSelect={this.handleParameterSelect}
+              handleChange={this.handleParameterChange}
               getDropdowns={this.getDropdowns}
             />
           </React.Fragment>
@@ -324,10 +303,7 @@ class AddDataset extends Component {
             />
             <AddMetadata
               folder={folder}
-              lakes={dropdown.lakes}
-              persons={dropdown.persons}
-              projects={dropdown.projects}
-              organisations={dropdown.organisations}
+              dropdown = {dropdown}
               nextStep={this.validateMetadata}
               prevStep={this.prevStep}
               handleChange={this.handleFolderChange}
