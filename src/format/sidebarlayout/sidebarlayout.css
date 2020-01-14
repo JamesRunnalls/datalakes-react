@@ -19,9 +19,12 @@
 }
 
 .rightcontent .scroll {
+  overflow: hidden;
+  height: 420px;
+}
+
+.rightcontent .scroll:hover {
   overflow: auto;
-  height: -webkit-fill-available;
-  max-height: 400px;
 }
 
 .righthead span {
@@ -135,7 +138,6 @@
   vertical-align: top;
   max-width: 100%;
   box-sizing: border-box;
-  height: 500px;
   overflow: auto;
   position: relative;
 }
@@ -149,6 +151,5 @@
   box-sizing: border-box;
   z-index: 9999;
   float: right;
-  height: 500px;
   position: relative;
 }

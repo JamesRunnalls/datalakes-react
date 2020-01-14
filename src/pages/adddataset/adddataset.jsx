@@ -235,8 +235,7 @@ class AddDataset extends Component {
       renkuResponse,
       dropdown,
       folder,
-      parameter_list,
-      files_list
+      parameter_list
     } = this.state;
 
     switch (step) {
@@ -265,7 +264,7 @@ class AddDataset extends Component {
             />
             <ReviewData
               parameter_list={parameter_list}
-              dropdown = {dropdown}
+              dropdown={dropdown}
               fileInformation={fileInformation}
               nextStep={this.validateData}
               prevStep={this.prevStep}
@@ -303,7 +302,7 @@ class AddDataset extends Component {
             />
             <AddMetadata
               folder={folder}
-              dropdown = {dropdown}
+              dropdown={dropdown}
               nextStep={this.validateMetadata}
               prevStep={this.prevStep}
               handleChange={this.handleFolderChange}

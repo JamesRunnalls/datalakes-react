@@ -14,7 +14,8 @@ class DatasetList extends Component {
       parameters,
       selected,
       onSelectDataset,
-      datalistclass
+      datalistclass,
+      getLabel
     } = this.props;
     if (list.length > 0) {
       return (
@@ -28,6 +29,7 @@ class DatasetList extends Component {
                 dataset={dataset}
                 dropdown={dropdown}
                 parameters={parameters}
+                getLabel={getLabel}
               />
             ))}
           </div>
@@ -45,11 +47,6 @@ class DatasetList extends Component {
 }
 
 class Dataset extends Component {
-  getLabel = (input, id) => {
-    const { dropdown } = this.props;
-    return dropdown[input].find(x => x.id === id).name;
-  };
-
   getParameters = id => {
     const { parameters } = this.props;
     return parameters.filter(x => x.folder_id === id);
@@ -67,7 +64,7 @@ class Dataset extends Component {
   };
 
   render() {
-    const { dataset, selected, onSelectDataset } = this.props;
+    const { dataset, selected, onSelectDataset, getLabel } = this.props;
     var url = "/data/" + dataset.id;
     var params = this.getParameters(dataset.id);
     params = params.filter(x => x.name !== "Time");
@@ -94,13 +91,13 @@ class Dataset extends Component {
               Parameters: {params.map(param => param.name).join(" | ")}{" "}
             </div>
             <div>
-              {this.getLabel("lake", dataset.lake_id)} |{" "}
+              {getLabel("lake", dataset.lake_id)} |{" "}
               {this.parseDate(dataset.start_time)} to{" "}
               {this.parseDate(dataset.end_time)}
             </div>
             <div>
-              License: {this.getLabel("license", dataset.license_id)} |
-              Downloads: {dataset.downloads} | Last Modified:{" "}
+              License: {getLabel("license", dataset.license_id)} | Downloads:{" "}
+              {dataset.downloads} | Last Modified:{" "}
               {this.parseDate(dataset.lastmodified)}
             </div>
           </div>
@@ -148,14 +145,22 @@ class FilterBox extends Component {
 class FilterBoxInner extends Component {
   state = {};
   render() {
-    const { params } = this.props;
-
+    var { params, checkbox, cat, filters, table } = this.props;
     return (
       <React.Fragment>
         <div id="filterboxinner" className="">
           {params.map(param => (
-            <div key={param.name}>
-              <input type="checkbox" className="checkboxfilter"></input>
+            <div
+              key={param.name}
+              onClick={() => checkbox(param.id, param.name, cat, table)}
+              className="filterboxinner"
+            >
+              <input
+                type="checkbox"
+                className="checkboxfilter"
+                checked={param.name in filters}
+                readOnly
+              ></input>
               {param.name + " "}({param.count})
             </div>
           ))}
@@ -165,24 +170,34 @@ class FilterBoxInner extends Component {
   }
 }
 
+class FilterBar extends Component {
+  render() {
+    const { filters, removeFilter } = this.props;
+    return (
+      <div className="filterbar">
+        {Object.keys(filters).map(filter => (
+          <div
+            key={filter}
+            className="filterbar-item"
+            onClick={() => removeFilter(filter)}
+            title="Remove filter"
+          >
+            <div className="filterbar-text">{filter}</div>
+            <div className="filterbar-x">&#10005;</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+}
+
 class DataPortal extends Component {
   state = {
-    metafilters: [],
-    parafilters: [],
+    filters: {},
     search: "",
     datasets: [],
     parameters: [],
-    selected: [],
-    addClass: false
-  };
-
-  getDropdowns = async () => {
-    const { data: dropdown } = await axios.get(
-      apiUrl + "/api/database/dropdowns"
-    );
-    this.setState({
-      dropdown
-    });
+    selected: []
   };
 
   async componentDidMount() {
@@ -198,8 +213,18 @@ class DataPortal extends Component {
     this.setState({ datasets, parameters });
   }
 
-  toggle = () => {
-    this.setState({ addClass: !this.state.addClass });
+  getLabel = (input, id) => {
+    const { dropdown } = this.state;
+    return dropdown[input].find(x => x.id === id).name;
+  };
+
+  getDropdowns = async () => {
+    const { data: dropdown } = await axios.get(
+      apiUrl + "/api/database/dropdowns"
+    );
+    this.setState({
+      dropdown
+    });
   };
 
   searchDatasets = event => {
@@ -221,26 +246,70 @@ class DataPortal extends Component {
     this.setState({ selected: [] });
   };
 
-  handleFilter = (selectedOption, parent) => {
-    var filters = this.state.filters;
-    if (selectedOption === null) {
-      filters = filters.filter(item => item.key !== parent);
-    } else {
-      filters = filters.filter(item => item.key !== parent);
-      filters.push({ key: parent, value: selectedOption.value });
+  removeFilter = filter => {
+    var { filters } = this.state;
+    if (filter in filters) {
+      delete filters[filter];
     }
-    this.setState({ filters: filters });
+    this.setState({ filters });
   };
 
-  characteristicCount = type => {
-    const { parameters } = this.state;
-    return parameters.filter(x => x.characteristic === type).length;
+  checkbox = (id, name, cat, table) => {
+    var { filters } = this.state;
+    if (name in filters) {
+      delete filters[name];
+    } else {
+      filters[name] = { id: id, category: cat, set: table };
+    }
+    this.setState({ filters });
   };
 
-  parameterCount = name => {
-    const { parameters } = this.state;
-    return parameters.filter(x => x.name === name).length;
+  count = (input, name, parameters) => {
+    return parameters.filter(x => x[input] === name).length;
   };
+
+  filterList = (params, name, exclude, label) => {
+    var distinct = [];
+    var dp = [...new Set(params.map(x => x[name]))];
+    for (var p of dp) {
+      if (p !== exclude) {
+        var namelabel = p;
+        if (name.includes("id")) namelabel = this.getLabel(label, p);
+        distinct.push({
+          id: p,
+          name: namelabel,
+          count: this.count(name, p, params)
+        });
+      }
+    }
+    distinct.sort((a, b) => {
+      return b.count - a.count;
+    });
+    return distinct;
+  };
+
+  filterDataSet = (fDatasets,filters,parameters) => {
+    const filterData = (data, filter, parameters) => {
+      if (filter.set === "datasets") {
+        return data.filter(item => item[filter.category] === filter.id);
+      } else if (filter.set === "parameters") {
+        return data.filter(item => parameters.filter(x => x[filter.category] === filter.id && x.folder_id === item.id).length > 0);
+      } else {
+        return data;
+      }
+    };
+    if (Object.keys(filters).length > 0) {
+      var tDatasets;
+      for (var l of [...new Set(Object.values(filters).map(filter => filter.category))]){
+        tDatasets = [];
+        for (var f of Object.values(filters).filter(filter => filter.category === l)) {
+          tDatasets = tDatasets.concat(filterData(fDatasets, f, parameters));
+        }
+        fDatasets = [...new Set(tDatasets)];
+      }
+    }
+    return { fDatasets: fDatasets }
+  }
 
   render() {
     document.title = "Data Portal - Datalakes";
@@ -254,35 +323,28 @@ class DataPortal extends Component {
     } = this.state;
 
     // Filter by filters
-    var filteredData = datasets;
-    //const filterData = (data, f) => {
-    //  return data.filter(item => item.filters[f.key] === f.value);
-    //};
-    //for (var f of filters) {
-    //  filteredData = filterData(filteredData, f);
-    //}
+    var fDatasets = datasets;
+    var fParams = parameters;
+    var { fDatasets } = this.filterDataSet(fDatasets,filters,parameters);
+    fParams = fParams.filter(param => fDatasets.filter(data => data.id == param.folder_id).length > 0);
 
     // Filter by search
-    //var lowercasedSearch = search.toLowerCase();
-    //filteredData = filteredData.filter(item => {
-    //  return String(Object.values(item.filters) + "," + item.label)
-    //    .toLowerCase()
-    //    .includes(lowercasedSearch);
-    //});
-
-    const filter = <div></div>;
+    var lowercasedSearch = search.toLowerCase();
+    fDatasets = fDatasets.filter(item => {
+      console.log(
+        fParams
+          .filter(x => x.folder_id === item.id)
+          .map(y => Object.values(y).toString())
+      );
+      return String(Object.values(item))
+        .toLowerCase()
+        .includes(lowercasedSearch);
+    });
 
     // Parameter filtering
-    var distintParameters = [];
-    var dp = [...new Set(parameters.map(x => x.name))];
-    for (var p of dp) {
-      if (p !== "Time"){
-        distintParameters.push({ name: p, count: this.parameterCount(p) });
-      }
-    }
-    distintParameters.sort((a, b) => {
-      return b.count - a.count;
-    });
+    var dParams = this.filterList(fParams, "parameter_id", 1, "parameter");
+    var dLake = this.filterList(fDatasets, "lake_id", "", "lake");
+    var dChar = this.filterList(fParams, "characteristic", "", "characterstic");
 
     return (
       <React.Fragment>
@@ -291,6 +353,39 @@ class DataPortal extends Component {
           sidebartitle="Filters"
           left={
             <React.Fragment>
+              <div className="sortbar">
+                <div
+                  className="sortbar-selected"
+                  title="Download multiple datasets"
+                >
+                  {selected.length} selected of {fDatasets.length} datasets
+                </div>
+                <div
+                  className="sortbar-x"
+                  title="Clear selected datasets"
+                  onClick={this.clearSelected}
+                >
+                  &#10005;
+                </div>
+                <select title="Sort by">
+                  <option>Most Recent</option>
+                  <option>Downloads</option>
+                </select>
+              </div>
+              <FilterBar filters={filters} removeFilter={this.removeFilter} />
+              <DatasetList
+                selected={this.state.selected}
+                list={fDatasets}
+                parameters={fParams}
+                onSelectDataset={this.selectDataset}
+                datalistclass={"datalist show"}
+                dropdown={dropdown}
+                getLabel={this.getLabel}
+              />
+            </React.Fragment>
+          }
+          rightNoScroll={
+            <React.Fragment>
               <input
                 onChange={this.searchDatasets}
                 className="SearchBar"
@@ -298,52 +393,42 @@ class DataPortal extends Component {
                 type="search"
                 ref="search"
               ></input>
-              <table className="sortbar">
-                <tbody>
-                  <tr>
-                    <td className="numberofdatasets">
-                      {filteredData.length} Datasets
-                    </td>
-                    <td className="numberofselected">
-                      {selected.length} Selected
-                    </td>
-                    <td className="sortby">
-                      Sort By
-                      <select>
-                        <option>Most Recent</option>
-                        <option>Downloads</option>
-                      </select>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div className="filterlist">{filter}</div>
-              <DatasetList
-                selected={this.state.selected}
-                list={filteredData}
-                parameters={parameters}
-                onSelectDataset={this.selectDataset}
-                datalistclass={"datalist show"}
-                dropdown={dropdown}
-              />
-            </React.Fragment>
-          }
-          right={
-            <React.Fragment>
               <div className="characteristics">
-                <div>All ({parameters.length})</div>
-                <div>Physical ({this.characteristicCount("Physical")})</div>
-                <div>Chemical ({this.characteristicCount("Chemical")})</div>
-                <div>Biological ({this.characteristicCount("Biological")})</div>
+                <FilterBoxInner
+                  checkbox={this.checkbox}
+                  cat="characteristic"
+                  params={dChar}
+                  filters={filters}
+                  table="parameters"
+                />
               </div>
               <FilterBox
                 title="Parameters"
-                content={<FilterBoxInner params={distintParameters} />}
+                content={
+                  <FilterBoxInner
+                    checkbox={this.checkbox}
+                    cat="parameter_id"
+                    params={dParams}
+                    filters={filters}
+                    table="parameters"
+                  />
+                }
                 preopen="true"
               />
               <FilterBox title="Time" content="ff" />
               <FilterBox title="Location" content="ff" />
-              <FilterBox title="Lake" content="ff" />
+              <FilterBox
+                title="Lake"
+                content={
+                  <FilterBoxInner
+                    checkbox={this.checkbox}
+                    cat="lake_id"
+                    params={dLake}
+                    filters={filters}
+                    table="datasets"
+                  />
+                }
+              />
               <FilterBox title="Other" content="ff" />
             </React.Fragment>
           }

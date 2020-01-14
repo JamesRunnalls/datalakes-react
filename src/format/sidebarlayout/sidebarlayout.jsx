@@ -44,9 +44,6 @@ class SidebarLayout extends Component {
           leftClass.push('full');
           
         }
-        var rightNoScroll = "";
-        if ("rightNoScroll" in this.props) {rightNoScroll = this.props.rightNoScroll}
-
          return ( 
              <React.Fragment>
               <div className={rightClass.join(' ')} id="rightcontainer">
@@ -54,11 +51,8 @@ class SidebarLayout extends Component {
                       <h3><div className="sidebartitle">{this.props.sidebartitle}</div> <span id="closeside"> > </span></h3>
                   </div>
                   <div className="rightcontent">
-                    {rightNoScroll}
-                    <div className="scroll">
-                      {this.props.right}
-                    </div>
-                      
+                  {("rightNoScroll" in this.props) && this.props.rightNoScroll}
+                  {("right" in this.props) && <div className="scroll">{this.props.right}</div>}
                   </div>
               </div>
               <div className={leftClass.join(' ')} id="leftcontainer">
