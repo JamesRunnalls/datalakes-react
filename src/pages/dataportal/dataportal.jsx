@@ -5,6 +5,7 @@ import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import "./dataportal.css";
+import MapSelect from "../../graphs/leaflet/mapselect.jsx";
 
 class DatasetList extends Component {
   render() {
@@ -107,6 +108,26 @@ class Dataset extends Component {
   }
 }
 
+class PopupBox extends Component {
+  render() {
+    const { title, fun, state } = this.props;
+    var symbol;
+    if (state) {
+      symbol = "-";
+    } else {
+      symbol = "+";
+    }
+    return (
+      <div className="filterbox">
+        <div className="toprow" onClick={fun}>
+          <div className="title">{title}</div>
+          <span className="symbol">{symbol}</span>
+        </div>
+      </div>
+    );
+  }
+}
+
 class FilterBox extends Component {
   state = {
     open: false
@@ -197,7 +218,10 @@ class DataPortal extends Component {
     search: "",
     datasets: [],
     parameters: [],
-    selected: []
+    selected: [],
+    sortby: "az",
+    download: false,
+    map: false
   };
 
   async componentDidMount() {
@@ -216,6 +240,18 @@ class DataPortal extends Component {
   getLabel = (input, id) => {
     const { dropdown } = this.state;
     return dropdown[input].find(x => x.id === id).name;
+  };
+
+  setSelect = event => {
+    this.setState({ sortby: event.target.value });
+  }
+
+  download = () => {
+    this.setState({ download: !this.state.download });
+  };
+
+  map = () => {
+    this.setState({ map: !this.state.map });
   };
 
   getDropdowns = async () => {
@@ -268,7 +304,11 @@ class DataPortal extends Component {
     return parameters.filter(x => x[input] === name).length;
   };
 
-  filterList = (params, name, exclude, label) => {
+  sortDownloads = dataset => {
+    return dataset
+  }
+
+  filterList = (params, name, label, exclude = "") => {
     var distinct = [];
     var dp = [...new Set(params.map(x => x[name]))];
     for (var p of dp) {
@@ -288,28 +328,62 @@ class DataPortal extends Component {
     return distinct;
   };
 
-  filterDataSet = (fDatasets,filters,parameters) => {
+  sortDatasets = (dataset,sortby) => {
+    if (sortby === "az") {
+      dataset.sort((a,b) => {
+        return a.title - b.title;
+      });
+    } else if (sortby === "downloads") {
+      dataset.sort((a,b) => {
+        return b.downloads - a.downloads;
+      });
+    } else if (sortby === "modified"){
+      dataset.sort((a,b) => {
+        return new Date(b.lastmodified) - new Date(a.lastmodified);
+      });
+    }
+    return dataset
+  }
+
+  filterDataSet = (dataset, filters, parameters, avoid = "") => {
     const filterData = (data, filter, parameters) => {
       if (filter.set === "datasets") {
         return data.filter(item => item[filter.category] === filter.id);
       } else if (filter.set === "parameters") {
-        return data.filter(item => parameters.filter(x => x[filter.category] === filter.id && x.folder_id === item.id).length > 0);
+        return data.filter(
+          item =>
+            parameters.filter(
+              x => x[filter.category] === filter.id && x.folder_id === item.id
+            ).length > 0
+        );
       } else {
         return data;
       }
     };
+
     if (Object.keys(filters).length > 0) {
       var tDatasets;
-      for (var l of [...new Set(Object.values(filters).map(filter => filter.category))]){
+      var category = [
+        ...new Set(Object.values(filters).map(filter => filter.category))
+      ].filter(cat => cat !== avoid); // List of catagories in filters
+      for (var l of category) {
         tDatasets = [];
-        for (var f of Object.values(filters).filter(filter => filter.category === l)) {
-          tDatasets = tDatasets.concat(filterData(fDatasets, f, parameters));
+        for (var f of Object.values(filters).filter(
+          filter => filter.category === l
+        )) {
+          tDatasets = tDatasets.concat(filterData(dataset, f, parameters));
         }
-        fDatasets = [...new Set(tDatasets)];
+        dataset = [...new Set(tDatasets)];
       }
     }
-    return { fDatasets: fDatasets }
-  }
+    return dataset;
+  };
+
+  filterParameters = (dataset, params) => {
+    return params.filter(
+      param => dataset.filter(data => data.id == param.folder_id).length > 0 && param.parameter_id !== 1
+    );
+  };
 
   render() {
     document.title = "Data Portal - Datalakes";
@@ -319,20 +393,20 @@ class DataPortal extends Component {
       datasets,
       selected,
       dropdown,
-      parameters
+      parameters,
+      sortby,
+      download,
+      map
     } = this.state;
 
     // Filter by filters
-    var fDatasets = datasets;
-    var fParams = parameters;
-    var { fDatasets } = this.filterDataSet(fDatasets,filters,parameters);
-    fParams = fParams.filter(param => fDatasets.filter(data => data.id == param.folder_id).length > 0);
-
+    var fDatasets = this.filterDataSet(datasets, filters, parameters);
+    
     // Filter by search
     var lowercasedSearch = search.toLowerCase();
     fDatasets = fDatasets.filter(item => {
       console.log(
-        fParams
+        parameters
           .filter(x => x.folder_id === item.id)
           .map(y => Object.values(y).toString())
       );
@@ -340,11 +414,24 @@ class DataPortal extends Component {
         .toLowerCase()
         .includes(lowercasedSearch);
     });
-
+  
     // Parameter filtering
-    var dParams = this.filterList(fParams, "parameter_id", 1, "parameter");
-    var dLake = this.filterList(fDatasets, "lake_id", "", "lake");
-    var dChar = this.filterList(fParams, "characteristic", "", "characterstic");
+    var fParams = this.filterParameters(fDatasets, parameters);
+    const dataP = this.filterParameters(
+      this.filterDataSet(datasets, filters, parameters, "parameter_id"),
+      parameters
+    );
+    const dataL = this.filterDataSet(datasets, filters, parameters, "lake_id");
+    const dataC = this.filterParameters(
+      this.filterDataSet(datasets, filters, parameters, "characteristic"),
+      parameters
+    );
+    var dParams = this.filterList(dataP, "parameter_id", "parameter", 1);
+    var dLake = this.filterList(dataL, "lake_id", "lake");
+    var dChar = this.filterList(dataC, "characteristic", "characterstic");
+
+    // Sort by
+    var fDatasets = this.sortDatasets(fDatasets,sortby);
 
     return (
       <React.Fragment>
@@ -357,6 +444,7 @@ class DataPortal extends Component {
                 <div
                   className="sortbar-selected"
                   title="Download multiple datasets"
+                  onClick={this.download}
                 >
                   {selected.length} selected of {fDatasets.length} datasets
                 </div>
@@ -367,12 +455,22 @@ class DataPortal extends Component {
                 >
                   &#10005;
                 </div>
-                <select title="Sort by">
-                  <option>Most Recent</option>
-                  <option>Downloads</option>
+                <select title="Sort by" onChange={this.setSelect} defaultValue={sortby}>
+                  <option value="az">A-Z</option>
+                  <option value="modified">Modified</option>
+                  <option value="downloads">Downloads</option>
                 </select>
               </div>
               <FilterBar filters={filters} removeFilter={this.removeFilter} />
+
+              <div className={download ? "popup" : "hidepopup"}>
+                <h3>Download </h3>
+              </div>
+
+              <div className={map ? "popup" : "hidepopup"} title="Hold ctrl and drag with your mouse to select custom area">
+                <MapSelect datasets={fDatasets}/>
+              </div>
+
               <DatasetList
                 selected={this.state.selected}
                 list={fDatasets}
@@ -415,8 +513,8 @@ class DataPortal extends Component {
                 }
                 preopen="true"
               />
-              <FilterBox title="Time" content="ff" />
-              <FilterBox title="Location" content="ff" />
+              <FilterBox title="Time" content="Coming soon" />
+              <PopupBox title="Location" fun={this.map} state={map} />
               <FilterBox
                 title="Lake"
                 content={
@@ -429,7 +527,7 @@ class DataPortal extends Component {
                   />
                 }
               />
-              <FilterBox title="Other" content="ff" />
+              <FilterBox title="Other" content="Coming soon" />
             </React.Fragment>
           }
         />

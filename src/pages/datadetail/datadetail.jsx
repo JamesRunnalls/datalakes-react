@@ -699,11 +699,7 @@ class DataDetail extends Component {
       ],
       preview: [
         "subnav-item",
-        <Preview
-          data={data}
-          getLabel={this.getLabel}
-          parameters={parameters}
-        />
+        <Preview data={data} getLabel={this.getLabel} parameters={parameters} />
       ],
       download: [
         "subnav-item",
@@ -729,7 +725,6 @@ class DataDetail extends Component {
       } else {
         menu.linegraph[0] = "subnav-item";
       }
-      menu.linegraph[0] = "subnav-item";
     }
     if (selection !== "") {
       menu[selection][0] = "subnav-item active";
@@ -740,7 +735,7 @@ class DataDetail extends Component {
     } else {
       return (
         <React.Fragment>
-          <h1>{dataset.title}</h1>
+          <h1>{dataset.title ? dataset.title : "Loading Data..."}</h1>
           <DataSubMenu
             menu={menu}
             updateSelectedState={this.updateSelectedState}
