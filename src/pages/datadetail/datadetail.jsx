@@ -349,41 +349,41 @@ class Preview extends Component {
   render() {
     const { data, parameters, getLabel } = this.props;
     var inner = [];
-    var axis = [];
-
     const xparam = parameters.find(x => x.axis === "x");
     const yparam = parameters.find(y => y.axis === "y");
     const xlabel = getLabel("parameter", xparam.parameter_id),
       ylabel = getLabel("parameter", yparam.parameter_id),
       xunits = xparam.unit,
       yunits = yparam.unit;
-
-    axis.push(<div key="xaxis">X-axis: {xlabel + " (" + xunits + ")"}</div>);
-    axis.push(<div key="yaxis">Y-axis: {ylabel + " (" + yunits + ")"}</div>);
     inner = [
       <tr key="h">
-        <th>x</th>
-        <th>y</th>
+        <th>1</th>
+        <td>{xlabel + " (" + xunits + ")"}</td>
+        <td>{ylabel + " (" + yunits + ")"}</td>
+        <td></td><td></td><td></td><td></td><td></td>
       </tr>
     ];
     for (var l = 0; l < Math.min(200, data.y.length); l++) {
       inner.push(
         <tr key={"h" + l}>
+          <th>{l+2}</th>
           <td>{data.x[l]}</td>
           <td>{data.y[l]}</td>
+          <td></td><td></td><td></td><td></td><td></td>
         </tr>
       );
     }
 
     return (
       <React.Fragment>
-        <div className="preview-flat">
-          <b>Data is flattened for this preview.</b>
-          {axis}
-        </div>
         <div className="preview-table">
           <table>
-            <tbody>{inner}</tbody>
+            <tbody>
+              <tr>
+              <th></th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th>
+              </tr>
+              {inner}
+            </tbody>
           </table>
         </div>
       </React.Fragment>

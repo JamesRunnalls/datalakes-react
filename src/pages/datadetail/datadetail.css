@@ -63,16 +63,16 @@
   cursor: pointer;
   padding: 5px 10px;
   border: 1px solid white;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid #c8c6bf;
 }
 
 .data-subnav .subnav-item:hover {
-  border: 1px solid black;
+  border: 1px solid #c8c6bf;
   transition: border 0.5s ease;
 }
 
 .data-subnav .subnav-item.active {
-  border: 1px solid black;
+  border: 1px solid #c8c6bf;
   border-bottom: 1px solid white;
   font-weight: 500;
 }
@@ -84,7 +84,7 @@
 .data-subnav {
   font-size: 13.33px;
   width: 100%;
-  border-bottom: solid 1px black;
+  border-bottom: solid 1px #c8c6bf;
   box-sizing: border-box;
   margin-bottom: 20px;
 }
@@ -162,7 +162,12 @@
 .preview-table {
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: 500px;
+  margin-bottom: 120px;
+}
+
+.preview-table table, td, th {
+  border-collapse: collapse;
+  border: 1px solid #c8c6bf;
 }
 
 .preview-flat {
@@ -172,8 +177,9 @@
 .preview-table table td {
   padding: 0 15px;
   text-align: center;
+  min-width: 100px;
 }
 
-.preview-table table tr:nth-child(even) {
-  background-color: #f2f2f2;
+.preview-table table th {
+  background-color:#E9E9E9;
 }
