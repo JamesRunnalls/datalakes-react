@@ -3,10 +3,49 @@
   width: 50%;
   vertical-align: top;
   min-width: 350px;
+  padding-right: 20px;
+  box-sizing: border-box;
+  margin-bottom: 120px;
+}
+
+.info-width {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.info-width table {
+  max-width: 100%;
+  text-align: left;
+}
+
+.info-width td {
+  padding: 6px 0px;
+  padding-right: 40px;
 }
 
 .info-inner td {
-  padding: 10px 40px 5px 0px;
+  padding: 6px 0px;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  width: 70%;
+}
+
+.info-inner th {
+  text-align: left;
+  width: 30%;
+}
+
+.info-inner table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.info-head {
+  font-size: 16px;
+  font-weight: 700;
+  padding-top: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #c8c6bf;
 }
 
 .info-title {
@@ -26,6 +65,10 @@
 
 .pipeline img {
   height: 75px;
+}
+
+.pipeline .pipeline-header {
+  margin-top: 30px;
 }
 
 .pipeline .diagram a {
@@ -165,9 +208,8 @@
   margin-bottom: 120px;
 }
 
-.preview-table table, td, th {
+.preview-table table {
   border-collapse: collapse;
-  border: 1px solid #c8c6bf;
 }
 
 .preview-flat {
@@ -178,6 +220,11 @@
   padding: 0 15px;
   text-align: center;
   min-width: 100px;
+  border: 1px solid #c8c6bf;
+}
+
+.preview-table table th {
+  border: 1px solid #c8c6bf;
 }
 
 .preview-table table th {

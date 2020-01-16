@@ -91,10 +91,15 @@ input.SearchBar {
 
 .datalist {
   display: none;
+  margin-bottom: 120px;
 }
 
 .datalist.show {
   display: block;
+}
+
+.download-inner {
+  padding:5px 15px;
 }
 
 .download-close {

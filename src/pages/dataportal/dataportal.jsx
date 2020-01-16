@@ -244,7 +244,7 @@ class DataPortal extends Component {
 
   setSelect = event => {
     this.setState({ sortby: event.target.value });
-  }
+  };
 
   download = () => {
     this.setState({ download: !this.state.download });
@@ -305,8 +305,8 @@ class DataPortal extends Component {
   };
 
   sortDownloads = dataset => {
-    return dataset
-  }
+    return dataset;
+  };
 
   filterList = (params, name, label, exclude = "") => {
     var distinct = [];
@@ -328,22 +328,22 @@ class DataPortal extends Component {
     return distinct;
   };
 
-  sortDatasets = (dataset,sortby) => {
+  sortDatasets = (dataset, sortby) => {
     if (sortby === "az") {
-      dataset.sort((a,b) => {
+      dataset.sort((a, b) => {
         return a.title - b.title;
       });
     } else if (sortby === "downloads") {
-      dataset.sort((a,b) => {
+      dataset.sort((a, b) => {
         return b.downloads - a.downloads;
       });
-    } else if (sortby === "modified"){
-      dataset.sort((a,b) => {
+    } else if (sortby === "modified") {
+      dataset.sort((a, b) => {
         return new Date(b.lastmodified) - new Date(a.lastmodified);
       });
     }
-    return dataset
-  }
+    return dataset;
+  };
 
   filterDataSet = (dataset, filters, parameters, avoid = "") => {
     const filterData = (data, filter, parameters) => {
@@ -381,7 +381,9 @@ class DataPortal extends Component {
 
   filterParameters = (dataset, params) => {
     return params.filter(
-      param => dataset.filter(data => data.id == param.folder_id).length > 0 && param.parameter_id !== 1
+      param =>
+        dataset.filter(data => data.id == param.folder_id).length > 0 &&
+        param.parameter_id !== 1
     );
   };
 
@@ -401,7 +403,7 @@ class DataPortal extends Component {
 
     // Filter by filters
     var fDatasets = this.filterDataSet(datasets, filters, parameters);
-    
+
     // Filter by search
     var lowercasedSearch = search.toLowerCase();
     fDatasets = fDatasets.filter(item => {
@@ -414,7 +416,7 @@ class DataPortal extends Component {
         .toLowerCase()
         .includes(lowercasedSearch);
     });
-  
+
     // Parameter filtering
     var fParams = this.filterParameters(fDatasets, parameters);
     const dataP = this.filterParameters(
@@ -431,7 +433,7 @@ class DataPortal extends Component {
     var dChar = this.filterList(dataC, "characteristic", "characterstic");
 
     // Sort by
-    var fDatasets = this.sortDatasets(fDatasets,sortby);
+    var fDatasets = this.sortDatasets(fDatasets, sortby);
 
     return (
       <React.Fragment>
@@ -455,7 +457,11 @@ class DataPortal extends Component {
                 >
                   &#10005;
                 </div>
-                <select title="Sort by" onChange={this.setSelect} defaultValue={sortby}>
+                <select
+                  title="Sort by"
+                  onChange={this.setSelect}
+                  defaultValue={sortby}
+                >
                   <option value="az">A-Z</option>
                   <option value="modified">Modified</option>
                   <option value="downloads">Downloads</option>
@@ -464,11 +470,17 @@ class DataPortal extends Component {
               <FilterBar filters={filters} removeFilter={this.removeFilter} />
 
               <div className={download ? "popup" : "hidepopup"}>
-                <h3>Download </h3>
+                <div className="download-inner">
+                  <h3>Download Selected Datasets</h3>
+                  This feature is not currently available. Please download the datasets individually. 
+                </div>
               </div>
 
-              <div className={map ? "popup" : "hidepopup"} title="Hold ctrl and drag with your mouse to select custom area">
-                <MapSelect datasets={fDatasets}/>
+              <div
+                className={map ? "popup" : "hidepopup"}
+                title="Hold ctrl and drag with your mouse to select custom area"
+              >
+                <MapSelect datasets={fDatasets} />
               </div>
 
               <DatasetList
@@ -513,7 +525,27 @@ class DataPortal extends Component {
                 }
                 preopen="true"
               />
-              <FilterBox title="Time" content="Coming soon" />
+              <FilterBox
+                title="Time"
+                content={
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>Start</td>
+                        <td>
+                          <input type="date" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>End</td>
+                        <td>
+                          <input type="date" />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                }
+              />
               <PopupBox title="Location" fun={this.map} state={map} />
               <FilterBox
                 title="Lake"

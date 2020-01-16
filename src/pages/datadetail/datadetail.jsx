@@ -360,16 +360,24 @@ class Preview extends Component {
         <th>1</th>
         <td>{xlabel + " (" + xunits + ")"}</td>
         <td>{ylabel + " (" + yunits + ")"}</td>
-        <td></td><td></td><td></td><td></td><td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
       </tr>
     ];
     for (var l = 0; l < Math.min(200, data.y.length); l++) {
       inner.push(
         <tr key={"h" + l}>
-          <th>{l+2}</th>
+          <th>{l + 2}</th>
           <td>{data.x[l]}</td>
           <td>{data.y[l]}</td>
-          <td></td><td></td><td></td><td></td><td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
         </tr>
       );
     }
@@ -377,10 +385,17 @@ class Preview extends Component {
     return (
       <React.Fragment>
         <div className="preview-table">
-          <table>
+          <table className="excel">
             <tbody>
               <tr>
-              <th></th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th>
+                <th></th>
+                <th>a</th>
+                <th>b</th>
+                <th>c</th>
+                <th>d</th>
+                <th>e</th>
+                <th>f</th>
+                <th>g</th>
               </tr>
               {inner}
             </tbody>
@@ -450,68 +465,147 @@ class Download extends Component {
 }
 
 class Pipeline extends Component {
-  state = {};
   render() {
-    return (
-      <div className="pipeline">
-        <div>
-          See the{" "}
-          <a href="https://renkulab.io/gitlab/damien.bouffard/datalakes">
-            Renku Repository
-          </a>{" "}
-          for full details on reproducibility or click on the icons below to be
-          directed to data and scripts stored in our{" "}
-          <a href="https://renkulab.io/gitlab/damien.bouffard/datalakes">
-            Gitlab Repository
-          </a>
-          .
+    const { dataset } = this.props;
+    if (dataset.renku == 1){
+      return (
+        <div className="pipeline">
+          <div className="pipeline-header">
+            Lineage information for this dataset has not been provided by the Renku knowledge graph. <br />
+            The lineage information has been added by the data owner and cannot be guaranteed to be reproducible. 
+          </div>
+          <div className="diagram">
+            <a target="_blank" href={dataset.pre_file}>
+              <img src={Database} alt="Database" title="Click to see precursor dataset"/>
+              <div className="">Precursor Dataset</div>
+
+            </a>
+            <div className="separator half"></div>
+            <a target="_blank" href={dataset.pre_script}>
+              <img src={Python} alt="Python" title="Click to see processing script"/>
+              <div className="">Processing Script</div>
+            </a>
+            <div className="separator half"></div>
+            <a>
+              <img src={Database} alt="Database" />
+              <div className="">This dataset</div>
+            </a>
+          </div>
         </div>
-        <div className="diagram">
-          <a>
-            <img src={Sensor} alt="Sensor" />
-            <div className="">Sensor</div>
-            <div>18.01.19</div>
-          </a>
-          <div className="separator full"></div>
-          <a>
-            <img src={Database} alt="Database" />
-            <div className="">Level 0</div>
-            <div>18.01.19</div>
-          </a>
-          <div className="separator half"></div>
-          <a>
-            <img src={Python} alt="Python" />
-            <div className="">Python</div>
-            <div>18.01.19</div>
-          </a>
-          <div className="separator half"></div>
-          <a>
-            <img src={Database} alt="Database" />
-            <div className="">Level 1</div>
-            <div>18.01.19</div>
-          </a>
-        </div>
-      </div>
-    );
+      );
+    } else {
+      return (
+        <div>See lineage in Renku</div>
+      )
+    }    
   }
 }
 
 class Information extends Component {
   state = {};
   render() {
-    const { dataset } = this.props;
+    const { dataset, parameters, getLabel } = this.props;
+
+    // Parameter Table
+    var rows = [];
+    for (var row of parameters) {
+      rows.push(
+        <tr key={row.id}>
+          <td>{row.name}</td>
+          <td>{row.axis}</td>
+          <td>{row.unit}</td>
+          <td>{getLabel("sensor",row.sensor_id)}</td>
+        </tr>
+      );
+    }
+
     return (
       <React.Fragment>
-        <div className="info-inner">
-          <div className="info-title">Dataset Properties</div>
+        <div className="info-width">
+          <div className="info-head">Parameters</div>
           <table>
             <tbody>
-              {Object.keys(dataset).map(prop => (
-                <tr key={prop}>
-                  <td>{prop}</td>
-                  <td>{dataset[prop]}</td>
-                </tr>
-              ))}
+              <tr>
+                <th>Parameter</th>
+                <th>Axis</th>
+                <th>Units</th>
+                <th>Sensor</th>
+              </tr>
+              {rows}
+            </tbody>
+          </table>
+        </div>
+        <div className="info-inner">
+          <div className="info-head">Properties</div>
+          <table>
+            <tbody>
+              <tr>
+                <th>Git</th>
+                <td><a href={dataset.git} target="_blank">Link</a></td>
+              </tr>
+              <tr>
+                <th>Start</th>
+                <td>{dataset.start_time}</td>
+              </tr>
+              <tr>
+                <th>End</th>
+                <td>{dataset.end_time}</td>
+              </tr>
+              <tr>
+                <th>Longitude</th>
+                <td>{dataset.longitude}</td>
+              </tr>
+              <tr>
+                <th>Latitude</th>
+                <td>{dataset.latitude}</td>
+              </tr>
+              <tr>
+                <th>Depth</th>
+                <td>{dataset.depth}</td>
+              </tr>
+              <tr>
+                <th>Lake</th>
+                <td>{getLabel("lake", dataset.lake_id)}</td>
+              </tr>
+              <tr>
+                <th>Downloads</th>
+                <td>{dataset.downloads}</td>
+              </tr>
+              <tr>
+                <th>Last Modified</th>
+                <td>{dataset.lastmodified}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="info-inner">
+          <div className="info-head">Contact</div>
+          <table>
+            <tbody>
+              <tr>
+                <th>Name</th>
+                <td>{getLabel("person", dataset.person_id)}</td>
+              </tr>
+              <tr>
+                <th>Email</th>
+                <td></td>
+              </tr>
+              <tr>
+                <th>Organisation</th>
+                <td>{getLabel("organisation", dataset.organisation_id)}</td>
+              </tr>
+              <tr>
+                <th>Project</th>
+                <td>{getLabel("project", dataset.project_id)}</td>
+              </tr>
+              <tr>
+                <th>License</th>
+                <td>{getLabel("license", dataset.license_id)}</td>
+              </tr>
+              <tr>
+                <th>Citation</th>
+                <td>{dataset.citation}</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -715,8 +809,11 @@ class DataDetail extends Component {
           apiUrl={apiUrl}
         />
       ],
-      pipeline: ["subnav-item", <Pipeline />],
-      information: ["subnav-item", <Information dataset={dataset} />]
+      pipeline: ["subnav-item", <Pipeline dataset={dataset}/>],
+      information: [
+        "subnav-item",
+        <Information dataset={dataset} parameters={parameters} getLabel={this.getLabel} />
+      ]
     };
     if (parameters.length == 2) {
       if (selection === "") {
