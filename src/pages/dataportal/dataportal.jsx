@@ -226,8 +226,8 @@ class DataPortal extends Component {
 
   async componentDidMount() {
     this.getDropdowns();
-    ReactDOM.findDOMNode(this.refs.search).focus();
-    ReactDOM.findDOMNode(this.refs.search).select();
+    this.refs.search.focus();
+    this.refs.search.select();
     var { data: datasets } = await axios.get(apiUrl + "/api/database/datasets");
     var { data: parameters } = await axios.get(
       apiUrl + "/api/database/parameters"
@@ -290,12 +290,48 @@ class DataPortal extends Component {
     this.setState({ filters });
   };
 
-  checkbox = (id, name, cat, table) => {
+  checkboxAddFilter = (id, name, cat, table) => {
     var { filters } = this.state;
     if (name in filters) {
       delete filters[name];
     } else {
       filters[name] = { id: id, category: cat, set: table };
+    }
+    this.setState({ filters });
+  };
+
+  mapAddFilter = latlng => {
+    var { filters } = this.state;
+    filters.Location = { id: latlng, category: "Location", set: "Location" };
+    this.setState({ filters });
+  };
+
+  startTimeAddFilter = e => {
+    var { filters } = this.state;
+    var date = e.target.value;
+    if (date == "" && "Start Date" in filters) {
+      delete filters["Start Date"];
+    } else {
+      filters["Start Date"] = {
+        id: date,
+        category: "Start Date",
+        set: "Start Date"
+      };
+    }
+    this.setState({ filters });
+  };
+
+  endTimeAddFilter = e => {
+    var { filters } = this.state;
+    var date = e.target.value;
+    if (date == "" && "End Date" in filters) {
+      delete filters["End Date"];
+    } else {
+      filters["End Date"] = {
+        id: date,
+        category: "End Date",
+        set: "End Date"
+      };
     }
     this.setState({ filters });
   };
@@ -355,6 +391,47 @@ class DataPortal extends Component {
             parameters.filter(
               x => x[filter.category] === filter.id && x.folder_id === item.id
             ).length > 0
+        );
+      } else if (filter.set === "Location") {
+        var latlng = filter.id;
+        var maxlat = Math.max.apply(
+          Math,
+          latlng.map(function(o) {
+            return o.lat;
+          })
+        );
+        var maxlng = Math.max.apply(
+          Math,
+          latlng.map(function(o) {
+            return o.lng;
+          })
+        );
+        var minlat = Math.min.apply(
+          Math,
+          latlng.map(function(o) {
+            return o.lat;
+          })
+        );
+        var minlng = Math.min.apply(
+          Math,
+          latlng.map(function(o) {
+            return o.lng;
+          })
+        );
+        return data.filter(
+          item =>
+            item["latitude"] > minlat &&
+            item["latitude"] < maxlat &&
+            item["longitude"] > minlng &&
+            item["longitude"] < maxlng
+        );
+      } else if (filter.set === "Start Date") {
+        return data.filter(
+          item => new Date(item["end_time"]) > new Date(filter.id)
+        );
+      } else if (filter.set === "End Date") {
+        return data.filter(
+          item => new Date(item["start_time"]) < new Date(filter.id)
         );
       } else {
         return data;
@@ -472,7 +549,8 @@ class DataPortal extends Component {
               <div className={download ? "popup" : "hidepopup"}>
                 <div className="download-inner">
                   <h3>Download Selected Datasets</h3>
-                  This feature is not currently available. Please download the datasets individually. 
+                  This feature is not currently available. Please download the
+                  datasets individually.
                 </div>
               </div>
 
@@ -480,7 +558,11 @@ class DataPortal extends Component {
                 className={map ? "popup" : "hidepopup"}
                 title="Hold ctrl and drag with your mouse to select custom area"
               >
-                <MapSelect datasets={fDatasets} />
+                <MapSelect
+                  datasets={fDatasets}
+                  mapAddFilter={this.mapAddFilter}
+                  filters={filters}
+                />
               </div>
 
               <DatasetList
@@ -505,7 +587,7 @@ class DataPortal extends Component {
               ></input>
               <div className="characteristics">
                 <FilterBoxInner
-                  checkbox={this.checkbox}
+                  checkbox={this.checkboxAddFilter}
                   cat="characteristic"
                   params={dChar}
                   filters={filters}
@@ -516,7 +598,7 @@ class DataPortal extends Component {
                 title="Parameters"
                 content={
                   <FilterBoxInner
-                    checkbox={this.checkbox}
+                    checkbox={this.checkboxAddFilter}
                     cat="parameter_id"
                     params={dParams}
                     filters={filters}
@@ -533,13 +615,19 @@ class DataPortal extends Component {
                       <tr>
                         <td>Start</td>
                         <td>
-                          <input type="date" />
+                          <input
+                            type="date"
+                            onChange={() => this.startTimeAddFilter(event)}
+                          />
                         </td>
                       </tr>
                       <tr>
                         <td>End</td>
                         <td>
-                          <input type="date" />
+                          <input
+                            type="date"
+                            onChange={() => this.endTimeAddFilter(event)}
+                          />
                         </td>
                       </tr>
                     </tbody>
@@ -551,7 +639,7 @@ class DataPortal extends Component {
                 title="Lake"
                 content={
                   <FilterBoxInner
-                    checkbox={this.checkbox}
+                    checkbox={this.checkboxAddFilter}
                     cat="lake_id"
                     params={dLake}
                     filters={filters}
