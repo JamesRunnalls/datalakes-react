@@ -716,7 +716,7 @@ class DataDetail extends Component {
     const dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
     this.getDropdowns();
     const { data: dataset } = await axios
-      .get(apiUrl + "/api/database/datasets/" + dataset_id)
+      .get(apiUrl + "/datasets/" + dataset_id)
       .catch(error => {
         this.setState({ error: true });
       });

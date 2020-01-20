@@ -228,12 +228,12 @@ class DataPortal extends Component {
     this.getDropdowns();
     this.refs.search.focus();
     this.refs.search.select();
-    var { data: datasets } = await axios.get(apiUrl + "/api/database/datasets");
-    var { data: parameters } = await axios.get(
-      apiUrl + "/api/database/parameters"
+    var { data: datasets, status: dstatus } = await axios.get(apiUrl + "/datasets");
+    var { data: parameters, status: pstatus } = await axios.get(
+      apiUrl + "/parameters"
     );
-    if ("stdout" in datasets) datasets = [];
-    if ("stdout" in parameters) parameters = [];
+    if (dstatus !== 200) datasets = [];
+    if (pstatus !== 200) parameters = [];
     this.setState({ datasets, parameters });
   }
 
