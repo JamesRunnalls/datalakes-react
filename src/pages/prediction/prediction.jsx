@@ -80,11 +80,11 @@ class Predictions extends Component {
 
     async componentDidMount(){
         // Lake Models
-        const { data: geojson } = await axios.get(apiUrl+'/api/lakemodels');
+        const { data: geojson } = await axios.get(apiUrl+'/predictions');
 
         // Simstrat Data
         try {
-            const { data: simstratSurfaceTemperature } = await axios.get(apiUrl+'/api/simstratsurfacetemperature');
+            const { data: simstratSurfaceTemperature } = await axios.get(apiUrl+'/predictions/simstrat');
             var temp = [];
 
             const simfind = (sim,lake) => {return sim.find(c => c.urlID === lake.properties.simstrat)}
@@ -105,7 +105,7 @@ class Predictions extends Component {
         
         // Meteolakes Data
         try {
-            const { data: meteolakes } = await axios.get(apiUrl+'/api/meteolakessurfacetemperature');
+            const { data: meteolakes } = await axios.get(apiUrl+'/predictions/meteolakes');
             this.setState({ meteolakes });
         } catch (e) {
             console.log(e);

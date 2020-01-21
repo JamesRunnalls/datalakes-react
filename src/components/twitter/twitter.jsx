@@ -13,7 +13,7 @@ class Twitter extends Component {
         
     }
     async componentDidMount(){
-        const { data: response } = await axios.get(apiUrl+'/api/twitter').catch(error => {
+        const { data: response } = await axios.get(apiUrl+'/twitter').catch(error => {
             this.setState({ error: true});
           });;
         var twitterText = response[0].text;

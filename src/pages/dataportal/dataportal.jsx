@@ -50,7 +50,7 @@ class DatasetList extends Component {
 class Dataset extends Component {
   getParameters = id => {
     const { parameters } = this.props;
-    return parameters.filter(x => x.folder_id === id);
+    return parameters.filter(x => x.datasets_id === id);
   };
 
   parseDate = input => {
@@ -66,7 +66,7 @@ class Dataset extends Component {
 
   render() {
     const { dataset, selected, onSelectDataset, getLabel } = this.props;
-    var url = "/data/" + dataset.id;
+    var url = "/datadetail/" + dataset.id;
     var params = this.getParameters(dataset.id);
     params = params.filter(x => x.name !== "Time");
     var check = "checkbox unchecked";
@@ -92,12 +92,12 @@ class Dataset extends Component {
               Parameters: {params.map(param => param.name).join(" | ")}{" "}
             </div>
             <div>
-              {getLabel("lake", dataset.lake_id)} |{" "}
+              {getLabel("lakes", dataset.lakes_id)} |{" "}
               {this.parseDate(dataset.start_time)} to{" "}
               {this.parseDate(dataset.end_time)}
             </div>
             <div>
-              License: {getLabel("license", dataset.license_id)} | Downloads:{" "}
+              License: {getLabel("licenses", dataset.licenses_id)} | Downloads:{" "}
               {dataset.downloads} | Last Modified:{" "}
               {this.parseDate(dataset.lastmodified)}
             </div>
@@ -225,21 +225,38 @@ class DataPortal extends Component {
   };
 
   async componentDidMount() {
-    this.getDropdowns();
     this.refs.search.focus();
     this.refs.search.select();
-    var { data: datasets, status: dstatus } = await axios.get(apiUrl + "/datasets");
+    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
+    var { data: datasets, status: dstatus } = await axios.get(
+      apiUrl + "/datasets"
+    );
     var { data: parameters, status: pstatus } = await axios.get(
       apiUrl + "/parameters"
     );
     if (dstatus !== 200) datasets = [];
-    if (pstatus !== 200) parameters = [];
-    this.setState({ datasets, parameters });
+    if (pstatus !== 200) {
+      parameters = [];
+    } else {
+      // Add parameter details
+      var details;
+      for (var x in parameters){
+        details = dropdown.parameters.find(item => item.id === parameters[x].parameters_id);
+        parameters[x]["name"] = details.name;
+        parameters[x]["characteristic"] = details.characteristic;
+      }
+    }
+    this.setState({ datasets, parameters, dropdown });
   }
 
   getLabel = (input, id) => {
     const { dropdown } = this.state;
-    return dropdown[input].find(x => x.id === id).name;
+    try {
+      return dropdown[input].find(x => x.id === id).name;
+    } catch (e) {
+      console.log(e);
+      return "NA";
+    }
   };
 
   setSelect = event => {
@@ -255,9 +272,7 @@ class DataPortal extends Component {
   };
 
   getDropdowns = async () => {
-    const { data: dropdown } = await axios.get(
-      apiUrl + "/api/database/dropdowns"
-    );
+    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
     this.setState({
       dropdown
     });
@@ -389,7 +404,7 @@ class DataPortal extends Component {
         return data.filter(
           item =>
             parameters.filter(
-              x => x[filter.category] === filter.id && x.folder_id === item.id
+              x => x[filter.category] === filter.id && x.datasets_id === item.id
             ).length > 0
         );
       } else if (filter.set === "Location") {
@@ -459,8 +474,8 @@ class DataPortal extends Component {
   filterParameters = (dataset, params) => {
     return params.filter(
       param =>
-        dataset.filter(data => data.id == param.folder_id).length > 0 &&
-        param.parameter_id !== 1
+        dataset.filter(data => data.id == param.datasets_id).length > 0 &&
+        param.parameters_id !== 1
     );
   };
 
@@ -486,7 +501,7 @@ class DataPortal extends Component {
     fDatasets = fDatasets.filter(item => {
       console.log(
         parameters
-          .filter(x => x.folder_id === item.id)
+          .filter(x => x.datasets_id === item.id)
           .map(y => Object.values(y).toString())
       );
       return String(Object.values(item))
@@ -497,16 +512,16 @@ class DataPortal extends Component {
     // Parameter filtering
     var fParams = this.filterParameters(fDatasets, parameters);
     const dataP = this.filterParameters(
-      this.filterDataSet(datasets, filters, parameters, "parameter_id"),
+      this.filterDataSet(datasets, filters, parameters, "parameters_id"),
       parameters
     );
-    const dataL = this.filterDataSet(datasets, filters, parameters, "lake_id");
+    const dataL = this.filterDataSet(datasets, filters, parameters, "lakes_id");
     const dataC = this.filterParameters(
       this.filterDataSet(datasets, filters, parameters, "characteristic"),
       parameters
     );
-    var dParams = this.filterList(dataP, "parameter_id", "parameter", 1);
-    var dLake = this.filterList(dataL, "lake_id", "lake");
+    var dParams = this.filterList(dataP, "parameters_id", "parameters", 1);
+    var dLake = this.filterList(dataL, "lakes_id", "lakes");
     var dChar = this.filterList(dataC, "characteristic", "characterstic");
 
     // Sort by
@@ -599,7 +614,7 @@ class DataPortal extends Component {
                 content={
                   <FilterBoxInner
                     checkbox={this.checkboxAddFilter}
-                    cat="parameter_id"
+                    cat="parameters_id"
                     params={dParams}
                     filters={filters}
                     table="parameters"
@@ -640,7 +655,7 @@ class DataPortal extends Component {
                 content={
                   <FilterBoxInner
                     checkbox={this.checkboxAddFilter}
-                    cat="lake_id"
+                    cat="lakes_id"
                     params={dLake}
                     filters={filters}
                     table="datasets"

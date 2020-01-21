@@ -29,7 +29,7 @@ class App extends Component {
                 <Route path='/predictions' component={HydrodynamicModel} />
 
                 <Route path='/dataportal' component={DataPortal} />
-                <Route path='/data' component={DataDetail} />
+                <Route path='/datadetail' component={DataDetail} />
 
                 <Route path='/API' component={API} />
                 

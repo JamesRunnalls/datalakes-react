@@ -48,8 +48,8 @@ class Live extends Component {
     }
 
     async componentDidMount(){
-        const { data: meteoStations } = await axios.get(apiUrl+'/api/meteostations');
-        const { data: lakeStations } = await axios.get(apiUrl+'/api/lakestations');
+        const { data: meteoStations } = await axios.get(apiUrl+'/live/meteostations');
+        const { data: lakeStations } = await axios.get(apiUrl+'/live/lakestations');
         this.setState({ meteoStations, lakeStations });
     }
     

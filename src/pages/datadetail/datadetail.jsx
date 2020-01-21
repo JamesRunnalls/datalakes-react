@@ -253,8 +253,8 @@ class LineGraph extends Component {
     // Get axis labels
     const xparam = parameters.find(x => x.axis === "x");
     const yparam = parameters.find(y => y.axis === "y");
-    const xlabel = getLabel("parameter", xparam.parameter_id),
-      ylabel = getLabel("parameter", yparam.parameter_id),
+    const xlabel = getLabel("parameters", xparam.parameters_id),
+      ylabel = getLabel("parameters", yparam.parameters_id),
       xunits = xparam.unit,
       yunits = yparam.unit;
     return (
@@ -351,8 +351,8 @@ class Preview extends Component {
     var inner = [];
     const xparam = parameters.find(x => x.axis === "x");
     const yparam = parameters.find(y => y.axis === "y");
-    const xlabel = getLabel("parameter", xparam.parameter_id),
-      ylabel = getLabel("parameter", yparam.parameter_id),
+    const xlabel = getLabel("parameters", xparam.parameters_id),
+      ylabel = getLabel("parameters", yparam.parameters_id),
       xunits = xparam.unit,
       yunits = yparam.unit;
     inner = [
@@ -429,7 +429,7 @@ class Download extends Component {
         {dataset.title}
 
         <div className="info-title">Licence</div>
-        {getLabel("license", dataset.license_id)}
+        {getLabel("licenses", dataset.licenses_id)}
 
         <div className="info-title">Citations</div>
         {dataset.citation}
@@ -467,22 +467,31 @@ class Download extends Component {
 class Pipeline extends Component {
   render() {
     const { dataset } = this.props;
-    if (dataset.renku == 1){
+    if (dataset.renku == 1) {
       return (
         <div className="pipeline">
           <div className="pipeline-header">
-            Lineage information for this dataset has not been provided by the Renku knowledge graph. <br />
-            The lineage information has been added by the data owner and cannot be guaranteed to be reproducible. 
+            Lineage information for this dataset has not been provided by the
+            Renku knowledge graph. <br />
+            The lineage information has been added by the data owner and cannot
+            be guaranteed to be reproducible.
           </div>
           <div className="diagram">
             <a target="_blank" href={dataset.pre_file}>
-              <img src={Database} alt="Database" title="Click to see precursor dataset"/>
+              <img
+                src={Database}
+                alt="Database"
+                title="Click to see precursor dataset"
+              />
               <div className="">Precursor Dataset</div>
-
             </a>
             <div className="separator half"></div>
             <a target="_blank" href={dataset.pre_script}>
-              <img src={Python} alt="Python" title="Click to see processing script"/>
+              <img
+                src={Python}
+                alt="Python"
+                title="Click to see processing script"
+              />
               <div className="">Processing Script</div>
             </a>
             <div className="separator half"></div>
@@ -494,10 +503,8 @@ class Pipeline extends Component {
         </div>
       );
     } else {
-      return (
-        <div>See lineage in Renku</div>
-      )
-    }    
+      return <div>See lineage in Renku</div>;
+    }
   }
 }
 
@@ -514,7 +521,7 @@ class Information extends Component {
           <td>{row.name}</td>
           <td>{row.axis}</td>
           <td>{row.unit}</td>
-          <td>{getLabel("sensor",row.sensor_id)}</td>
+          <td>{getLabel("sensors", row.sensors_id)}</td>
         </tr>
       );
     }
@@ -541,7 +548,11 @@ class Information extends Component {
             <tbody>
               <tr>
                 <th>Git</th>
-                <td><a href={dataset.git} target="_blank">Link</a></td>
+                <td>
+                  <a href={dataset.git} target="_blank">
+                    Link
+                  </a>
+                </td>
               </tr>
               <tr>
                 <th>Start</th>
@@ -565,7 +576,7 @@ class Information extends Component {
               </tr>
               <tr>
                 <th>Lake</th>
-                <td>{getLabel("lake", dataset.lake_id)}</td>
+                <td>{getLabel("lakes", dataset.lakes_id)}</td>
               </tr>
               <tr>
                 <th>Downloads</th>
@@ -584,7 +595,7 @@ class Information extends Component {
             <tbody>
               <tr>
                 <th>Name</th>
-                <td>{getLabel("person", dataset.person_id)}</td>
+                <td>{getLabel("persons", dataset.persons_id)}</td>
               </tr>
               <tr>
                 <th>Email</th>
@@ -592,15 +603,15 @@ class Information extends Component {
               </tr>
               <tr>
                 <th>Organisation</th>
-                <td>{getLabel("organisation", dataset.organisation_id)}</td>
+                <td>{getLabel("organisations", dataset.organisations_id)}</td>
               </tr>
               <tr>
                 <th>Project</th>
-                <td>{getLabel("project", dataset.project_id)}</td>
+                <td>{getLabel("projects", dataset.projects_id)}</td>
               </tr>
               <tr>
                 <th>License</th>
-                <td>{getLabel("license", dataset.license_id)}</td>
+                <td>{getLabel("licenses", dataset.licenses_id)}</td>
               </tr>
               <tr>
                 <th>Citation</th>
@@ -684,6 +695,7 @@ class DataDetail extends Component {
     max: "",
     lower: "",
     upper: "",
+    files: [],
     data: ""
   };
 
@@ -699,9 +711,7 @@ class DataDetail extends Component {
   };
 
   getDropdowns = async () => {
-    const { data: dropdown } = await axios.get(
-      apiUrl + "/api/database/dropdowns"
-    );
+    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
     this.setState({
       dropdown
     });
@@ -709,29 +719,41 @@ class DataDetail extends Component {
 
   getLabel = (input, id) => {
     const { dropdown } = this.state;
-    return dropdown[input].find(x => x.id === id).name;
+    try {
+      return dropdown[input].find(x => x.id === id).name;
+    } catch (e) {
+      console.log(input,id,e);
+      return "NA";
+    }
   };
 
   async componentDidMount() {
     const dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
-    this.getDropdowns();
-    const { data: dataset } = await axios
-      .get(apiUrl + "/datasets/" + dataset_id)
-      .catch(error => {
-        this.setState({ error: true });
-      });
-    const { data: files } = await axios
-      .get(apiUrl + "/api/database/files/" + dataset_id)
-      .catch(error => {
-        this.setState({ error: true });
-      });
-    const { data: parameters } = await axios
-      .get(apiUrl + "/api/database/parameters/" + dataset_id)
-      .catch(error => {
-        this.setState({ error: true });
-      });
+    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
+    let server = await Promise.all([
+      axios.get(apiUrl + "/datasets/" + dataset_id),
+      axios.get(apiUrl + "/files?datasets_id=" + dataset_id),
+      axios.get(apiUrl + "/datasetparameters?datasets_id=" + dataset_id)
+    ]).catch(error => {
+      this.setState({ error: true });
+    });
+
+    var dataset = server[0].data;
+    var files = server[1].data;
+    var parameters = server[2].data;
+
+    // Add parameters detail
+    var details;
+    for (var x in parameters) {
+      details = dropdown.parameters.find(
+        item => item.id === parameters[x].parameters_id
+      );
+      parameters[x]["name"] = details.name;
+      parameters[x]["characteristic"] = details.characteristic;
+    }
+
     const { data } = await axios
-      .get(apiUrl + "/api/database/json/" + files[0].id)
+      .get(apiUrl + "/files/" + files[0].id + "?download=raw")
       .catch(error => {
         this.setState({ error: true });
       });
@@ -742,7 +764,7 @@ class DataDetail extends Component {
       lower = xe[0],
       upper = xe[1];
 
-    this.setState({ dataset, parameters, data, min, max, lower, upper });
+    this.setState({ dataset, parameters, files, data, min, max, lower, upper, dropdown });
   }
 
   updateSelectedState = selected => {
@@ -809,10 +831,14 @@ class DataDetail extends Component {
           apiUrl={apiUrl}
         />
       ],
-      pipeline: ["subnav-item", <Pipeline dataset={dataset}/>],
+      pipeline: ["subnav-item", <Pipeline dataset={dataset} />],
       information: [
         "subnav-item",
-        <Information dataset={dataset} parameters={parameters} getLabel={this.getLabel} />
+        <Information
+          dataset={dataset}
+          parameters={parameters}
+          getLabel={this.getLabel}
+        />
       ]
     };
     if (parameters.length == 2) {
