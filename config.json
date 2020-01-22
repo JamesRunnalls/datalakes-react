@@ -1,4 +1,5 @@
 {
-    "apiUrl":"http://localhost:4000",
+    "apiUrlss":"http://localhost:4000",
+    "apiUrl":"http://datalakesapi-dev.eu-central-1.elasticbeanstalk.com",
     "apiUrls":"https://datalakes-api.herokuapp.com"
 }
