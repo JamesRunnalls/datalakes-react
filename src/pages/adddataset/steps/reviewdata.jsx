@@ -262,10 +262,10 @@ class ReviewData extends Component {
       notification = <div>{message}</div>;
     }
 
-    // Number of files in folder - to be expanded in future
+    // Number of files in dataset - to be expanded in future
     var noFiles = 0;
-    if ("folderFiles" in fileInformation) {
-      noFiles = fileInformation.folderFiles.length - 1;
+    if ("datasetFiles" in fileInformation) {
+      noFiles = fileInformation.datasetFiles.length - 1;
     }
 
     return (
@@ -288,7 +288,7 @@ class ReviewData extends Component {
               {rows}
             </tbody>
           </table>
-          {noFiles} additional files have been detected in the same folder as
+          {noFiles} additional files have been detected in the same dataset as
           your dataset.
           <div className="error-message">{notification}</div>
           <div className="buttonnav">

@@ -16,7 +16,7 @@ class Publish extends Component {
   }
 
   render() {
-    const { parameter_list, folder } = this.props;
+    const { parameter_list, dataset } = this.props;
 
     // Parameter Table
     var rows = [];
@@ -35,7 +35,7 @@ class Publish extends Component {
 
     // Renku
     var renku = "";
-    if (folder["renku"] === 0) {
+    if (dataset["renku"] === 0) {
       renku = "Lineage managed through Renku"
     } else {
       renku = "Not used."
@@ -60,54 +60,54 @@ class Publish extends Component {
           <tbody>
           <tr>
               <th>Link to Git Repo</th>
-              <td>{folder["git"]}</td>
+              <td>{dataset["git"]}</td>
             </tr>
             <tr>
               <th>Start Time</th>
-              <td>{folder["start_time"]}</td>
+              <td>{dataset["start_time"]}</td>
             </tr>
             <tr>
               <th>End Time</th>
-              <td>{folder["end_time"]}</td>
+              <td>{dataset["end_time"]}</td>
             </tr>
             <tr>
               <th>Location</th>
               <td>
-                {folder["latitude"]},{folder["longitude"]}
+                {dataset["latitude"]},{dataset["longitude"]}
               </td>
             </tr>
             <tr>
               <th>Depth</th>
-              <td>{folder["depth"]}m</td>
+              <td>{dataset["depth"]}m</td>
             </tr>
             <tr>
               <th>Lake</th>
-              <td>{this.getDropdownLabel("lake",folder["lake_id"])}</td>
+              <td>{this.getDropdownLabel("lake",dataset["lake_id"])}</td>
             </tr>
             <tr>
               <th>Title</th>
-              <td>{folder["title"]}</td>
+              <td>{dataset["title"]}</td>
             </tr>
             <tr>
               <th>Project</th>
-              <td>{this.getDropdownLabel("project",folder["project_id"])}</td>
+              <td>{this.getDropdownLabel("project",dataset["project_id"])}</td>
             </tr>
 
             <tr>
               <th>Person</th>
-              <td>{this.getDropdownLabel("person",folder["person_id"])}</td>
+              <td>{this.getDropdownLabel("person",dataset["person_id"])}</td>
             </tr>
             <tr>
               <th>Organisation</th>
-              <td>{this.getDropdownLabel("organisation",folder["organisation_id"])}</td>
+              <td>{this.getDropdownLabel("organisation",dataset["organisation_id"])}</td>
             </tr>
             <tr>
               <th>License</th>
-              <td>{this.getDropdownLabel("license",folder["license_id"])}</td>
+              <td>{this.getDropdownLabel("license",dataset["license_id"])}</td>
             </tr>
             <tr>
               <th>Citation</th>
-              <td>{folder["citation"]}</td>
+              <td>{dataset["citation"]}</td>
             </tr>
             <tr>
               <th>Renku</th>
@@ -115,11 +115,11 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Pre file</th>
-              <td>{folder["pre_file"]}</td>
+              <td>{dataset["pre_file"]}</td>
             </tr>
             <tr>
               <th>Pre Script</th>
-              <td>{folder["pre_script"]}</td>
+              <td>{dataset["pre_script"]}</td>
             </tr>
           </tbody>
         </table>

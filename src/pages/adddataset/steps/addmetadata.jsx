@@ -31,7 +31,7 @@ class AddMetadata extends Component {
   };
 
   render() {
-    const { dropdown, getDropdowns, folder } = this.props;
+    const { dropdown, getDropdowns, dataset } = this.props;
     const { lake, person, project, organisation, license } = dropdown;
     const modalInfo = {
       person: person,
@@ -61,7 +61,7 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="starttime"
-                    defaultValue={folder["start_time"]}
+                    defaultValue={dataset["start_time"]}
                     placeholder="Seconds since 1970-01-01 00:00:00"
                     onChange={this.props.handleChange("start_time")}
                   />
@@ -82,7 +82,7 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="endtime"
-                    defaultValue={folder["end_time"]}
+                    defaultValue={dataset["end_time"]}
                     placeholder="Seconds since 1970-01-01 00:00:00"
                     onChange={this.props.handleChange("end_time")}
                   />
@@ -94,7 +94,7 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="latitude"
-                    defaultValue={folder["latitude"]}
+                    defaultValue={dataset["latitude"]}
                     style={{ width: "calc(50% - 3px)", marginRight: "3px" }}
                     placeholder="Latitude"
                     onChange={this.props.handleChange("latitude")}
@@ -102,7 +102,7 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="longitude"
-                    defaultValue={folder["longitude"]}
+                    defaultValue={dataset["longitude"]}
                     style={{ width: "calc(50% - 3px)", marginLeft: "3px" }}
                     placeholder="Longitude"
                     onChange={this.props.handleChange("longitude")}
@@ -115,7 +115,7 @@ class AddMetadata extends Component {
                   <input
                     type="number"
                     name="depth"
-                    defaultValue={folder["depth"]}
+                    defaultValue={dataset["depth"]}
                     placeholder="Meters below lake surface"
                     onChange={this.props.handleChange("depth")}
                   />
@@ -129,7 +129,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={lake}
-                    defaultValue={folder["lake_id"]}
+                    defaultValue={dataset["lake_id"]}
                     onChange={this.props.handleSelect("lake_id")}
                     showModal={this.showModal}
                   />
@@ -141,7 +141,7 @@ class AddMetadata extends Component {
                   <input
                     type="text"
                     name="title"
-                    defaultValue={folder["title"]}
+                    defaultValue={dataset["title"]}
                     placeholder="Use a descriptive title to help others"
                     onChange={this.props.handleChange("title")}
                   />
@@ -155,7 +155,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={project}
-                    defaultValue={folder["project_id"]}
+                    defaultValue={dataset["project_id"]}
                     onChange={this.props.handleSelect("project_id")}
                     showModal={this.showModal}
                   />
@@ -170,7 +170,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={person}
-                    defaultValue={folder["person_id"]}
+                    defaultValue={dataset["person_id"]}
                     onChange={this.props.handleSelect("person_id")}
                     showModal={this.showModal}
                   />
@@ -184,7 +184,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={organisation}
-                    defaultValue={folder["organisation_id"]}
+                    defaultValue={dataset["organisation_id"]}
                     onChange={this.props.handleSelect("organisation_id")}
                     showModal={this.showModal}
                   />
@@ -207,7 +207,7 @@ class AddMetadata extends Component {
                     value="id"
                     label="name"
                     dataList={license}
-                    defaultValue={folder["license_id"]}
+                    defaultValue={dataset["license_id"]}
                     onChange={this.props.handleSelect("license_id")}
                     showModal={this.showModal}
                   />
@@ -219,7 +219,7 @@ class AddMetadata extends Component {
                   <input
                     type="text"
                     name="citation"
-                    defaultValue={folder["citation"]}
+                    defaultValue={dataset["citation"]}
                     placeholder="How should others reference your data"
                     onChange={this.props.handleChange("citation")}
                   />

@@ -24,7 +24,7 @@ class AddData extends Component {
     }
   
     render() {
-      const { folder } = this.props;
+      const { dataset } = this.props;
       var { message } = this.state;
   
       if (message === "Working") {
@@ -46,7 +46,7 @@ class AddData extends Component {
                 type="text"
                 ref="git"
                 onChange={this.props.handleChange("git")}
-                defaultValue={folder.git}
+                defaultValue={dataset.git}
               />
             </div>
             <div className="error-message">{message}</div>
