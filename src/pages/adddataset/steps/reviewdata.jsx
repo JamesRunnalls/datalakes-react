@@ -7,8 +7,7 @@ import Loading from "../../../components/loading/loading";
 class ReviewData extends Component {
   state = {
     modal: false,
-    modalValue: "",
-    message: ""
+    modalValue: ""
   };
 
   // Modal for adding to dropdown lists
@@ -41,9 +40,9 @@ class ReviewData extends Component {
 
   componentDidMount() {
     const { fileInformation, dropdown } = this.props;
-    const { parameter, sensor } = dropdown;
+    const { parameters, sensors } = dropdown;
     var { parameter_list, initialChange } = this.props;
-    const { file, attributes } = fileInformation;
+    const { variables, attributes } = fileInformation;
 
     // Initial data parse and auto field matching
     if (parameter_list.length === 0) {
@@ -54,11 +53,11 @@ class ReviewData extends Component {
       var variable = {};
 
       // Loop over variables in nc file
-      for (var key in file) {
+      for (var key in variables) {
         parseParameter = key;
         parseUnit = "NA";
         parseSensor = "NA";
-        variableAttributes = file[key].attributes;
+        variableAttributes = variables[key].attributes;
 
         // Look for names in nc file.
         if ("units" in variableAttributes) {
@@ -77,17 +76,17 @@ class ReviewData extends Component {
         // Search for matching names in database to define default values
         var defaultParameter = this.fuseSearch(
           ["name"],
-          parameter,
+          parameters,
           parseParameter
         );
-        
-        var defaultSensor = this.fuseSearch(["name"], sensor, parseSensor);
+
+        var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
         var defaultAxis = "y";
 
         // Fallback to parameter units if none provided in nc file
-        var defaultUnit
-        if (parseUnit === "NA"){
-          defaultUnit = parameter.find(x => x.id === defaultParameter).unit;
+        var defaultUnit;
+        if (parseUnit === "NA") {
+          defaultUnit = parameters.find(x => x.id === defaultParameter).unit;
         } else {
           defaultUnit = parseUnit;
         }
@@ -114,16 +113,21 @@ class ReviewData extends Component {
   }
 
   nextStep = e => {
-    this.setState({ message: "Working" });
+    this.setState({
+      message:
+        "Parsing data to JSON format. This might take a while for large files.",
+      loading: true
+    });
     e.preventDefault();
-    this.props.nextStep().then(data => {
-      if (data[1] === false) {
-        this.setState({ message: "Please complete all the fields." });
-      } else if (data[0].stdout === 1) {
-        this.setState({ message: "Parse failed please try again." });
-      }
+    this.props.nextStep().catch(error => {
+      console.log("Error")
+      this.setState({
+        message: error.message,
+        loading: false
+      });
     });
   };
+
   prevStep = e => {
     e.preventDefault();
     this.props.prevStep();
@@ -138,8 +142,8 @@ class ReviewData extends Component {
       handleChange,
       handleSelect
     } = this.props;
-    const { parameter, sensor, axis } = dropdown;
-    var { modal, modalValue, message } = this.state;
+    const { parameters, sensors, axis } = dropdown;
+    var { modal, modalValue, message, loading } = this.state;
 
     // Create dynamic table
     var rows = [];
@@ -214,7 +218,7 @@ class ReviewData extends Component {
               table="parameter"
               value="id"
               label="name"
-              dataList={parameter}
+              dataList={parameters}
               defaultValue={row.parameter}
               onChange={handleSelect(i, "parameter")}
               showModal={this.showModal}
@@ -235,7 +239,7 @@ class ReviewData extends Component {
               table="sensor"
               value="id"
               label="name"
-              dataList={sensor}
+              dataList={sensors}
               defaultValue={row.sensor}
               onChange={handleSelect(i, "sensor")}
               showModal={this.showModal}
@@ -247,19 +251,16 @@ class ReviewData extends Component {
     }
 
     // Modal data
-    const modalInfo = { parameter: parameter, sensor: sensor };
+    const modalInfo = { parameter: parameters, sensor: sensors };
 
     // Loading message when parsing data
-    var notification = "";
-    if (message === "Working") {
-      notification = (
+    if (message !== "") {
+      var userMessage = (
         <div className="loading">
-          <Loading />
-          Parsing data to JSON format. This might take a while for large files.
+          {loading && <Loading />}
+          {message}
         </div>
       );
-    } else if (message !== "") {
-      notification = <div>{message}</div>;
     }
 
     // Number of files in dataset - to be expanded in future
@@ -290,7 +291,7 @@ class ReviewData extends Component {
           </table>
           {noFiles} additional files have been detected in the same dataset as
           your dataset.
-          <div className="error-message">{notification}</div>
+          <div className="error-message">{userMessage}</div>
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>
             <button onClick={this.nextStep}>Parse Data </button>

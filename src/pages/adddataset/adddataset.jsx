@@ -37,7 +37,8 @@ class AddDataset extends Component {
       citation: ""
     },
     parameter_list: [],
-    files_list: []
+    files_list: [],
+    file: {}
   };
 
   getDropdowns = async () => {
@@ -80,82 +81,121 @@ class AddDataset extends Component {
 
   validateFile = async () => {
     var { dataset, step } = this.state;
+
+    // Add blank row to datasets table
+    var { data } = await axios.post(apiUrl + "/datasets", {}).catch(error => {
+      console.log(error);
+      this.setState({ allowedStep: [1, 0, 0, 0, 0] });
+      throw { message: "Process failed please try again" };
+    });
+
+    // Clone git repo and add files to files table
     var reqObj = this.parseUrl(dataset.git);
-    var { data, status } = await axios.post(apiUrl + "/datasets", {}); // Add blank row to database and get unique id
     reqObj["id"] = data.id;
-    var { data, status } = await axios.post(apiUrl + "/sparsegitclone", reqObj);
-    var { id, dir, file } = reqObj;
-    var { data, status } = await axios.get(
-      apiUrl +
-        "/files/nc/" +
-        encodeURIComponent("git/" + id + "/" + dir + "/" + file)
-    );
-    if (status === 200) {
-      dataset["id"] = id;
-      this.setState({
-        allowedStep: [1, 2, 0, 0, 0],
-        fileInformation: data,
-        step: step + 1,
-        dataset
+    var { data } = await axios
+      .post(apiUrl + "/sparsegitclone", reqObj)
+      .catch(error => {
+        console.log(error);
+        this.setState({ allowedStep: [1, 0, 0, 0, 0] });
+        throw { message: "Unable to clone repository please try again." };
       });
+
+    // Parse variable and attribute information from incoming file
+    var { file, files } = data;
+    if (file) {
+      var { data, status } = await axios
+        .get(apiUrl + "/files/" + file.type + "/" + file.id)
+        .catch(error => {
+          console.log(error);
+          this.setState({ allowedStep: [1, 0, 0, 0, 0] });
+          throw {
+            message:
+              "Failed to parse file please check the file structure and try again."
+          };
+        });
     } else {
       this.setState({ allowedStep: [1, 0, 0, 0, 0] });
+      throw {
+        message:
+          "File not found in repository please check the link and try again."
+      };
     }
-    return data;
+
+    dataset["id"] = reqObj.id;
+    this.setState({
+      allowedStep: [1, 2, 0, 0, 0],
+      fileInformation: data,
+      step: step + 1,
+      dataset,
+      files_list: files,
+      file: file
+    });
+    return;
   };
 
   // 2) Validate data parse and get lineage from Renku
 
   validateData = async () => {
-    const { parameter_list, dataset, fileInformation } = this.state;
-    const { id, location } = fileInformation;
+    const { step, parameter_list, dataset, file } = this.state;
+    const { id } = file;
 
     // Check all table filled
-    var filled = true;
     for (var row of parameter_list) {
-      filled = this.noEmptyString(row);
+      if (!this.noEmptyString(row)) {
+        this.setState({ allowedStep: [1, 2, 0, 0, 0] });
+        throw { message: "Please complete all the fields." };
+      }
     }
 
     // Lineage from Renku
-    var url = apiUrl + "/api/git/renku/" + encodeURIComponent(dataset.git);
-    var { data: renkuData } = await axios.get(url);
-
-    if (renkuData.stdout === 0 && renkuData.log.data.lineage !== null) {
-      dataset["renku"] = renkuData.stdout;
-      dataset["pre_file"] = "NA";
-      dataset["pre_script"] = "NA";
-    } else {
-      dataset["renku"] = 1;
+    var { data: renkuData } = await axios
+      .get(apiUrl + "/renku/" + encodeURIComponent(dataset.git))
+      .catch(error => {
+        console.log(error);
+        this.setState({ allowedStep: [1, 2, 0, 0, 0] });
+        throw {
+          message:
+            "There was an error connecting to the Renku API please try again."
+        };
+      });
+    dataset["renku"] = 1;
+    if ("data" in renkuData) {
+      if (renkuData.data.lineage !== null) {
+        dataset["renku"] = 0;
+        dataset["pre_file"] = "NA";
+        dataset["pre_script"] = "NA";
+      }
     }
 
     // Send nc file to convertion api
-    url = apiUrl + "/api/convert/nc";
-    const message = {
-      id: id,
-      location: location,
-      variables: parameter_list
-    };
-    var { data: conversion } = await axios.post(url, message);
+    var { data } = await axios
+      .post(apiUrl + "/convert", {
+        id: id,
+        variables: parameter_list
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({ allowedStep: [1, 2, 0, 0, 0] });
+        throw {
+          message:
+            "Unable to convert file to JSON format. Please contact the developer."
+        };
+      });
 
     // Logic for continuing to next step
-    if (conversion.stdout === 0 && filled) {
-      const { step } = this.state;
-      var { start_time, end_time, depth, longitude, latitude } = conversion.out;
-      dataset["start_time"] = start_time;
-      dataset["end_time"] = end_time;
-      dataset["depth"] = depth;
-      dataset["longitude"] = longitude;
-      dataset["latitude"] = latitude;
-      this.setState({
-        renkuResponse: renkuData,
-        allowedStep: [1, 2, 3, 0, 0],
-        dataset,
-        step: step + 1
-      });
-    } else {
-      this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-    }
-    return [conversion, filled];
+    var { start_time, end_time, depth, longitude, latitude } = data.out;
+    dataset["start_time"] = start_time;
+    dataset["end_time"] = end_time;
+    dataset["depth"] = depth;
+    dataset["longitude"] = longitude;
+    dataset["latitude"] = latitude;
+    this.setState({
+      renkuResponse: renkuData,
+      allowedStep: [1, 2, 3, 0, 0],
+      dataset,
+      step: step + 1
+    });
+    return;
   };
 
   // 3) Validate lineage
