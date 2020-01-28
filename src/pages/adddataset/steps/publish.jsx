@@ -1,33 +1,61 @@
 import React, { Component } from "react";
+import Loading from "../../../components/loading/loading";
 
 class Publish extends Component {
-  nextStep = e => {
-    //e.preventDefault();
-    this.props.nextStep();
+  state = {
+    message: "",
+    loading: true
   };
+
+  nextStep = e => {
+    this.setState({
+      loading: true,
+      message:
+        "Publishing Dataset."
+    });
+    e.preventDefault();
+    this.props.nextStep().catch(error => {
+      this.setState({
+        message: error.message,
+        loading: false
+      });
+    });
+  };
+
   prevStep = e => {
     e.preventDefault();
     this.props.prevStep();
   };
 
   getDropdownLabel = (input,id) => {
+    console.log(input,id)
     const { dropdown } = this.props;
     return dropdown[input].find(x => x.id === id).name;
   }
 
   render() {
-    const { parameter_list, dataset } = this.props;
+    const { datasetparameters, dataset } = this.props;
+    var { message, loading } = this.state;
+
+    if (message !== "") {
+      var userMessage = (
+        <div className="loading">
+          {loading && <Loading />}
+          {message}
+        </div>
+      );
+    }
 
     // Parameter Table
     var rows = [];
     var i = 0;
-    for (var row of parameter_list) {
+    for (var row of datasetparameters) {
       rows.push(
         <tr key={"row" + i}>
-          <td>{this.getDropdownLabel("parameter",row.parameter)}</td>
+          <td>{this.getDropdownLabel("parameters",row.parameter)}</td>
           <td>{row.axis}</td>
           <td>{row.unit}</td>
-          <td>{this.getDropdownLabel("sensor",row.sensor)}</td>
+          <td>{this.getDropdownLabel("sensors",row.sensor)}</td>
         </tr>
       );
       i++;
@@ -82,7 +110,7 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Lake</th>
-              <td>{this.getDropdownLabel("lake",dataset["lake_id"])}</td>
+              <td>{this.getDropdownLabel("lakes",dataset["lakes_id"])}</td>
             </tr>
             <tr>
               <th>Title</th>
@@ -90,20 +118,20 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Project</th>
-              <td>{this.getDropdownLabel("project",dataset["project_id"])}</td>
+              <td>{this.getDropdownLabel("projects",dataset["projects_id"])}</td>
             </tr>
 
             <tr>
               <th>Person</th>
-              <td>{this.getDropdownLabel("person",dataset["person_id"])}</td>
+              <td>{this.getDropdownLabel("persons",dataset["persons_id"])}</td>
             </tr>
             <tr>
               <th>Organisation</th>
-              <td>{this.getDropdownLabel("organisation",dataset["organisation_id"])}</td>
+              <td>{this.getDropdownLabel("organisations",dataset["organisations_id"])}</td>
             </tr>
             <tr>
               <th>License</th>
-              <td>{this.getDropdownLabel("license",dataset["license_id"])}</td>
+              <td>{this.getDropdownLabel("licenses",dataset["licenses_id"])}</td>
             </tr>
             <tr>
               <th>Citation</th>
@@ -123,6 +151,7 @@ class Publish extends Component {
             </tr>
           </tbody>
         </table>
+        <div className="error-message">{userMessage}</div>
         <div className="buttonnav">
           <button onClick={this.prevStep}>Back</button>
           <button onClick={this.nextStep}>Publish </button>

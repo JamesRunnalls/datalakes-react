@@ -25,18 +25,18 @@ class AddDataset extends Component {
       latitude: "",
       longitude: "",
       depth: "",
-      lake_id: "",
-      person_id: "",
-      project_id: "",
-      organisation_id: "",
+      lakes_id: "",
+      persons_id: "",
+      projects_id: "",
+      organisations_id: "",
       title: "",
       renku: "",
       pre_file: "",
       pre_script: "",
-      license_id: "",
+      licenses_id: "",
       citation: ""
     },
-    parameter_list: [],
+    datasetparameters: [],
     files_list: [],
     file: {}
   };
@@ -53,32 +53,6 @@ class AddDataset extends Component {
   }
 
   // 1) Process input file
-
-  parseUrl = url => {
-    var ssh;
-    var dir;
-    var branch;
-    var file;
-    if (url.includes("renkulab.io/gitlab")) {
-      const path = url.split("/blob/")[1].split("/");
-      branch = path[0];
-      ssh =
-        "git@renkulab.io:" +
-        url
-          .split("/blob/")[0]
-          .split("renkulab.io/gitlab/")
-          .pop();
-      dir = path.slice(1, path.length - 1).join("/");
-      file = path[path.length - 1];
-    }
-    return {
-      ssh: ssh,
-      dir: dir,
-      branch: branch,
-      file: file
-    };
-  };
-
   validateFile = async () => {
     var { dataset, step } = this.state;
 
@@ -104,7 +78,7 @@ class AddDataset extends Component {
     var { file, files } = data;
     if (file) {
       var { data, status } = await axios
-        .get(apiUrl + "/files/" + file.type + "/" + file.id)
+        .get(apiUrl + "/files/" + file.filetype + "/" + file.id)
         .catch(error => {
           console.log(error);
           this.setState({ allowedStep: [1, 0, 0, 0, 0] });
@@ -136,11 +110,11 @@ class AddDataset extends Component {
   // 2) Validate data parse and get lineage from Renku
 
   validateData = async () => {
-    const { step, parameter_list, dataset, file } = this.state;
+    const { step, datasetparameters, dataset, file } = this.state;
     const { id } = file;
 
     // Check all table filled
-    for (var row of parameter_list) {
+    for (var row of datasetparameters) {
       if (!this.noEmptyString(row)) {
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
         throw { message: "Please complete all the fields." };
@@ -171,10 +145,10 @@ class AddDataset extends Component {
     var { data } = await axios
       .post(apiUrl + "/convert", {
         id: id,
-        variables: parameter_list
+        variables: datasetparameters
       })
       .catch(error => {
-        console.log(error);
+        console.log(error.message);
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
         throw {
           message:
@@ -200,39 +174,43 @@ class AddDataset extends Component {
 
   // 3) Validate lineage
 
-  validateLineage = () => {
+  validateLineage = async () => {
     const { dataset, step } = this.state;
     if (dataset["pre_script"] !== "" && dataset["pre_file"] !== "") {
       this.setState({ allowedStep: [1, 2, 3, 4, 0], step: step + 1 });
     } else {
-      return true;
+      throw { message: "Please complete all the fields." };
     }
+    return;
   };
 
   // 4) Validate metadata
 
-  validateMetadata = () => {
+  validateMetadata = async () => {
     const { dataset, step } = this.state;
     if (this.noEmptyString(dataset)) {
       this.setState({ allowedStep: [1, 2, 3, 4, 5], step: step + 1 });
     } else {
-      return true;
+      throw { message: "Please complete all the fields." };
     }
   };
 
   // 5) Publish
 
   publish = async () => {
-    const { dataset, parameter_list } = this.state;
-    var url = apiUrl + "/api/adddataset";
-    const message = {
-      dataset: dataset,
-      parameter_list: parameter_list
-    };
-    var { data } = await axios.post(url, message);
-    if (data.stdout === 0) {
-      window.location.href = "/data/" + dataset.id;
-    }
+    const { dataset, datasetparameters } = this.state;
+    await axios
+      .post(apiUrl + "/datasetparameters", {
+        id: dataset.id,
+        datasetparameters: datasetparameters
+      })
+      .catch(error => {
+        throw { message: "Failed to publish please try again." };
+      });
+    await axios.put(apiUrl + "/datasets", dataset).catch(error => {
+      throw { message: "Failed to publish please try again." };
+    });
+    window.location.href = "/datadetail/" + dataset.id;
   };
 
   // Progress Bar
@@ -261,6 +239,32 @@ class AddDataset extends Component {
     return out;
   };
 
+  // Parse url
+  parseUrl = url => {
+    var ssh;
+    var dir;
+    var branch;
+    var file;
+    if (url.includes("renkulab.io/gitlab")) {
+      const path = url.split("/blob/")[1].split("/");
+      branch = path[0];
+      ssh =
+        "git@renkulab.io:" +
+        url
+          .split("/blob/")[0]
+          .split("renkulab.io/gitlab/")
+          .pop();
+      dir = path.slice(1, path.length - 1).join("/");
+      file = path[path.length - 1];
+    }
+    return {
+      ssh: ssh,
+      dir: dir,
+      branch: branch,
+      file: file
+    };
+  };
+
   // Handle changes to inputs
 
   handleChange = input => event => {
@@ -276,15 +280,15 @@ class AddDataset extends Component {
   };
 
   handleParameterChange = (a, b) => event => {
-    var parameter_list = this.state.parameter_list;
-    parameter_list[a][b] = event.target.value;
-    this.setState({ parameter_list });
+    var datasetparameters = this.state.datasetparameters;
+    datasetparameters[a][b] = event.target.value;
+    this.setState({ datasetparameters });
   };
 
   handleParameterSelect = (a, b) => event => {
-    var parameter_list = this.state.parameter_list;
-    parameter_list[a][b] = event.value;
-    this.setState({ parameter_list });
+    var datasetparameters = this.state.datasetparameters;
+    datasetparameters[a][b] = event.value;
+    this.setState({ datasetparameters });
   };
 
   handleDatasetSelect = input => event => {
@@ -306,7 +310,7 @@ class AddDataset extends Component {
       renkuResponse,
       dropdown,
       dataset,
-      parameter_list
+      datasetparameters
     } = this.state;
 
     switch (step) {
@@ -334,7 +338,7 @@ class AddDataset extends Component {
               allowedStep={allowedStep}
             />
             <ReviewData
-              parameter_list={parameter_list}
+              datasetparameters={datasetparameters}
               dropdown={dropdown}
               fileInformation={fileInformation}
               nextStep={this.validateData}
@@ -393,7 +397,7 @@ class AddDataset extends Component {
             <Publish
               nextStep={this.publish}
               prevStep={this.prevStep}
-              parameter_list={parameter_list}
+              datasetparameters={datasetparameters}
               dataset={dataset}
               dropdown={dropdown}
             />

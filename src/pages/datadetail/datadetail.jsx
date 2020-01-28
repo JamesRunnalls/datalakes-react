@@ -742,16 +742,24 @@ class DataDetail extends Component {
     var files = server[1].data;
     var parameters = server[2].data;
 
-    // Add parameters detail
+    // Add parameter details
     var details;
     for (var x in parameters) {
-      details = dropdown.parameters.find(
-        item => item.id === parameters[x].parameters_id
-      );
-      parameters[x]["name"] = details.name;
-      parameters[x]["characteristic"] = details.characteristic;
+      try {
+        details = dropdown.parameters.find(
+          item => item.id === parameters[x].parameters_id
+        );
+        parameters[x]["name"] = details.name;
+        parameters[x]["characteristic"] = details.characteristic;
+      } catch (err){
+        parameters[x]["name"] = null;
+        parameters[x]["characteristic"] = null;
+      }
     }
-
+    
+    // Filter for only json files
+    files = files.filter(file => file.filetype === "json");
+    
     const { data } = await axios
       .get(apiUrl + "/files/" + files[0].id + "?download=raw")
       .catch(error => {

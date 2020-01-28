@@ -7,11 +7,14 @@ class ReviewLineage extends Component {
 
   nextStep = e => {
     e.preventDefault();
-    var data = this.props.nextStep();
-    if (data) {
-      this.setState({ message: "Please complete all the fields." });
-    }
+    this.props.nextStep().catch(error => {
+      console.log("Error",error)
+      this.setState({
+        message: error.message,
+      });
+    });
   };
+
   prevStep = e => {
     e.preventDefault();
     this.props.prevStep();

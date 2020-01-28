@@ -41,11 +41,11 @@ class ReviewData extends Component {
   componentDidMount() {
     const { fileInformation, dropdown } = this.props;
     const { parameters, sensors } = dropdown;
-    var { parameter_list, initialChange } = this.props;
+    var { datasetparameters, initialChange } = this.props;
     const { variables, attributes } = fileInformation;
 
     // Initial data parse and auto field matching
-    if (parameter_list.length === 0) {
+    if (datasetparameters.length === 0) {
       var parseParameter = "";
       var parseUnit = "";
       var parseSensor = "";
@@ -106,9 +106,9 @@ class ReviewData extends Component {
           axis: defaultAxis,
           sensor: defaultSensor
         };
-        parameter_list.push(variable);
+        datasetparameters.push(variable);
       }
-      initialChange(parameter_list);
+      initialChange(datasetparameters);
     }
   }
 
@@ -120,7 +120,7 @@ class ReviewData extends Component {
     });
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.log("Error")
+      console.log("Error",error)
       this.setState({
         message: error.message,
         loading: false
@@ -138,7 +138,7 @@ class ReviewData extends Component {
       fileInformation,
       dropdown,
       getDropdowns,
-      parameter_list,
+      datasetparameters,
       handleChange,
       handleSelect
     } = this.props;
@@ -153,7 +153,7 @@ class ReviewData extends Component {
     var depth = [{ name: "m" }];
     var longitude = [{ name: "degrees" }];
     var latitude = [{ name: "degrees" }];
-    for (var row of parameter_list) {
+    for (var row of datasetparameters) {
       // Logic to restrict key parameter units
       if (row.parameter === 1) {
         // Time

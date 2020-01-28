@@ -20,11 +20,14 @@ class AddMetadata extends Component {
 
   nextStep = e => {
     e.preventDefault();
-    var data = this.props.nextStep();
-    if (data) {
-      this.setState({ message: "Please complete all the fields." });
-    }
+    this.props.nextStep().catch(error => {
+      console.log("Error",error)
+      this.setState({
+        message: error.message,
+      });
+    });
   };
+
   prevStep = e => {
     e.preventDefault();
     this.props.prevStep();
@@ -32,13 +35,13 @@ class AddMetadata extends Component {
 
   render() {
     const { dropdown, getDropdowns, dataset } = this.props;
-    const { lake, person, project, organisation, license } = dropdown;
+    const { lakes, persons, projects, organisations, licenses } = dropdown;
     const modalInfo = {
-      person: person,
-      project: project,
-      lake: lake,
-      organisation: organisation,
-      license: license
+      person: persons,
+      project: projects,
+      lake: lakes,
+      organisation: organisations,
+      license: licenses
     };
     const { modal, modalValue, message } = this.state;
     return (
@@ -128,9 +131,9 @@ class AddMetadata extends Component {
                     table="lake"
                     value="id"
                     label="name"
-                    dataList={lake}
-                    defaultValue={dataset["lake_id"]}
-                    onChange={this.props.handleSelect("lake_id")}
+                    dataList={lakes}
+                    defaultValue={dataset["lakes_id"]}
+                    onChange={this.props.handleSelect("lakes_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -154,9 +157,9 @@ class AddMetadata extends Component {
                     table="project"
                     value="id"
                     label="name"
-                    dataList={project}
-                    defaultValue={dataset["project_id"]}
-                    onChange={this.props.handleSelect("project_id")}
+                    dataList={projects}
+                    defaultValue={dataset["projects_id"]}
+                    onChange={this.props.handleSelect("projects_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -169,9 +172,9 @@ class AddMetadata extends Component {
                     table="person"
                     value="id"
                     label="name"
-                    dataList={person}
-                    defaultValue={dataset["person_id"]}
-                    onChange={this.props.handleSelect("person_id")}
+                    dataList={persons}
+                    defaultValue={dataset["persons_id"]}
+                    onChange={this.props.handleSelect("persons_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -183,9 +186,9 @@ class AddMetadata extends Component {
                     table="organisation"
                     value="id"
                     label="name"
-                    dataList={organisation}
-                    defaultValue={dataset["organisation_id"]}
-                    onChange={this.props.handleSelect("organisation_id")}
+                    dataList={organisations}
+                    defaultValue={dataset["organisations_id"]}
+                    onChange={this.props.handleSelect("organisations_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -206,9 +209,9 @@ class AddMetadata extends Component {
                     table="license"
                     value="id"
                     label="name"
-                    dataList={license}
-                    defaultValue={dataset["license_id"]}
-                    onChange={this.props.handleSelect("license_id")}
+                    dataList={licenses}
+                    defaultValue={dataset["licenses_id"]}
+                    onChange={this.props.handleSelect("licenses_id")}
                     showModal={this.showModal}
                   />
                 </td>

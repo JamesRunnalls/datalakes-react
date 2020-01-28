@@ -240,10 +240,17 @@ class DataPortal extends Component {
     } else {
       // Add parameter details
       var details;
-      for (var x in parameters){
-        details = dropdown.parameters.find(item => item.id === parameters[x].parameters_id);
-        parameters[x]["name"] = details.name;
-        parameters[x]["characteristic"] = details.characteristic;
+      for (var x in parameters) {
+        try {
+          details = dropdown.parameters.find(
+            item => item.id === parameters[x].parameters_id
+          );
+          parameters[x]["name"] = details.name;
+          parameters[x]["characteristic"] = details.characteristic;
+        } catch (err){
+          parameters[x]["name"] = null;
+          parameters[x]["characteristic"] = null;
+        }
       }
     }
     this.setState({ datasets, parameters, dropdown });
