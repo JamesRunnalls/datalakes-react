@@ -10,11 +10,11 @@ class Publish extends Component {
   nextStep = e => {
     this.setState({
       loading: true,
-      message:
-        "Publishing Dataset."
+      message: "Publishing Dataset."
     });
     e.preventDefault();
     this.props.nextStep().catch(error => {
+      console.error(error.message)
       this.setState({
         message: error.message,
         loading: false
@@ -27,11 +27,14 @@ class Publish extends Component {
     this.props.prevStep();
   };
 
-  getDropdownLabel = (input,id) => {
-    console.log(input,id)
-    const { dropdown } = this.props;
-    return dropdown[input].find(x => x.id === id).name;
-  }
+  getDropdownLabel = (input, id) => {
+    try {
+      const { dropdown } = this.props;
+      return dropdown[input].find(x => x.id === id).name;
+    } catch (e) {
+      console.error(input, id, e.message);
+    }
+  };
 
   render() {
     const { datasetparameters, dataset } = this.props;
@@ -52,10 +55,10 @@ class Publish extends Component {
     for (var row of datasetparameters) {
       rows.push(
         <tr key={"row" + i}>
-          <td>{this.getDropdownLabel("parameters",row.parameter)}</td>
+          <td>{this.getDropdownLabel("parameters", row.parameters_id)}</td>
           <td>{row.axis}</td>
           <td>{row.unit}</td>
-          <td>{this.getDropdownLabel("sensors",row.sensor)}</td>
+          <td>{this.getDropdownLabel("sensors", row.sensors_id)}</td>
         </tr>
       );
       i++;
@@ -64,9 +67,9 @@ class Publish extends Component {
     // Renku
     var renku = "";
     if (dataset["renku"] === 0) {
-      renku = "Lineage managed through Renku"
+      renku = "Lineage managed through Renku";
     } else {
-      renku = "Not used."
+      renku = "Not used.";
     }
 
     return (
@@ -86,7 +89,7 @@ class Publish extends Component {
         <h3>Dataset Metadata</h3>
         <table className="metadata">
           <tbody>
-          <tr>
+            <tr>
               <th>Link to Git Repo</th>
               <td>{dataset["git"]}</td>
             </tr>
@@ -110,7 +113,7 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Lake</th>
-              <td>{this.getDropdownLabel("lakes",dataset["lakes_id"])}</td>
+              <td>{this.getDropdownLabel("lakes", dataset["lakes_id"])}</td>
             </tr>
             <tr>
               <th>Title</th>
@@ -118,20 +121,29 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Project</th>
-              <td>{this.getDropdownLabel("projects",dataset["projects_id"])}</td>
+              <td>
+                {this.getDropdownLabel("projects", dataset["projects_id"])}
+              </td>
             </tr>
 
             <tr>
               <th>Person</th>
-              <td>{this.getDropdownLabel("persons",dataset["persons_id"])}</td>
+              <td>{this.getDropdownLabel("persons", dataset["persons_id"])}</td>
             </tr>
             <tr>
               <th>Organisation</th>
-              <td>{this.getDropdownLabel("organisations",dataset["organisations_id"])}</td>
+              <td>
+                {this.getDropdownLabel(
+                  "organisations",
+                  dataset["organisations_id"]
+                )}
+              </td>
             </tr>
             <tr>
               <th>License</th>
-              <td>{this.getDropdownLabel("licenses",dataset["licenses_id"])}</td>
+              <td>
+                {this.getDropdownLabel("licenses", dataset["licenses_id"])}
+              </td>
             </tr>
             <tr>
               <th>Citation</th>

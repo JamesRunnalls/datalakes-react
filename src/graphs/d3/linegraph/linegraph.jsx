@@ -8,6 +8,10 @@ class D3LineGraph extends Component {
     return new Date(raw * 1000);
   };
 
+  removeErrorWarning = (x) => {
+    return;
+  }
+
   plotLineGraph = () => {
     try {
       d3.select("svg").remove();
@@ -101,6 +105,8 @@ class D3LineGraph extends Component {
         .attr("x", 0)
         .attr("y", 0);
 
+      this.removeErrorWarning(clip);
+
       // Add the X Axis
       if (xlabel === "Time") {
         svg
@@ -115,7 +121,7 @@ class D3LineGraph extends Component {
           xLabel = this.props.xlabel;
         }
 
-        var xunits = "";
+        xunits = "";
         if ("xunits" in this.props) {
           xunits = this.props.xunits;
           xLabel = this.props.xlabel + " (" + xunits + ")";

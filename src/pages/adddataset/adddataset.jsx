@@ -57,48 +57,42 @@ class AddDataset extends Component {
     var { dataset, step } = this.state;
 
     // Add blank row to datasets table
-    var { data } = await axios.post(apiUrl + "/datasets", {}).catch(error => {
-      console.log(error);
+    var { data: data1 } = await axios.post(apiUrl + "/datasets", {}).catch(error => {
+      console.error(error.message);
       this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-      throw { message: "Process failed please try again" };
+      throw new Error ("Process failed please try again");
     });
 
     // Clone git repo and add files to files table
     var reqObj = this.parseUrl(dataset.git);
-    reqObj["id"] = data.id;
-    var { data } = await axios
+    reqObj["id"] = data1.id;
+    var { data: data2 } = await axios
       .post(apiUrl + "/sparsegitclone", reqObj)
       .catch(error => {
-        console.log(error);
+        console.error(error.message);
         this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-        throw { message: "Unable to clone repository please try again." };
+        throw new Error ("Unable to clone repository please try again.");
       });
 
     // Parse variable and attribute information from incoming file
-    var { file, files } = data;
+    var { file, files } = data2;
     if (file) {
-      var { data, status } = await axios
-        .get(apiUrl + "/files/" + file.filetype + "/" + file.id)
+      var { data: fileInformation} = await axios
+        .get(apiUrl + "/files/" + file.id + "?get=metadata")
         .catch(error => {
-          console.log(error);
+          console.error(error.message);
           this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-          throw {
-            message:
-              "Failed to parse file please check the file structure and try again."
-          };
+          throw new Error ("Failed to parse file please check the file structure and try again.");
         });
     } else {
       this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-      throw {
-        message:
-          "File not found in repository please check the link and try again."
-      };
+      throw new Error ("File not found in repository please check the link and try again.");
     }
 
     dataset["id"] = reqObj.id;
     this.setState({
       allowedStep: [1, 2, 0, 0, 0],
-      fileInformation: data,
+      fileInformation: fileInformation,
       step: step + 1,
       dataset,
       files_list: files,
@@ -117,7 +111,7 @@ class AddDataset extends Component {
     for (var row of datasetparameters) {
       if (!this.noEmptyString(row)) {
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw { message: "Please complete all the fields." };
+        throw new Error ("Please complete all the fields.");
       }
     }
 
@@ -125,12 +119,9 @@ class AddDataset extends Component {
     var { data: renkuData } = await axios
       .get(apiUrl + "/renku/" + encodeURIComponent(dataset.git))
       .catch(error => {
-        console.log(error);
+        console.error(error.message);
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw {
-          message:
-            "There was an error connecting to the Renku API please try again."
-        };
+        throw new Error ("There was an error connecting to the Renku API please try again.");
       });
     dataset["renku"] = 1;
     if ("data" in renkuData) {
@@ -140,7 +131,6 @@ class AddDataset extends Component {
         dataset["pre_script"] = "NA";
       }
     }
-
     // Send nc file to convertion api
     var { data } = await axios
       .post(apiUrl + "/convert", {
@@ -148,16 +138,13 @@ class AddDataset extends Component {
         variables: datasetparameters
       })
       .catch(error => {
-        console.log(error.message);
+        console.error(error.message);
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw {
-          message:
-            "Unable to convert file to JSON format. Please contact the developer."
-        };
+        throw new Error ("Unable to convert file to JSON format. Please contact the developer.");
       });
 
     // Logic for continuing to next step
-    var { start_time, end_time, depth, longitude, latitude } = data.out;
+    var { start_time, end_time, depth, longitude, latitude } = data;
     dataset["start_time"] = start_time;
     dataset["end_time"] = end_time;
     dataset["depth"] = depth;
@@ -179,7 +166,7 @@ class AddDataset extends Component {
     if (dataset["pre_script"] !== "" && dataset["pre_file"] !== "") {
       this.setState({ allowedStep: [1, 2, 3, 4, 0], step: step + 1 });
     } else {
-      throw { message: "Please complete all the fields." };
+      throw new Error ("Please complete all the fields.");
     }
     return;
   };
@@ -191,7 +178,7 @@ class AddDataset extends Component {
     if (this.noEmptyString(dataset)) {
       this.setState({ allowedStep: [1, 2, 3, 4, 5], step: step + 1 });
     } else {
-      throw { message: "Please complete all the fields." };
+      throw new Error ("Please complete all the fields.");
     }
   };
 
@@ -205,10 +192,10 @@ class AddDataset extends Component {
         datasetparameters: datasetparameters
       })
       .catch(error => {
-        throw { message: "Failed to publish please try again." };
+        throw new Error ("Failed to publish please try again.");
       });
     await axios.put(apiUrl + "/datasets", dataset).catch(error => {
-      throw { message: "Failed to publish please try again." };
+      throw new Error ("Failed to publish please try again.");
     });
     window.location.href = "/datadetail/" + dataset.id;
   };
@@ -314,6 +301,21 @@ class AddDataset extends Component {
     } = this.state;
 
     switch (step) {
+      default:
+        return (
+          <React.Fragment>
+            <ProgressBar
+              step={step}
+              setStep={this.setStep}
+              allowedStep={allowedStep}
+            />
+            <AddData
+              nextStep={this.validateFile}
+              handleChange={this.handleDatasetChange}
+              dataset={dataset}
+            />
+          </React.Fragment>
+        );
       case 1:
         return (
           <React.Fragment>

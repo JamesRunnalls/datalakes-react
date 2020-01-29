@@ -21,7 +21,7 @@ class AddMetadata extends Component {
   nextStep = e => {
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.log("Error",error)
+      console.error(error.message)
       this.setState({
         message: error.message,
       });
@@ -37,11 +37,11 @@ class AddMetadata extends Component {
     const { dropdown, getDropdowns, dataset } = this.props;
     const { lakes, persons, projects, organisations, licenses } = dropdown;
     const modalInfo = {
-      person: persons,
-      project: projects,
-      lake: lakes,
-      organisation: organisations,
-      license: licenses
+      persons: persons,
+      projects: projects,
+      lakes: lakes,
+      organisations: organisations,
+      licenses: licenses
     };
     const { modal, modalValue, message } = this.state;
     return (
@@ -128,7 +128,7 @@ class AddMetadata extends Component {
                 <th>Lake</th>
                 <td>
                   <DataSelect
-                    table="lake"
+                    table="lakes"
                     value="id"
                     label="name"
                     dataList={lakes}
@@ -154,7 +154,7 @@ class AddMetadata extends Component {
                 <th>Project</th>
                 <td>
                   <DataSelect
-                    table="project"
+                    table="projects"
                     value="id"
                     label="name"
                     dataList={projects}
@@ -169,7 +169,7 @@ class AddMetadata extends Component {
                 <th>Person</th>
                 <td>
                   <DataSelect
-                    table="person"
+                    table="persons"
                     value="id"
                     label="name"
                     dataList={persons}
@@ -183,7 +183,7 @@ class AddMetadata extends Component {
                 <th>Organisation</th>
                 <td>
                   <DataSelect
-                    table="organisation"
+                    table="organisations"
                     value="id"
                     label="name"
                     dataList={organisations}
@@ -206,7 +206,7 @@ class AddMetadata extends Component {
                 </th>
                 <td>
                   <DataSelect
-                    table="license"
+                    table="licenses"
                     value="id"
                     label="name"
                     dataList={licenses}

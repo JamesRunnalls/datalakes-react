@@ -16,6 +16,7 @@ class AddData extends Component {
     });
     e.preventDefault();
     this.props.nextStep().catch(error => {
+      console.error(error.message);
       this.setState({
         message: error.message,
         loading: false

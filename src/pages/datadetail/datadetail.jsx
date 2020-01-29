@@ -7,7 +7,6 @@ import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import D3HeatMap from "../../graphs/d3/heatmap/heatmap";
 import D3LineGraph from "../../graphs/d3/linegraph/linegraph";
 import { apiUrl } from "../../../config.json";
-import Sensor from "./img/sensor.svg";
 import Database from "./img/data.svg";
 import Python from "./img/python.svg";
 //import R from "./img/r.svg";
@@ -247,7 +246,7 @@ class LineGraph extends Component {
       }
       var x = data.x.slice(l, u);
       var y = data.y.slice(l, u);
-      var z = [];
+      //var z = [];
       data = { x: x, y: y };
     }
     // Get axis labels
@@ -420,7 +419,6 @@ class Download extends Component {
       apiUrl
     } = this.props;
     const jsonUrl = apiUrl + "/api/data/json/" + url;
-    const ncUrl = apiUrl + "/api/data/nc/" + url;
     const csvUrl = apiUrl + "/api/data/csv/" + url;
     const txtUrl = apiUrl + "/api/data/txt/" + url;
     return (
@@ -467,7 +465,7 @@ class Download extends Component {
 class Pipeline extends Component {
   render() {
     const { dataset } = this.props;
-    if (dataset.renku == 1) {
+    if (dataset.renku === 1) {
       return (
         <div className="pipeline">
           <div className="pipeline-header">
@@ -727,6 +725,12 @@ class DataDetail extends Component {
     }
   };
 
+  parameterDetails = (dropdown,parameters,x) => {
+    return dropdown.parameters.find(
+      item => item.id === parameters[x].parameters_id
+    );
+  }
+
   async componentDidMount() {
     const dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
     const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
@@ -746,9 +750,7 @@ class DataDetail extends Component {
     var details;
     for (var x in parameters) {
       try {
-        details = dropdown.parameters.find(
-          item => item.id === parameters[x].parameters_id
-        );
+        details = this.parameterDetails(dropdown,parameters,x);
         parameters[x]["name"] = details.name;
         parameters[x]["characteristic"] = details.characteristic;
       } catch (err){
@@ -759,9 +761,9 @@ class DataDetail extends Component {
     
     // Filter for only json files
     files = files.filter(file => file.filetype === "json");
-    
+
     const { data } = await axios
-      .get(apiUrl + "/files/" + files[0].id + "?download=raw")
+      .get(apiUrl + "/files/" + files[0].id + "?get=raw")
       .catch(error => {
         this.setState({ error: true });
       });
@@ -849,7 +851,7 @@ class DataDetail extends Component {
         />
       ]
     };
-    if (parameters.length == 2) {
+    if (parameters.length === 2) {
       if (selection === "") {
         menu.linegraph[0] = "subnav-item active";
         inner = menu.linegraph[1];

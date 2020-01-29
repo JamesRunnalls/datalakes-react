@@ -35,17 +35,17 @@ class AddDropdownItem extends Component {
 
   submit = async e => {
     e.preventDefault();
-    const url = apiUrl + "/api/database/create/" + this.props.modalValue;
-    const { data } = await axios.post(url, this.state.values);
-    if (data.stdout === 0) {
-      this.props.showModal();
-      this.clearState();
-      this.props.getDropdowns();
-    }
+    await axios.post(apiUrl + "/selectiontables", {
+      table: this.props.modalValue,
+      data: this.state.values
+    });
+    this.props.showModal();
+    this.clearState();
+    this.props.getDropdowns();
   };
 
   componentDidUpdate() {
-      this.setInitialSelectState();
+    this.setInitialSelectState();
   }
 
   setInitialSelectState = () => {
@@ -62,10 +62,11 @@ class AddDropdownItem extends Component {
     if (Array.isArray(keys)) {
       for (var label of keys) {
         if (label.includes("_id")) {
-            if (label in values ){} else {
-                values[label] = modalInfo[label.split("_")[0]][0].id;
-                this.setState({ values });
-            }
+          if (label in values) {
+          } else {
+            values[label] = modalInfo[label.split("_")[0]][0].id;
+            this.setState({ values });
+          }
         }
       }
     }

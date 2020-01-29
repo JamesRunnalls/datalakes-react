@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
@@ -224,6 +223,12 @@ class DataPortal extends Component {
     map: false
   };
 
+  parameterDetails = (dropdown,parameters,x) => {
+    return dropdown.parameters.find(
+      item => item.id === parameters[x].parameters_id
+    );
+  }
+
   async componentDidMount() {
     this.refs.search.focus();
     this.refs.search.select();
@@ -232,7 +237,7 @@ class DataPortal extends Component {
       apiUrl + "/datasets"
     );
     var { data: parameters, status: pstatus } = await axios.get(
-      apiUrl + "/parameters"
+      apiUrl + "/datasetparameters"
     );
     if (dstatus !== 200) datasets = [];
     if (pstatus !== 200) {
@@ -242,9 +247,7 @@ class DataPortal extends Component {
       var details;
       for (var x in parameters) {
         try {
-          details = dropdown.parameters.find(
-            item => item.id === parameters[x].parameters_id
-          );
+          details = this.parameterDetails(dropdown,parameters,x);
           parameters[x]["name"] = details.name;
           parameters[x]["characteristic"] = details.characteristic;
         } catch (err){
@@ -331,7 +334,7 @@ class DataPortal extends Component {
   startTimeAddFilter = e => {
     var { filters } = this.state;
     var date = e.target.value;
-    if (date == "" && "Start Date" in filters) {
+    if (date === "" && "Start Date" in filters) {
       delete filters["Start Date"];
     } else {
       filters["Start Date"] = {
@@ -346,7 +349,7 @@ class DataPortal extends Component {
   endTimeAddFilter = e => {
     var { filters } = this.state;
     var date = e.target.value;
-    if (date == "" && "End Date" in filters) {
+    if (date === "" && "End Date" in filters) {
       delete filters["End Date"];
     } else {
       filters["End Date"] = {
@@ -467,9 +470,7 @@ class DataPortal extends Component {
       ].filter(cat => cat !== avoid); // List of catagories in filters
       for (var l of category) {
         tDatasets = [];
-        for (var f of Object.values(filters).filter(
-          filter => filter.category === l
-        )) {
+        for (var f of this.filterCategory(filters,l)) {
           tDatasets = tDatasets.concat(filterData(dataset, f, parameters));
         }
         dataset = [...new Set(tDatasets)];
@@ -478,10 +479,16 @@ class DataPortal extends Component {
     return dataset;
   };
 
+  filterCategory = (filters,l) => {
+    return Object.values(filters).filter(
+      filter => filter.category === l
+    )
+  }
+
   filterParameters = (dataset, params) => {
     return params.filter(
       param =>
-        dataset.filter(data => data.id == param.datasets_id).length > 0 &&
+        dataset.filter(data => data.id === param.datasets_id).length > 0 &&
         param.parameters_id !== 1
     );
   };
@@ -506,11 +513,6 @@ class DataPortal extends Component {
     // Filter by search
     var lowercasedSearch = search.toLowerCase();
     fDatasets = fDatasets.filter(item => {
-      console.log(
-        parameters
-          .filter(x => x.datasets_id === item.id)
-          .map(y => Object.values(y).toString())
-      );
       return String(Object.values(item))
         .toLowerCase()
         .includes(lowercasedSearch);
@@ -532,7 +534,7 @@ class DataPortal extends Component {
     var dChar = this.filterList(dataC, "characteristic", "characterstic");
 
     // Sort by
-    var fDatasets = this.sortDatasets(fDatasets, sortby);
+    fDatasets = this.sortDatasets(fDatasets, sortby);
 
     return (
       <React.Fragment>

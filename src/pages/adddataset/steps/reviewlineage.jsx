@@ -8,7 +8,7 @@ class ReviewLineage extends Component {
   nextStep = e => {
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.log("Error",error)
+      console.error(error.message);
       this.setState({
         message: error.message,
       });

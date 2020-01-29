@@ -41,9 +41,9 @@ class ReviewData extends Component {
   componentDidMount() {
     const { fileInformation, dropdown } = this.props;
     const { parameters, sensors } = dropdown;
-    var { datasetparameters, initialChange } = this.props;
     const { variables, attributes } = fileInformation;
-
+    var { datasetparameters, initialChange } = this.props;
+    
     // Initial data parse and auto field matching
     if (datasetparameters.length === 0) {
       var parseParameter = "";
@@ -86,7 +86,7 @@ class ReviewData extends Component {
         // Fallback to parameter units if none provided in nc file
         var defaultUnit;
         if (parseUnit === "NA") {
-          defaultUnit = parameters.find(x => x.id === defaultParameter).unit;
+          defaultUnit = this.findUnits(parameters,defaultParameter);
         } else {
           defaultUnit = parseUnit;
         }
@@ -101,15 +101,19 @@ class ReviewData extends Component {
           parseParameter: key,
           parseUnit: parseUnit,
           parseSensor: parseSensor,
-          parameter: defaultParameter,
+          parameters_id: defaultParameter,
           unit: defaultUnit,
           axis: defaultAxis,
-          sensor: defaultSensor
+          sensors_id: defaultSensor
         };
         datasetparameters.push(variable);
       }
-      initialChange(datasetparameters);
+      initialChange("datasetparameters",datasetparameters);
     }
+  }
+
+  findUnits = (parameters,defaultParameter) => {
+    return parameters.find(x => x.id === defaultParameter).unit;
   }
 
   nextStep = e => {
@@ -120,7 +124,7 @@ class ReviewData extends Component {
     });
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.log("Error",error)
+      console.error(error.message)
       this.setState({
         message: error.message,
         loading: false
@@ -215,12 +219,12 @@ class ReviewData extends Component {
           <td>{row.parseUnit}</td>
           <td>
             <DataSelect
-              table="parameter"
+              table="parameters"
               value="id"
               label="name"
               dataList={parameters}
-              defaultValue={row.parameter}
-              onChange={handleSelect(i, "parameter")}
+              defaultValue={row.parameters_id}
+              onChange={handleSelect(i, "parameters_id")}
               showModal={this.showModal}
             />
           </td>
@@ -236,12 +240,12 @@ class ReviewData extends Component {
           <td>{unit}</td>
           <td>
             <DataSelect
-              table="sensor"
+              table="sensors"
               value="id"
               label="name"
               dataList={sensors}
-              defaultValue={row.sensor}
-              onChange={handleSelect(i, "sensor")}
+              defaultValue={row.sensors_id}
+              onChange={handleSelect(i, "sensors_id")}
               showModal={this.showModal}
             />
           </td>
@@ -251,7 +255,7 @@ class ReviewData extends Component {
     }
 
     // Modal data
-    const modalInfo = { parameter: parameters, sensor: sensors };
+    const modalInfo = { parameters: parameters, sensors: sensors };
 
     // Loading message when parsing data
     if (message !== "") {
