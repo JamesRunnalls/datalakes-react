@@ -19,7 +19,7 @@ class AddDataset extends Component {
     dataset: {
       id: "",
       git:
-        "https://renkulab.io/gitlab/james.runnalls/exampleproccess/blob/master/data/1A0001_LexploreMeteostationTemperature/LeXPLORE_WS_Lexplore_Weather_data.nc",
+        "https://renkulab.io/gitlab/viet.tran-khac/lexplore-data/blob/master/data/Level1A/1A0009_LexplorePPMooringDissolvedOxygen_5000cm/netcdf/201809_1A0009_LexplorePPMooringDissolvedOxygen_5000cm.nc",
       start_time: "",
       end_time: "",
       latitude: "",
@@ -234,6 +234,8 @@ class AddDataset extends Component {
     var file;
     if (url.includes("renkulab.io/gitlab")) {
       const path = url.split("/blob/")[1].split("/");
+      const loc = url.split("/blob/")[0].split("/");
+      const repo = loc[loc.length - 1];
       branch = path[0];
       ssh =
         "git@renkulab.io:" +
@@ -241,7 +243,9 @@ class AddDataset extends Component {
           .split("/blob/")[0]
           .split("renkulab.io/gitlab/")
           .pop();
-      dir = path.slice(1, path.length - 1).join("/");
+      dir = path.slice(1, path.length - 1);
+      dir.unshift(repo);
+      dir = dir.join("/");
       file = path[path.length - 1];
     }
     return {
@@ -272,6 +276,13 @@ class AddDataset extends Component {
     this.setState({ datasetparameters });
   };
 
+  handleParameterCheck = (a, b) => event => {
+    var datasetparameters = this.state.datasetparameters;
+    datasetparameters[a][b] = !datasetparameters[a][b];
+    this.setState({ datasetparameters });
+  };
+
+
   handleParameterSelect = (a, b) => event => {
     var datasetparameters = this.state.datasetparameters;
     datasetparameters[a][b] = event.value;
@@ -297,7 +308,8 @@ class AddDataset extends Component {
       renkuResponse,
       dropdown,
       dataset,
-      datasetparameters
+      datasetparameters,
+      files_list
     } = this.state;
 
     switch (step) {
@@ -343,11 +355,13 @@ class AddDataset extends Component {
               datasetparameters={datasetparameters}
               dropdown={dropdown}
               fileInformation={fileInformation}
+              files_list={files_list}
               nextStep={this.validateData}
               prevStep={this.prevStep}
               initialChange={this.initialParameterChange}
               handleSelect={this.handleParameterSelect}
               handleChange={this.handleParameterChange}
+              handleCheck={this.handleParameterCheck}
               getDropdowns={this.getDropdowns}
             />
           </React.Fragment>

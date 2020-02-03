@@ -43,7 +43,7 @@ class ReviewData extends Component {
     const { parameters, sensors } = dropdown;
     const { variables, attributes } = fileInformation;
     var { datasetparameters, initialChange } = this.props;
-    
+
     // Initial data parse and auto field matching
     if (datasetparameters.length === 0) {
       var parseParameter = "";
@@ -86,7 +86,7 @@ class ReviewData extends Component {
         // Fallback to parameter units if none provided in nc file
         var defaultUnit;
         if (parseUnit === "NA") {
-          defaultUnit = this.findUnits(parameters,defaultParameter);
+          defaultUnit = this.findUnits(parameters, defaultParameter);
         } else {
           defaultUnit = parseUnit;
         }
@@ -104,17 +104,18 @@ class ReviewData extends Component {
           parameters_id: defaultParameter,
           unit: defaultUnit,
           axis: defaultAxis,
-          sensors_id: defaultSensor
+          sensors_id: defaultSensor,
+          included: true
         };
         datasetparameters.push(variable);
       }
-      initialChange("datasetparameters",datasetparameters);
+      initialChange("datasetparameters", datasetparameters);
     }
   }
 
-  findUnits = (parameters,defaultParameter) => {
+  findUnits = (parameters, defaultParameter) => {
     return parameters.find(x => x.id === defaultParameter).unit;
-  }
+  };
 
   nextStep = e => {
     this.setState({
@@ -124,7 +125,7 @@ class ReviewData extends Component {
     });
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.error(error.message)
+      console.error(error.message);
       this.setState({
         message: error.message,
         loading: false
@@ -139,12 +140,13 @@ class ReviewData extends Component {
 
   render() {
     const {
-      fileInformation,
       dropdown,
       getDropdowns,
       datasetparameters,
       handleChange,
-      handleSelect
+      handleCheck,
+      handleSelect,
+      files_list
     } = this.props;
     const { parameters, sensors, axis } = dropdown;
     var { modal, modalValue, message, loading } = this.state;
@@ -249,6 +251,13 @@ class ReviewData extends Component {
               showModal={this.showModal}
             />
           </td>
+          <td>
+            <input
+              type="checkbox"
+              defaultChecked={row.included}
+              onChange={handleCheck(i, "included")}
+            ></input>
+          </td>
         </tr>
       );
       i++;
@@ -267,11 +276,11 @@ class ReviewData extends Component {
       );
     }
 
-    // Number of files in dataset - to be expanded in future
+    // Number of files
     var noFiles = 0;
-    if ("datasetFiles" in fileInformation) {
-      noFiles = fileInformation.datasetFiles.length - 1;
-    }
+    try {
+      noFiles = files_list.length - 1;
+    } catch (e) {}
 
     return (
       <React.Fragment>
@@ -280,7 +289,7 @@ class ReviewData extends Component {
             <tbody>
               <tr>
                 <th colSpan="2">Read from file</th>
-                <th colSpan="4">Check and adjust auto-parse</th>
+                <th colSpan="5">Check and adjust auto-parse</th>
               </tr>
               <tr>
                 <th>Variable</th>
@@ -289,6 +298,7 @@ class ReviewData extends Component {
                 <th style={{ width: "55px" }}>Axis</th>
                 <th>Units</th>
                 <th>Sensor</th>
+                <th style={{ width: "15px" }}></th>
               </tr>
               {rows}
             </tbody>
