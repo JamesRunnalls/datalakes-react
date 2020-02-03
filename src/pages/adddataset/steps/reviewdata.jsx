@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import Fuse from "fuse.js";
 import DataSelect from "../../../components/dataselect/dataselect";
 import AddDropdownItem from "../adddropdownitem";
 import Loading from "../../../components/loading/loading";
@@ -16,105 +15,6 @@ class ReviewData extends Component {
       modal: !this.state.modal,
       modalValue: value
     });
-  };
-
-  fuseSearch = (keys, list, find) => {
-    var options = {
-      keys: keys,
-      shouldSort: true,
-      threshold: 0.9,
-      location: 0,
-      distance: 100,
-      maxPatternLength: 32,
-      minMatchCharLength: 1
-    };
-    var fuse = new Fuse(list, options);
-    var match = find.split("_").join(" ");
-    var search = fuse.search(match);
-    var defaultValue = "";
-    if (search.length !== 0) {
-      defaultValue = search[0].id;
-    }
-    return defaultValue;
-  };
-
-  componentDidMount() {
-    const { fileInformation, dropdown } = this.props;
-    const { parameters, sensors } = dropdown;
-    const { variables, attributes } = fileInformation;
-    var { datasetparameters, initialChange } = this.props;
-
-    // Initial data parse and auto field matching
-    if (datasetparameters.length === 0) {
-      var parseParameter = "";
-      var parseUnit = "";
-      var parseSensor = "";
-      var variableAttributes = "";
-      var variable = {};
-
-      // Loop over variables in nc file
-      for (var key in variables) {
-        parseParameter = key;
-        parseUnit = "NA";
-        parseSensor = "NA";
-        variableAttributes = variables[key].attributes;
-
-        // Look for names in nc file.
-        if ("units" in variableAttributes) {
-          parseUnit = variableAttributes["units"].value;
-        }
-        if ("standard_name" in variableAttributes) {
-          parseParameter = variableAttributes["standard_name"].value;
-        }
-        if ("long_name" in variableAttributes) {
-          parseParameter = variableAttributes["long_name"].value;
-        }
-        if ("sensor" in attributes) {
-          parseSensor = attributes["sensor"].value;
-        }
-
-        // Search for matching names in database to define default values
-        var defaultParameter = this.fuseSearch(
-          ["name"],
-          parameters,
-          parseParameter
-        );
-
-        var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
-        var defaultAxis = "y";
-
-        // Fallback to parameter units if none provided in nc file
-        var defaultUnit;
-        if (parseUnit === "NA") {
-          defaultUnit = this.findUnits(parameters, defaultParameter);
-        } else {
-          defaultUnit = parseUnit;
-        }
-
-        // Logic for default axis assignment
-        if (defaultParameter === 1) {
-          defaultAxis = "x";
-        }
-
-        // Summarise data
-        variable = {
-          parseParameter: key,
-          parseUnit: parseUnit,
-          parseSensor: parseSensor,
-          parameters_id: defaultParameter,
-          unit: defaultUnit,
-          axis: defaultAxis,
-          sensors_id: defaultSensor,
-          included: true
-        };
-        datasetparameters.push(variable);
-      }
-      initialChange("datasetparameters", datasetparameters);
-    }
-  }
-
-  findUnits = (parameters, defaultParameter) => {
-    return parameters.find(x => x.id === defaultParameter).unit;
   };
 
   nextStep = e => {

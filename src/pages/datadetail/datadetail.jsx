@@ -80,19 +80,26 @@ class DataDetail extends Component {
 
     // Add parameter details
     var details;
-    for (var x in parameters) {
+    for (var p in parameters) {
       try {
-        details = this.parameterDetails(dropdown, parameters, x);
-        parameters[x]["name"] = details.name;
-        parameters[x]["characteristic"] = details.characteristic;
+        details = this.parameterDetails(dropdown, parameters, p);
+        parameters[p]["name"] = details.name;
+        parameters[p]["characteristic"] = details.characteristic;
       } catch (err) {
-        parameters[x]["name"] = null;
-        parameters[x]["characteristic"] = null;
+        parameters[p]["name"] = null;
+        parameters[p]["characteristic"] = null;
       }
     }
 
     // Logic for graphs
-    if (parameters.length === 2) {
+    var x = parameters.filter(param => param.axis === "x").length > 0;
+    var y = parameters.filter(param => param.axis === "y").length > 0;
+    var z = parameters.filter(param => param.axis === "z").length > 0;
+
+    if (x && y && z) {
+      allowedStep.push("heatmap");
+      step = "heatmap";
+    } else if (x && y) {
       allowedStep.push("linegraph");
       step = "linegraph";
     } else {

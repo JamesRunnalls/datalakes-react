@@ -14,7 +14,7 @@ class Publish extends Component {
     });
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.error(error.message)
+      console.error(error.message);
       this.setState({
         message: error.message,
         loading: false
@@ -53,15 +53,17 @@ class Publish extends Component {
     var rows = [];
     var i = 0;
     for (var row of datasetparameters) {
-      rows.push(
-        <tr key={"row" + i}>
-          <td>{this.getDropdownLabel("parameters", row.parameters_id)}</td>
-          <td>{row.axis}</td>
-          <td>{row.unit}</td>
-          <td>{this.getDropdownLabel("sensors", row.sensors_id)}</td>
-        </tr>
-      );
-      i++;
+      if (row.included) {
+        rows.push(
+          <tr key={"row" + i}>
+            <td>{this.getDropdownLabel("parameters", row.parameters_id)}</td>
+            <td>{row.axis}</td>
+            <td>{row.unit}</td>
+            <td>{this.getDropdownLabel("sensors", row.sensors_id)}</td>
+          </tr>
+        );
+        i++;
+      }
     }
 
     // Renku

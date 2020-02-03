@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "./adddataset.css";
 import axios from "axios";
+import Fuse from "fuse.js";
 import { apiUrl } from "../../../config.json";
 import AddData from "./steps/adddata";
 import ReviewData from "./steps/reviewdata";
@@ -54,14 +55,16 @@ class AddDataset extends Component {
 
   // 1) Process input file
   validateFile = async () => {
-    var { dataset, step } = this.state;
+    var { dataset, step, datasetparameters, dropdown } = this.state;
 
     // Add blank row to datasets table
-    var { data: data1 } = await axios.post(apiUrl + "/datasets", {}).catch(error => {
-      console.error(error.message);
-      this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-      throw new Error ("Process failed please try again");
-    });
+    var { data: data1 } = await axios
+      .post(apiUrl + "/datasets", {})
+      .catch(error => {
+        console.error(error.message);
+        this.setState({ allowedStep: [1, 0, 0, 0, 0] });
+        throw new Error("Process failed please try again");
+      });
 
     // Clone git repo and add files to files table
     var reqObj = this.parseUrl(dataset.git);
@@ -71,30 +74,42 @@ class AddDataset extends Component {
       .catch(error => {
         console.error(error.message);
         this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-        throw new Error ("Unable to clone repository please try again.");
+        throw new Error("Unable to clone repository please try again.");
       });
 
     // Parse variable and attribute information from incoming file
     var { file, files } = data2;
     if (file) {
-      var { data: fileInformation} = await axios
+      var { data: fileInformation } = await axios
         .get(apiUrl + "/files/" + file.id + "?get=metadata")
         .catch(error => {
           console.error(error.message);
           this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-          throw new Error ("Failed to parse file please check the file structure and try again.");
+          throw new Error(
+            "Failed to parse file please check the file structure and try again."
+          );
         });
     } else {
       this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-      throw new Error ("File not found in repository please check the link and try again.");
+      throw new Error(
+        "File not found in repository please check the link and try again."
+      );
     }
-
     dataset["id"] = reqObj.id;
+
+    // Set initial dataset parameters
+    datasetparameters = this.setDatasetParameters(
+      fileInformation,
+      dropdown,
+      datasetparameters
+    );
+
     this.setState({
       allowedStep: [1, 2, 0, 0, 0],
       fileInformation: fileInformation,
       step: step + 1,
       dataset,
+      datasetparameters,
       files_list: files,
       file: file
     });
@@ -111,7 +126,7 @@ class AddDataset extends Component {
     for (var row of datasetparameters) {
       if (!this.noEmptyString(row)) {
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw new Error ("Please complete all the fields.");
+        throw new Error("Please complete all the fields.");
       }
     }
 
@@ -121,7 +136,9 @@ class AddDataset extends Component {
       .catch(error => {
         console.error(error.message);
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw new Error ("There was an error connecting to the Renku API please try again.");
+        throw new Error(
+          "There was an error connecting to the Renku API please try again."
+        );
       });
     dataset["renku"] = 1;
     if ("data" in renkuData) {
@@ -131,6 +148,24 @@ class AddDataset extends Component {
         dataset["pre_script"] = "NA";
       }
     }
+
+    // Set real axis values
+    var axis = []
+    var parseAxis;
+    var updateAxis;
+    var j;
+    for (var i = 0; i < datasetparameters.length; i++) {
+      parseAxis = datasetparameters[i]["axis"];
+      updateAxis = parseAxis;
+      j = 1;
+      while (axis.includes(updateAxis)){
+        updateAxis = parseAxis + j;
+        j++
+      }
+      axis.push(updateAxis)
+    datasetparameters[i]["rAxis"] = updateAxis;
+    }
+
     // Send nc file to convertion api
     var { data } = await axios
       .post(apiUrl + "/convert", {
@@ -140,7 +175,9 @@ class AddDataset extends Component {
       .catch(error => {
         console.error(error.message);
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw new Error ("Unable to convert file to JSON format. Please contact the developer.");
+        throw new Error(
+          "Unable to convert file to JSON format. Please contact the developer."
+        );
       });
 
     // Logic for continuing to next step
@@ -152,6 +189,7 @@ class AddDataset extends Component {
     dataset["latitude"] = latitude;
     this.setState({
       renkuResponse: renkuData,
+      datasetparameters,
       allowedStep: [1, 2, 3, 0, 0],
       dataset,
       step: step + 1
@@ -166,7 +204,7 @@ class AddDataset extends Component {
     if (dataset["pre_script"] !== "" && dataset["pre_file"] !== "") {
       this.setState({ allowedStep: [1, 2, 3, 4, 0], step: step + 1 });
     } else {
-      throw new Error ("Please complete all the fields.");
+      throw new Error("Please complete all the fields.");
     }
     return;
   };
@@ -178,7 +216,7 @@ class AddDataset extends Component {
     if (this.noEmptyString(dataset)) {
       this.setState({ allowedStep: [1, 2, 3, 4, 5], step: step + 1 });
     } else {
-      throw new Error ("Please complete all the fields.");
+      throw new Error("Please complete all the fields.");
     }
   };
 
@@ -192,10 +230,10 @@ class AddDataset extends Component {
         datasetparameters: datasetparameters
       })
       .catch(error => {
-        throw new Error ("Failed to publish please try again.");
+        throw new Error("Failed to publish please try again.");
       });
     await axios.put(apiUrl + "/datasets", dataset).catch(error => {
-      throw new Error ("Failed to publish please try again.");
+      throw new Error("Failed to publish please try again.");
     });
     window.location.href = "/datadetail/" + dataset.id;
   };
@@ -256,6 +294,101 @@ class AddDataset extends Component {
     };
   };
 
+  fuseSearch = (keys, list, find) => {
+    var options = {
+      keys: keys,
+      shouldSort: true,
+      threshold: 0.9,
+      location: 0,
+      distance: 100,
+      maxPatternLength: 32,
+      minMatchCharLength: 1
+    };
+    var fuse = new Fuse(list, options);
+    var match = find.split("_").join(" ");
+    var search = fuse.search(match);
+    var defaultValue = "";
+    if (search.length !== 0) {
+      defaultValue = search[0].id;
+    }
+    return defaultValue;
+  };
+
+  findUnits = (parameters, defaultParameter) => {
+    return parameters.find(x => x.id === defaultParameter).unit;
+  };
+
+  setDatasetParameters = (fileInformation, dropdown, datasetparameters) => {
+    const { parameters, sensors } = dropdown;
+    const { variables, attributes } = fileInformation;
+
+    // Initial data parse and auto field matching
+    var parseParameter = "";
+    var parseUnit = "";
+    var parseSensor = "";
+    var variableAttributes = "";
+    var variable = {};
+
+    // Loop over variables in nc file
+    for (var key in variables) {
+      parseParameter = key;
+      parseUnit = "NA";
+      parseSensor = "NA";
+      variableAttributes = variables[key].attributes;
+
+      // Look for names in nc file.
+      if ("units" in variableAttributes) {
+        parseUnit = variableAttributes["units"].value;
+      }
+      if ("standard_name" in variableAttributes) {
+        parseParameter = variableAttributes["standard_name"].value;
+      }
+      if ("long_name" in variableAttributes) {
+        parseParameter = variableAttributes["long_name"].value;
+      }
+      if ("sensor" in attributes) {
+        parseSensor = attributes["sensor"].value;
+      }
+
+      // Search for matching names in database to define default values
+      var defaultParameter = this.fuseSearch(
+        ["name"],
+        parameters,
+        parseParameter
+      );
+
+      var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
+      var defaultAxis = "y";
+
+      // Fallback to parameter units if none provided in nc file
+      var defaultUnit;
+      if (parseUnit === "NA") {
+        defaultUnit = this.findUnits(parameters, defaultParameter);
+      } else {
+        defaultUnit = parseUnit;
+      }
+
+      // Logic for default axis assignment
+      if (defaultParameter === 1) {
+        defaultAxis = "x";
+      }
+
+      // Summarise data
+      variable = {
+        parseParameter: key,
+        parseUnit: parseUnit,
+        parseSensor: parseSensor,
+        parameters_id: defaultParameter,
+        unit: defaultUnit,
+        axis: defaultAxis,
+        sensors_id: defaultSensor,
+        included: true
+      };
+      datasetparameters.push(variable);
+    }
+    return datasetparameters;
+  };
+
   // Handle changes to inputs
 
   handleChange = input => event => {
@@ -282,7 +415,6 @@ class AddDataset extends Component {
     this.setState({ datasetparameters });
   };
 
-
   handleParameterSelect = (a, b) => event => {
     var datasetparameters = this.state.datasetparameters;
     datasetparameters[a][b] = event.value;
@@ -293,10 +425,6 @@ class AddDataset extends Component {
     var dataset = this.state.dataset;
     dataset[input] = event.value;
     this.setState({ dataset });
-  };
-
-  initialParameterChange = (input, value) => {
-    this.setState({ [input]: value });
   };
 
   render() {
@@ -358,7 +486,6 @@ class AddDataset extends Component {
               files_list={files_list}
               nextStep={this.validateData}
               prevStep={this.prevStep}
-              initialChange={this.initialParameterChange}
               handleSelect={this.handleParameterSelect}
               handleChange={this.handleParameterChange}
               handleCheck={this.handleParameterCheck}
