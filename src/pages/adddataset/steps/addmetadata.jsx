@@ -34,7 +34,7 @@ class AddMetadata extends Component {
   };
 
   render() {
-    const { dropdown, getDropdowns, dataset } = this.props;
+    const { dropdown, getDropdowns, dataset, handleChange, handleSelect } = this.props;
     const { lakes, persons, projects, organisations, licenses } = dropdown;
     const modalInfo = {
       persons: persons,
@@ -66,7 +66,7 @@ class AddMetadata extends Component {
                     name="starttime"
                     defaultValue={dataset["start_time"]}
                     placeholder="Seconds since 1970-01-01 00:00:00"
-                    onChange={this.props.handleChange("start_time")}
+                    onChange={handleChange("start_time")}
                   />
                 </td>
               </tr>
@@ -87,7 +87,7 @@ class AddMetadata extends Component {
                     name="endtime"
                     defaultValue={dataset["end_time"]}
                     placeholder="Seconds since 1970-01-01 00:00:00"
-                    onChange={this.props.handleChange("end_time")}
+                    onChange={handleChange("end_time")}
                   />
                 </td>
               </tr>
@@ -100,7 +100,7 @@ class AddMetadata extends Component {
                     defaultValue={dataset["latitude"]}
                     style={{ width: "calc(50% - 3px)", marginRight: "3px" }}
                     placeholder="Latitude"
-                    onChange={this.props.handleChange("latitude")}
+                    onChange={handleChange("latitude")}
                   />
                   <input
                     type="number"
@@ -108,19 +108,19 @@ class AddMetadata extends Component {
                     defaultValue={dataset["longitude"]}
                     style={{ width: "calc(50% - 3px)", marginLeft: "3px" }}
                     placeholder="Longitude"
-                    onChange={this.props.handleChange("longitude")}
+                    onChange={handleChange("longitude")}
                   />
                 </td>
               </tr>
               <tr>
-                <th>Depth</th>
+                <th>Depth (m)</th>
                 <td>
                   <input
                     type="number"
                     name="depth"
                     defaultValue={dataset["depth"]}
                     placeholder="Meters below lake surface"
-                    onChange={this.props.handleChange("depth")}
+                    onChange={handleChange("depth")}
                   />
                 </td>
               </tr>
@@ -133,7 +133,7 @@ class AddMetadata extends Component {
                     label="name"
                     dataList={lakes}
                     defaultValue={dataset["lakes_id"]}
-                    onChange={this.props.handleSelect("lakes_id")}
+                    onChange={handleSelect("lakes_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -146,7 +146,7 @@ class AddMetadata extends Component {
                     name="title"
                     defaultValue={dataset["title"]}
                     placeholder="Use a descriptive title to help others"
-                    onChange={this.props.handleChange("title")}
+                    onChange={handleChange("title")}
                   />
                 </td>
               </tr>
@@ -159,7 +159,7 @@ class AddMetadata extends Component {
                     label="name"
                     dataList={projects}
                     defaultValue={dataset["projects_id"]}
-                    onChange={this.props.handleSelect("projects_id")}
+                    onChange={handleSelect("projects_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -174,7 +174,7 @@ class AddMetadata extends Component {
                     label="name"
                     dataList={persons}
                     defaultValue={dataset["persons_id"]}
-                    onChange={this.props.handleSelect("persons_id")}
+                    onChange={handleSelect("persons_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -188,7 +188,7 @@ class AddMetadata extends Component {
                     label="name"
                     dataList={organisations}
                     defaultValue={dataset["organisations_id"]}
-                    onChange={this.props.handleSelect("organisations_id")}
+                    onChange={handleSelect("organisations_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -211,7 +211,7 @@ class AddMetadata extends Component {
                     label="name"
                     dataList={licenses}
                     defaultValue={dataset["licenses_id"]}
-                    onChange={this.props.handleSelect("licenses_id")}
+                    onChange={handleSelect("licenses_id")}
                     showModal={this.showModal}
                   />
                 </td>
@@ -224,7 +224,7 @@ class AddMetadata extends Component {
                     name="citation"
                     defaultValue={dataset["citation"]}
                     placeholder="How should others reference your data"
-                    onChange={this.props.handleChange("citation")}
+                    onChange={handleChange("citation")}
                   />
                 </td>
               </tr>

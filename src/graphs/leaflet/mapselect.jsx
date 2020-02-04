@@ -52,7 +52,6 @@ class MapSelect extends Component {
     this.map.on("draw:created", function(e) {
       var layer = e.layer;
       mapAddFilter(layer._latlngs[0]);
-      console.log(drawnItems)
       drawnItems.clearLayers();
       drawnItems.addLayer(layer);
     });

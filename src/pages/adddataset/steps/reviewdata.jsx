@@ -33,6 +33,14 @@ class ReviewData extends Component {
     });
   };
 
+  handleDatasetIntercept = input => {
+    var { handleDataset, resetFileConnect, fileconnect } = this.props;
+    if (fileconnect !== "no") {
+      resetFileConnect();
+    }
+    handleDataset(input);
+  };
+
   prevStep = e => {
     e.preventDefault();
     this.props.prevStep();
@@ -46,7 +54,10 @@ class ReviewData extends Component {
       handleChange,
       handleCheck,
       handleSelect,
-      files_list
+      files_list,
+      liveconnect,
+      fileconnect,
+      handleDataset
     } = this.props;
     const { parameters, sensors, axis } = dropdown;
     var { modal, modalValue, message, loading } = this.state;
@@ -182,6 +193,14 @@ class ReviewData extends Component {
       noFiles = files_list.length - 1;
     } catch (e) {}
 
+    // Multiple files
+    var fT = datasetparameters.filter(dp => dp.parameters_id === 1);
+    var filesTime = fT.length > 0 && fT[0].included;
+    var fD = datasetparameters.filter(dp => dp.parameters_id === 2);
+    var filesDepth = fD.length > 0 && fD[0].included;
+
+    console.log("Time ", filesTime);
+    console.log("Depth ", filesDepth);
     return (
       <React.Fragment>
         <form>
@@ -189,7 +208,7 @@ class ReviewData extends Component {
             <tbody>
               <tr>
                 <th colSpan="2">Read from file</th>
-                <th colSpan="5">Check and adjust auto-parse</th>
+                <th colSpan="4">Check and adjust auto-parse</th>
               </tr>
               <tr>
                 <th>Variable</th>
@@ -198,13 +217,43 @@ class ReviewData extends Component {
                 <th style={{ width: "55px" }}>Axis</th>
                 <th>Units</th>
                 <th>Sensor</th>
-                <th style={{ width: "15px" }}></th>
+                <th style={{ width: "15px" }}><div title="Include parameter.">Incl.</div></th>
               </tr>
               {rows}
             </tbody>
           </table>
-          {noFiles} additional files have been detected in the same dataset as
-          your dataset.
+          <div className="file-connection">
+            The {noFiles} additional files in my folder
+            <select
+              value={fileconnect}
+              onChange={handleDataset("fileconnect")}
+            >
+              <option value="no">have no relevance to my file.</option>
+              <option value="mix">are a mix of different files.</option>
+              <option value="time" disabled={!filesTime}>
+                are of identical format but vary in time and I would like to
+                combine them.
+              </option>
+              <option value="depth" disabled={!filesDepth}>
+                are of identical format but vary in depth and I would like to
+                combine them..
+              </option>
+            </select>
+          </div>
+          <div className="repo-connection">
+            I want a 
+            <select
+              defaultValue={liveconnect}
+              onChange={handleDataset("liveconnect")}
+            >
+              <option value="false">
+                static (one off) connection to my repository.
+              </option>
+              <option value="true">
+                live (updating) connection to my repository.
+              </option>
+            </select>
+          </div>
           <div className="error-message">{userMessage}</div>
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>

@@ -12,23 +12,30 @@ class LineGraph extends Component {
     lweight: "0.5",
     bcolor: "#ffffff",
     xaxis: "x",
-    yaxis: "y"
+    yaxis: "y",
+    title: "test",
+    download: false
   };
 
   update = () => {
     var lcolor = document.getElementById("lcolor").value;
     var lweight = document.getElementById("lweight").value;
     var bcolor = document.getElementById("bcolor").value;
-    this.setState({ lcolor, lweight, bcolor });
+    var title = document.getElementById("title").value;
+    this.setState({ lcolor, lweight, bcolor, title });
   };
 
   reset = () => {
     this.setState({
-      lcolor: "black",
+      lcolor: "#000000",
       lweight: "0.5",
-      bcolor: "#ffffff"
+      bcolor: "#ffffff",
+      title: ""
     });
-    document.getElementById("lweight").value = "";
+    document.getElementById("lcolor").value = "#000000";
+    document.getElementById("lweight").value = 0.5;
+    document.getElementById("bcolor").value = "#ffffff";
+    document.getElementById("title").value = "";
   };
 
   handleAxisSelect = axis => event => {
@@ -55,6 +62,19 @@ class LineGraph extends Component {
     }
   };
 
+  startDownload = () => {
+    if (!this.state.download) this.setState({ download: true });
+  };
+
+  endDownload = () => {
+    if (this.state.download) this.setState({ download: false });
+  };
+
+  componentDidMount() {
+    var { dataset } = this.props;
+    this.setState({ title: dataset.title });
+  }
+
   render() {
     var {
       onChange,
@@ -66,7 +86,15 @@ class LineGraph extends Component {
       max,
       min
     } = this.props;
-    const { lweight, bcolor, lcolor, xaxis, yaxis } = this.state;
+    const {
+      lweight,
+      bcolor,
+      lcolor,
+      xaxis,
+      yaxis,
+      title,
+      download
+    } = this.state;
 
     // Axis Options
     const xoptions = [];
@@ -84,6 +112,9 @@ class LineGraph extends Component {
         });
       }
     }
+
+    // Show time slider
+    var timeSlider = parameters.filter(p => p.parameters_id === 1).length > 0;
 
     // Get data for selected options
     var plotdata = { x: data[xaxis], y: data[yaxis] };
@@ -106,6 +137,7 @@ class LineGraph extends Component {
           left={
             <D3LineGraph
               data={plotdata}
+              title={title}
               xlabel={xlabel}
               ylabel={ylabel}
               xunits={xunits}
@@ -114,6 +146,8 @@ class LineGraph extends Component {
               lcolor={lcolor}
               lweight={lweight}
               bcolor={bcolor}
+              download={download}
+              endDownload={this.endDownload}
             />
           }
           rightNoScroll={
@@ -140,26 +174,38 @@ class LineGraph extends Component {
                   />
                 </div>
               </div>
-              <FilterBox
-                title="Date Range"
-                content={
-                  <div className="side-date-slider">
-                    <DateSlider
-                      onChange={onChange}
-                      min={min}
-                      max={max}
-                      lower={lower}
-                      upper={upper}
-                    />
-                  </div>
-                }
-              />
+              {timeSlider && (
+                <FilterBox
+                  title="Date Range"
+                  content={
+                    <div className="side-date-slider">
+                      <DateSlider
+                        onChange={onChange}
+                        min={min}
+                        max={max}
+                        lower={lower}
+                        upper={upper}
+                      />
+                    </div>
+                  }
+                />
+              )}
               <FilterBox
                 title="Display Options"
                 content={
                   <div>
                     <table className="colors-table">
                       <tbody>
+                        <tr>
+                          <td>Title</td>
+                          <td colSpan="2">
+                            <input
+                              type="text"
+                              id="title"
+                              defaultValue={title}
+                            ></input>
+                          </td>
+                        </tr>
                         <tr>
                           <td></td>
                           <td>Color</td>
@@ -213,7 +259,7 @@ class LineGraph extends Component {
                   <button
                     id="linegraph-download"
                     className="download-button"
-                    onClick={this.download}
+                    onClick={() => this.startDownload()}
                   >
                     Download as PNG
                   </button>

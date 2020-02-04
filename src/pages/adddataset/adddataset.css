@@ -85,12 +85,8 @@ button {
 
 form select {
   font-size: 14px;
-  width: 100%;
-  border: solid 1px black;
-  border-radius: 5px;
-  box-sizing: border-box;
-  padding: 6px 5px;
-  margin-bottom: 0;
+  margin-left: 5px;
+  margin-right: 5px;
   background-color: white;
 }
 
@@ -118,9 +114,13 @@ form input {
   background-color: white;
 }
 
+.repo-connection {
+  margin-top: 15px;
+}
+
 table.datareview {
   width: 100%;
-  margin-bottom: 40px;
+  margin-bottom: 15px;
   border-spacing: 10px;
 }
 

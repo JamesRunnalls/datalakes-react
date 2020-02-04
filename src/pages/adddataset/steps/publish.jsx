@@ -163,6 +163,10 @@ class Publish extends Component {
               <th>Pre Script</th>
               <td>{dataset["pre_script"]}</td>
             </tr>
+            <tr>
+              <th>Live Connection</th>
+              <td>{dataset["liveconnect"]}</td>
+            </tr>
           </tbody>
         </table>
         <div className="error-message">{userMessage}</div>

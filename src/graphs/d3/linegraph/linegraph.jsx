@@ -35,7 +35,7 @@ class D3LineGraph extends Component {
   dataTransform = (label, data) => {
     if (label === "Time") {
       return this.formatDate(data);
-    } else if (label == "Depth") {
+    } else if (label === "Depth") {
       return -data;
     } else {
       return data;
@@ -58,7 +58,10 @@ class D3LineGraph extends Component {
           sequential,
           bcolor,
           lcolor,
-          lweight
+          lweight,
+          title,
+          download,
+          endDownload
         } = this.props;
 
         // Set graph size
@@ -240,6 +243,15 @@ class D3LineGraph extends Component {
           )
           .attr("d", valueline(xy));
 
+        // Add title
+        svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", 2 - (margin.top / 2))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "14px") 
+        .style("text-decoration", "underline")  
+        .text(title);
+
         // Brushing
         var brush = d3
             .brush()
@@ -360,7 +372,7 @@ class D3LineGraph extends Component {
             .attr("d", valueline(xy));
         }
 
-        d3.select("#linegraph-download").on("click", function() {
+        if (download) {
           var s = new XMLSerializer();
           var str = s.serializeToString(
             document.getElementById("linegraphsvg")
@@ -385,7 +397,8 @@ class D3LineGraph extends Component {
           };
           image.src =
             "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
-        });
+        }
+        endDownload();
       } catch (e) {
         console.error("Error plotting line graph", e);
       }

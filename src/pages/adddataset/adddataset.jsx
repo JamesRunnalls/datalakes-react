@@ -35,7 +35,9 @@ class AddDataset extends Component {
       pre_file: "",
       pre_script: "",
       licenses_id: "",
-      citation: ""
+      citation: "",
+      liveconnect: "false",
+      fileconnect: "no"
     },
     datasetparameters: [],
     files_list: [],
@@ -55,7 +57,7 @@ class AddDataset extends Component {
 
   // 1) Process input file
   validateFile = async () => {
-    var { dataset, step, datasetparameters, dropdown } = this.state;
+    var { dataset, step, dropdown } = this.state;
 
     // Add blank row to datasets table
     var { data: data1 } = await axios
@@ -98,10 +100,9 @@ class AddDataset extends Component {
     dataset["id"] = reqObj.id;
 
     // Set initial dataset parameters
-    datasetparameters = this.setDatasetParameters(
+    var datasetparameters = this.setDatasetParameters(
       fileInformation,
-      dropdown,
-      datasetparameters
+      dropdown
     );
 
     this.setState({
@@ -320,7 +321,7 @@ class AddDataset extends Component {
     return parameters.find(x => x.id === defaultParameter).unit;
   };
 
-  setDatasetParameters = (fileInformation, dropdown, datasetparameters) => {
+  setDatasetParameters = (fileInformation, dropdown) => {
     const { parameters, sensors } = dropdown;
     const { variables, attributes } = fileInformation;
 
@@ -330,6 +331,7 @@ class AddDataset extends Component {
     var parseSensor = "";
     var variableAttributes = "";
     var variable = {};
+    var datasetparameters = [];
 
     // Loop over variables in nc file
     for (var key in variables) {
@@ -399,34 +401,23 @@ class AddDataset extends Component {
     this.setState({ values });
   };
 
-  handleDatasetChange = input => event => {
+  handleDataset = input => event => {
     var dataset = this.state.dataset;
-    dataset[input] = event.target.value;
+    dataset[input] = event.value ? event.value : event.target.value; 
     this.setState({ dataset });
   };
 
-  handleParameterChange = (a, b) => event => {
+  handleParameter = (a, b) => event => {
     var datasetparameters = this.state.datasetparameters;
-    datasetparameters[a][b] = event.target.value;
+    datasetparameters[a][b] = event.value ? event.value : event.target.value; 
     this.setState({ datasetparameters });
   };
 
   handleParameterCheck = (a, b) => event => {
-    var datasetparameters = this.state.datasetparameters;
+    var { datasetparameters, dataset } = this.state;
     datasetparameters[a][b] = !datasetparameters[a][b];
-    this.setState({ datasetparameters });
-  };
-
-  handleParameterSelect = (a, b) => event => {
-    var datasetparameters = this.state.datasetparameters;
-    datasetparameters[a][b] = event.value;
-    this.setState({ datasetparameters });
-  };
-
-  handleDatasetSelect = input => event => {
-    var dataset = this.state.dataset;
-    dataset[input] = event.value;
-    this.setState({ dataset });
+    dataset.fileconnect = "no"
+    this.setState({ datasetparameters, dataset });
   };
 
   render() {
@@ -453,7 +444,7 @@ class AddDataset extends Component {
             />
             <AddData
               nextStep={this.validateFile}
-              handleChange={this.handleDatasetChange}
+              handleChange={this.handleDataset}
               dataset={dataset}
             />
           </React.Fragment>
@@ -468,7 +459,7 @@ class AddDataset extends Component {
             />
             <AddData
               nextStep={this.validateFile}
-              handleChange={this.handleDatasetChange}
+              handleChange={this.handleDataset}
               dataset={dataset}
             />
           </React.Fragment>
@@ -484,12 +475,15 @@ class AddDataset extends Component {
             <ReviewData
               datasetparameters={datasetparameters}
               dropdown={dropdown}
+              fileconnect={dataset.fileconnect}
+              liveconnect={dataset.liveconnect}
               fileInformation={fileInformation}
               files_list={files_list}
               nextStep={this.validateData}
               prevStep={this.prevStep}
-              handleSelect={this.handleParameterSelect}
-              handleChange={this.handleParameterChange}
+              handleSelect={this.handleParameter}
+              handleChange={this.handleParameter}
+              handleDataset={this.handleDataset}
               handleCheck={this.handleParameterCheck}
               getDropdowns={this.getDropdowns}
             />
@@ -508,7 +502,7 @@ class AddDataset extends Component {
               renkuResponse={renkuResponse}
               nextStep={this.validateLineage}
               prevStep={this.prevStep}
-              handleChange={this.handleDatasetChange}
+              handleChange={this.handleDataset}
             />
           </React.Fragment>
         );
@@ -525,8 +519,8 @@ class AddDataset extends Component {
               dropdown={dropdown}
               nextStep={this.validateMetadata}
               prevStep={this.prevStep}
-              handleChange={this.handleDatasetChange}
-              handleSelect={this.handleDatasetSelect}
+              handleChange={this.handleDataset}
+              handleSelect={this.handleDataset}
               getDropdowns={this.getDropdowns}
             />
           </React.Fragment>
