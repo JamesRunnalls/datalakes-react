@@ -111,8 +111,7 @@ form .form-group label {
 form input {
   font-size: 14px;
   width: 100%;
-  border: solid 1px black;
-  border-radius: 5px;
+  border: solid 1px rgb(169,169,169);
   box-sizing: border-box;
   padding: 7px 5px;
   margin-bottom: 0;

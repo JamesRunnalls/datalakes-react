@@ -23,3 +23,21 @@
 .inner__single-value {
   max-width: calc(100% - 30px)!important;
 }
+
+.inner__control {
+  border-color: rgb(169,169,169) !important;
+  border-radius: 0 !important;
+  cursor: text !important;
+}
+
+.inner__control:hover {
+  box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+}
+
+.inner__indicator.inner__dropdown-indicator {
+  color: rgb(169,169,169) !important;
+}
+
+.inner__indicator.inner__clear-indicator {
+  cursor: pointer;
+}

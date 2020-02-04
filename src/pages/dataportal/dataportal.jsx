@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
-import "./dataportal.css";
+import FilterBox from '../../components/filterbox/filterbox';
 import MapSelect from "../../graphs/leaflet/mapselect.jsx";
+import "./dataportal.css";
 
 class DatasetList extends Component {
   render() {
@@ -122,41 +123,6 @@ class PopupBox extends Component {
           <div className="title">{title}</div>
           <span className="symbol">{symbol}</span>
         </div>
-      </div>
-    );
-  }
-}
-
-class FilterBox extends Component {
-  state = {
-    open: false
-  };
-  toggle = () => {
-    this.setState({ open: !this.state.open });
-  };
-
-  componentDidMount() {
-    if (this.props.preopen === "true") {
-      this.toggle();
-    }
-  }
-  render() {
-    const { content, title } = this.props;
-    const { open } = this.state;
-    var symbol;
-    if (open) {
-      symbol = "-";
-    } else {
-      symbol = "+";
-    }
-
-    return (
-      <div className="filterbox">
-        <div className="toprow" onClick={this.toggle}>
-          <div className="title">{title}</div>
-          <span className="symbol">{symbol}</span>
-        </div>
-        {open && <div className="content">{content}</div>}
       </div>
     );
   }

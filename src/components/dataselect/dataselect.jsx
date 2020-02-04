@@ -35,14 +35,18 @@ class DataSelect extends Component {
           classNamePrefix="inner"
           onChange={this.props.onChange}
           styles={customStyles}
-          noOptionsMessage={() => (
-            <a
-              style={{ cursor: "pointer" }}
-              onClick={() => this.addNew(this.props.table)}
-            >
-              Add new
-            </a>
-          )}
+          noOptionsMessage={
+            this.props.showModal
+              ? () => (
+                  <a
+                    style={{ cursor: "pointer" }}
+                    onClick={() => this.addNew(this.props.table)}
+                  >
+                    Add new
+                  </a>
+                )
+              : () => <div>No options</div>
+          }
         />
       </div>
     );

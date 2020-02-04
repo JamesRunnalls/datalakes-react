@@ -150,20 +150,22 @@ class AddDataset extends Component {
     }
 
     // Set real axis values
-    var axis = []
+    var axis = [];
     var parseAxis;
     var updateAxis;
     var j;
     for (var i = 0; i < datasetparameters.length; i++) {
-      parseAxis = datasetparameters[i]["axis"];
+      if (datasetparameters[i]["included"]) {
+        parseAxis = datasetparameters[i]["axis"];
       updateAxis = parseAxis;
       j = 1;
-      while (axis.includes(updateAxis)){
+      while (axis.includes(updateAxis)) {
         updateAxis = parseAxis + j;
-        j++
+        j++;
       }
-      axis.push(updateAxis)
-    datasetparameters[i]["rAxis"] = updateAxis;
+      axis.push(updateAxis);
+      datasetparameters[i]["rAxis"] = updateAxis;
+      }
     }
 
     // Send nc file to convertion api
