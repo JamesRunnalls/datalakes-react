@@ -17,7 +17,8 @@ class Preview extends Component {
   }
 
   render() {
-    const { data, parameters, getLabel } = this.props;
+    var { data, parameters, getLabel } = this.props;
+    data = data[0];
     var inner = [];
     inner = [
       <tr key="h">

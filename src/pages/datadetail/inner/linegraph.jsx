@@ -116,10 +116,19 @@ class LineGraph extends Component {
     }
 
     // Show time slider
-    var timeSlider = parameters.filter(p => p.parameters_id === 1).length > 0;
+    var time = parameters.filter(p => p.parameters_id === 1);
+    var timeSlider = false;
+    if (time.length > 1){
+      if (time[0].axis !== "M"){
+        timeSlider = true;
+      }
+    }
+
+    // Show multiple files
+    var fileSlider = data.length > 1;
 
     // Get data for selected options
-    var plotdata = { x: data[xaxis], y: data[yaxis] };
+    var plotdata = { x: data[0][xaxis], y: data[0][yaxis] };
 
     // Datetime filter
     plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
@@ -180,6 +189,17 @@ class LineGraph extends Component {
                   </div>
                 </div>
               </div>
+              {fileSlider && (
+                <FilterBox
+                  title="Date Range"
+                  preopen="true"
+                  content={
+                    <div className="">
+                      Slider for multiple files
+                    </div>
+                  }
+                />
+              )}
               {timeSlider && (
                 <FilterBox
                   title="Date Range"

@@ -136,17 +136,16 @@ class DataDetail extends Component {
       dataArray.push(data);
     }
 
-    var dataOut;
-    if (dataArray.length === 1) {
-      dataOut = dataArray[0];
-    } else {
-      if (dataset.fileconnect === "time") {
-        dataOut = this.combineTimeseries(dataArray);
-      }
+    var dataOut = dataArray;
+    if (
+      dataset.fileconnect === "time" &&
+      parameters.find(p => p.parameters_id === 1).axis !== "M"
+    ) {
+      dataOut = [this.combineTimeseries(dataArray)];
     }
 
-    var xe = d3.extent(dataOut.x),
-      min = xe[0],
+    var xe = d3.extent(dataOut[0].x);
+    var min = xe[0],
       max = xe[1],
       lower = xe[0],
       upper = xe[1];
