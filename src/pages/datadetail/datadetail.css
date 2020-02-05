@@ -126,7 +126,7 @@
   font-size: 13.33px;
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 20px;
+  margin-bottom: 50px;
 }
 
 .data-subnav .subnav-item .subnav-text {
@@ -232,4 +232,10 @@
   width: 260px;
   display: inline-block;
   padding-left: 10px;
+}
+
+.loading-table {
+  width: 100%;
+  height: 500px;
+  text-align: center;
 }

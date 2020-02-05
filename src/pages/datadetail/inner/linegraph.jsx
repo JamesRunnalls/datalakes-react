@@ -78,6 +78,8 @@ class LineGraph extends Component {
   render() {
     var {
       onChange,
+      onChangeLower,
+      onChangeUpper,
       parameters,
       getLabel,
       data,
@@ -153,25 +155,29 @@ class LineGraph extends Component {
           rightNoScroll={
             <React.Fragment>
               <div>
-                x:{" "}
-                <div className="axis-select">
-                  <DataSelect
-                    value="value"
-                    label="label"
-                    dataList={xoptions}
-                    defaultValue={xaxis}
-                    onChange={this.handleAxisSelect("xaxis")}
-                  />
+                <div>
+                  x:{" "}
+                  <div className="axis-select">
+                    <DataSelect
+                      value="value"
+                      label="label"
+                      dataList={xoptions}
+                      defaultValue={xaxis}
+                      onChange={this.handleAxisSelect("xaxis")}
+                    />
+                  </div>
                 </div>
-                {"\n"}y:{" "}
-                <div className="axis-select">
-                  <DataSelect
-                    value="value"
-                    label="label"
-                    dataList={yoptions}
-                    defaultValue={yaxis}
-                    onChange={this.handleAxisSelect("yaxis")}
-                  />
+                <div>
+                  y:{" "}
+                  <div className="axis-select">
+                    <DataSelect
+                      value="value"
+                      label="label"
+                      dataList={yoptions}
+                      defaultValue={yaxis}
+                      onChange={this.handleAxisSelect("yaxis")}
+                    />
+                  </div>
                 </div>
               </div>
               {timeSlider && (
@@ -181,6 +187,8 @@ class LineGraph extends Component {
                     <div className="side-date-slider">
                       <DateSlider
                         onChange={onChange}
+                        onChangeLower={onChangeLower}
+                        onChangeUpper={onChangeUpper}
                         min={min}
                         max={max}
                         lower={lower}
@@ -199,11 +207,10 @@ class LineGraph extends Component {
                         <tr>
                           <td>Title</td>
                           <td colSpan="2">
-                            <input
-                              type="text"
+                            <textarea
                               id="title"
                               defaultValue={title}
-                            ></input>
+                            ></textarea>
                           </td>
                         </tr>
                         <tr>

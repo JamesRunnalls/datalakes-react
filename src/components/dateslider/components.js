@@ -1,5 +1,4 @@
 import React, { Fragment, Component } from "react";
-import { format } from "date-fns";
 import PropTypes from "prop-types";
 import './dateslider.css';
 
@@ -23,9 +22,6 @@ getRailProps: PropTypes.func.isRequired,
 // *******************************************************
 // HANDLE COMPONENT
 // *******************************************************
-function formatTooltip(ms) {
-    return format(new Date(ms), "d.MM.yy");
-}
 
 export class Handle extends Component {
 state = {
@@ -44,35 +40,18 @@ render() {
     const {
     domain: [min, max],
     handle: { id, value, percent },
-    isActive,
     disabled,
     getHandleProps,
     } = this.props
-    const { mouseOver } = this.state
 
     return (
     <Fragment>
-        {(mouseOver || isActive) && !disabled ? (
-        <div
-            style={{
-            left: `${percent}%`,
-            position: 'absolute',
-            marginLeft: '-25px',
-            marginTop: '-28px',
-            }}
-        >
-            <div className="tooltip">
-            <span className="tooltiptext">{formatTooltip(value)}</span>
-            </div>
-        </div>
-        ) : null}
         <div
         style={{
             left: `${percent}%`,
             position: 'absolute',
             transform: 'translate(-50%, -50%)',
             WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-            zIndex: 400,
             width: 26,
             height: 42,
             cursor: 'pointer',
@@ -94,7 +73,6 @@ render() {
             position: 'absolute',
             transform: 'translate(-50%, -50%)',
             WebkitTapHighlightColor: 'rgba(0,0,0,0)',
-            zIndex: 300,
             width: 2,
             height: 20,
             border: 0,   
@@ -131,10 +109,9 @@ return (
     style={{
         position: 'absolute',
         transform: 'translate(0%, -50%)',
-        height: 5,
-        zIndex: 1,
+        height: 2,
         backgroundColor: disabled ? '#999' : '#000',
-        borderRadius: 7,
+        borderRadius: 2,
         cursor: 'pointer',
         left: `${source.percent}%`,
         width: `${target.percent - source.percent}%`,

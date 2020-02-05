@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
+import DateTimePicker from "react-datetime-picker";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { format } from "date-fns";
 import { scaleTime } from "d3";
@@ -10,9 +11,22 @@ class DateSlider extends Component {
     return new Date(raw * 1000);
   };
 
-  formatTick(ms) {
-    return format(new Date(ms), "MMM yy");
-  }
+  formatTick = ms => {
+    const { min, max } = this.props;
+    const diff = max - min;
+    if (diff < 172800) {
+      // 3 Days
+      return format(new Date(ms), "hh:mm:ss");
+    } else if (diff < 31556952) {
+      // 1 Year
+      return format(new Date(ms), "dd MMM");
+    } else if (diff < 157784760) {
+      // 5 Years
+      return format(new Date(ms), "MMM yy");
+    } else {
+      return format(new Date(ms), "yyyy");
+    }
+  };
 
   render() {
     const sliderStyle = {
@@ -23,18 +37,55 @@ class DateSlider extends Component {
       marginTop: 40,
       boxSizing: "border-box"
     };
-    var { min, max, lower, upper, onChange } = this.props;
+    var {
+      min,
+      max,
+      lower,
+      upper,
+      onChange,
+      onChangeLower,
+      onChangeUpper
+    } = this.props;
     min = this.formatDate(min);
     max = this.formatDate(max);
     lower = this.formatDate(lower);
     upper = this.formatDate(upper);
     const dateTicks = scaleTime()
       .domain([min, max])
-      .ticks(8)
+      .ticks(5)
       .map(d => +d);
 
     return (
-      <div style={{ width: "100%" }}>
+      <div className="datetime-selector">
+        <table className="datetime-table">
+          <tbody>
+            <tr>
+              <td className="left">
+                <DateTimePicker
+                  onChange={onChangeLower}
+                  value={lower}
+                  clearIcon={null}
+                  calendarIcon={null}
+                  maxDate={upper}
+                  minDate={min}
+                  disableClock={true}
+                />
+              </td>
+              <td>></td>
+              <td className="right">
+                <DateTimePicker
+                  onChange={onChangeUpper}
+                  value={upper}
+                  clearIcon={null}
+                  calendarIcon={null}
+                  maxDate={max}
+                  minDate={lower}
+                  disableClock={true}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <Slider
           mode={3}
           domain={[+min, +max]}

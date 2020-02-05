@@ -25,7 +25,7 @@ class ReviewData extends Component {
     });
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.error(error.message);
+      console.error(error,error.message);
       this.setState({
         message: error.message,
         loading: false
@@ -199,8 +199,6 @@ class ReviewData extends Component {
     var fD = datasetparameters.filter(dp => dp.parameters_id === 2);
     var filesDepth = fD.length > 0 && fD[0].included;
 
-    console.log("Time ", filesTime);
-    console.log("Depth ", filesDepth);
     return (
       <React.Fragment>
         <form>
@@ -247,7 +245,7 @@ class ReviewData extends Component {
               onChange={handleDataset("liveconnect")}
             >
               <option value="false">
-                static (one off) connection to my repository.
+                static (one-off) connection to my repository.
               </option>
               <option value="true">
                 live (updating) connection to my repository.

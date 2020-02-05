@@ -1,7 +1,21 @@
 .leaflet-draw {
-    display: none;
+  display: none;
 }
 
 .leaflet-draw-tooltip {
-    display: none;
+  display: none;
+}
+
+.closemap {
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  display: block;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 20px;
+}
+
+.closemap:hover {
+  color: grey;
 }

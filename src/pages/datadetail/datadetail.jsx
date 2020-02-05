@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import * as d3 from "d3";
+import { mergeWith } from "lodash";
 import HeatMap from "./inner/heatmap";
 import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
@@ -8,6 +9,7 @@ import Information from "./inner/information";
 import Pipeline from "./inner/pipeline";
 import Preview from "./inner/preview";
 import DataSubMenu from "./datasubmenu";
+import Loading from "../../components/loading/loading";
 import { apiUrl } from "../../../config.json";
 import "./datadetail.css";
 
@@ -38,6 +40,16 @@ class DataDetail extends Component {
     }
   };
 
+  onChangeUpper = value => {
+    var upper = value.getTime() / 1000;
+    this.setState({ upper });
+  };
+
+  onChangeLower = value => {
+    var lower = value.getTime() / 1000;
+    this.setState({ lower });
+  };
+
   getDropdowns = async () => {
     const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
     this.setState({
@@ -59,6 +71,11 @@ class DataDetail extends Component {
     return dropdown.parameters.find(
       item => item.id === parameters[x].parameters_id
     );
+  };
+
+  getAve = arr => {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    return sum / arr.length || 0;
   };
 
   async componentDidMount() {
@@ -109,13 +126,26 @@ class DataDetail extends Component {
     // Filter for only json files
     files = files.filter(file => file.filetype === "json");
 
-    const { data } = await axios
-      .get(apiUrl + "/files/" + files[0].id + "?get=raw")
-      .catch(error => {
-        this.setState({ error: true });
-      });
+    var dataArray = [];
+    for (var j = 0; j < files.length; j++) {
+      var { data } = await axios
+        .get(apiUrl + "/files/" + files[j].id + "?get=raw")
+        .catch(error => {
+          this.setState({ error: true });
+        });
+      dataArray.push(data);
+    }
 
-    var xe = d3.extent(data.x),
+    var dataOut;
+    if (dataArray.length === 1) {
+      dataOut = dataArray[0];
+    } else {
+      if (dataset.fileconnect === "time") {
+        dataOut = this.combineTimeseries(dataArray);
+      }
+    }
+
+    var xe = d3.extent(dataOut.x),
       min = xe[0],
       max = xe[1],
       lower = xe[0],
@@ -125,7 +155,7 @@ class DataDetail extends Component {
       dataset,
       parameters,
       files,
-      data,
+      data: dataOut,
       min,
       max,
       lower,
@@ -135,6 +165,21 @@ class DataDetail extends Component {
       allowedStep
     });
   }
+
+  combineTimeseries = arr => {
+    arr.sort((a, b) => {
+      return this.getAve(a.x) - this.getAve(b.x);
+    });
+    var combinedArr = arr[0];
+    for (var i = 1; i < arr.length; i++) {
+      combinedArr = mergeWith(combinedArr, arr[i], this.customizer);
+    }
+    return combinedArr;
+  };
+
+  customizer = (objValue, srcValue) => {
+    return objValue.concat(srcValue);
+  };
 
   updateSelectedState = step => {
     this.setState({ step });
@@ -166,6 +211,16 @@ class DataDetail extends Component {
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
             />
+            <table className="loading-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <Loading />
+                    <h3>Downloading Data</h3>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </React.Fragment>
         );
       case "heatmap":
@@ -199,6 +254,8 @@ class DataDetail extends Component {
             />
             <LineGraph
               onChange={this.onChangeTime}
+              onChangeLower={this.onChangeLower}
+              onChangeUpper={this.onChangeUpper}
               dataset={dataset}
               getLabel={this.getLabel}
               parameters={parameters}
@@ -245,6 +302,8 @@ class DataDetail extends Component {
               min={min}
               url={url}
               apiUrl={apiUrl}
+              onChangeLower={this.onChangeLower}
+              onChangeUpper={this.onChangeUpper}
             />
           </React.Fragment>
         );

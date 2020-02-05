@@ -13,7 +13,9 @@ class Download extends Component {
         min,
         dataset,
         url,
-        apiUrl
+        apiUrl,
+        onChangeLower,
+        onChangeUpper
       } = this.props;
       const jsonUrl = apiUrl + "/api/data/json/" + url;
       const csvUrl = apiUrl + "/api/data/csv/" + url;
@@ -37,6 +39,8 @@ class Download extends Component {
               max={max}
               lower={lower}
               upper={upper}
+              onChangeLower={onChangeLower}
+              onChangeUpper={onChangeUpper}
             />
           </div>
           <div className="info-title">Download</div>

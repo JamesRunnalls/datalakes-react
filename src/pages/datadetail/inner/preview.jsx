@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "../datadetail.css";
 
 class Preview extends Component {
+  
   tableHeader = (i, parameters, getLabel) => {
     return (
       parameters[i] &&
@@ -30,7 +31,8 @@ class Preview extends Component {
         <td>{this.tableHeader(6, parameters, getLabel)}</td>
       </tr>
     ];
-    for (var l = 0; l < Math.min(200, data.y.length); l++) {
+    var len = data.y ? data.y.length : data.x.length;
+    for (var l = 0; l < Math.min(200, len); l++) {
       inner.push(
         <tr key={"h" + l}>
           <th>{l + 2}</th>

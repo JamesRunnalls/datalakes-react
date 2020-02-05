@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
-import FilterBox from '../../components/filterbox/filterbox';
+import FilterBox from "../../components/filterbox/filterbox";
 import MapSelect from "../../graphs/leaflet/mapselect.jsx";
 import "./dataportal.css";
 
@@ -189,11 +189,11 @@ class DataPortal extends Component {
     map: false
   };
 
-  parameterDetails = (dropdown,parameters,x) => {
+  parameterDetails = (dropdown, parameters, x) => {
     return dropdown.parameters.find(
       item => item.id === parameters[x].parameters_id
     );
-  }
+  };
 
   async componentDidMount() {
     this.refs.search.focus();
@@ -213,10 +213,10 @@ class DataPortal extends Component {
       var details;
       for (var x in parameters) {
         try {
-          details = this.parameterDetails(dropdown,parameters,x);
+          details = this.parameterDetails(dropdown, parameters, x);
           parameters[x]["name"] = details.name;
           parameters[x]["characteristic"] = details.characteristic;
-        } catch (err){
+        } catch (err) {
           parameters[x]["name"] = null;
           parameters[x]["characteristic"] = null;
         }
@@ -243,7 +243,7 @@ class DataPortal extends Component {
     this.setState({ download: !this.state.download });
   };
 
-  map = () => {
+  mapToggle = () => {
     this.setState({ map: !this.state.map });
   };
 
@@ -436,7 +436,7 @@ class DataPortal extends Component {
       ].filter(cat => cat !== avoid); // List of catagories in filters
       for (var l of category) {
         tDatasets = [];
-        for (var f of this.filterCategory(filters,l)) {
+        for (var f of this.filterCategory(filters, l)) {
           tDatasets = tDatasets.concat(filterData(dataset, f, parameters));
         }
         dataset = [...new Set(tDatasets)];
@@ -445,11 +445,9 @@ class DataPortal extends Component {
     return dataset;
   };
 
-  filterCategory = (filters,l) => {
-    return Object.values(filters).filter(
-      filter => filter.category === l
-    )
-  }
+  filterCategory = (filters, l) => {
+    return Object.values(filters).filter(filter => filter.category === l);
+  };
 
   filterParameters = (dataset, params) => {
     return params.filter(
@@ -552,9 +550,9 @@ class DataPortal extends Component {
                   datasets={fDatasets}
                   mapAddFilter={this.mapAddFilter}
                   filters={filters}
+                  mapToggle={this.mapToggle}
                 />
               </div>
-
               <DatasetList
                 selected={this.state.selected}
                 list={fDatasets}
@@ -624,7 +622,28 @@ class DataPortal extends Component {
                   </table>
                 }
               />
-              <PopupBox title="Location" fun={this.map} state={map} />
+              <FilterBox
+                title="Depth"
+                content={
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>Min</td>
+                        <td>
+                          <input type="number" placeholder="Depth in meters" />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Max</td>
+                        <td>
+                          <input type="number" placeholder="Depth in meters" />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                }
+              />
+              <PopupBox title="Location" fun={this.mapToggle} state={map} />
               <FilterBox
                 title="Lake"
                 content={

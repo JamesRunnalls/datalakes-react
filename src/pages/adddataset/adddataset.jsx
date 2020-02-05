@@ -120,8 +120,14 @@ class AddDataset extends Component {
   // 2) Validate data parse and get lineage from Renku
 
   validateData = async () => {
-    const { step, datasetparameters, dataset, file } = this.state;
-    const { id } = file;
+    const { step, datasetparameters, dataset, file, files_list } = this.state;
+
+    // Clean folder
+    await axios
+      .get(apiUrl + "/files/clean/" + dataset.id)
+      .catch(error => {
+        console.error(error.message);
+      });
 
     // Check all table filled
     for (var row of datasetparameters) {
@@ -158,33 +164,44 @@ class AddDataset extends Component {
     for (var i = 0; i < datasetparameters.length; i++) {
       if (datasetparameters[i]["included"]) {
         parseAxis = datasetparameters[i]["axis"];
-      updateAxis = parseAxis;
-      j = 1;
-      while (axis.includes(updateAxis)) {
-        updateAxis = parseAxis + j;
-        j++;
-      }
-      axis.push(updateAxis);
-      datasetparameters[i]["rAxis"] = updateAxis;
+        updateAxis = parseAxis;
+        j = 1;
+        while (axis.includes(updateAxis)) {
+          updateAxis = parseAxis + j;
+          j++;
+        }
+        axis.push(updateAxis);
+        datasetparameters[i]["rAxis"] = updateAxis;
       }
     }
 
-    // Send nc file to convertion api
-    var { data } = await axios
-      .post(apiUrl + "/convert", {
-        id: id,
-        variables: datasetparameters
-      })
-      .catch(error => {
-        console.error(error.message);
-        this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw new Error(
-          "Unable to convert file to JSON format. Please contact the developer."
-        );
-      });
+    // Convert single or multiple files
+    if (dataset.fileconnect === "no" || dataset.fileconnect === "mix") {
+      const { id } = file;
+      var data = await this.convertFile(apiUrl, id, datasetparameters, dataset.fileconnect);
+      var { start_time, end_time, depth, longitude, latitude } = data;
+    } else {
+      var arr_start_time = [];
+      var arr_end_time = [];
+      var arr_depth = [];
+      var arr_longitude = [];
+      var arr_latitude = [];
+      for (var k = 0; k < files_list.length; k++) {
+        data = await this.convertFile(apiUrl, files_list[k].id, datasetparameters, dataset.fileconnect);
+        arr_start_time.push(data.start_time);
+        arr_end_time.push(data.end_time);
+        arr_depth.push(data.depth);
+        arr_longitude.push(data.longitude);
+        arr_latitude.push(data.latitude);
+      }
+      start_time = this.getMin(arr_start_time);
+      end_time = this.getMax(arr_end_time);
+      depth = this.allEqual() ? arr_depth[0] : this.getAve(arr_depth);
+      longitude = this.getAve(arr_longitude);
+      latitude = this.getAve(arr_latitude);
+    }
 
     // Logic for continuing to next step
-    var { start_time, end_time, depth, longitude, latitude } = data;
     dataset["start_time"] = start_time;
     dataset["end_time"] = end_time;
     dataset["depth"] = depth;
@@ -198,6 +215,23 @@ class AddDataset extends Component {
       step: step + 1
     });
     return;
+  };
+
+  convertFile = async (apiUrl, id, datasetparameters, fileconnect) => {
+    var { data } = await axios
+      .post(apiUrl + "/convert", {
+        id: id,
+        variables: datasetparameters,
+        fileconnect: fileconnect
+      })
+      .catch(error => {
+        console.error(error.message);
+        this.setState({ allowedStep: [1, 2, 0, 0, 0] });
+        throw new Error(
+          "Unable to convert file to JSON format. Please contact the developer."
+        );
+      });
+    return data;
   };
 
   // 3) Validate lineage
@@ -321,6 +355,40 @@ class AddDataset extends Component {
     return parameters.find(x => x.id === defaultParameter).unit;
   };
 
+  getMax = arr => {
+    let len = arr.length;
+    let max = -Infinity;
+  
+    while (len--) {
+      max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
+  };
+  
+  getMin = arr => {
+    let len = arr.length;
+    let min = Infinity;
+  
+    while (len--) {
+      min = arr[len] < min ? arr[len] : min;
+    }
+    return min;
+  };
+  
+  getAve = arr => {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    return sum / arr.length || 0;
+  };
+  
+  allEqual = arr => {
+    try {
+      return arr.every(v => v === arr[0]);
+    } catch (e) {
+      return "";
+    }
+    
+  };
+
   setDatasetParameters = (fileInformation, dropdown) => {
     const { parameters, sensors } = dropdown;
     const { variables, attributes } = fileInformation;
@@ -403,20 +471,20 @@ class AddDataset extends Component {
 
   handleDataset = input => event => {
     var dataset = this.state.dataset;
-    dataset[input] = event.value ? event.value : event.target.value; 
+    dataset[input] = event.value ? event.value : event.target.value;
     this.setState({ dataset });
   };
 
   handleParameter = (a, b) => event => {
     var datasetparameters = this.state.datasetparameters;
-    datasetparameters[a][b] = event.value ? event.value : event.target.value; 
+    datasetparameters[a][b] = event.value ? event.value : event.target.value;
     this.setState({ datasetparameters });
   };
 
   handleParameterCheck = (a, b) => event => {
     var { datasetparameters, dataset } = this.state;
     datasetparameters[a][b] = !datasetparameters[a][b];
-    dataset.fileconnect = "no"
+    dataset.fileconnect = "no";
     this.setState({ datasetparameters, dataset });
   };
 

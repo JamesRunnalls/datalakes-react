@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import L from "leaflet";
+import "./customcontrol";
 import "leaflet.markercluster";
 import "leaflet-draw";
 import "./custommap.css";
@@ -14,17 +15,17 @@ class MapSelect extends Component {
     if (e.ctrlKey) {
       this.rectangle.enable();
     }
-  }
+  };
 
   componentDidMount() {
-    const { datasets, mapAddFilter } = this.props;
+    const { datasets, mapAddFilter, mapToggle } = this.props;
     var center = [46.85, 7.55];
     var zoom = 8;
 
     this.map = L.map("map", {
       center: center,
       zoom: zoom,
-      minZoom: 7,
+      minZoom: 2,
       layers: [
         //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'})
         L.tileLayer(
@@ -58,26 +59,44 @@ class MapSelect extends Component {
     this.drawnItems = drawnItems;
     window.addEventListener("keydown", this.rectEnable);
 
-    // set bounds
-    var southWest = L.latLng(44.4, 3.95);
-    var northEast = L.latLng(48.55, 13.06);
-    var bounds = L.latLngBounds(southWest, northEast);
-    this.map.setMaxBounds(bounds);
+    // Close button
+    L.control
+      .custom({
+        position: "topright",
+        content: '<div class="closemap" title="Close map">&#10008</div>',
+        classes: "closemap",
+        style: {
+          margin: "10px",
+          padding: "0px 0 0 0",
+          cursor: "pointer"
+        },
+        events: {
+          click: function(data) {
+            mapToggle();
+          }
+        }
+      })
+      .addTo(this.map);
 
-    // plot markers
+    // Plot markers
     this.plotMarkers(datasets);
   }
 
   componentDidUpdate() {
     this.map.invalidateSize();
     const { datasets, filters } = this.props;
-    if (!("Location" in filters)){
+    if (!("Location" in filters)) {
       this.drawnItems.clearLayers();
+      var bounds = this.plotMarkers(datasets);
+      try {
+        this.map.fitBounds(bounds);
+      } catch (e) {}
+    } else {
+      this.plotMarkers(datasets);
     }
-    this.plotMarkers(datasets);
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     window.removeEventListener("keydown", this.rectEnable);
   }
 
@@ -97,7 +116,9 @@ class MapSelect extends Component {
         '"></div>'
     });
     this.markers = L.markerClusterGroup();
+    var bounds = L.latLngBounds();
     for (var dataset of datasets) {
+      bounds.extend([dataset.latitude, dataset.longitude]);
       this.markers.addLayer(
         new L.marker([dataset.latitude, dataset.longitude], {
           icon: Icon
@@ -105,6 +126,7 @@ class MapSelect extends Component {
       );
     }
     this.map.addLayer(this.markers);
+    return bounds;
   };
   render() {
     return (
