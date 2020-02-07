@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import DateSlider from "../../../components/dateslider/dateslider";
+import DateSliderDouble from "../../../components/sliders/datesliderdouble";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
 import "../datadetail.css";
@@ -97,7 +97,7 @@ class HeatMap extends Component {
                   Set Date Range
                 </div>
                 <div className="side-date-slider">
-                  <DateSlider
+                  <DateSliderDouble
                     onChange={onChange}
                     min={min}
                     max={max}

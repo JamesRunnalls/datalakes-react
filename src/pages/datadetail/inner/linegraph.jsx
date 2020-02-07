@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import DateSlider from "../../../components/dateslider/dateslider";
+import DateSliderDouble from "../../../components/sliders/datesliderdouble";
+import DateSliderSingle from "../../../components/sliders/dateslidersingle";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import DataSelect from "../../../components/dataselect/dataselect";
@@ -75,9 +76,14 @@ class LineGraph extends Component {
     this.setState({ title: dataset.title });
   }
 
+  formatDate = raw => {
+    return new Date(raw * 1000);
+  };
+
   render() {
     var {
-      onChange,
+      onChangeTime,
+      onChangeFile,
       onChangeLower,
       onChangeUpper,
       parameters,
@@ -86,7 +92,9 @@ class LineGraph extends Component {
       lower,
       upper,
       max,
-      min
+      min,
+      files,
+      file
     } = this.props;
     const {
       lweight,
@@ -118,8 +126,8 @@ class LineGraph extends Component {
     // Show time slider
     var time = parameters.filter(p => p.parameters_id === 1);
     var timeSlider = false;
-    if (time.length > 1){
-      if (time[0].axis !== "M"){
+    if (time.length > 0) {
+      if (time[0].axis !== "M") {
         timeSlider = true;
       }
     }
@@ -128,7 +136,7 @@ class LineGraph extends Component {
     var fileSlider = data.length > 1;
 
     // Get data for selected options
-    var plotdata = { x: data[0][xaxis], y: data[0][yaxis] };
+    var plotdata = { x: data[file][xaxis], y: data[file][yaxis] };
 
     // Datetime filter
     plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
@@ -146,20 +154,33 @@ class LineGraph extends Component {
         <SidebarLayout
           sidebartitle="Plot Controls"
           left={
-            <D3LineGraph
-              data={plotdata}
-              title={title}
-              xlabel={xlabel}
-              ylabel={ylabel}
-              xunits={xunits}
-              yunits={yunits}
-              sequential="x"
-              lcolor={lcolor}
-              lweight={lweight}
-              bcolor={bcolor}
-              download={download}
-              endDownload={this.endDownload}
-            />
+            <React.Fragment>
+              <D3LineGraph
+                data={plotdata}
+                title={title}
+                xlabel={xlabel}
+                ylabel={ylabel}
+                xunits={xunits}
+                yunits={yunits}
+                sequential="x"
+                lcolor={lcolor}
+                lweight={lweight}
+                bcolor={bcolor}
+                download={download}
+                endDownload={this.endDownload}
+              />
+              {data.length > 1 && (
+                <div className="linegraph-file">
+                  {this.formatDate(files[file].value).toString()};
+                </div>
+              )}
+              {files.length !== data.length && data.length > 1 && (
+                <div className="linegraph-downloading">
+                  Downloading file {data.length} of {files.length} click on Plot
+                  Controls to view other files.
+                </div>
+              )}
+            </React.Fragment>
           }
           rightNoScroll={
             <React.Fragment>
@@ -191,11 +212,15 @@ class LineGraph extends Component {
               </div>
               {fileSlider && (
                 <FilterBox
-                  title="Date Range"
+                  title="Other Files"
                   preopen="true"
                   content={
                     <div className="">
-                      Slider for multiple files
+                      <DateSliderSingle
+                        onChange={onChangeFile}
+                        value={file}
+                        arr={files}
+                      />
                     </div>
                   }
                 />
@@ -205,8 +230,8 @@ class LineGraph extends Component {
                   title="Date Range"
                   content={
                     <div className="side-date-slider">
-                      <DateSlider
-                        onChange={onChange}
+                      <DateSliderDouble
+                        onChange={onChangeTime}
                         onChangeLower={onChangeLower}
                         onChangeUpper={onChangeUpper}
                         min={min}

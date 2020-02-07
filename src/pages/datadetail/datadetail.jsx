@@ -26,7 +26,9 @@ class DataDetail extends Component {
     files: [],
     data: "",
     step: "",
-    allowedStep: ["preview", "download", "pipeline", "information"]
+    allowedStep: ["preview", "download", "pipeline", "information"],
+    download: 0,
+    file: 0
   };
 
   onChangeTime = values => {
@@ -37,6 +39,14 @@ class DataDetail extends Component {
       Math.round(upper) !== Math.round(this.state.upper)
     ) {
       this.setState({ lower, upper });
+    }
+  };
+
+  onChangeFile = values => {
+    var { data } = this.state;
+    var file = values[0] - 1;
+    if (file <= data.length) {
+      this.setState({ file });
     }
   };
 
@@ -126,35 +136,24 @@ class DataDetail extends Component {
     // Filter for only json files
     files = files.filter(file => file.filetype === "json");
 
+    // Sort by value (ascending)
+    files.sort(this.numAscending);
+
+    // Download first file
     var dataArray = [];
-    for (var j = 0; j < files.length; j++) {
-      var { data } = await axios
-        .get(apiUrl + "/files/" + files[j].id + "?get=raw")
-        .catch(error => {
-          this.setState({ error: true });
-        });
-      dataArray.push(data);
-    }
-
-    var dataOut = dataArray;
-    if (
-      dataset.fileconnect === "time" &&
-      parameters.find(p => p.parameters_id === 1).axis !== "M"
-    ) {
-      dataOut = [this.combineTimeseries(dataArray)];
-    }
-
-    var xe = d3.extent(dataOut[0].x);
-    var min = xe[0],
-      max = xe[1],
-      lower = xe[0],
-      upper = xe[1];
+    var { data } = await axios
+      .get(apiUrl + "/files/" + files[0].id + "?get=raw")
+      .catch(error => {
+        this.setState({ error: true });
+      });
+    dataArray.push(data);
+    var { lower, upper, min, max } = this.dataBounds(dataArray);
 
     this.setState({
       dataset,
       parameters,
       files,
-      data: dataOut,
+      data: dataArray,
       min,
       max,
       lower,
@@ -163,7 +162,57 @@ class DataDetail extends Component {
       step,
       allowedStep
     });
+
+    // Download rest of files async
+    this.downloadData(dataArray, files, apiUrl, dataset, parameters);
   }
+
+  numAscending = (a, b) => {
+    var numA = parseFloat(a.value);
+    var numB = parseFloat(b.value);
+    var compare = 0;
+    if (numA > numB) {
+      compare = 1;
+    } else if (numA < numB) {
+      compare = -1;
+    }
+    return compare;
+  };
+
+  downloadData = async (dataArray, files, apiUrl, dataset, parameters) => {
+    for (var j = 1; j < files.length; j++) {
+      var { data } = await axios
+        .get(apiUrl + "/files/" + files[j].id + "?get=raw")
+        .catch(error => {
+          this.setState({ error: true });
+        });
+      dataArray.push(data);
+      if (
+        dataset.fileconnect === "time" &&
+        parameters.find(p => p.parameters_id === 1).axis !== "M"
+      ) {
+        dataArray = [this.combineTimeseries(dataArray)];
+      }
+      var { lower, upper, min, max } = this.dataBounds(dataArray);
+      this.setState({
+        data: dataArray,
+        download: j + 1,
+        min,
+        max,
+        upper,
+        lower
+      });
+    }
+  };
+
+  dataBounds = dataArray => {
+    var xe = d3.extent(dataArray[0].x);
+    var min = xe[0],
+      max = xe[1],
+      lower = xe[0],
+      upper = xe[1];
+    return { upper: upper, lower: lower, min: min, max: max };
+  };
 
   combineTimeseries = arr => {
     arr.sort((a, b) => {
@@ -194,7 +243,9 @@ class DataDetail extends Component {
       lower,
       upper,
       step,
-      allowedStep
+      allowedStep,
+      files,
+      file
     } = this.state;
     document.title = dataset.title + " - Datalakes";
     const url = this.props.location.pathname.split("/").slice(-1)[0];
@@ -252,7 +303,8 @@ class DataDetail extends Component {
               updateSelectedState={this.updateSelectedState}
             />
             <LineGraph
-              onChange={this.onChangeTime}
+              onChangeTime={this.onChangeTime}
+              onChangeFile={this.onChangeFile}
               onChangeLower={this.onChangeLower}
               onChangeUpper={this.onChangeUpper}
               dataset={dataset}
@@ -263,6 +315,8 @@ class DataDetail extends Component {
               upper={upper}
               max={max}
               min={min}
+              files={files}
+              file={file}
             />
           </React.Fragment>
         );

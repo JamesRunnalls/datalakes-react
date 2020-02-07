@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import DateSlider from "../../../components/dateslider/dateslider";
+import DateSliderDouble from "../../../components/sliders/datesliderdouble";
 import "../datadetail.css";
 
 class Download extends Component {
@@ -33,7 +33,7 @@ class Download extends Component {
   
           <div className="info-title">Time Period</div>
           <div className="date-slider">
-            <DateSlider
+            <DateSliderDouble
               onChange={onChange}
               min={min}
               max={max}

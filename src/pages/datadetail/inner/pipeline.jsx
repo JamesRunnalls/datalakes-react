@@ -16,7 +16,7 @@ class Pipeline extends Component {
               be guaranteed to be reproducible.
             </div>
             <div className="diagram">
-              <a target="_blank" href={dataset.pre_file}>
+              <a target="_blank" href={dataset.pre_file.includes("http") ? dataset.pre_file : `http://${dataset.pre_file}`}>
                 <img
                   src={Database}
                   alt="Database"
@@ -25,7 +25,7 @@ class Pipeline extends Component {
                 <div className="">Precursor Dataset</div>
               </a>
               <div className="separator half"></div>
-              <a target="_blank" href={dataset.pre_script}>
+              <a target="_blank" href={dataset.pre_script.includes("http") ? dataset.pre_script : `http://${dataset.pre_script}`}>
                 <img
                   src={Python}
                   alt="Python"

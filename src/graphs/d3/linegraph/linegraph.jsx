@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
+import { isEqual } from "lodash";
 import { format } from "date-fns";
 import "./linegraph.css";
 
@@ -92,7 +93,7 @@ class D3LineGraph extends Component {
           x = d3
             .scaleLinear()
             .range([0, width])
-            .domain([-this.getMax(data.x),-this.getMin(data.x)]);
+            .domain([-this.getMax(data.x), -this.getMin(data.x)]);
         } else {
           x = d3
             .scaleLinear()
@@ -112,9 +113,9 @@ class D3LineGraph extends Component {
             .domain([this.getMin(ydomain), this.getMax(ydomain)]);
         } else if (ylabel === "Depth") {
           y = d3
-          .scaleLinear()
-          .range([height, 0])
-          .domain([-this.getMax(data.y),-this.getMin(data.y)]);
+            .scaleLinear()
+            .range([height, 0])
+            .domain([-this.getMax(data.y), -this.getMin(data.y)]);
         } else {
           y = d3
             .scaleLinear()
@@ -244,13 +245,14 @@ class D3LineGraph extends Component {
           .attr("d", valueline(xy));
 
         // Add title
-        svg.append("text")
-        .attr("x", (width / 2))             
-        .attr("y", 2 - (margin.top / 2))
-        .attr("text-anchor", "middle")  
-        .style("font-size", "14px") 
-        .style("text-decoration", "underline")  
-        .text(title);
+        svg
+          .append("text")
+          .attr("x", width / 2)
+          .attr("y", 2 - margin.top / 2)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .style("text-decoration", "underline")
+          .text(title);
 
         // Brushing
         var brush = d3
@@ -347,8 +349,9 @@ class D3LineGraph extends Component {
               selectedData.y +
               yunits;
           } else {
-            document.getElementById("value").innerHTML =
-            `${selectedData.x} ${xunits} | ${selectedData.y} ${yunits}`;
+            document.getElementById(
+              "value"
+            ).innerHTML = `${selectedData.x} ${xunits} | ${selectedData.y} ${yunits}`;
           }
         }
 
@@ -414,8 +417,10 @@ class D3LineGraph extends Component {
     window.removeEventListener("resize", this.plotLineGraph);
   }
 
-  componentDidUpdate() {
-    this.plotLineGraph();
+  componentDidUpdate(prevProps, prevState) {
+    if (!isEqual(prevProps, this.props)){
+      this.plotLineGraph();
+    }
   }
 
   render() {

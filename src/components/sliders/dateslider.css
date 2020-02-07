@@ -1,0 +1,69 @@
+.railStyle {
+  position: absolute;
+  width: 100%;
+  transform: translate(0%, -50%);
+  height: 40px;
+  cursor: pointer;
+  z-index: 300;
+}
+
+.railCenterStyle {
+  position: absolute;
+  width: 100%;
+  transform: translate(0%, -50%);
+  height: 2px;
+  border-radius: 7px;
+  cursor: pointer;
+  pointer-events: none;
+  background-color: rgb(184, 184, 184);
+}
+
+.railOuterStyle {
+  position: absolute;
+  transform: translate(0%, -50%);
+  width: 100%;
+  height: 42px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.railInnerStyle {
+  position: absolute;
+  width: calc(100% + 60px);
+  height: 1px;
+  transform: translate(0%, -50%);
+  border-radius: 7px;
+  pointer-events: none;
+  background-color: rgb(184, 184, 184);
+  left: -30px;
+}
+
+.datetime-selector {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.datetime-table {
+  width: 100%;
+  margin-bottom: -15px;
+}
+
+.datetime-table .left {
+  text-align: left;
+}
+
+.datetime-table .right {
+  text-align: right;
+}
+
+.react-datetime-picker__wrapper {
+  border: none;
+}
+
+.react-datetime-picker__calendar {
+  width: 300px;
+}
+
+.single-value {
+ font-size: 12px;
+}

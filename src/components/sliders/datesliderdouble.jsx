@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { scaleTime } from "d3";
 import "./dateslider.css";
 
-class DateSlider extends Component {
+class DateSliderDouble extends Component {
   formatDate = raw => {
     return new Date(raw * 1000);
   };
@@ -145,4 +145,4 @@ class DateSlider extends Component {
   }
 }
 
-export default DateSlider;
+export default DateSliderDouble;
