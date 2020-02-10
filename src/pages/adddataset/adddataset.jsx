@@ -37,7 +37,8 @@ class AddDataset extends Component {
       licenses_id: "",
       citation: "",
       liveconnect: "false",
-      fileconnect: "no"
+      fileconnect: "no",
+      repository_id: ""
     },
     datasetparameters: [],
     files_list: [],
@@ -80,7 +81,7 @@ class AddDataset extends Component {
       });
 
     // Parse variable and attribute information from incoming file
-    var { file, files } = data2;
+    var { repo_id, file, files } = data2;
     if (file) {
       var { data: fileInformation } = await axios
         .get(apiUrl + "/files/" + file.id + "?get=metadata")
@@ -98,6 +99,7 @@ class AddDataset extends Component {
       );
     }
     dataset["id"] = reqObj.id;
+    dataset["repository_id"] = repo_id;
 
     // Set initial dataset parameters
     var datasetparameters = this.setDatasetParameters(

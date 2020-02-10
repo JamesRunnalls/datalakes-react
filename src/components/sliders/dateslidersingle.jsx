@@ -6,7 +6,7 @@ import "./dateslider.css";
 
 class DateSliderSingle extends Component {
   state = {
-    update: 1
+    update: 0
   };
 
   formatDate = raw => {
@@ -29,7 +29,7 @@ class DateSliderSingle extends Component {
     var { arr, value, onChange } = this.props;
     var { update } = this.state;
     var valueStr = this.formatDate(arr[update].value).toString();
-    var min = 1;
+    var min = 0;
     var max = arr.length - 1;
 
     const dateTicks = scaleLinear()

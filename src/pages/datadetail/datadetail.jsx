@@ -44,7 +44,7 @@ class DataDetail extends Component {
 
   onChangeFile = values => {
     var { data } = this.state;
-    var file = values[0] - 1;
+    var file = values[0];
     if (file <= data.length) {
       this.setState({ file });
     }

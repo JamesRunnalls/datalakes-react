@@ -56,7 +56,7 @@ render() {
             height: 42,
             cursor: 'pointer',
             // border: '1px solid grey',
-            backgroundColor: 'none',
+            backgroundColor: 'none'
         }}
         {...getHandleProps(id, {
             onMouseEnter: this.onMouseEnter,
@@ -77,6 +77,7 @@ render() {
             height: 20,
             border: 0,   
             backgroundColor: disabled ? '#666' : '#000',
+            zIndex: -1
         }}
         />
     </Fragment>
