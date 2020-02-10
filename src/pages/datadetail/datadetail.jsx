@@ -27,68 +27,12 @@ class DataDetail extends Component {
     data: "",
     step: "",
     allowedStep: ["preview", "download", "pipeline", "information"],
-    download: 0,
+    downloadNumber: 0,
     file: 0
   };
 
-  onChangeTime = values => {
-    const lower = values[0] / 1000;
-    const upper = values[1] / 1000;
-    if (
-      Math.round(lower) !== Math.round(this.state.lower) ||
-      Math.round(upper) !== Math.round(this.state.upper)
-    ) {
-      this.setState({ lower, upper });
-    }
-  };
-
-  onChangeFile = values => {
-    var { data } = this.state;
-    var file = values[0];
-    if (file <= data.length) {
-      this.setState({ file });
-    }
-  };
-
-  onChangeUpper = value => {
-    var upper = value.getTime() / 1000;
-    this.setState({ upper });
-  };
-
-  onChangeLower = value => {
-    var lower = value.getTime() / 1000;
-    this.setState({ lower });
-  };
-
-  getDropdowns = async () => {
-    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
-    this.setState({
-      dropdown
-    });
-  };
-
-  getLabel = (input, id) => {
-    const { dropdown } = this.state;
-    try {
-      return dropdown[input].find(x => x.id === id).name;
-    } catch (e) {
-      console.log(input, id, e);
-      return "NA";
-    }
-  };
-
-  parameterDetails = (dropdown, parameters, x) => {
-    return dropdown.parameters.find(
-      item => item.id === parameters[x].parameters_id
-    );
-  };
-
-  getAve = arr => {
-    const sum = arr.reduce((a, b) => a + b, 0);
-    return sum / arr.length || 0;
-  };
-
   async componentDidMount() {
+    this._isMounted = true;
     var { step, allowedStep } = this.state;
     const dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
     let server = await Promise.all([
@@ -164,22 +108,17 @@ class DataDetail extends Component {
     });
 
     // Download rest of files async
-    this.downloadData(dataArray, files, apiUrl, dataset, parameters);
+    //this.downloadData(dataArray, files, apiUrl, dataset, parameters);
   }
 
-  numAscending = (a, b) => {
-    var numA = parseFloat(a.value);
-    var numB = parseFloat(b.value);
-    var compare = 0;
-    if (numA > numB) {
-      compare = 1;
-    } else if (numA < numB) {
-      compare = -1;
-    }
-    return compare;
-  };
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
 
-  downloadData = async (dataArray, files, apiUrl, dataset, parameters) => {
+  // Download data
+  downloadData = async () => {
+    this.downloadData = () => {}; // Only possible to fire once.
+    var { data: dataArray, files, dataset, parameters } = this.state;
     for (var j = 1; j < files.length; j++) {
       var { data } = await axios
         .get(apiUrl + "/files/" + files[j].id + "?get=raw")
@@ -194,15 +133,98 @@ class DataDetail extends Component {
         dataArray = [this.combineTimeseries(dataArray)];
       }
       var { lower, upper, min, max } = this.dataBounds(dataArray);
-      this.setState({
-        data: dataArray,
-        download: j + 1,
-        min,
-        max,
-        upper,
-        lower
-      });
+      if (this._isMounted) {
+        this.setState({
+          data: dataArray,
+          downloadNumber: j + 1,
+          min,
+          max,
+          upper,
+          lower
+        });
+      } else {
+        return false;
+      }
     }
+  };
+
+  // Update state based on actions
+
+  updateSelectedState = step => {
+    this.setState({ step });
+  };
+
+  onChangeTime = values => {
+    const lower = values[0] / 1000;
+    const upper = values[1] / 1000;
+    if (
+      Math.round(lower) !== Math.round(this.state.lower) ||
+      Math.round(upper) !== Math.round(this.state.upper)
+    ) {
+      this.setState({ lower, upper });
+    }
+  };
+
+  onChangeFile = values => {
+    var { data } = this.state;
+    var file = values[0];
+    if (file <= data.length) {
+      this.setState({ file });
+    }
+  };
+
+  onChangeUpper = value => {
+    var upper = value.getTime() / 1000;
+    this.setState({ upper });
+  };
+
+  onChangeLower = value => {
+    var lower = value.getTime() / 1000;
+    this.setState({ lower });
+  };
+
+  // Get data from API
+
+  getDropdowns = async () => {
+    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
+    this.setState({
+      dropdown
+    });
+  };
+
+  getLabel = (input, id) => {
+    const { dropdown } = this.state;
+    try {
+      return dropdown[input].find(x => x.id === id).name;
+    } catch (e) {
+      console.log(input, id, e);
+      return "NA";
+    }
+  };
+
+  parameterDetails = (dropdown, parameters, x) => {
+    return dropdown.parameters.find(
+      item => item.id === parameters[x].parameters_id
+    );
+  };
+
+  // Number functions
+
+  numAscending = (a, b) => {
+    var numA = parseFloat(a.value);
+    var numB = parseFloat(b.value);
+    var compare = 0;
+    if (numA > numB) {
+      compare = -1;
+    } else if (numA < numB) {
+      compare = 1;
+    }
+    return compare;
+  };
+
+  getAve = arr => {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    return sum / arr.length || 0;
   };
 
   dataBounds = dataArray => {
@@ -229,10 +251,6 @@ class DataDetail extends Component {
     return objValue.concat(srcValue);
   };
 
-  updateSelectedState = step => {
-    this.setState({ step });
-  };
-
   render() {
     const {
       dataset,
@@ -245,7 +263,8 @@ class DataDetail extends Component {
       step,
       allowedStep,
       files,
-      file
+      file,
+      downloadNumber
     } = this.state;
     document.title = dataset.title + " - Datalakes";
     const url = this.props.location.pathname.split("/").slice(-1)[0];
@@ -317,6 +336,8 @@ class DataDetail extends Component {
               min={min}
               files={files}
               file={file}
+              downloadNumber={downloadNumber}
+              downloadData={this.downloadData}
             />
           </React.Fragment>
         );

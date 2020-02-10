@@ -25,9 +25,7 @@ class SidebarLayout extends Component {
 
       componentDidMount() {
         if (this.props.open === "False"){
-          this.setState({ addClass: true }, () => {
-            window.dispatchEvent(new Event('resize'));
-          });
+          this.setState({ addClass: true });
         }
         window.addEventListener("resize", this.hideOnResize);
       }

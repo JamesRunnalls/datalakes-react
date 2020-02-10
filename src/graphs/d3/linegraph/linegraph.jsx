@@ -43,7 +43,8 @@ class D3LineGraph extends Component {
     }
   };
 
-  plotLineGraph = () => {
+  plotLineGraph = async () => {
+    console.log("start");
     try {
       d3.select("#linegraphsvg").remove();
     } catch (e) {}
@@ -61,9 +62,9 @@ class D3LineGraph extends Component {
           lcolor,
           lweight,
           title,
-          download,
-          endDownload
+          setDownloadGraph
         } = this.props;
+        var dataTransform = this.dataTransform;
 
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
@@ -206,44 +207,6 @@ class D3LineGraph extends Component {
             .text(`${ylabel} (${yunits})`);
         }
 
-        // Transform Data
-        var xy = [];
-        for (var i = 0; i < data.x.length; i++) {
-          xy.push({
-            x: this.dataTransform(xlabel, data.x[i]),
-            y: this.dataTransform(ylabel, data.y[i])
-          });
-        }
-
-        // Define the line
-        var valueline = d3
-          .line()
-          .defined(d => !isNaN(d.y))
-          .x(function(d) {
-            return x(d.x);
-          })
-          .y(function(d) {
-            return y(d.y);
-          });
-
-        // Add the line
-        var line = svg
-          .append("g")
-          .attr("id", "scatterplot")
-          .attr("clip-path", "url(#clip)");
-
-        line
-          .append("path")
-          .attr(
-            "style",
-            "fill:none;stroke:" +
-              lcolor +
-              "; stroke-width:" +
-              lweight +
-              "; fill-opacity:0; stroke-opacity:1;"
-          )
-          .attr("d", valueline(xy));
-
         // Add title
         svg
           .append("text")
@@ -254,154 +217,203 @@ class D3LineGraph extends Component {
           .style("text-decoration", "underline")
           .text(title);
 
-        // Brushing
-        var brush = d3
-            .brush()
-            .extent([
-              [0, 0],
-              [width, height]
-            ])
-            .on("end", brushended),
-          idleTimeout,
-          idleDelay = 350;
+        main();    
 
-        line
-          .append("g")
-          .attr("class", "brush")
-          .call(brush);
-
-        // Add Focus
-        var focus = svg
-          .append("g")
-          .append("circle")
-          .style("fill", "red")
-          .attr("stroke", "red")
-          .attr("r", 4)
-          .style("opacity", 0);
-
-        var bisectx = d3.bisector(function(d) {
-          return d.x;
-        }).left;
-
-        // Add cursor catcher
-        svg
-          .select(".overlay")
-          .on("mouseover", mouseover)
-          .on("mousemove", mousemove)
-          .on("mouseout", mouseout);
-
-        function brushended() {
-          mouseout();
-          var s = d3.event.selection;
-          if (!s) {
-            if (!idleTimeout)
-              return (idleTimeout = setTimeout(idled, idleDelay));
-            x.domain(
-              d3.extent(xy, function(d) {
-                if (typeof d.x === "string") {
-                  d.x = this.formatDate(d.x);
-                }
-                return d.x;
-              })
-            );
-            y.domain(
-              d3.extent(xy, function(d) {
-                d.y = parseFloat(d.y);
-                return d.y;
-              })
-            );
-          } else {
-            x.domain([s[0][0], s[1][0]].map(x.invert, x));
-            y.domain([s[1][1], s[0][1]].map(y.invert, y));
-            line.select(".brush").call(brush.move, null);
+        async function main() {
+          // Transform Data
+          var xy = [];
+          for (var i = 0; i < data.x.length; i++) {
+            xy.push({
+              x: dataTransform(xlabel, data.x[i]),
+              y: dataTransform(ylabel, data.y[i])
+            });
           }
-          zoom();
-        }
 
-        function mouseover() {
-          focus.style("opacity", 1);
-        }
+          // Define the line
+          var valueline = d3
+            .line()
+            .defined(d => !isNaN(d.y))
+            .x(function(d) {
+              return x(d.x);
+            })
+            .y(function(d) {
+              return y(d.y);
+            });
 
-        function mouseout() {
-          focus.style("opacity", 0);
-          document.getElementById("value").innerHTML = "";
-        }
+          // Add the line
+          var line = svg
+            .append("g")
+            .attr("id", "scatterplot")
+            .attr("clip-path", "url(#clip)");
 
-        function mousemove() {
-          var selectedData = "";
-          if (sequential === "y") {
-            var y0 = y.invert(d3.mouse(this)[1]);
-            selectedData = xy.sort(function(a, b) {
-              return Math.abs(a.y - y0) - Math.abs(b.y - y0);
-            })[0];
-          } else {
-            var x0 = x.invert(d3.mouse(this)[0]);
-            var i = bisectx(xy, x0, 1);
-
-            selectedData = xy[i];
-          }
-          focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
-
-          if (xlabel === "Time") {
-            document.getElementById("value").innerHTML =
-              format(new Date(selectedData.x), "hh:mm dd MMM yy") +
-              " | " +
-              selectedData.y +
-              yunits;
-          } else {
-            document.getElementById(
-              "value"
-            ).innerHTML = `${selectedData.x} ${xunits} | ${selectedData.y} ${yunits}`;
-          }
-        }
-
-        function idled() {
-          idleTimeout = null;
-        }
-
-        function zoom() {
-          var t = line.transition().duration(750);
-          svg
-            .select("#axis--x")
-            .transition(t)
-            .call(xAxis);
-          svg
-            .select("#axis--y")
-            .transition(t)
-            .call(yAxis);
           line
-            .selectAll("path")
-            .transition(t)
+            .append("path")
+            .attr(
+              "style",
+              "fill:none;stroke:" +
+                lcolor +
+                "; stroke-width:" +
+                lweight +
+                "; fill-opacity:0; stroke-opacity:1;"
+            )
             .attr("d", valueline(xy));
+
+          // Brushing
+          var brush = d3
+              .brush()
+              .extent([
+                [0, 0],
+                [width, height]
+              ])
+              .on("end", brushended),
+            idleTimeout,
+            idleDelay = 350;
+
+          line
+            .append("g")
+            .attr("class", "brush")
+            .call(brush);
+
+          // Add Focus
+          var focus = svg
+            .append("g")
+            .append("circle")
+            .style("fill", "red")
+            .attr("stroke", "red")
+            .attr("r", 4)
+            .style("opacity", 0);
+
+          var bisectx = d3.bisector(function(d) {
+            return d.x;
+          }).left;
+
+          // Add cursor catcher
+          svg
+            .select(".overlay")
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseout);
+
+          console.log("Mid");
+
+          function brushended() {
+            mouseout();
+            var s = d3.event.selection;
+            if (!s) {
+              if (!idleTimeout)
+                return (idleTimeout = setTimeout(idled, idleDelay));
+              x.domain(
+                d3.extent(xy, function(d) {
+                  if (typeof d.x === "string") {
+                    d.x = this.formatDate(d.x);
+                  }
+                  return d.x;
+                })
+              );
+              y.domain(
+                d3.extent(xy, function(d) {
+                  d.y = parseFloat(d.y);
+                  return d.y;
+                })
+              );
+            } else {
+              x.domain([s[0][0], s[1][0]].map(x.invert, x));
+              y.domain([s[1][1], s[0][1]].map(y.invert, y));
+              line.select(".brush").call(brush.move, null);
+            }
+            zoom();
+          }
+
+          function mouseover() {
+            focus.style("opacity", 1);
+          }
+
+          function mouseout() {
+            focus.style("opacity", 0);
+            document.getElementById("value").innerHTML = "";
+          }
+
+          function mousemove() {
+            var selectedData = "";
+            if (sequential === "y") {
+              var y0 = y.invert(d3.mouse(this)[1]);
+              selectedData = xy.sort(function(a, b) {
+                return Math.abs(a.y - y0) - Math.abs(b.y - y0);
+              })[0];
+            } else {
+              var x0 = x.invert(d3.mouse(this)[0]);
+              var i = bisectx(xy, x0, 1);
+
+              selectedData = xy[i];
+            }
+            focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
+
+            if (xlabel === "Time") {
+              document.getElementById("value").innerHTML =
+                format(new Date(selectedData.x), "hh:mm dd MMM yy") +
+                " | " +
+                selectedData.y +
+                yunits;
+            } else {
+              document.getElementById(
+                "value"
+              ).innerHTML = `${selectedData.x} ${xunits} | ${selectedData.y} ${yunits}`;
+            }
+          }
+
+          function idled() {
+            idleTimeout = null;
+          }
+
+          function zoom() {
+            var t = line.transition().duration(750);
+            svg
+              .select("#axis--x")
+              .transition(t)
+              .call(xAxis);
+            svg
+              .select("#axis--y")
+              .transition(t)
+              .call(yAxis);
+            line
+              .selectAll("path")
+              .transition(t)
+              .attr("d", valueline(xy));
+          }
+
+          function downloadGraph() {
+            var s = new XMLSerializer();
+            var str = s.serializeToString(
+              document.getElementById("linegraphsvg")
+            );
+
+            var canvas = document.createElement("canvas"),
+              context = canvas.getContext("2d");
+
+            canvas.width = viswidth;
+            canvas.height = visheight;
+
+            var image = new Image();
+            image.onerror = function() {
+              alert(
+                "Appologies .png download failed. Please download as .svg."
+              );
+            };
+            image.onload = function() {
+              context.drawImage(image, 0, 0);
+              var a = document.createElement("a");
+              a.download = "downloadgraph.png";
+              a.href = canvas.toDataURL("image/png");
+              a.click();
+            };
+            image.src =
+              "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
+          }
+
+          setDownloadGraph(downloadGraph);
         }
 
-        if (download) {
-          var s = new XMLSerializer();
-          var str = s.serializeToString(
-            document.getElementById("linegraphsvg")
-          );
-
-          var canvas = document.createElement("canvas"),
-            context = canvas.getContext("2d");
-
-          canvas.width = viswidth;
-          canvas.height = visheight;
-
-          var image = new Image();
-          image.onerror = function() {
-            alert("Appologies .png download failed. Please download as .svg.");
-          };
-          image.onload = function() {
-            context.drawImage(image, 0, 0);
-            var a = document.createElement("a");
-            a.download = "downloadgraph.png";
-            a.href = canvas.toDataURL("image/png");
-            a.click();
-          };
-          image.src =
-            "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
-        }
-        endDownload();
+        console.log("End");
       } catch (e) {
         console.error("Error plotting line graph", e);
       }
@@ -409,16 +421,19 @@ class D3LineGraph extends Component {
   };
 
   componentDidMount() {
-    window.addEventListener("resize", this.plotLineGraph);
-    this.plotLineGraph();
+    window.addEventListener("resize", () => {
+      this.plotLineGraph();
+    });
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.plotLineGraph);
+    window.addEventListener("resize", () => {
+      this.plotLineGraph();
+    });
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (!isEqual(prevProps, this.props)){
+    if (!isEqual(prevProps, this.props)) {
       this.plotLineGraph();
     }
   }

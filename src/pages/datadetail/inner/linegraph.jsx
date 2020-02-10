@@ -63,13 +63,11 @@ class LineGraph extends Component {
     }
   };
 
-  startDownload = () => {
-    if (!this.state.download) this.setState({ download: true });
-  };
+  downloadGraph = () => {}
 
-  endDownload = () => {
-    if (this.state.download) this.setState({ download: false });
-  };
+  setDownloadGraph = (newFunc) => {
+    this.downloadGraph = newFunc;
+  }
 
   componentDidMount() {
     var { dataset } = this.props;
@@ -94,7 +92,9 @@ class LineGraph extends Component {
       max,
       min,
       files,
-      file
+      file,
+      downloadNumber,
+      downloadData
     } = this.props;
     const {
       lweight,
@@ -102,8 +102,7 @@ class LineGraph extends Component {
       lcolor,
       xaxis,
       yaxis,
-      title,
-      download
+      title
     } = this.state;
 
     // Axis Options
@@ -166,18 +165,28 @@ class LineGraph extends Component {
                 lcolor={lcolor}
                 lweight={lweight}
                 bcolor={bcolor}
-                download={download}
-                endDownload={this.endDownload}
+                setDownloadGraph={this.setDownloadGraph}
               />
               {data.length > 1 && (
                 <div className="linegraph-file">
                   {this.formatDate(files[file].value).toString()};
                 </div>
               )}
-              {files.length !== data.length && data.length > 1 && (
+              {downloadNumber === 0 && files.length > 1 && (
+                <div>
+                  <button onClick={() => downloadData()}>Download</button>
+                </div>
+              )}
+              {downloadNumber !== files.length && downloadNumber !== 0 && (
                 <div className="linegraph-downloading">
-                  Downloading file {data.length} of {files.length} click on Plot
-                  Controls to view other files.
+                  Downloading file {downloadNumber} of {files.length}
+                  {data.length > 1 && (
+                    <React.Fragment>
+                      {" "}
+                      click on Plot Controls to view other files
+                    </React.Fragment>
+                  )}
+                  .
                 </div>
               )}
             </React.Fragment>
@@ -311,7 +320,7 @@ class LineGraph extends Component {
                   <button
                     id="linegraph-download"
                     className="download-button"
-                    onClick={() => this.startDownload()}
+                    onClick={() => this.downloadGraph()}
                   >
                     Download as PNG
                   </button>

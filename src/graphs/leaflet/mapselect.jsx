@@ -26,6 +26,7 @@ class MapSelect extends Component {
       center: center,
       zoom: zoom,
       minZoom: 2,
+      maxZoom: 16,
       layers: [
         //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'})
         L.tileLayer(
@@ -108,12 +109,7 @@ class MapSelect extends Component {
     var color = "red";
     var Icon = L.divIcon({
       className: "map-marker",
-      html:
-        '<div class="' +
-        shape +
-        '" style="background-color:' +
-        color +
-        '"></div>'
+      html: `<div class="${shape}" style="background-color:${color}"></div> `
     });
     this.markers = L.markerClusterGroup();
     var bounds = L.latLngBounds();
@@ -122,7 +118,7 @@ class MapSelect extends Component {
       this.markers.addLayer(
         new L.marker([dataset.latitude, dataset.longitude], {
           icon: Icon
-        }).bindPopup(dataset.title)
+        }).bindPopup(`<a href="datadetail/${dataset.id}">${dataset.title}</a>`)
       );
     }
     this.map.addLayer(this.markers);

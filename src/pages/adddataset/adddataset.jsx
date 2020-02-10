@@ -19,8 +19,7 @@ class AddDataset extends Component {
     dropdown: {},
     dataset: {
       id: "",
-      git:
-        "https://renkulab.io/gitlab/viet.tran-khac/lexplore-data/blob/master/data/Level1A/1A0009_LexplorePPMooringDissolvedOxygen_5000cm/netcdf/201809_1A0009_LexplorePPMooringDissolvedOxygen_5000cm.nc",
+      git: "",
       start_time: "",
       end_time: "",
       latitude: "",
@@ -125,11 +124,9 @@ class AddDataset extends Component {
     const { step, datasetparameters, dataset, file, files_list } = this.state;
 
     // Clean folder
-    await axios
-      .get(apiUrl + "/files/clean/" + dataset.id)
-      .catch(error => {
-        console.error(error.message);
-      });
+    await axios.get(apiUrl + "/files/clean/" + dataset.id).catch(error => {
+      console.error(error.message);
+    });
 
     // Check all table filled
     for (var row of datasetparameters) {
@@ -180,7 +177,12 @@ class AddDataset extends Component {
     // Convert single or multiple files
     if (dataset.fileconnect === "no" || dataset.fileconnect === "mix") {
       const { id } = file;
-      var data = await this.convertFile(apiUrl, id, datasetparameters, dataset.fileconnect);
+      var data = await this.convertFile(
+        apiUrl,
+        id,
+        datasetparameters,
+        dataset.fileconnect
+      );
       var { start_time, end_time, depth, longitude, latitude } = data;
     } else {
       var arr_start_time = [];
@@ -189,7 +191,12 @@ class AddDataset extends Component {
       var arr_longitude = [];
       var arr_latitude = [];
       for (var k = 0; k < files_list.length; k++) {
-        data = await this.convertFile(apiUrl, files_list[k].id, datasetparameters, dataset.fileconnect);
+        data = await this.convertFile(
+          apiUrl,
+          files_list[k].id,
+          datasetparameters,
+          dataset.fileconnect
+        );
         arr_start_time.push(data.start_time);
         arr_end_time.push(data.end_time);
         arr_depth.push(data.depth);
@@ -360,35 +367,34 @@ class AddDataset extends Component {
   getMax = arr => {
     let len = arr.length;
     let max = -Infinity;
-  
+
     while (len--) {
       max = arr[len] > max ? arr[len] : max;
     }
     return max;
   };
-  
+
   getMin = arr => {
     let len = arr.length;
     let min = Infinity;
-  
+
     while (len--) {
       min = arr[len] < min ? arr[len] : min;
     }
     return min;
   };
-  
+
   getAve = arr => {
     const sum = arr.reduce((a, b) => a + b, 0);
     return sum / arr.length || 0;
   };
-  
+
   allEqual = arr => {
     try {
       return arr.every(v => v === arr[0]);
     } catch (e) {
       return "";
     }
-    
   };
 
   setDatasetParameters = (fileInformation, dropdown) => {
