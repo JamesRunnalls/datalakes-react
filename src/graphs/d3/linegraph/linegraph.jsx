@@ -44,7 +44,6 @@ class D3LineGraph extends Component {
   };
 
   plotLineGraph = async () => {
-    console.log("start");
     try {
       d3.select("#linegraphsvg").remove();
     } catch (e) {}
@@ -294,8 +293,6 @@ class D3LineGraph extends Component {
             .on("mousemove", mousemove)
             .on("mouseout", mouseout);
 
-          console.log("Mid");
-
           function brushended() {
             mouseout();
             var s = d3.event.selection;
@@ -396,7 +393,7 @@ class D3LineGraph extends Component {
             var image = new Image();
             image.onerror = function() {
               alert(
-                "Appologies .png download failed. Please download as .svg."
+                "Appologies .png download failed. Pleaseawait  download as .svg."
               );
             };
             image.onload = function() {
@@ -412,8 +409,6 @@ class D3LineGraph extends Component {
 
           setDownloadGraph(downloadGraph);
         }
-
-        console.log("End");
       } catch (e) {
         console.error("Error plotting line graph", e);
       }

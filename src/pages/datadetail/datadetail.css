@@ -102,7 +102,7 @@
 
 .data-subnav .subnav-item {
   display: inline-block;
-  margin:0 10px -1px 10px;
+  margin: 0 10px -1px 10px;
   cursor: pointer;
   padding: 5px 10px;
   border: 1px solid white;
@@ -130,73 +130,82 @@
 }
 
 .data-subnav .subnav-item .subnav-text {
-    display:inline-block;
+  display: inline-block;
 }
 
 .data-subnav .subnav-item .subnav-img {
-    height:16px;
-    padding-right: 10px;
-    vertical-align: top;
+  height: 16px;
+  padding-right: 10px;
+  vertical-align: top;
 }
 
 @media screen and (max-width: 960px) {
-    .data-subnav .subnav-item .subnav-text {
-        display:none;
-    }
-    .data-subnav .subnav-item .subnav-img {
-        padding: 0 5px;
-    }
-    .data-subnav .subnav-item {
-        margin:0 0 -1px 0;
-    }
-    .data-subnav {
-        margin: 0 0 10px 0;
-    }
+  .data-subnav .subnav-item .subnav-text {
+    display: none;
   }
-
+  .data-subnav .subnav-item .subnav-img {
+    padding: 0 5px;
+  }
+  .data-subnav .subnav-item {
+    margin: 0 0 -1px 0;
+  }
+  .data-subnav {
+    margin: 0 0 10px 0;
+  }
+}
 
 .colors-table .color-value {
-    height: 100%;
-    width: 100%;
-    box-sizing: border-box;
-    border: none;
-    border-bottom: 1px solid black;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 1px solid black;
 }
 
 .colors-table {
-    width: 100%;
-    box-sizing: border-box;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .colors-table td {
-    padding-right: 15px;
+  padding-right: 15px;
 }
 
 .color-buttons {
-    padding-top:10px;
-    text-align: center;
+  padding-top: 10px;
+  text-align: center;
 }
 
 .color-button {
-    border: solid 1px black;
-    border-radius: 5px;
-    background-color: white;
-    margin-right: 15px;
-    margin-top: 5px;
-    cursor: pointer;
-    padding: 4px 8px;
-    width: 120px;
+  border: solid 1px black;
+  background-color: white;
+  margin-right: 15px;
+  margin-top: 5px;
+  cursor: pointer;
+  padding: 4px 8px;
+  width: 120px;
 }
 
 .download-button {
-    border: solid 1px black;
-    border-radius: 5px;
-    background-color: white;
-    margin-right: 15px;
-    margin-top: 15px;
-    cursor: pointer;
-    padding: 4px 8px;
-    width: 120px;
+  border: solid 1px black;
+  background-color: white;
+  margin-right: 15px;
+  margin-top: 15px;
+  cursor: pointer;
+  padding: 4px 8px;
+  width: 120px;
+}
+
+.read-button {
+  border: solid 1px black;
+  background-color: white;
+  margin-right: 15px;
+  margin-top: 15px;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: block;
+  margin: auto;
+  margin-top: 5px;
 }
 
 .preview-table {
@@ -225,7 +234,7 @@
 }
 
 .preview-table table th {
-  background-color:#E9E9E9;
+  background-color: #e9e9e9;
 }
 
 .axis-select {
@@ -241,8 +250,6 @@
 }
 
 .linegraph-downloading {
-  font-size: 12px;
-  font-weight: 700;
   width: 100%;
   text-align: center;
 }

@@ -63,11 +63,11 @@ class LineGraph extends Component {
     }
   };
 
-  downloadGraph = () => {}
+  downloadGraph = () => {};
 
-  setDownloadGraph = (newFunc) => {
+  setDownloadGraph = newFunc => {
     this.downloadGraph = newFunc;
-  }
+  };
 
   componentDidMount() {
     var { dataset } = this.props;
@@ -96,14 +96,7 @@ class LineGraph extends Component {
       downloadNumber,
       downloadData
     } = this.props;
-    const {
-      lweight,
-      bcolor,
-      lcolor,
-      xaxis,
-      yaxis,
-      title
-    } = this.state;
+    const { lweight, bcolor, lcolor, xaxis, yaxis, title } = this.state;
 
     // Axis Options
     const xoptions = [];
@@ -173,20 +166,27 @@ class LineGraph extends Component {
                 </div>
               )}
               {downloadNumber === 0 && files.length > 1 && (
-                <div>
-                  <button onClick={() => downloadData()}>Download</button>
+                <div className="linegraph-file">
+                  {Math.round(100 / files.length).toString()}% of the dataset in
+                  memory.
+                  <button
+                    className="read-button"
+                    onClick={() => downloadData()}
+                  >
+                    Read in full dataset
+                  </button>
                 </div>
               )}
               {downloadNumber !== files.length && downloadNumber !== 0 && (
                 <div className="linegraph-downloading">
-                  Downloading file {downloadNumber} of {files.length}
+                  {Math.round((downloadNumber * 100) / files.length).toString()}
+                  % of the dataset in memory.
                   {data.length > 1 && (
                     <React.Fragment>
                       {" "}
-                      click on Plot Controls to view other files
+                      Click on Plot Controls to view other files.
                     </React.Fragment>
                   )}
-                  .
                 </div>
               )}
             </React.Fragment>
