@@ -40,12 +40,11 @@ class SidebarLayout extends Component {
         if(this.state.addClass) {
           rightClass.push('hide');
           leftClass.push('full');
-          
         }
          return ( 
              <React.Fragment>
               <div className={rightClass.join(' ')} id="rightcontainer">
-                  <div className="righthead side" id="side" title="Click to hide sidebar" onClick={this.toggle}>
+                  <div className="righthead side" id="side" title="Click to hide sidebar" onClick={() => this.toggle()}>
                       <h3><div className="sidebartitle">{this.props.sidebartitle}</div> <span id="closeside"> > </span></h3>
                   </div>
                   <div className="rightcontent">

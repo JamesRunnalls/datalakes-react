@@ -416,15 +416,11 @@ class D3LineGraph extends Component {
   };
 
   componentDidMount() {
-    window.addEventListener("resize", () => {
-      this.plotLineGraph();
-    });
+    window.addEventListener("resize", this.plotLineGraph, false);
   }
 
   componentWillUnmount() {
-    window.addEventListener("resize", () => {
-      this.plotLineGraph();
-    });
+    window.removeEventListener("resize",this.plotLineGraph, false);
   }
 
   componentDidUpdate(prevProps, prevState) {

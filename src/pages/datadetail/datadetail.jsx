@@ -106,9 +106,6 @@ class DataDetail extends Component {
       step,
       allowedStep
     });
-
-    // Download rest of files async
-    //this.downloadData(dataArray, files, apiUrl, dataset, parameters);
   }
 
   componentWillUnmount() {
