@@ -1,25 +1,15 @@
 import React, { Component } from "react";
-import DateSliderDouble from "../../../components/sliders/datesliderdouble";
 import "../datadetail.css";
 
 class Download extends Component {
     render() {
       const {
-        onChange,
         getLabel,
-        lower,
-        upper,
-        max,
-        min,
         dataset,
-        url,
-        apiUrl,
-        onChangeLower,
-        onChangeUpper
+        apiUrl
       } = this.props;
-      const jsonUrl = apiUrl + "/api/data/json/" + url;
-      const csvUrl = apiUrl + "/api/data/csv/" + url;
-      const txtUrl = apiUrl + "/api/data/txt/" + url;
+      const ncUrl = apiUrl + "/download/nc/" + dataset.id
+      const jsonUrl = apiUrl + "/download/json/" + dataset.id;
       return (
         <React.Fragment>
           <div className="info-title">Dataset Title</div>
@@ -31,28 +21,10 @@ class Download extends Component {
           <div className="info-title">Citations</div>
           {dataset.citation}
   
-          <div className="info-title">Time Period</div>
-          <div className="date-slider">
-            <DateSliderDouble
-              onChange={onChange}
-              min={min}
-              max={max}
-              lower={lower}
-              upper={upper}
-              onChangeLower={onChangeLower}
-              onChangeUpper={onChangeUpper}
-            />
-          </div>
           <div className="info-title">Download</div>
           <div className="MultipleDownload">
-            <a>
-              <button title="Not Currently Available">.nc</button>
-            </a>
-            <a href={csvUrl}>
-              <button title="Download datasets in CSV format">.csv</button>
-            </a>
-            <a href={txtUrl}>
-              <button title="Download datasets in TXT format">.txt</button>
+            <a href={ncUrl}>
+              <button title="Download datasets in NetCDF format">.nc</button>
             </a>
             <a href={jsonUrl}>
               <button title="Download datasets in JSON format">.json</button>

@@ -64,7 +64,7 @@ class Information extends Component {
                   <td>{dataset.latitude}</td>
                 </tr>
                 <tr>
-                  <th>Depth</th>
+                  <th>Depth (m)</th>
                   <td>{dataset.depth}</td>
                 </tr>
                 <tr>
