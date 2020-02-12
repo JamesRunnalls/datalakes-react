@@ -128,7 +128,7 @@ class ReviewData extends Component {
       }
       rows.push(
         <tr key={"row" + i}>
-          <td>{row.parseParameter}</td>
+          <td>{row.parseparameter}</td>
           <td>{row.parseUnit}</td>
           <td>
             <DataSelect

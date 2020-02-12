@@ -406,7 +406,7 @@ class AddDataset extends Component {
     const { variables, attributes } = fileInformation;
 
     // Initial data parse and auto field matching
-    var parseParameter = "";
+    var parseparameter = "";
     var parseUnit = "";
     var parseSensor = "";
     var variableAttributes = "";
@@ -415,7 +415,7 @@ class AddDataset extends Component {
 
     // Loop over variables in nc file
     for (var key in variables) {
-      parseParameter = key;
+      parseparameter = key;
       parseUnit = "NA";
       parseSensor = "NA";
       variableAttributes = variables[key].attributes;
@@ -425,10 +425,10 @@ class AddDataset extends Component {
         parseUnit = variableAttributes["units"].value;
       }
       if ("standard_name" in variableAttributes) {
-        parseParameter = variableAttributes["standard_name"].value;
+        parseparameter = variableAttributes["standard_name"].value;
       }
       if ("long_name" in variableAttributes) {
-        parseParameter = variableAttributes["long_name"].value;
+        parseparameter = variableAttributes["long_name"].value;
       }
       if ("sensor" in attributes) {
         parseSensor = attributes["sensor"].value;
@@ -438,7 +438,7 @@ class AddDataset extends Component {
       var defaultParameter = this.fuseSearch(
         ["name"],
         parameters,
-        parseParameter
+        parseparameter
       );
 
       var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
@@ -459,7 +459,7 @@ class AddDataset extends Component {
 
       // Summarise data
       variable = {
-        parseParameter: key,
+        parseparameter: key,
         parseUnit: parseUnit,
         parseSensor: parseSensor,
         parameters_id: defaultParameter,
