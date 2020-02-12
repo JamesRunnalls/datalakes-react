@@ -37,7 +37,8 @@ class AddDataset extends Component {
       citation: "",
       liveconnect: "false",
       fileconnect: "no",
-      repository_id: ""
+      repository_id: "",
+      folder: ""
     },
     datasetparameters: [],
     files_list: [],
@@ -70,6 +71,7 @@ class AddDataset extends Component {
 
     // Clone git repo and add files to files table
     var reqObj = this.parseUrl(dataset.git);
+    console.log(reqObj);
     reqObj["id"] = data1.id;
     var { data: data2 } = await axios
       .post(apiUrl + "/sparsegitclone", reqObj)
@@ -99,6 +101,7 @@ class AddDataset extends Component {
     }
     dataset["id"] = reqObj.id;
     dataset["repository_id"] = repo_id;
+    dataset["folder"] = reqObj.dir;
 
     // Set initial dataset parameters
     var datasetparameters = this.setDatasetParameters(
@@ -326,7 +329,8 @@ class AddDataset extends Component {
         url
           .split("/blob/")[0]
           .split("renkulab.io/gitlab/")
-          .pop();
+          .pop() +
+        ".git";
       dir = path.slice(1, path.length - 1);
       dir.unshift(repo);
       dir = dir.join("/");
