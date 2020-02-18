@@ -56,7 +56,6 @@ class D3LineGraph extends Component {
           xunits,
           ylabel,
           yunits,
-          sequential,
           bcolor,
           lcolor,
           lweight,
@@ -282,10 +281,6 @@ class D3LineGraph extends Component {
             .attr("r", 4)
             .style("opacity", 0);
 
-          var bisectx = d3.bisector(function(d) {
-            return d.x;
-          }).left;
-
           // Add cursor catcher
           svg
             .select(".overlay")
@@ -330,19 +325,27 @@ class D3LineGraph extends Component {
             document.getElementById("value").innerHTML = "";
           }
 
-          function mousemove() {
-            var selectedData = "";
-            if (sequential === "y") {
-              var y0 = y.invert(d3.mouse(this)[1]);
-              selectedData = xy.sort(function(a, b) {
-                return Math.abs(a.y - y0) - Math.abs(b.y - y0);
-              })[0];
-            } else {
-              var x0 = x.invert(d3.mouse(this)[0]);
-              var i = bisectx(xy, x0, 1);
-
-              selectedData = xy[i];
+          function closestCoordinates(x0,y0,xy) {
+            var x,y,dist_t;
+            var dist = Infinity;
+            for (var i = 0; i < xy.length; i++) {
+              dist_t = Math.sqrt(
+                Math.pow(Math.abs(xy[i].y - y0), 2) +
+                  Math.pow(Math.abs(xy[i].x - x0), 2)
+              );
+              if (dist_t < dist){
+                x = xy[i].x;
+                y = xy[i].y;
+                dist = dist_t;
+              }
             }
+            return {x: x, y: y}
+          }
+
+          function mousemove() {
+            var y0 = y.invert(d3.mouse(this)[1]);
+            var x0 = x.invert(d3.mouse(this)[0]);
+            var selectedData = closestCoordinates(x0,y0,xy)
             focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
 
             if (xlabel === "Time") {

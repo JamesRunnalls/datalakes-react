@@ -2,9 +2,11 @@ import React, { Component } from "react";
 import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { scaleLinear } from "d3";
+import { format } from "date-fns";
+import { scaleTime } from "d3";
 import "./dateslider.css";
 
-class DateSliderSingle extends Component {
+class SliderSingle extends Component {
   state = {
     update: 0
   };
@@ -13,8 +15,44 @@ class DateSliderSingle extends Component {
     return new Date(raw * 1000);
   };
 
-  onUpdate = update => {
-    this.setState({ update });
+  closest = (num, arr) => {
+    var diff = Infinity;
+    var index = 0;
+    for (var i = 0; i < arr.length; i++) {
+      var newdiff = Math.abs(num - arr[i]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = i;
+      }
+    }
+    return index;
+  };
+
+  formatTick = ms => {
+    const { min, max } = this.props;
+    const diff = max - min;
+    if (diff < 172800) {
+      // 3 Days
+      return format(new Date(ms), "hh:mm:ss");
+    } else if (diff < 31556952) {
+      // 1 Year
+      return format(new Date(ms), "dd MMM");
+    } else if (diff < 157784760) {
+      // 5 Years
+      return format(new Date(ms), "MMM yy");
+    } else {
+      return format(new Date(ms), "yyyy");
+    }
+  };
+
+  onUpdate = inupdate => {
+    var { update } = this.state;
+    var { filedict } = this.props;
+    var newUpdate = this.closest(inupdate[0]/1000, filedict);
+    console.log(update,newUpdate);
+    if (update !== newUpdate && newUpdate !== 0) {
+      this.setState({ update: newUpdate });
+    }
   };
 
   render() {
@@ -26,28 +64,38 @@ class DateSliderSingle extends Component {
       marginTop: 40,
       boxSizing: "border-box"
     };
-    var { arr, value, onChange } = this.props;
+    var { arr, value, onChange, type, min, max, filedict } = this.props;
     var { update } = this.state;
-    var valueStr = this.formatDate(arr[update].value).toString();
-    var min = 0;
-    var max = arr.length - 1;
 
-    const dateTicks = scaleLinear()
-      .domain([min, max])
-      .ticks(Math.min(arr.length, 8))
-      .map(d => +d);
+    var val = this.formatDate(filedict[value]);
+    var dateTicks, valueStr;
+    if (type === "time") {
+      valueStr = this.formatDate(filedict[update]).toString();
+      min = this.formatDate(min);
+      max = this.formatDate(max);
+      dateTicks = scaleTime()
+        .domain([min, max])
+        .ticks(5)
+        .map(d => +d);
+    } else if (type === "depth") {
+      valueStr = arr[update].value.toString();
+      dateTicks = scaleLinear()
+        .domain([min, max])
+        .ticks(Math.min(arr.length, 8))
+        .map(d => +d);
+    }
 
     return (
       <div className="datetime-selector">
         <div className="single-value">{valueStr}</div>
         <Slider
           mode={1}
+          step={1}
           domain={[+min, +max]}
           rootStyle={sliderStyle}
           onChange={onChange}
+          values={[val]}
           onUpdate={this.onUpdate}
-          values={[value]}
-          step={1}
         >
           <Rail>
             {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
@@ -101,4 +149,4 @@ class DateSliderSingle extends Component {
   }
 }
 
-export default DateSliderSingle;
+export default SliderSingle;

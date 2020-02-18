@@ -24,6 +24,7 @@ class DataDetail extends Component {
     lower: "",
     upper: "",
     files: [],
+    filedict: [],
     data: "",
     step: "",
     allowedStep: ["preview", "download", "pipeline", "information"],
@@ -80,18 +81,24 @@ class DataDetail extends Component {
     // Filter for only json files
     files = files.filter(file => file.filetype === "json");
 
-    // Sort by value (ascending)
-    files.sort(this.numAscending);
+    // Sort by value (descending)
+    files.sort(this.numDescending);
+
+    // Get convertion array
+    var filedict = this.filedict(files);
+
+    // Get min and max
+    var { min, max } = this.fileBounds(files);
 
     // Download first file
-    var dataArray = [];
+    var dataArray = new Array(files.length).fill(0);
     var { data } = await axios
       .get(apiUrl + "/files/" + files[0].id + "?get=raw")
       .catch(error => {
         this.setState({ error: true });
       });
-    dataArray.push(data);
-    var { lower, upper, min, max } = this.dataBounds(dataArray);
+    dataArray[0] = data;
+    var { lower, upper } = this.dataBounds(dataArray);
 
     this.setState({
       dataset,
@@ -100,6 +107,7 @@ class DataDetail extends Component {
       data: dataArray,
       min,
       max,
+      filedict,
       lower,
       upper,
       dropdown,
@@ -129,13 +137,11 @@ class DataDetail extends Component {
       ) {
         dataArray = [this.combineTimeseries(dataArray)];
       }
-      var { lower, upper, min, max } = this.dataBounds(dataArray);
+      var { lower, upper } = this.dataBounds(dataArray);
       if (this._isMounted) {
         this.setState({
           data: dataArray,
           downloadNumber: j + 1,
-          min,
-          max,
           upper,
           lower
         });
@@ -207,9 +213,9 @@ class DataDetail extends Component {
 
   // Number functions
 
-  numAscending = (a, b) => {
-    var numA = parseFloat(a.value);
-    var numB = parseFloat(b.value);
+  numDescending = (a, b) => {
+    var numA = (parseFloat(a.min) + parseFloat(a.max))/2;
+    var numB = (parseFloat(b.min) + parseFloat(b.max))/2;
     var compare = 0;
     if (numA > numB) {
       compare = -1;
@@ -226,11 +232,33 @@ class DataDetail extends Component {
 
   dataBounds = dataArray => {
     var xe = d3.extent(dataArray[0].x);
-    var min = xe[0],
-      max = xe[1],
-      lower = xe[0],
+    var lower = xe[0],
       upper = xe[1];
-    return { upper: upper, lower: lower, min: min, max: max };
+    return { upper: upper, lower: lower };
+  };
+
+  filedict = array => {
+    var out = [];
+    for (var i = 0; i < array.length; i++) {
+      out.push((parseFloat(array[i].min) + parseFloat(array[i].max))/2)
+    }
+    return out;
+  }
+
+  fileBounds = array => {
+    var min = Math.min.apply(
+      Math,
+      array.map(function(o) {
+        return o.min;
+      })
+    );
+    var max = Math.max.apply(
+      Math,
+      array.map(function(o) {
+        return o.max;
+      })
+    );
+    return { min: min, max: max };
   };
 
   combineTimeseries = arr => {
@@ -261,7 +289,8 @@ class DataDetail extends Component {
       allowedStep,
       files,
       file,
-      downloadNumber
+      downloadNumber,
+      filedict
     } = this.state;
     document.title = dataset.title + " - Datalakes";
     const url = this.props.location.pathname.split("/").slice(-1)[0];
@@ -333,6 +362,7 @@ class DataDetail extends Component {
               min={min}
               files={files}
               file={file}
+              filedict={filedict}
               downloadNumber={downloadNumber}
               downloadData={this.downloadData}
             />

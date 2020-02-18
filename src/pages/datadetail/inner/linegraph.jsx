@@ -1,11 +1,37 @@
 import React, { Component } from "react";
 import DateSliderDouble from "../../../components/sliders/datesliderdouble";
-import DateSliderSingle from "../../../components/sliders/dateslidersingle";
+import SliderSingle from "../../../components/sliders/slidersingle";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import DataSelect from "../../../components/dataselect/dataselect";
 import FilterBox from "../../../components/filterbox/filterbox";
 import "../datadetail.css";
+
+class LoadDataSets extends Component {
+  state = {};
+  render() {
+    var { downloadNumber, files, downloadData } = this.props;
+    return (
+      <div>
+        {downloadNumber === 0 && files.length > 1 && (
+          <div className="linegraph-file">
+            {Math.round(100 / files.length).toString()}% of the dataset in
+            memory.
+            <button className="read-button" onClick={() => downloadData()}>
+              Read in full dataset
+            </button>
+          </div>
+        )}
+        {downloadNumber !== files.length && downloadNumber !== 0 && (
+          <div className="linegraph-downloading">
+            {Math.round((downloadNumber * 100) / files.length).toString()}% of
+            the dataset in memory.
+          </div>
+        )}
+      </div>
+    );
+  }
+}
 
 class LineGraph extends Component {
   state = {
@@ -93,6 +119,7 @@ class LineGraph extends Component {
       min,
       files,
       file,
+      filedict,
       downloadNumber,
       downloadData
     } = this.props;
@@ -115,17 +142,17 @@ class LineGraph extends Component {
       }
     }
 
-    // Show time slider
+    // Show time slider or multiple files
     var time = parameters.filter(p => p.parameters_id === 1);
     var timeSlider = false;
+    var fileSlider = false;
     if (time.length > 0) {
       if (time[0].axis !== "M") {
         timeSlider = true;
+      } else {
+        fileSlider = true;
       }
     }
-
-    // Show multiple files
-    var fileSlider = data.length > 1;
 
     // Get data for selected options
     var plotdata = { x: data[file][xaxis], y: data[file][yaxis] };
@@ -160,35 +187,13 @@ class LineGraph extends Component {
                 bcolor={bcolor}
                 setDownloadGraph={this.setDownloadGraph}
               />
-              {data.length > 1 && (
-                <div className="linegraph-file">
-                  {this.formatDate(files[file].value).toString()};
-                </div>
-              )}
-              {downloadNumber === 0 && files.length > 1 && (
-                <div className="linegraph-file">
-                  {Math.round(100 / files.length).toString()}% of the dataset in
-                  memory.
-                  <button
-                    className="read-button"
-                    onClick={() => downloadData()}
-                  >
-                    Read in full dataset
-                  </button>
-                </div>
-              )}
-              {downloadNumber !== files.length && downloadNumber !== 0 && (
-                <div className="linegraph-downloading">
-                  {Math.round((downloadNumber * 100) / files.length).toString()}
-                  % of the dataset in memory.
-                  {data.length > 1 && (
-                    <React.Fragment>
-                      {" "}
-                      Click on Plot Controls to view other files.
-                    </React.Fragment>
-                  )}
-                </div>
-              )}
+              <div className="linegraph-bottombox">
+                {data.length > 1 && (
+                  <div className="linegraph-file">
+                    {this.formatDate(files[file].value).toString()};
+                  </div>
+                )}
+              </div>
             </React.Fragment>
           }
           rightNoScroll={
@@ -225,10 +230,19 @@ class LineGraph extends Component {
                   preopen="true"
                   content={
                     <div className="">
-                      <DateSliderSingle
+                      <SliderSingle
                         onChange={onChangeFile}
                         value={file}
+                        min={min}
+                        max={max}
                         arr={files}
+                        type="time"
+                        filedict={filedict}
+                      />
+                      <LoadDataSets
+                        downloadNumber={downloadNumber}
+                        files={files}
+                        downloadData={downloadData}
                       />
                     </div>
                   }
@@ -247,6 +261,11 @@ class LineGraph extends Component {
                         max={max}
                         lower={lower}
                         upper={upper}
+                      />
+                      <LoadDataSets
+                        downloadNumber={downloadNumber}
+                        files={files}
+                        downloadData={downloadData}
                       />
                     </div>
                   }
