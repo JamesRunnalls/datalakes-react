@@ -3,29 +3,59 @@ import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { scaleLinear } from "d3";
 import { format } from "date-fns";
+import * as d3 from "d3";
 import { scaleTime } from "d3";
-import "./dateslider.css";
+import "./slider.css";
 
-class SliderSingle extends Component {
-  state = {
-    update: 0
-  };
-
+class AvailbilityBar extends Component {
   formatDate = raw => {
     return new Date(raw * 1000);
   };
 
-  closest = (num, arr) => {
-    var diff = Infinity;
-    var index = 0;
-    for (var i = 0; i < arr.length; i++) {
-      var newdiff = Math.abs(num - arr[i]);
-      if (newdiff < diff) {
-        diff = newdiff;
-        index = i;
-      }
-    }
-    return index;
+  componentDidMount() {
+    var { min, max, filedict } = this.props;
+    var array = filedict.map(x => this.formatDate(x));
+
+    var width = d3
+      .select("#availabilitybar")
+      .node()
+      .getBoundingClientRect().width;
+    var svg = d3
+      .select("#availabilitybar")
+      .append("svg")
+      .attr("id", "availabilitybarsvg")
+      .attr("height",6)
+    var x = scaleTime()
+      .domain([min, max])
+      .range([0, width]);
+    svg
+      .selectAll("dot")
+      .data(array)
+      .enter()
+      .append("rect")
+      .attr("height", 6)
+      .attr("width", 1)
+      .attr("stroke","darkslategrey")
+      .attr("x", function(d) {
+        return x(d);
+      })
+      .attr("y", function(d) {
+        return 0;
+      });
+  }
+
+  render() {
+    return <div id="availabilitybar" className="availabilitybar"></div>;
+  }
+}
+
+class SliderSingle extends Component {
+  state = {
+    update: [0]
+  };
+
+  formatDate = raw => {
+    return new Date(raw * 1000);
   };
 
   formatTick = ms => {
@@ -45,32 +75,35 @@ class SliderSingle extends Component {
     }
   };
 
-  onUpdate = inupdate => {
-    var { update } = this.state;
-    var { filedict } = this.props;
-    var newUpdate = this.closest(inupdate[0]/1000, filedict);
-    console.log(update,newUpdate);
-    if (update !== newUpdate && newUpdate !== 0) {
-      this.setState({ update: newUpdate });
-    }
+  onUpdate = update => {
+    this.setState({ update });
   };
 
   render() {
     const sliderStyle = {
       position: "relative",
-      width: "calc(100% - 60px)",
+      width: "100%",
       height: 42,
       margin: "auto",
-      marginTop: 40,
+      marginTop: 10,
       boxSizing: "border-box"
     };
-    var { arr, value, onChange, type, min, max, filedict } = this.props;
+    var {
+      arr,
+      value,
+      onChange,
+      type,
+      min,
+      max,
+      file,
+      filedict,
+      onChangeFileInt
+    } = this.props;
     var { update } = this.state;
 
-    var val = this.formatDate(filedict[value]);
     var dateTicks, valueStr;
     if (type === "time") {
-      valueStr = this.formatDate(filedict[update]).toString();
+      valueStr = new Date(update[0]).toString();
       min = this.formatDate(min);
       max = this.formatDate(max);
       dateTicks = scaleTime()
@@ -78,7 +111,7 @@ class SliderSingle extends Component {
         .ticks(5)
         .map(d => +d);
     } else if (type === "depth") {
-      valueStr = arr[update].value.toString();
+      valueStr = update.toString();
       dateTicks = scaleLinear()
         .domain([min, max])
         .ticks(Math.min(arr.length, 8))
@@ -86,17 +119,35 @@ class SliderSingle extends Component {
     }
 
     return (
-      <div className="datetime-selector">
-        <div className="single-value">{valueStr}</div>
+      <div
+        className="datetime-selector"
+        title="Hint: use arrow keys to move between timesteps"
+      >
+        <div>
+          <div
+            className="slider-arrow"
+            onClick={() => onChangeFileInt(file + 1)}
+          >
+            &#60;
+          </div>
+          <div className="single-value">{valueStr}</div>
+          <div
+            className="slider-arrow"
+            onClick={() => onChangeFileInt(file - 1)}
+          >
+            &#62;
+          </div>
+        </div>
         <Slider
           mode={1}
           step={1}
           domain={[+min, +max]}
           rootStyle={sliderStyle}
           onChange={onChange}
-          values={[val]}
+          values={[value]}
           onUpdate={this.onUpdate}
         >
+          <AvailbilityBar min={min} max={max} filedict={filedict} />
           <Rail>
             {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
           </Rail>

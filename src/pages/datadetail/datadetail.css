@@ -206,6 +206,7 @@
   display: block;
   margin: auto;
   margin-top: 5px;
+  font-size: 12px;
 }
 
 .preview-table {
@@ -262,4 +263,10 @@
 
 .linegraph-bottombox {
   margin-bottom: 120px;
+}
+
+.loaddatasets {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 5px;
 }

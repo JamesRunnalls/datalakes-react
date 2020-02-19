@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
 import * as d3 from "d3";
-import { mergeWith } from "lodash";
 import HeatMap from "./inner/heatmap";
 import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
@@ -28,8 +27,9 @@ class DataDetail extends Component {
     data: "",
     step: "",
     allowedStep: ["preview", "download", "pipeline", "information"],
-    downloadNumber: 0,
-    file: 0
+    fullDataset: false,
+    file: 0,
+    innerLoading: false
   };
 
   async componentDidMount() {
@@ -123,31 +123,42 @@ class DataDetail extends Component {
   // Download data
   downloadData = async () => {
     this.downloadData = () => {}; // Only possible to fire once.
-    var { data: dataArray, files, dataset, parameters } = this.state;
-    for (var j = 1; j < files.length; j++) {
-      var { data } = await axios
-        .get(apiUrl + "/files/" + files[j].id + "?get=raw")
-        .catch(error => {
-          this.setState({ error: true });
-        });
-      dataArray.push(data);
-      if (
-        dataset.fileconnect === "time" &&
-        parameters.find(p => p.parameters_id === 1).axis !== "M"
-      ) {
-        dataArray = [this.combineTimeseries(dataArray)];
+    var { data: dataArray, files } = this.state;
+    for (var j = 0; j < files.length; j++) {
+      if (dataArray[j] === 0) {
+        var { data } = await axios
+          .get(apiUrl + "/files/" + files[j].id + "?get=raw")
+          .catch(error => {
+            this.setState({ error: true });
+          });
+        dataArray[j] = data;
+        if (this._isMounted) {
+          this.setState({
+            data: dataArray,
+            fullDataset: true
+          });
+        } else {
+          return false;
+        }
       }
-      var { lower, upper } = this.dataBounds(dataArray);
-      if (this._isMounted) {
-        this.setState({
-          data: dataArray,
-          downloadNumber: j + 1,
-          upper,
-          lower
-        });
-      } else {
-        return false;
-      }
+    }
+  };
+
+  downloadFile = async index => {
+    var { data: dataArray, files } = this.state;
+    var { data } = await axios
+      .get(apiUrl + "/files/" + files[index].id + "?get=raw")
+      .catch(error => {
+        this.setState({ error: true });
+      });
+    dataArray[index] = data;
+    if (this._isMounted) {
+      this.setState({
+        data: dataArray,
+        innerLoading: false
+      });
+    } else {
+      return false;
     }
   };
 
@@ -168,11 +179,52 @@ class DataDetail extends Component {
     }
   };
 
+  closest = (num, arr) => {
+    var diff = Infinity;
+    var index = 0;
+    for (var i = 0; i < arr.length; i++) {
+      var newdiff = Math.abs(num - arr[i]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = i;
+      }
+    }
+    return index;
+  };
+
+  onChangeFileInt = values => {
+    var { file: oldFile, data } = this.state;
+    var file = values;
+    if (file !== oldFile && this.isInt(file)) {
+      if (file >= 0 && file <= data.length) {
+        if (data[file] === 0) {
+          this.setState({ file, innerLoading: true });
+          this.downloadFile(file);
+        } else {
+          this.setState({ file });
+        }
+      }
+    }
+  };
+
   onChangeFile = values => {
-    var { data } = this.state;
-    var file = values[0];
-    if (file <= data.length) {
-      this.setState({ file });
+    var { filedict, file: oldFile, data } = this.state;
+    var file = this.closest(values[0] / 1000, filedict);
+    if (file !== oldFile && this.isInt(values[0])) {
+      if (data[file] === 0) {
+        this.setState({ file, innerLoading: true });
+        this.downloadFile(file);
+      } else {
+        this.setState({ file });
+      }
+    }
+  };
+
+  isInt = value => {
+    if (/^[-+]?(\d+|Infinity)$/.test(value)) {
+      return true;
+    } else {
+      return false;
     }
   };
 
@@ -214,8 +266,8 @@ class DataDetail extends Component {
   // Number functions
 
   numDescending = (a, b) => {
-    var numA = (parseFloat(a.min) + parseFloat(a.max))/2;
-    var numB = (parseFloat(b.min) + parseFloat(b.max))/2;
+    var numA = (parseFloat(a.min) + parseFloat(a.max)) / 2;
+    var numB = (parseFloat(b.min) + parseFloat(b.max)) / 2;
     var compare = 0;
     if (numA > numB) {
       compare = -1;
@@ -225,10 +277,7 @@ class DataDetail extends Component {
     return compare;
   };
 
-  getAve = arr => {
-    const sum = arr.reduce((a, b) => a + b, 0);
-    return sum / arr.length || 0;
-  };
+ 
 
   dataBounds = dataArray => {
     var xe = d3.extent(dataArray[0].x);
@@ -240,10 +289,10 @@ class DataDetail extends Component {
   filedict = array => {
     var out = [];
     for (var i = 0; i < array.length; i++) {
-      out.push((parseFloat(array[i].min) + parseFloat(array[i].max))/2)
+      out.push((parseFloat(array[i].min) + parseFloat(array[i].max)) / 2);
     }
     return out;
-  }
+  };
 
   fileBounds = array => {
     var min = Math.min.apply(
@@ -261,21 +310,6 @@ class DataDetail extends Component {
     return { min: min, max: max };
   };
 
-  combineTimeseries = arr => {
-    arr.sort((a, b) => {
-      return this.getAve(a.x) - this.getAve(b.x);
-    });
-    var combinedArr = arr[0];
-    for (var i = 1; i < arr.length; i++) {
-      combinedArr = mergeWith(combinedArr, arr[i], this.customizer);
-    }
-    return combinedArr;
-  };
-
-  customizer = (objValue, srcValue) => {
-    return objValue.concat(srcValue);
-  };
-
   render() {
     const {
       dataset,
@@ -289,8 +323,9 @@ class DataDetail extends Component {
       allowedStep,
       files,
       file,
-      downloadNumber,
-      filedict
+      fullDataset,
+      filedict,
+      innerLoading
     } = this.state;
     document.title = dataset.title + " - Datalakes";
     const url = this.props.location.pathname.split("/").slice(-1)[0];
@@ -350,6 +385,7 @@ class DataDetail extends Component {
             <LineGraph
               onChangeTime={this.onChangeTime}
               onChangeFile={this.onChangeFile}
+              onChangeFileInt={this.onChangeFileInt}
               onChangeLower={this.onChangeLower}
               onChangeUpper={this.onChangeUpper}
               dataset={dataset}
@@ -363,8 +399,9 @@ class DataDetail extends Component {
               files={files}
               file={file}
               filedict={filedict}
-              downloadNumber={downloadNumber}
+              fullDataset={fullDataset}
               downloadData={this.downloadData}
+              loading={innerLoading}
             />
           </React.Fragment>
         );

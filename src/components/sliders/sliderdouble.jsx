@@ -4,7 +4,7 @@ import DateTimePicker from "react-datetime-picker";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { format } from "date-fns";
 import { scaleTime } from "d3";
-import "./dateslider.css";
+import "./slider.css";
 
 class DateSliderDouble extends Component {
   formatDate = raw => {
@@ -31,7 +31,7 @@ class DateSliderDouble extends Component {
   render() {
     const sliderStyle = {
       position: "relative",
-      width: "calc(100% - 60px)",
+      width: "100%",
       height: 42,
       margin: "auto",
       marginTop: 40,

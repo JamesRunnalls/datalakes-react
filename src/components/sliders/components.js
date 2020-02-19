@@ -1,6 +1,6 @@
 import React, { Fragment, Component } from "react";
 import PropTypes from "prop-types";
-import './dateslider.css';
+import './slider.css';
 
 // *******************************************************
 // SLIDER RAIL (no tooltips)
@@ -56,7 +56,8 @@ render() {
             height: 42,
             cursor: 'pointer',
             // border: '1px solid grey',
-            backgroundColor: 'none'
+            backgroundColor: 'none',
+            zIndex: 0
         }}
         {...getHandleProps(id, {
             onMouseEnter: this.onMouseEnter,
@@ -77,7 +78,7 @@ render() {
             height: 20,
             border: 0,   
             backgroundColor: disabled ? '#666' : '#000',
-            zIndex: -1
+            zIndex: 0
         }}
         />
     </Fragment>

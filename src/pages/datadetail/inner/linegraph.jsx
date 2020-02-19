@@ -1,31 +1,39 @@
 import React, { Component } from "react";
-import DateSliderDouble from "../../../components/sliders/datesliderdouble";
+import { mergeWith } from "lodash";
+import SliderDouble from "../../../components/sliders/sliderdouble";
 import SliderSingle from "../../../components/sliders/slidersingle";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import DataSelect from "../../../components/dataselect/dataselect";
 import FilterBox from "../../../components/filterbox/filterbox";
+import Loading from "../../../components/loading/loading";
 import "../datadetail.css";
 
 class LoadDataSets extends Component {
-  state = {};
+  downloadProgress = data => {
+    var len = data.length;
+    var count = 0;
+    for (var i = 0; i < len; i++) {
+      if (data[i] === 0) count++;
+    }
+    count = len - count;
+    if (count < len) {
+      return `${count} of ${len} files in memory.`;
+    } else {
+      return "";
+    }
+  };
+
   render() {
-    var { downloadNumber, files, downloadData } = this.props;
+    var { fullDataset, downloadData, data } = this.props;
     return (
-      <div>
-        {downloadNumber === 0 && files.length > 1 && (
+      <div className="loaddatasets">
+        {this.downloadProgress(data)}
+        {!fullDataset && (
           <div className="linegraph-file">
-            {Math.round(100 / files.length).toString()}% of the dataset in
-            memory.
             <button className="read-button" onClick={() => downloadData()}>
-              Read in full dataset
+              Preload full dataset
             </button>
-          </div>
-        )}
-        {downloadNumber !== files.length && downloadNumber !== 0 && (
-          <div className="linegraph-downloading">
-            {Math.round((downloadNumber * 100) / files.length).toString()}% of
-            the dataset in memory.
           </div>
         )}
       </div>
@@ -42,6 +50,29 @@ class LineGraph extends Component {
     yaxis: "y",
     title: "test",
     download: false
+  };
+
+  formatDate = raw => {
+    return new Date(raw * 1000);
+  };
+
+  getAve = arr => {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    return sum / arr.length || 0;
+  };
+
+  combineTimeseries = arr => {
+    var combinedArr = arr[0];
+    for (var i = 1; i < arr.length; i++) {
+      if (arr[i] !== 0){
+        combinedArr = mergeWith(combinedArr, arr[i], this.customizer);
+      }
+    }
+    return combinedArr;
+  };
+
+  customizer = (objValue, srcValue) => {
+    return objValue.concat(srcValue);
   };
 
   update = () => {
@@ -70,6 +101,8 @@ class LineGraph extends Component {
   };
 
   datetimeFilter = (data, lower, upper, min, max) => {
+    console.log(data)
+    console.log(upper,lower)
     if ((lower !== min && lower !== "") || (upper !== max && upper !== "")) {
       var l = 0;
       var u = data.x.length - 1;
@@ -81,8 +114,10 @@ class LineGraph extends Component {
           u = i;
         }
       }
+      console.log(l,u)
       var x = data.x.slice(l, u);
       var y = data.y.slice(l, u);
+      console.log(x,y)
       return { x: x, y: y };
     } else {
       return data;
@@ -95,9 +130,25 @@ class LineGraph extends Component {
     this.downloadGraph = newFunc;
   };
 
+  handleKeyDown = event => {
+    var { file, onChangeFileInt } = this.props;
+    if (event.keyCode === 37){
+      // Left
+      onChangeFileInt([file + 1])
+    } else if (event.keyCode === 39){
+      // right
+      onChangeFileInt([file - 1])
+    }
+  }
+
   componentDidMount() {
     var { dataset } = this.props;
     this.setState({ title: dataset.title });
+    document.addEventListener("keydown", this.handleKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.addEventListener("keydown", this.handleKeyDown);
   }
 
   formatDate = raw => {
@@ -108,6 +159,7 @@ class LineGraph extends Component {
     var {
       onChangeTime,
       onChangeFile,
+      onChangeFileInt,
       onChangeLower,
       onChangeUpper,
       parameters,
@@ -120,14 +172,32 @@ class LineGraph extends Component {
       files,
       file,
       filedict,
-      downloadNumber,
-      downloadData
+      fullDataset,
+      downloadData,
+      loading
     } = this.props;
     const { lweight, bcolor, lcolor, xaxis, yaxis, title } = this.state;
 
+    var xoptions = [];
+    var yoptions = [];
+    var xlabel = "";
+    var ylabel = "";
+    var xunits = "";
+    var yunits = "";
+
+    // Show time slider or multiple files
+    var time = parameters.filter(p => p.parameters_id === 1);
+    var timeSlider = false;
+    var fileSlider = false;
+    if (time.length > 0) {
+      if (time[0].axis !== "M") {
+        timeSlider = true;
+      } else {
+        fileSlider = true;
+      }
+    }
+
     // Axis Options
-    const xoptions = [];
-    const yoptions = [];
     for (var j = 0; j < parameters.length; j++) {
       if (parameters[j]["axis"].includes("x")) {
         xoptions.push({
@@ -142,31 +212,29 @@ class LineGraph extends Component {
       }
     }
 
-    // Show time slider or multiple files
-    var time = parameters.filter(p => p.parameters_id === 1);
-    var timeSlider = false;
-    var fileSlider = false;
-    if (time.length > 0) {
-      if (time[0].axis !== "M") {
-        timeSlider = true;
-      } else {
-        fileSlider = true;
+    if (!loading) {
+
+      // Get data
+      var plotdata;
+      if (files[file].connect === "join"){
+        var combinedData = this.combineTimeseries(data);
+        plotdata = { x: combinedData[xaxis], y: combinedData[yaxis] };
+        plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
+      } else if (files[file].connect === "ind") {
+        plotdata = { x: data[file][xaxis], y: data[file][yaxis] };
       }
-    }
 
-    // Get data for selected options
-    var plotdata = { x: data[file][xaxis], y: data[file][yaxis] };
-
-    // Datetime filter
-    plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
-
-    // Get axis labels
-    const xparam = parameters.find(x => x.axis === xaxis);
-    const yparam = parameters.find(y => y.axis === yaxis);
-    const xlabel = getLabel("parameters", xparam.parameters_id),
-      ylabel = getLabel("parameters", yparam.parameters_id),
-      xunits = xparam.unit,
+      // Get axis labels
+      const xparam = parameters.find(x => x.axis === xaxis);
+      const yparam = parameters.find(y => y.axis === yaxis);
+      xlabel = getLabel("parameters", xparam.parameters_id);
+      ylabel = getLabel("parameters", yparam.parameters_id);
+      xunits = xparam.unit;
       yunits = yparam.unit;
+
+      // Value
+      var value = this.formatDate(filedict[file]);
+    }
 
     return (
       <React.Fragment>
@@ -174,26 +242,37 @@ class LineGraph extends Component {
           sidebartitle="Plot Controls"
           left={
             <React.Fragment>
-              <D3LineGraph
-                data={plotdata}
-                title={title}
-                xlabel={xlabel}
-                ylabel={ylabel}
-                xunits={xunits}
-                yunits={yunits}
-                sequential="x"
-                lcolor={lcolor}
-                lweight={lweight}
-                bcolor={bcolor}
-                setDownloadGraph={this.setDownloadGraph}
-              />
-              <div className="linegraph-bottombox">
-                {data.length > 1 && (
-                  <div className="linegraph-file">
-                    {this.formatDate(files[file].value).toString()};
+              {loading ? (
+                <table className="loading-table">
+                  <tbody>
+                    <tr>
+                      <td>
+                        <Loading />
+                        <h3>Downloading Data</h3>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              ) : (
+                <React.Fragment>
+                  <D3LineGraph
+                    data={plotdata}
+                    title={title}
+                    xlabel={xlabel}
+                    ylabel={ylabel}
+                    xunits={xunits}
+                    yunits={yunits}
+                    sequential="x"
+                    lcolor={lcolor}
+                    lweight={lweight}
+                    bcolor={bcolor}
+                    setDownloadGraph={this.setDownloadGraph}
+                  />
+                  <div className="linegraph-bottombox">
+                    <div className="linegraph-file">{value.toString()}</div>
                   </div>
-                )}
-              </div>
+                </React.Fragment>
+              )}
             </React.Fragment>
           }
           rightNoScroll={
@@ -232,16 +311,18 @@ class LineGraph extends Component {
                     <div className="">
                       <SliderSingle
                         onChange={onChangeFile}
-                        value={file}
+                        onChangeFileInt={onChangeFileInt}
+                        file={file}
+                        value={value}
                         min={min}
                         max={max}
                         arr={files}
-                        type="time"
                         filedict={filedict}
+                        type="time"
                       />
                       <LoadDataSets
-                        downloadNumber={downloadNumber}
-                        files={files}
+                        fullDataset={fullDataset}
+                        data={data}
                         downloadData={downloadData}
                       />
                     </div>
@@ -251,9 +332,10 @@ class LineGraph extends Component {
               {timeSlider && (
                 <FilterBox
                   title="Date Range"
+                  preopen="true"
                   content={
                     <div className="side-date-slider">
-                      <DateSliderDouble
+                      <SliderDouble
                         onChange={onChangeTime}
                         onChangeLower={onChangeLower}
                         onChangeUpper={onChangeUpper}
@@ -263,8 +345,8 @@ class LineGraph extends Component {
                         upper={upper}
                       />
                       <LoadDataSets
-                        downloadNumber={downloadNumber}
-                        files={files}
+                        fullDataset={fullDataset}
+                        data={data}
                         downloadData={downloadData}
                       />
                     </div>
@@ -347,7 +429,7 @@ class LineGraph extends Component {
               />
             </React.Fragment>
           }
-          open="False"
+          //open="False"
         />
       </React.Fragment>
     );

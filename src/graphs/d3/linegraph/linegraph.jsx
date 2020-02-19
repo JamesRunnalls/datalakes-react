@@ -47,7 +47,6 @@ class D3LineGraph extends Component {
     try {
       d3.select("#linegraphsvg").remove();
     } catch (e) {}
-
     if (this.props.data) {
       try {
         var {
@@ -419,6 +418,7 @@ class D3LineGraph extends Component {
   };
 
   componentDidMount() {
+    this.plotLineGraph();
     window.addEventListener("resize", this.plotLineGraph, false);
   }
 
