@@ -163,11 +163,13 @@ class LineGraph extends Component {
     var time = parameters.filter(p => p.parameters_id === 1);
     var timeSlider = false;
     var fileSlider = false;
-    if (time.length > 0) {
-      if (time[0].axis !== "M") {
-        timeSlider = true;
-      } else {
-        fileSlider = true;
+    if (files.length > 1) {
+      if (time.length > 0) {
+        if (time[0].axis !== "M") {
+          timeSlider = true;
+        } else {
+          fileSlider = true;
+        }
       }
     }
 
@@ -176,12 +178,12 @@ class LineGraph extends Component {
       if (parameters[j]["axis"].includes("x")) {
         xoptions.push({
           value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"])
+          label: getLabel("parameters", parameters[j]["parameters_id"], "name")
         });
       } else if (parameters[j]["axis"].includes("y")) {
         yoptions.push({
           value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"])
+          label: getLabel("parameters", parameters[j]["parameters_id"], "name")
         });
       }
     }
@@ -204,8 +206,8 @@ class LineGraph extends Component {
       // Get axis labels
       const xparam = parameters.find(x => x.axis === xaxis);
       const yparam = parameters.find(y => y.axis === yaxis);
-      xlabel = getLabel("parameters", xparam.parameters_id);
-      ylabel = getLabel("parameters", yparam.parameters_id);
+      xlabel = getLabel("parameters", xparam.parameters_id, "name");
+      ylabel = getLabel("parameters", yparam.parameters_id, "name");
       xunits = xparam.unit;
       yunits = yparam.unit;
 
@@ -318,6 +320,7 @@ class LineGraph extends Component {
                         max={max}
                         lower={lower}
                         upper={upper}
+                        filedict={filedict}
                       />
                       <LoadDataSets data={data} downloadData={downloadData} />
                     </div>

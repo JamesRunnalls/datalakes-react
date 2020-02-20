@@ -232,7 +232,7 @@ class ReviewData extends Component {
                 are of identical format but vary in time and I would like to
                 combine them.
               </option>
-              <option value="depth" disabled={!filesDepth}>
+              <option value="depth" disabled={true}>
                 are of identical format but vary in depth and I would like to
                 combine them..
               </option>

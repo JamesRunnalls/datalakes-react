@@ -37,8 +37,9 @@ class AddDataset extends Component {
       citation: "",
       liveconnect: "false",
       fileconnect: "no",
-      repository_id: "",
-      folder: ""
+      repositories_id: "",
+      folder: "",
+      downloads: 0
     },
     datasetparameters: [],
     files_list: [],
@@ -100,7 +101,7 @@ class AddDataset extends Component {
       );
     }
     dataset["id"] = reqObj.id;
-    dataset["repository_id"] = repo_id;
+    dataset["repositories_id"] = repo_id;
     dataset["folder"] = reqObj.dir;
 
     // Set initial dataset parameters

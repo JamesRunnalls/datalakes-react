@@ -31,15 +31,15 @@ class ContactForm extends Component {
         return ( 
             <form id="contact-form" onSubmit={this.handleSubmit} method="POST">
                 Name
-                <div className="form-group">
-                    <input type="text" placeholder="John Doe" className="form-control" id="name" required/>
+                <div className="contact-group">
+                    <input type="text" placeholder="Jane Doe" className="form-control" id="name" required/>
                 </div>
                 Email
-                <div className="form-group">
-                    <input type="email" placeholder="john.doe@email.com" className="form-control" id="email" required/>
+                <div className="contact-group">
+                    <input type="email" placeholder="jane.doe@email.com" className="form-control" id="email" required/>
                 </div>
                 Message
-                <div className="form-group">
+                <div className="contact-group">
                     <textarea className="form-control" placeholder="My message here" rows="5" id="message" required></textarea>
                 </div>
                 <button type="submit" className="contact-button">Send Message</button>

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import * as d3 from "d3";
 import { mergeWith } from "lodash";
@@ -43,7 +44,7 @@ class DataDetail extends Component {
       axios.get(apiUrl + "/datasetparameters?datasets_id=" + dataset_id),
       axios.get(apiUrl + "/selectiontables")
     ]).catch(error => {
-      this.setState({ error: true });
+      this.setState({ step: "error" });
     });
 
     var dataset = server[0].data;
@@ -96,7 +97,7 @@ class DataDetail extends Component {
     var { data } = await axios
       .get(apiUrl + "/files/" + files[0].id + "?get=raw")
       .catch(error => {
-        this.setState({ error: true });
+        this.setState({ step: "error" });
       });
     dataArray[0] = data;
     var combined = data;
@@ -228,7 +229,7 @@ class DataDetail extends Component {
   };
 
   selectedFiles = (upper, lower, filedict, data) => {
-    if (data === "download"){
+    if (data === "download") {
       data = new Array(filedict.length).fill(0);
     }
     var fileList = [];
@@ -288,12 +289,12 @@ class DataDetail extends Component {
     });
   };
 
-  getLabel = (input, id) => {
+  getLabel = (input, id, prop) => {
     const { dropdown } = this.state;
     try {
-      return dropdown[input].find(x => x.id === id).name;
+      return dropdown[input].find(x => x.id === id)[prop];
     } catch (e) {
-      console.log(input, id, e);
+      console.error(input, id, e);
       return "NA";
     }
   };
@@ -432,25 +433,18 @@ class DataDetail extends Component {
       innerLoading,
       combined
     } = this.state;
-    document.title = dataset.title + " - Datalakes";
-    var title = <h1>{dataset.title ? dataset.title : "Loading Data..."}</h1>;
+    document.title = dataset.title ? dataset.title + " - Datalakes" : "Datalakes";
 
     switch (step) {
       default:
         return (
           <React.Fragment>
-            {title}
-            <DataSubMenu
-              step={step}
-              allowedStep={allowedStep}
-              updateSelectedState={this.updateSelectedState}
-            />
             <table className="loading-table">
               <tbody>
                 <tr>
                   <td>
                     <Loading />
-                    <h3>Downloading Data</h3>
+                    <h3>Loading Data</h3>
                   </td>
                 </tr>
               </tbody>
@@ -460,7 +454,7 @@ class DataDetail extends Component {
       case "heatmap":
         return (
           <React.Fragment>
-            {title}
+            <h1>{dataset.title}</h1>
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -480,7 +474,7 @@ class DataDetail extends Component {
       case "linegraph":
         return (
           <React.Fragment>
-            {title}
+            <h1>{dataset.title}</h1>
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -512,7 +506,7 @@ class DataDetail extends Component {
       case "preview":
         return (
           <React.Fragment>
-            {title}
+            <h1>{dataset.title}</h1>
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -528,7 +522,7 @@ class DataDetail extends Component {
       case "download":
         return (
           <React.Fragment>
-            {title}
+            <h1>{dataset.title}</h1>
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -549,7 +543,7 @@ class DataDetail extends Component {
       case "pipeline":
         return (
           <React.Fragment>
-            {title}
+            <h1>{dataset.title}</h1>
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -561,7 +555,7 @@ class DataDetail extends Component {
       case "information":
         return (
           <React.Fragment>
-            {title}
+            <h1>{dataset.title}</h1>
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -572,6 +566,23 @@ class DataDetail extends Component {
               parameters={parameters}
               getLabel={this.getLabel}
             />
+          </React.Fragment>
+        );
+      case "error":
+        return (
+          <React.Fragment>
+            <table className="loading-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h3>Error that dataset could not be found.</h3>
+                    <Link to="/dataportal">
+                      <h2>Head back to the data portal</h2>
+                    </Link>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </React.Fragment>
         );
     }

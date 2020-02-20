@@ -6,7 +6,7 @@ class Preview extends Component {
   tableHeader = (i, parameters, getLabel) => {
     return (
       parameters[i] &&
-      `${getLabel("parameters", parameters[i].parameters_id)} (${
+      `${getLabel("parameters", parameters[i].parameters_id,"name")} (${
         parameters[i].unit
       })`
     );

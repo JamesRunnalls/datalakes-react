@@ -4,6 +4,7 @@ import DateTimePicker from "react-datetime-picker";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { format } from "date-fns";
 import { scaleTime } from "d3";
+import AvailbilityBar from './availabilitybar';
 import "./slider.css";
 
 class DateSliderDouble extends Component {
@@ -44,7 +45,8 @@ class DateSliderDouble extends Component {
       upper,
       onChange,
       onChangeLower,
-      onChangeUpper
+      onChangeUpper,
+      filedict
     } = this.props;
     min = this.formatDate(min);
     max = this.formatDate(max);
@@ -93,6 +95,7 @@ class DateSliderDouble extends Component {
           onChange={onChange}
           values={[lower, upper]}
         >
+          <AvailbilityBar min={min} max={max} filedict={filedict} />
           <Rail>
             {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
           </Rail>

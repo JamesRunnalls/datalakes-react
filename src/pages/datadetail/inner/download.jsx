@@ -39,8 +39,10 @@ class Download extends Component {
     return out;
   };
 
-  downloadFiles = (filetype, apiUrl, id, arr) => {
+  downloadFiles = (filetype, apiUrl, id, arr, title) => {
     var url = `${apiUrl}/download/${filetype}/${id}`;
+    var name =
+      title.replace(/\s/g, "").toLowerCase() + "_datalakesdownload.zip";
     axios({
       method: "post",
       url: url,
@@ -51,7 +53,7 @@ class Download extends Component {
         const downloadUrl = window.URL.createObjectURL(new Blob([data]));
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.setAttribute("download", "file.zip");
+        link.setAttribute("download", name);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -77,38 +79,55 @@ class Download extends Component {
     if (upper === "NA") upper = max;
     if (lower === "NA") lower = min;
 
-    var arr = selectedFiles(upper, lower, filedict, "download");
+    var arr = [0];
+    if (filedict.length > 1){
+      arr = selectedFiles(upper, lower, filedict, "download");
+    } 
     var selectedArray = this.fileIdSelect(arr);
 
     return (
       <React.Fragment>
         <div className="info-title">Licence</div>
-        {getLabel("licenses", dataset.licenses_id)}
-
+        <a
+          href={getLabel("licenses", dataset.licenses_id, "link")}
+          title={getLabel("licenses", dataset.licenses_id, "description")}
+        >
+          {getLabel("licenses", dataset.licenses_id, "name")}
+        </a>
         <div className="info-title">Citation</div>
         {dataset.citation}
 
         <div className="info-title">Download</div>
 
         <div className="multipledownload">
-          <div className="subheading">Select time period for downloads.</div>
-          <SliderDouble
-            onChange={this.onChangeTime}
-            onChangeLower={this.onChangeLower}
-            onChangeUpper={this.onChangeUpper}
-            min={min}
-            max={max}
-            lower={lower}
-            upper={upper}
-          />
-          <div className="selected-download">
-            {selectedArray.length} of {filedict.length} files selected for
-            download.
-          </div>
+          {filedict.length > 1 && <div>
+            <div className="subheading">Select time period for downloads.</div>
+            <SliderDouble
+              onChange={this.onChangeTime}
+              onChangeLower={this.onChangeLower}
+              onChangeUpper={this.onChangeUpper}
+              min={min}
+              max={max}
+              lower={lower}
+              upper={upper}
+              filedict={filedict}
+            />
+            <div className="selected-download">
+              {selectedArray.length} of {filedict.length} files selected for
+              download.
+            </div>
+          </div>}
+
           <div className="subheading">Select file type for download.</div>
           <button
             onClick={() =>
-              this.downloadFiles("nc", apiUrl, dataset.id, selectedArray)
+              this.downloadFiles(
+                "nc",
+                apiUrl,
+                dataset.id,
+                selectedArray,
+                dataset.title
+              )
             }
             className="download-button"
             title="Download datasets in NetCDF format"
@@ -117,7 +136,13 @@ class Download extends Component {
           </button>
           <button
             onClick={() =>
-              this.downloadFiles("json", apiUrl, dataset.id, selectedArray)
+              this.downloadFiles(
+                "json",
+                apiUrl,
+                dataset.id,
+                selectedArray,
+                dataset.title
+              )
             }
             className="download-button"
             title="Download datasets in JSON format"
