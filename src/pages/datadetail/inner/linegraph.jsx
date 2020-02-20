@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { mergeWith } from "lodash";
 import SliderDouble from "../../../components/sliders/sliderdouble";
 import SliderSingle from "../../../components/sliders/slidersingle";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
@@ -17,20 +16,18 @@ class LoadDataSets extends Component {
       if (data[i] === 0) count++;
     }
     count = len - count;
-    if (count < len) {
-      return `${count} of ${len} files in memory.`;
-    } else {
-      return "";
-    }
+    return count;
   };
 
   render() {
-    var { fullDataset, downloadData, data } = this.props;
+    var { downloadData, data } = this.props;
+    var count = this.downloadProgress(data);
+
     return (
       <div className="loaddatasets">
-        {this.downloadProgress(data)}
-        {!fullDataset && (
+        {count < data.length && (
           <div className="linegraph-file">
+            {count} of {data.length} files in memory.
             <button className="read-button" onClick={() => downloadData()}>
               Preload full dataset
             </button>
@@ -54,25 +51,6 @@ class LineGraph extends Component {
 
   formatDate = raw => {
     return new Date(raw * 1000);
-  };
-
-  getAve = arr => {
-    const sum = arr.reduce((a, b) => a + b, 0);
-    return sum / arr.length || 0;
-  };
-
-  combineTimeseries = arr => {
-    var combinedArr = arr[0];
-    for (var i = 1; i < arr.length; i++) {
-      if (arr[i] !== 0){
-        combinedArr = mergeWith(combinedArr, arr[i], this.customizer);
-      }
-    }
-    return combinedArr;
-  };
-
-  customizer = (objValue, srcValue) => {
-    return objValue.concat(srcValue);
   };
 
   update = () => {
@@ -101,8 +79,6 @@ class LineGraph extends Component {
   };
 
   datetimeFilter = (data, lower, upper, min, max) => {
-    console.log(data)
-    console.log(upper,lower)
     if ((lower !== min && lower !== "") || (upper !== max && upper !== "")) {
       var l = 0;
       var u = data.x.length - 1;
@@ -114,10 +90,8 @@ class LineGraph extends Component {
           u = i;
         }
       }
-      console.log(l,u)
       var x = data.x.slice(l, u);
       var y = data.y.slice(l, u);
-      console.log(x,y)
       return { x: x, y: y };
     } else {
       return data;
@@ -132,14 +106,14 @@ class LineGraph extends Component {
 
   handleKeyDown = event => {
     var { file, onChangeFileInt } = this.props;
-    if (event.keyCode === 37){
+    if (event.keyCode === 37) {
       // Left
-      onChangeFileInt([file + 1])
-    } else if (event.keyCode === 39){
+      onChangeFileInt([file + 1]);
+    } else if (event.keyCode === 39) {
       // right
-      onChangeFileInt([file - 1])
+      onChangeFileInt([file - 1]);
     }
-  }
+  };
 
   componentDidMount() {
     var { dataset } = this.props;
@@ -172,9 +146,9 @@ class LineGraph extends Component {
       files,
       file,
       filedict,
-      fullDataset,
       downloadData,
-      loading
+      loading,
+      combined
     } = this.props;
     const { lweight, bcolor, lcolor, xaxis, yaxis, title } = this.state;
 
@@ -213,15 +187,18 @@ class LineGraph extends Component {
     }
 
     if (!loading) {
-
       // Get data
       var plotdata;
-      if (files[file].connect === "join"){
-        var combinedData = this.combineTimeseries(data);
-        plotdata = { x: combinedData[xaxis], y: combinedData[yaxis] };
-        plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
+      if (files[file].connect === "join") {
+        plotdata = { x: combined[xaxis], y: combined[yaxis] };
       } else if (files[file].connect === "ind") {
         plotdata = { x: data[file][xaxis], y: data[file][yaxis] };
+      } else {
+        plotdata = { x: data[0][xaxis], y: data[0][yaxis] };
+      }
+
+      if (timeSlider) {
+        plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
       }
 
       // Get axis labels
@@ -320,11 +297,7 @@ class LineGraph extends Component {
                         filedict={filedict}
                         type="time"
                       />
-                      <LoadDataSets
-                        fullDataset={fullDataset}
-                        data={data}
-                        downloadData={downloadData}
-                      />
+                      <LoadDataSets data={data} downloadData={downloadData} />
                     </div>
                   }
                 />
@@ -344,11 +317,7 @@ class LineGraph extends Component {
                         lower={lower}
                         upper={upper}
                       />
-                      <LoadDataSets
-                        fullDataset={fullDataset}
-                        data={data}
-                        downloadData={downloadData}
-                      />
+                      <LoadDataSets data={data} downloadData={downloadData} />
                     </div>
                   }
                 />

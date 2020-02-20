@@ -270,3 +270,17 @@
   font-size: 12px;
   margin-top: 5px;
 }
+
+.multipledownload .subheading {
+  padding-top: 10px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.multipledownload .selected-download {
+  padding-bottom: 20px;
+  padding-top: 5px;
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+}

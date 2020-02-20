@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import * as d3 from "d3";
+import { mergeWith } from "lodash";
 import HeatMap from "./inner/heatmap";
 import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
@@ -27,9 +28,9 @@ class DataDetail extends Component {
     data: "",
     step: "",
     allowedStep: ["preview", "download", "pipeline", "information"],
-    fullDataset: false,
     file: 0,
-    innerLoading: false
+    innerLoading: false,
+    combined: []
   };
 
   async componentDidMount() {
@@ -98,6 +99,7 @@ class DataDetail extends Component {
         this.setState({ error: true });
       });
     dataArray[0] = data;
+    var combined = data;
     var { lower, upper } = this.dataBounds(dataArray);
 
     this.setState({
@@ -112,7 +114,8 @@ class DataDetail extends Component {
       upper,
       dropdown,
       step,
-      allowedStep
+      allowedStep,
+      combined
     });
   }
 
@@ -123,7 +126,7 @@ class DataDetail extends Component {
   // Download data
   downloadData = async () => {
     this.downloadData = () => {}; // Only possible to fire once.
-    var { data: dataArray, files } = this.state;
+    var { data: dataArray, files, combined } = this.state;
     for (var j = 0; j < files.length; j++) {
       if (dataArray[j] === 0) {
         var { data } = await axios
@@ -132,10 +135,13 @@ class DataDetail extends Component {
             this.setState({ error: true });
           });
         dataArray[j] = data;
+        if (files[0].connect === "join") {
+          combined = this.combineTimeseries(dataArray);
+        }
         if (this._isMounted) {
           this.setState({
             data: dataArray,
-            fullDataset: true
+            combined
           });
         } else {
           return false;
@@ -162,34 +168,35 @@ class DataDetail extends Component {
     }
   };
 
+  downloadMultipleFiles = async arr => {
+    var { data: dataArray, files, combined } = this.state;
+    for (var j = 0; j < arr.length; j++) {
+      if (dataArray[arr[j]] === 0) {
+        var { data } = await axios
+          .get(apiUrl + "/files/" + files[arr[j]].id + "?get=raw")
+          .catch(error => {
+            this.setState({ error: true });
+          });
+        dataArray[arr[j]] = data;
+      }
+    }
+    if (files[0].connect === "join") {
+      combined = this.combineTimeseries(dataArray);
+    }
+    if (this._isMounted) {
+      this.setState({
+        data: dataArray,
+        innerLoading: false,
+        combined
+      });
+    } else {
+      return false;
+    }
+  };
   // Update state based on actions
 
   updateSelectedState = step => {
     this.setState({ step });
-  };
-
-  onChangeTime = values => {
-    const lower = values[0] / 1000;
-    const upper = values[1] / 1000;
-    if (
-      Math.round(lower) !== Math.round(this.state.lower) ||
-      Math.round(upper) !== Math.round(this.state.upper)
-    ) {
-      this.setState({ lower, upper });
-    }
-  };
-
-  closest = (num, arr) => {
-    var diff = Infinity;
-    var index = 0;
-    for (var i = 0; i < arr.length; i++) {
-      var newdiff = Math.abs(num - arr[i]);
-      if (newdiff < diff) {
-        diff = newdiff;
-        index = i;
-      }
-    }
-    return index;
   };
 
   onChangeFileInt = values => {
@@ -220,21 +227,55 @@ class DataDetail extends Component {
     }
   };
 
-  isInt = value => {
-    if (/^[-+]?(\d+|Infinity)$/.test(value)) {
-      return true;
-    } else {
-      return false;
+  selectedFiles = (upper, lower, filedict, data) => {
+    if (data === "download"){
+      data = new Array(filedict.length).fill(0);
+    }
+    var fileList = [];
+    for (var i = 0; i < filedict.length; i++) {
+      if (filedict[i] < upper && filedict[i] > lower && data[i] === 0) {
+        fileList.push(i);
+      }
+    }
+    return fileList;
+  };
+
+  onChangeTime = values => {
+    var { filedict, data } = this.state;
+    const lower = values[0] / 1000;
+    const upper = values[1] / 1000;
+    if (
+      Math.round(lower) !== Math.round(this.state.lower) ||
+      Math.round(upper) !== Math.round(this.state.upper)
+    ) {
+      var toDownload = this.selectedFiles(upper, lower, filedict, data);
+      if (toDownload.length > 0) {
+        this.setState({ innerLoading: true });
+        this.downloadMultipleFiles(toDownload);
+      }
+      this.setState({ lower, upper });
     }
   };
 
   onChangeUpper = value => {
+    var { filedict, data, lower } = this.state;
     var upper = value.getTime() / 1000;
+    var toDownload = this.selectedFiles(upper, lower, filedict, data);
+    if (toDownload.length > 0) {
+      this.setState({ innerLoading: true });
+      this.downloadMultipleFiles(toDownload);
+    }
     this.setState({ upper });
   };
 
   onChangeLower = value => {
+    var { filedict, data, upper } = this.state;
     var lower = value.getTime() / 1000;
+    var toDownload = this.selectedFiles(upper, lower, filedict, data);
+    if (toDownload.length > 0) {
+      this.setState({ innerLoading: true });
+      this.downloadMultipleFiles(toDownload);
+    }
     this.setState({ lower });
   };
 
@@ -265,6 +306,27 @@ class DataDetail extends Component {
 
   // Number functions
 
+  closest = (num, arr) => {
+    var diff = Infinity;
+    var index = 0;
+    for (var i = 0; i < arr.length; i++) {
+      var newdiff = Math.abs(num - arr[i]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = i;
+      }
+    }
+    return index;
+  };
+
+  isInt = value => {
+    if (/^[-+]?(\d+|Infinity)$/.test(value)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   numDescending = (a, b) => {
     var numA = (parseFloat(a.min) + parseFloat(a.max)) / 2;
     var numB = (parseFloat(b.min) + parseFloat(b.max)) / 2;
@@ -276,8 +338,6 @@ class DataDetail extends Component {
     }
     return compare;
   };
-
- 
 
   dataBounds = dataArray => {
     var xe = d3.extent(dataArray[0].x);
@@ -310,6 +370,51 @@ class DataDetail extends Component {
     return { min: min, max: max };
   };
 
+  getAve = arr => {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    return sum / arr.length || 0;
+  };
+
+  getMax = arr => {
+    let len = arr.length;
+    let max = -Infinity;
+
+    while (len--) {
+      max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
+  };
+
+  getMin = arr => {
+    let len = arr.length;
+    let min = Infinity;
+
+    while (len--) {
+      min = arr[len] < min ? arr[len] : min;
+    }
+    return min;
+  };
+
+  combineTimeseries = arr => {
+    var arrCopy = Object.values(Object.assign({}, arr));
+    arrCopy = arrCopy.filter(function(value) {
+      return value !== 0;
+    });
+    arrCopy.sort((a, b) => {
+      return this.getAve(a.x) - this.getAve(b.x);
+    });
+
+    var combinedArr = Object.assign({}, arrCopy[0]);
+    for (var i = 1; i < arrCopy.length; i++) {
+      combinedArr = mergeWith(combinedArr, arrCopy[i], this.customizer);
+    }
+    return combinedArr;
+  };
+
+  customizer = (objValue, srcValue) => {
+    return objValue.concat(srcValue);
+  };
+
   render() {
     const {
       dataset,
@@ -323,12 +428,11 @@ class DataDetail extends Component {
       allowedStep,
       files,
       file,
-      fullDataset,
       filedict,
-      innerLoading
+      innerLoading,
+      combined
     } = this.state;
     document.title = dataset.title + " - Datalakes";
-    const url = this.props.location.pathname.split("/").slice(-1)[0];
     var title = <h1>{dataset.title ? dataset.title : "Loading Data..."}</h1>;
 
     switch (step) {
@@ -399,9 +503,9 @@ class DataDetail extends Component {
               files={files}
               file={file}
               filedict={filedict}
-              fullDataset={fullDataset}
               downloadData={this.downloadData}
               loading={innerLoading}
+              combined={combined}
             />
           </React.Fragment>
         );
@@ -432,16 +536,13 @@ class DataDetail extends Component {
             />
             <Download
               dataset={dataset}
-              onChange={this.onChangeTime}
+              files={files}
+              filedict={filedict}
+              selectedFiles={this.selectedFiles}
               getLabel={this.getLabel}
-              lower={lower}
-              upper={upper}
               max={max}
               min={min}
-              url={url}
               apiUrl={apiUrl}
-              onChangeLower={this.onChangeLower}
-              onChangeUpper={this.onChangeUpper}
             />
           </React.Fragment>
         );

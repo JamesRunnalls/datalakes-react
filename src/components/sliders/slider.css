@@ -41,6 +41,8 @@
 .datetime-selector {
   width: 100%;
   margin-top: 15px;
+  padding: 0 5px;
+  box-sizing: border-box;
 }
 
 .datetime-table {
@@ -49,11 +51,15 @@
 }
 
 .datetime-table .left {
-  text-align: left;
+  text-align: right;
+}
+
+.datetime-table .center {
+  text-align: center;
 }
 
 .datetime-table .right {
-  text-align: right;
+  text-align: left;
 }
 
 .react-datetime-picker__wrapper {

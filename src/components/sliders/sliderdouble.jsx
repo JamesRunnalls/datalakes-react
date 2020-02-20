@@ -71,7 +71,7 @@ class DateSliderDouble extends Component {
                   disableClock={true}
                 />
               </td>
-              <td>></td>
+              <td className="center">></td>
               <td className="right">
                 <DateTimePicker
                   onChange={onChangeUpper}
