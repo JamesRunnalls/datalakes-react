@@ -82,13 +82,10 @@ class Download extends Component {
 
     return (
       <React.Fragment>
-        <div className="info-title">Dataset Title</div>
-        {dataset.title}
-
         <div className="info-title">Licence</div>
         {getLabel("licenses", dataset.licenses_id)}
 
-        <div className="info-title">Citations</div>
+        <div className="info-title">Citation</div>
         {dataset.citation}
 
         <div className="info-title">Download</div>
