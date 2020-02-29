@@ -1,17 +1,22 @@
+import "./custommap.css";
+import "./leaflet.css";
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import L from "leaflet";
-import "./custommap.css";
-import "./leaflet.css";
 import Gradient from "./gradient";
 
 class SwissTopoMap extends Component {
   state = {
-    addClass: false
+    help: false,
+    fullsize: false
   };
 
-  toggle = () => {
-    this.setState({ addClass: !this.state.addClass });
+  toggleHelp = () => {
+    this.setState({ help: !this.state.help });
+  };
+
+  toggleFullsize = () => {
+    this.setState({ fullsize: !this.state.fullsize });
   };
 
   sendMap = map => {
@@ -28,6 +33,9 @@ class SwissTopoMap extends Component {
       zoom = this.props.zoom;
     }
 
+    var toggleHelp = this.toggleHelp;
+    var toggleFullsize = this.toggleFullsize;
+
     this.map = L.map("map", {
       center: center,
       zoom: zoom,
@@ -41,6 +49,34 @@ class SwissTopoMap extends Component {
       ]
     });
 
+    // Full screen
+    L.control
+      .custom({
+        position: "topleft",
+        content: '<div class="customcontrol" title="Full screen">&#10529</div>',
+        classes: "leaflet-bar",
+        events: {
+          click: function(data) {
+            toggleFullsize();
+          }
+        }
+      })
+      .addTo(this.map);
+
+    // Help
+    L.control
+      .custom({
+        position: "topleft",
+        content: '<div class="customcontrol" title="Help">?</div>',
+        classes: "leaflet-bar",
+        events: {
+          click: function(data) {
+            toggleHelp();
+          }
+        }
+      })
+      .addTo(this.map);
+
     // set bounds
     var southWest = L.latLng(44.4, 3.95);
     var northEast = L.latLng(48.55, 13.06);
@@ -53,9 +89,12 @@ class SwissTopoMap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this.plotGeoJSON(this.props);
-    this.plotPolygons(this.props);
-    this.plotMarkers(this.props);
+    if (prevProps !== this.props) {
+      this.plotGeoJSON(this.props);
+      this.plotPolygons(this.props);
+      this.plotMarkers(this.props);
+    }
+    this.map.invalidateSize();
   }
 
   showPolygonTemp = e => {
@@ -215,46 +254,29 @@ class SwissTopoMap extends Component {
   };
 
   render() {
-    var help = "";
-    if ("help" in this.props) {
-      help = this.props.help;
-    }
-
-    let helpContainer = "help-container";
-    if (this.state.addClass) {
-      helpContainer = "help-container show";
-    }
-
+    var { help, fullsize } = this.state;
     return (
       <React.Fragment>
-        <div className="map">
+        <div className={fullsize ? "map full" : "map"}>
           <div id="map">
             <div ref="loader" className="map-loader">
               <div className="lds-dual-ring"></div>
             </div>
-            <div
-              title="View user guide"
-              onClick={this.toggle.bind(this)}
-              className="help"
-            >
-              ?
-            </div>
-            <div title="Full screen" className="fullscreen">
-              f
-            </div>
-            <div className={helpContainer}>
-              <div
-                onClick={this.toggle.bind(this)}
-                className="help-top"
-                title="Click to hide user guide"
-              >
-                <h3>
-                  <div className="help-title">User Guide</div>
-                  <span> &#215; </span>
-                </h3>
+            {help && (
+              <div className="help-container show">
+                <div
+                  onClick={this.toggleHelp}
+                  className="help-top"
+                  title="Click to hide user guide"
+                >
+                  <h3>
+                    <div className="help-title">User Guide</div>
+                    <span> &#215; </span>
+                  </h3>
+                </div>
+                <div className="help-content">{help}</div>
               </div>
-              <div className="help-content">{help}</div>
-            </div>
+            )}
           </div>
         </div>
       </React.Fragment>

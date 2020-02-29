@@ -12,6 +12,14 @@
     z-index: 99999;
 }
 
+.map.full {
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
 .help {
     z-index: 999;
     position: absolute;
@@ -156,5 +164,17 @@
     100% {
       transform: rotate(360deg);
     }
+  }
+
+  .customcontrol {
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    display: block;
+    text-align: center;
+    border-radius: 4px;
+    font-size: 20px;
+    background-color: white;
+    cursor: pointer;
   }
   
