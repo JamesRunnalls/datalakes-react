@@ -1,14 +1,15 @@
 import "./custommap.css";
 import "./leaflet.css";
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
 import L from "leaflet";
 import Gradient from "./gradient";
+import Loading from "../../components/loading/loading";
 
 class SwissTopoMap extends Component {
   state = {
     help: false,
-    fullsize: false
+    fullsize: false,
+    loading: true
   };
 
   toggleHelp = () => {
@@ -152,7 +153,7 @@ class SwissTopoMap extends Component {
         );
       }
       this.polygons = L.layerGroup(lakes);
-      ReactDOM.findDOMNode(this.refs.loader).className = "map-loader hide";
+      this.setState({ loading: false })
     }
   };
 
@@ -187,7 +188,7 @@ class SwissTopoMap extends Component {
           });
         }
       }
-      ReactDOM.findDOMNode(this.refs.loader).className = "map-loader hide";
+      this.setState({ loading: false })
     }
   };
 
@@ -225,13 +226,13 @@ class SwissTopoMap extends Component {
           );
           var fillopacity = 1;
           var opacity = 1;
-          if (
-            layer.properties.meteolakes !== "" ||
-            layer.properties.datalakes !== ""
-          ) {
-            fillopacity = 0;
-            opacity = 0;
-          }
+          //if (
+          //  layer.properties.meteolakes !== "" ||
+          //  layer.properties.datalakes !== ""
+          //) {
+          //  fillopacity = 0;
+          //  opacity = 0;
+          //}
           return {
             color: lakeColor,
             fillOpacity: fillopacity,
@@ -249,19 +250,21 @@ class SwissTopoMap extends Component {
         );
         layer.on("mouseout", this.hideGeojsonTemp);
       });
-      ReactDOM.findDOMNode(this.refs.loader).className = "map-loader hide";
+      this.setState({ loading: false })
     }
   };
 
   render() {
-    var { help, fullsize } = this.state;
+    var { help, fullsize, loading } = this.state;
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
           <div id="map">
-            <div ref="loader" className="map-loader">
-              <div className="lds-dual-ring"></div>
-            </div>
+            {loading && (
+              <div ref="loader" className="map-loader">
+                <Loading />
+              </div>
+            )}
             {help && (
               <div className="help-container show">
                 <div

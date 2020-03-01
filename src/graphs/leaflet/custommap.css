@@ -1,180 +1,149 @@
 .leaflet-popup-content a {
-    text-decoration: none!important;
-    color: black!important;
+  text-decoration: none !important;
+  color: black !important;
 }
 
 .leaflet-popup-content a:hover {
-    text-decoration: underline!important;
+  text-decoration: underline !important;
 }
 
 .map {
-    height: 500px;
-    z-index: 99999;
+  height: 500px;
+  z-index: 99999;
 }
 
 .map.full {
-    height: 100vh;
-    width: 100vw;
-    position: fixed;
-    top: 0;
-    left: 0;
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .help {
-    z-index: 999;
-    position: absolute;
-    top: 70px;
-    left: 0;
-    font-family: "Lucida Console", Monaco, monospace;
-    font-weight: 700;
-    font-size: 20px;
-    padding: 0;
-    height: 30px;
-    width: 30px;
-    background-color: white;
-    margin-left: 10px;
-    margin-top: 10px;
-    border-radius: 4px;
-    border: 2px solid rgba(0,0,0,0.2);
-    text-align: center;
-    -webkit-background-clip: padding-box;
-    background-clip: padding-box;
-    cursor: pointer;
+  z-index: 999;
+  position: absolute;
+  top: 70px;
+  left: 0;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: 700;
+  font-size: 20px;
+  padding: 0;
+  height: 30px;
+  width: 30px;
+  background-color: white;
+  margin-left: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  text-align: center;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  cursor: pointer;
 }
 
 .help:hover {
-    background-color: rgb(246,246,246);
+  background-color: rgb(246, 246, 246);
 }
 
 .fullscreen {
-    z-index: 999;
-    position: absolute;
-    top: 100px;
-    left: 0;
-    font-family: "Lucida Console", Monaco, monospace;
-    font-weight: 700;
-    font-size: 20px;
-    padding: 0;
-    height: 30px;
-    width: 30px;
-    background-color: white;
-    margin-left: 10px;
-    margin-top: 10px;
-    border-radius: 4px;
-    border: 2px solid rgba(0,0,0,0.2);
-    text-align: center;
-    -webkit-background-clip: padding-box;
-    background-clip: padding-box;
-    cursor: pointer;
+  z-index: 999;
+  position: absolute;
+  top: 100px;
+  left: 0;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: 700;
+  font-size: 20px;
+  padding: 0;
+  height: 30px;
+  width: 30px;
+  background-color: white;
+  margin-left: 10px;
+  margin-top: 10px;
+  border-radius: 4px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  text-align: center;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  cursor: pointer;
 }
 
 .fullscreen:hover {
-    background-color: rgb(246,246,246);
+  background-color: rgb(246, 246, 246);
 }
 
 .help-container {
-    z-index: 9999;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255,255,255,0.95);
-    display: none;
+  z-index: 9999;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  display: none;
 }
 
 .help-container.show {
-    display: block;
+  display: block;
 }
 
 .help-close {
-    width: 25px;
-    font-family: "Lucida Console", Monaco, monospace;
-    font-weight: 700;
-    font-size: 40px;
-    display: inline-block;
-    text-align: center;
-    cursor: pointer;
-    margin-right: 10px;
+  width: 25px;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: 700;
+  font-size: 40px;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  margin-right: 10px;
 }
 
 .help-title {
-   display: inline-block;
+  display: inline-block;
 }
 
 .help-top span {
-    float: right;
-    font-size: 18px;
+  float: right;
+  font-size: 18px;
 }
 
 .help-top {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .help-top h3 {
-    border-bottom: 1px solid #C8C6BF;
-    padding: 0 0 5px;
-    margin: 0 0 16px;
-    line-height: 20px;
+  border-bottom: 1px solid #c8c6bf;
+  padding: 0 0 5px;
+  margin: 0 0 16px;
+  line-height: 20px;
 }
 
 .help-content {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 10px;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
 }
 
 .map-loader {
-    z-index: 9999;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    text-align: center;
+  z-index: 9999;
+  position: absolute;
+  top: 220px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
 }
 
-.map-loader.hide {
-    display: none;
+.customcontrol {
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  display: block;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 20px;
+  background-color: white;
+  cursor: pointer;
 }
-
-.lds-dual-ring {
-    display: inline-block;
-    width: 64px;
-    height: 64px;
-    margin-top: calc(50% - 96px);
-  }
-  .lds-dual-ring:after {
-    content: " ";
-    display: block;
-    width: 46px;
-    height: 46px;
-    margin: 1px;
-    border-radius: 50%;
-    border: 5px solid #000;
-    border-color: #000 transparent #000 transparent;
-    animation: lds-dual-ring 1.2s linear infinite;
-  }
-  @keyframes lds-dual-ring {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  .customcontrol {
-    width: 26px;
-    height: 26px;
-    line-height: 26px;
-    display: block;
-    text-align: center;
-    border-radius: 4px;
-    font-size: 20px;
-    background-color: white;
-    cursor: pointer;
-  }
-  
