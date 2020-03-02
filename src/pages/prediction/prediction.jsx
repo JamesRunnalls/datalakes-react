@@ -4,8 +4,63 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import SwissTopoMap from "../../graphs/leaflet/custommap";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
+import { generateColorRGB } from "../../components/gradients/gradients";
 import { apiUrl } from "../../../config.json";
 import "./prediction.css";
+
+class ColorBar extends Component {
+  render() {
+    var {
+      setMinTemp,
+      setMaxTemp,
+      MinTemp,
+      MaxTemp,
+      minColor,
+      maxColor,
+      setMinColor,
+      setMaxColor
+    } = this.props;
+    const barStyle = {
+      background: `linear-gradient(90deg,${minColor} 0%,${maxColor} 100%)`
+    };
+    return (
+      <div id="colorbar">
+        <div className="colorbar-inner">
+          <input
+            title="Edit minimum temperature"
+            type="text"
+            defaultValue={MinTemp}
+            onBlur={setMinTemp}
+          ></input>{" "}
+          °C
+          <div id="bar" style={barStyle} title="Legend colorbar">
+            <input
+              type="color"
+              defaultValue={minColor}
+              onFocus={setMinColor}
+              className="color-picker"
+              title="Edit minimum color"
+            />
+            <input
+              type="color"
+              defaultValue={maxColor}
+              onFocus={setMaxColor}
+              className="color-picker right"
+              title="Edit maximum color"
+            />
+          </div>
+          <input
+            title="Edit maximum temperature"
+            type="text"
+            defaultValue={MaxTemp}
+            onBlur={setMaxTemp}
+          ></input>{" "}
+          °C
+        </div>
+      </div>
+    );
+  }
+}
 
 class ModelInfo extends Component {
   sendPanInfo = geometry => {
@@ -102,7 +157,9 @@ class Predictions extends Component {
     search: "",
     MinTemp: "",
     MaxTemp: "",
-    Temp: ""
+    Temp: "",
+    minColor: "#0000FF",
+    maxColor: "#FF0000"
   };
 
   async componentDidMount() {
@@ -143,11 +200,10 @@ class Predictions extends Component {
       );
       var tempMin, tempMax;
       for (var i = 0; i < meteolakes.length; i++) {
-          tempMin = Math.floor(this.getMinMeteolakes(meteolakes[i].data));
-          tempMax = Math.ceil(this.getMaxMeteolakes(meteolakes[i].data));
-          if (tempMin < MinTemp) MinTemp = tempMin;
-          if (tempMax > MaxTemp) MaxTemp = tempMax;
-
+        tempMin = Math.floor(this.getMinMeteolakes(meteolakes[i].data));
+        tempMax = Math.ceil(this.getMaxMeteolakes(meteolakes[i].data));
+        if (tempMin < MinTemp) MinTemp = tempMin;
+        if (tempMax > MaxTemp) MaxTemp = tempMax;
       }
       this.setState({ meteolakes, MinTemp, MaxTemp });
     } catch (e) {
@@ -156,15 +212,29 @@ class Predictions extends Component {
   }
 
   getMinMeteolakes = data => {
-    return data.reduce((min, p) => p.v < min ? p.v : min, data[0].v);
-  }
+    return data.reduce((min, p) => (p.v < min ? p.v : min), data[0].v);
+  };
 
   getMaxMeteolakes = data => {
-    return data.reduce((max, p) => p.v > max ? p.v : max, data[0].v);
-  }
+    return data.reduce((max, p) => (p.v > max ? p.v : max), data[0].v);
+  };
 
   isNumeric = n => {
     return !isNaN(parseFloat(n)) && isFinite(n);
+  };
+
+  setMinColor = event => {
+    var { minColor } = this.state;
+    if (minColor !== event.target.value) {
+      this.setState({ minColor: event.target.value });
+    }
+  };
+
+  setMaxColor = event => {
+    var { maxColor } = this.state;
+    if (maxColor !== event.target.value) {
+      this.setState({ maxColor: event.target.value });
+    }
   };
 
   setMinTemp = event => {
@@ -180,16 +250,16 @@ class Predictions extends Component {
       Math.round(parseFloat(Temp) * 100) / 100 + "°C";
   };
 
-  hideTemp = () => {
-    ReactDOM.findDOMNode(this.refs.hoverTemp).style.display = "none";
-    ReactDOM.findDOMNode(this.refs.hoverTemp).innerHTML = "";
-  };
-
   setMaxTemp = event => {
     const MaxTemp = parseFloat(event.target.value);
     if (this.isNumeric(MaxTemp) && MaxTemp < 40) {
       this.setState({ MaxTemp });
     }
+  };
+
+  hideTemp = () => {
+    ReactDOM.findDOMNode(this.refs.hoverTemp).style.display = "none";
+    ReactDOM.findDOMNode(this.refs.hoverTemp).innerHTML = "";
   };
 
   setMap = map => {
@@ -243,7 +313,8 @@ class Predictions extends Component {
     );
   };
 
-  lakeColor = (gradient, temp, mintemp, maxtemp) => {
+  lakeColor = (minColor, maxColor, temp, mintemp, maxtemp) => {
+    var gradient = generateColorRGB(minColor, maxColor, 100);
     var lakecolor = "";
     if (temp > maxtemp) {
       lakecolor = "#000000";
@@ -276,6 +347,7 @@ class Predictions extends Component {
 
   render() {
     document.title = "Predictions - Datalakes";
+    var { MaxTemp, MinTemp, minColor, maxColor } = this.state;
 
     // Filter lakes
     var lowercasedSearch = this.state.search.toLowerCase();
@@ -297,29 +369,24 @@ class Predictions extends Component {
                 colorbar={[this.state.MinTemp, this.state.MaxTemp]}
                 setMap={this.setMap}
                 setTemp={this.setTemp}
+                minColor={minColor}
+                maxColor={maxColor}
                 hideTemp={this.hideTemp}
                 threeD={this.state.meteolakes}
+                legend={
+                  <ColorBar
+                    MinTemp={MinTemp}
+                    MaxTemp={MaxTemp}
+                    setMaxTemp={this.setMaxTemp}
+                    setMinTemp={this.setMinTemp}
+                    minColor={minColor}
+                    maxColor={maxColor}
+                    setMinColor={this.setMinColor}
+                    setMaxColor={this.setMaxColor}
+                  />
+                }
+                hover={<div ref="hoverTemp" className="hoverTemp"></div>}
               />
-              <div ref="hoverTemp" className="hoverTemp"></div>
-              <div id="colorbar">
-                <div className="colorbar-inner">
-                  <input
-                    title="Edit minimum temperature"
-                    type="text"
-                    defaultValue={this.state.MinTemp}
-                    onBlur={this.setMinTemp}
-                  ></input>{" "}
-                  °C
-                  <div id="bar" title="Legend colorbar"></div>
-                  <input
-                    title="Edit maximum temperature"
-                    type="text"
-                    defaultValue={this.state.MaxTemp}
-                    onBlur={this.setMaxTemp}
-                  ></input>{" "}
-                  °C
-                </div>
-              </div>
             </React.Fragment>
           }
           right={

@@ -13,12 +13,6 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 #bar {
-  background: rgb(0, 0, 255);
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 255, 1) 0%,
-    rgba(255, 51, 0, 1) 100%
-  );
   width: 150px;
   height: 20px;
   display: inline-block;
@@ -45,7 +39,7 @@ input[type="search"]::-webkit-search-cancel-button {
   }
 }
 
-#colorbar input {
+#colorbar input[type="text"] {
   border: none;
   background: none;
   width: 15px;
@@ -84,7 +78,7 @@ input[type="search"]::-webkit-search-cancel-button {
   color: black;
 }
 
-.modellist a:hover{
+.modellist a:hover {
   text-decoration: underline;
 }
 
@@ -97,6 +91,18 @@ input[type="search"]::-webkit-search-cancel-button {
   padding-left: 20px;
 }
 
-.top:hover > .lakeTitle { 
+.top:hover > .lakeTitle {
   text-decoration: underline;
+}
+
+.color-picker {
+  height: 20px;
+  box-sizing: border-box;
+  width: 75px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.color-picker.right {
+  float: right;
 }

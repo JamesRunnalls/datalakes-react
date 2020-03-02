@@ -6,6 +6,7 @@ import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import FilterBox from "../../components/filterbox/filterbox";
 import MapSelect from "../../graphs/leaflet/mapselect.jsx";
 import "./dataportal.css";
+import Loading from "../../components/loading/loading.jsx";
 
 class DatasetList extends Component {
   render() {
@@ -16,7 +17,8 @@ class DatasetList extends Component {
       selected,
       onSelectDataset,
       datalistclass,
-      getLabel
+      getLabel,
+      loading
     } = this.props;
     if (list.length > 0) {
       return (
@@ -37,11 +39,16 @@ class DatasetList extends Component {
         </React.Fragment>
       );
     } else {
-      return (
-        <React.Fragment>
+      return loading ? (
+        <div className="dataportal-loading">
+          <Loading />
+          Loading Datasets
+        </div>
+      ) : (
+        <div className="dataportal-loading">
           Sorry no datasets match your search. Please adjust your search
           parameters and try again.
-        </React.Fragment>
+        </div>
       );
     }
   }
@@ -186,7 +193,8 @@ class DataPortal extends Component {
     selected: [],
     sortby: "az",
     download: false,
-    map: false
+    map: false,
+    loading: true
   };
 
   parameterDetails = (dropdown, parameters, x) => {
@@ -222,7 +230,7 @@ class DataPortal extends Component {
         }
       }
     }
-    this.setState({ datasets, parameters, dropdown });
+    this.setState({ datasets, parameters, dropdown, loading: false });
   }
 
   getLabel = (input, id) => {
@@ -468,7 +476,8 @@ class DataPortal extends Component {
       parameters,
       sortby,
       download,
-      map
+      map,
+      loading
     } = this.state;
 
     // Filter by filters
@@ -561,6 +570,7 @@ class DataPortal extends Component {
                 datalistclass={"datalist show"}
                 dropdown={dropdown}
                 getLabel={this.getLabel}
+                loading={loading}
               />
             </React.Fragment>
           }

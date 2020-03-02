@@ -2,7 +2,6 @@ import "./custommap.css";
 import "./leaflet.css";
 import React, { Component } from "react";
 import L from "leaflet";
-import Gradient from "./gradient";
 import Loading from "../../components/loading/loading";
 
 class SwissTopoMap extends Component {
@@ -130,7 +129,8 @@ class SwissTopoMap extends Component {
         let GeoPopupFunction = props.popupfunction;
         for (var px of lake.data) {
           var lakecolor = props.lakeColor(
-            Gradient.colors,
+            props.minColor,
+            props.maxColor,
             px["v"],
             mintemp,
             maxtemp
@@ -154,7 +154,7 @@ class SwissTopoMap extends Component {
         );
       }
       this.polygons = L.layerGroup(lakes);
-      this.setState({ loading: false })
+      this.setState({ loading: false });
     }
   };
 
@@ -189,7 +189,7 @@ class SwissTopoMap extends Component {
           });
         }
       }
-      this.setState({ loading: false })
+      this.setState({ loading: false });
     }
   };
 
@@ -220,7 +220,8 @@ class SwissTopoMap extends Component {
         style: layer => {
           var lakeTemp = layer.properties.surfacetemperature;
           var lakeColor = LakeColor(
-            Gradient.colors,
+            props.minColor,
+            props.maxColor,
             lakeTemp,
             mintemp,
             maxtemp
@@ -251,12 +252,13 @@ class SwissTopoMap extends Component {
         );
         layer.on("mouseout", this.hideGeojsonTemp);
       });
-      this.setState({ loading: false })
+      this.setState({ loading: false });
     }
   };
 
   render() {
     var { help, fullsize, loading } = this.state;
+    var { legend, hover } = this.props;
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
@@ -264,6 +266,7 @@ class SwissTopoMap extends Component {
             {loading && (
               <div ref="loader" className="map-loader">
                 <Loading />
+                Downloading map data
               </div>
             )}
             {help && (
@@ -282,6 +285,8 @@ class SwissTopoMap extends Component {
               </div>
             )}
           </div>
+          {legend}
+          {hover}
         </div>
       </React.Fragment>
     );
