@@ -38,6 +38,7 @@ class SwissTopoMap extends Component {
     var toggleFullsize = this.toggleFullsize;
 
     this.map = L.map("map", {
+      preferCanvas: true,
       center: center,
       zoom: zoom,
       minZoom: 7,
