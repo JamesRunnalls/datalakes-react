@@ -69,9 +69,13 @@ class D3LineGraph extends Component {
           height = visheight - margin.top - margin.bottom;
 
         // Format X-axis
-        var x;
+        var x, xx;
         if (xscale === "Time") {
           x = d3
+            .scaleTime()
+            .range([0, width])
+            .domain([this.getMin(data.x), this.getMax(data.x)]);
+          xx = d3
             .scaleTime()
             .range([0, width])
             .domain([this.getMin(data.x), this.getMax(data.x)]);
@@ -80,17 +84,29 @@ class D3LineGraph extends Component {
             .scaleLinear()
             .range([0, width])
             .domain([this.getMin(data.x), this.getMax(data.x)]);
+          xx = d3
+            .scaleLinear()
+            .range([0, width])
+            .domain([this.getMin(data.x), this.getMax(data.x)]);
         } else if (xscale === "Log") {
           x = d3
+            .scaleLog()
+            .range([0, width])
+            .domain([this.getMin(data.x), this.getMax(data.x)]);
+          xx = d3
             .scaleLog()
             .range([0, width])
             .domain([this.getMin(data.x), this.getMax(data.x)]);
         }
 
         // Format Y-axis
-        var y;
+        var y, yy;
         if (yscale === "Time") {
           y = d3
+            .scaleTime()
+            .range([height, 0])
+            .domain([this.getMin(data.y), this.getMax(data.y)]);
+          yy = d3
             .scaleTime()
             .range([height, 0])
             .domain([this.getMin(data.y), this.getMax(data.y)]);
@@ -99,8 +115,16 @@ class D3LineGraph extends Component {
             .scaleLinear()
             .range([height, 0])
             .domain([this.getMin(data.y), this.getMax(data.y)]);
+          yy = d3
+            .scaleLinear()
+            .range([height, 0])
+            .domain([this.getMin(data.y), this.getMax(data.y)]);
         } else if (yscale === "Log") {
           y = d3
+            .scaleLog()
+            .range([height, 0])
+            .domain([this.getMin(data.y), this.getMax(data.y)]);
+          yy = d3
             .scaleLog()
             .range([height, 0])
             .domain([this.getMin(data.y), this.getMax(data.y)]);
@@ -148,7 +172,7 @@ class D3LineGraph extends Component {
         this.removeErrorWarning(clip);
 
         // Add the X Axis
-        svg
+        var gX = svg
           .append("g")
           .attr("class", "x axis")
           .attr("id", "axis--x")
@@ -172,7 +196,7 @@ class D3LineGraph extends Component {
         }
 
         // Add the Y Axis
-        svg
+        var gY = svg
           .append("g")
           .attr("class", "y axis")
           .attr("id", "axis--y")
@@ -199,7 +223,7 @@ class D3LineGraph extends Component {
           .style("text-decoration", "underline")
           .text(title);
 
-        main();    
+        main();
 
         async function main() {
           // Transform Data
@@ -210,7 +234,7 @@ class D3LineGraph extends Component {
               y: data.y[i]
             });
           }
-          
+
           // Define the line
           var valueline = d3
             .line()
@@ -220,7 +244,7 @@ class D3LineGraph extends Component {
             .y(function(d) {
               return y(d.y);
             });
-            
+
           // Add the line
           var line = svg
             .append("g")
@@ -239,22 +263,6 @@ class D3LineGraph extends Component {
             )
             .attr("d", valueline(xy));
 
-          // Brushing
-          var brush = d3
-              .brush()
-              .extent([
-                [0, 0],
-                [width, height]
-              ])
-              .on("end", brushended),
-            idleTimeout,
-            idleDelay = 350;
-
-          line
-            .append("g")
-            .attr("class", "brush")
-            .call(brush);
-
           // Add Focus
           var focus = svg
             .append("g")
@@ -271,6 +279,48 @@ class D3LineGraph extends Component {
             .on("mousemove", mousemove)
             .on("mouseout", mouseout);
 
+          // Zooming and Panning
+          var zoom = d3
+            .zoom()
+            .extent([
+              [0, 0],
+              [width, height]
+            ])
+            .on("zoom", normalzoom);
+
+          var zoombox = svg
+            .append("rect")
+            .attr("id", "zoombox")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("cursor", "move")
+            .attr("pointer-events", "all")
+            .call(zoom);
+
+          function normalzoom() {
+            x.domain(d3.event.transform.rescaleX(xx).domain());
+            y.domain(d3.event.transform.rescaleY(yy).domain());
+            svg.select("#axis--x").call(xAxis);
+            svg.select("#axis--y").call(yAxis);
+            line.selectAll("path").attr("d", valueline(xy));
+          }
+
+          var brush = d3
+              .brush()
+              .extent([
+                [0, 0],
+                [width, height]
+              ])
+              .on("end", brushended),
+            idleTimeout,
+            idleDelay = 350;
+
+          line
+            .append("g")
+            .attr("class", "brush")
+            .call(brush);
+
           function brushended() {
             mouseout();
             var s = d3.event.selection;
@@ -279,9 +329,6 @@ class D3LineGraph extends Component {
                 return (idleTimeout = setTimeout(idled, idleDelay));
               x.domain(
                 d3.extent(xy, function(d) {
-                  if (typeof d.x === "string") {
-                    d.x = this.formatDate(d.x);
-                  }
                   return d.x;
                 })
               );
@@ -292,12 +339,21 @@ class D3LineGraph extends Component {
                 })
               );
             } else {
-              x.domain([s[0][0], s[1][0]].map(x.invert, x));
-              y.domain([s[1][1], s[0][1]].map(y.invert, y));
+              xx.domain([s[0][0], s[1][0]].map(x.invert, x));
+              yy.domain([s[1][1], s[0][1]].map(y.invert, y));
               line.select(".brush").call(brush.move, null);
+              svg.call(zoom.transform, d3.zoomIdentity);
             }
-            zoom();
+            zoombox = zoombox.style("pointer-events", "all");
           }
+
+          d3.select(window).on("keydown", function() {
+            if (d3.event.ctrlKey || d3.event.metaKey) {
+              zoombox = zoombox.style("pointer-events", "none");
+            } else if (d3.event.keyCode === 27) {
+              zoombox = zoombox.style("pointer-events", "all");
+            }
+          });
 
           function mouseover() {
             focus.style("opacity", 1);
@@ -308,27 +364,27 @@ class D3LineGraph extends Component {
             document.getElementById("value").innerHTML = "";
           }
 
-          function closestCoordinates(x0,y0,xy) {
-            var x,y,dist_t;
+          function closestCoordinates(x0, y0, xy) {
+            var x, y, dist_t;
             var dist = Infinity;
             for (var i = 0; i < xy.length; i++) {
               dist_t = Math.sqrt(
                 Math.pow(Math.abs(xy[i].y - y0), 2) +
                   Math.pow(Math.abs(xy[i].x - x0), 2)
               );
-              if (dist_t < dist){
+              if (dist_t < dist) {
                 x = xy[i].x;
                 y = xy[i].y;
                 dist = dist_t;
               }
             }
-            return {x: x, y: y}
+            return { x: x, y: y };
           }
 
           function mousemove() {
             var y0 = y.invert(d3.mouse(this)[1]);
             var x0 = x.invert(d3.mouse(this)[0]);
-            var selectedData = closestCoordinates(x0,y0,xy)
+            var selectedData = closestCoordinates(x0, y0, xy);
             focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
 
             if (xlabel === "Time") {
@@ -346,22 +402,6 @@ class D3LineGraph extends Component {
 
           function idled() {
             idleTimeout = null;
-          }
-
-          function zoom() {
-            var t = line.transition().duration(750);
-            svg
-              .select("#axis--x")
-              .transition(t)
-              .call(xAxis);
-            svg
-              .select("#axis--y")
-              .transition(t)
-              .call(yAxis);
-            line
-              .selectAll("path")
-              .transition(t)
-              .attr("d", valueline(xy));
           }
 
           function downloadGraph() {
@@ -407,7 +447,7 @@ class D3LineGraph extends Component {
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize",this.plotLineGraph, false);
+    window.removeEventListener("resize", this.plotLineGraph, false);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -422,7 +462,7 @@ class D3LineGraph extends Component {
         <div className="vis-header">
           <div className="vis-data" id="value"></div>
         </div>
-        <div id="vis"></div>
+        <div id="vis" title="Click control to activate zoom to area"></div>
       </React.Fragment>
     );
   }

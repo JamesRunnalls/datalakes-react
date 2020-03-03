@@ -111,7 +111,7 @@ class LineGraph extends Component {
     } else if (event.keyCode === 39) {
       // right
       onChangeFileInt([file - 1]);
-    }
+    } 
   };
 
   setDefault = () => {
