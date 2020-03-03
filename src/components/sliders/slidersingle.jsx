@@ -47,14 +47,13 @@ class SliderSingle extends Component {
       boxSizing: "border-box"
     };
     var {
-      arr,
       value,
       onChange,
       type,
       min,
       max,
       file,
-      filedict,
+      files,
       onChangeFileInt
     } = this.props;
     var { update } = this.state;
@@ -72,7 +71,7 @@ class SliderSingle extends Component {
       valueStr = update.toString();
       dateTicks = scaleLinear()
         .domain([min, max])
-        .ticks(Math.min(arr.length, 8))
+        .ticks(Math.min(files.length, 8))
         .map(d => +d);
     }
 
@@ -105,7 +104,7 @@ class SliderSingle extends Component {
           values={[value]}
           onUpdate={this.onUpdate}
         >
-          <AvailbilityBar min={min} max={max} filedict={filedict} />
+          <AvailbilityBar min={min} max={max} files={files} />
           <Rail>
             {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
           </Rail>

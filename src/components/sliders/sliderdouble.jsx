@@ -46,7 +46,7 @@ class DateSliderDouble extends Component {
       onChange,
       onChangeLower,
       onChangeUpper,
-      filedict
+      files
     } = this.props;
     min = this.formatDate(min);
     max = this.formatDate(max);
@@ -95,7 +95,7 @@ class DateSliderDouble extends Component {
           onChange={onChange}
           values={[lower, upper]}
         >
-          <AvailbilityBar min={min} max={max} filedict={filedict} />
+          <AvailbilityBar min={min} max={max} files={files} />
           <Rail>
             {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
           </Rail>

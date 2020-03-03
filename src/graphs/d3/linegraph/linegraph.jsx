@@ -33,16 +33,6 @@ class D3LineGraph extends Component {
     return;
   };
 
-  dataTransform = (label, data) => {
-    if (label === "Time") {
-      return this.formatDate(data);
-    } else if (label === "Depth") {
-      return -data;
-    } else {
-      return data;
-    }
-  };
-
   plotLineGraph = async () => {
     try {
       d3.select("#linegraphsvg").remove();
@@ -55,13 +45,14 @@ class D3LineGraph extends Component {
           xunits,
           ylabel,
           yunits,
+          xscale,
+          yscale,
           bcolor,
           lcolor,
           lweight,
           title,
           setDownloadGraph
         } = this.props;
-        var dataTransform = this.dataTransform;
 
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
@@ -79,44 +70,38 @@ class D3LineGraph extends Component {
 
         // Format X-axis
         var x;
-        var xdomain;
-        if (xlabel === "Time") {
-          var xe = [this.getMin(data.x), this.getMax(data.x)];
-          xdomain = [this.formatDate(xe[0]), this.formatDate(xe[1])];
+        if (xscale === "Time") {
           x = d3
             .scaleTime()
             .range([0, width])
-            .domain([this.getMin(xdomain), this.getMax(xdomain)]);
-        } else if (xlabel === "Depth") {
+            .domain([this.getMin(data.x), this.getMax(data.x)]);
+        } else if (xscale === "Linear") {
           x = d3
             .scaleLinear()
             .range([0, width])
-            .domain([-this.getMax(data.x), -this.getMin(data.x)]);
-        } else {
+            .domain([this.getMin(data.x), this.getMax(data.x)]);
+        } else if (xscale === "Log") {
           x = d3
-            .scaleLinear()
+            .scaleLog()
             .range([0, width])
             .domain([this.getMin(data.x), this.getMax(data.x)]);
         }
 
         // Format Y-axis
         var y;
-        var ydomain;
-        if (ylabel === "Time") {
-          var ye = [this.getMin(data.y), this.getMax(data.y)];
-          ydomain = [this.formatDate(ye[0]), this.formatDate(ye[1])];
+        if (yscale === "Time") {
           y = d3
             .scaleTime()
             .range([height, 0])
-            .domain([this.getMin(ydomain), this.getMax(ydomain)]);
-        } else if (ylabel === "Depth") {
+            .domain([this.getMin(data.y), this.getMax(data.y)]);
+        } else if (yscale === "Linear") {
           y = d3
             .scaleLinear()
             .range([height, 0])
-            .domain([-this.getMax(data.y), -this.getMin(data.y)]);
-        } else {
+            .domain([this.getMin(data.y), this.getMax(data.y)]);
+        } else if (yscale === "Log") {
           y = d3
-            .scaleLinear()
+            .scaleLog()
             .range([height, 0])
             .domain([this.getMin(data.y), this.getMax(data.y)]);
         }
@@ -221,22 +206,21 @@ class D3LineGraph extends Component {
           var xy = [];
           for (var i = 0; i < data.x.length; i++) {
             xy.push({
-              x: dataTransform(xlabel, data.x[i]),
-              y: dataTransform(ylabel, data.y[i])
+              x: data.x[i],
+              y: data.y[i]
             });
           }
-
+          
           // Define the line
           var valueline = d3
             .line()
-            .defined(d => !isNaN(d.y))
             .x(function(d) {
               return x(d.x);
             })
             .y(function(d) {
               return y(d.y);
             });
-
+            
           // Add the line
           var line = svg
             .append("g")

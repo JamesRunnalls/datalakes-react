@@ -25,7 +25,6 @@ class DataDetail extends Component {
     lower: "",
     upper: "",
     files: [],
-    filedict: [],
     data: "",
     step: "",
     allowedStep: ["preview", "download", "pipeline", "information"],
@@ -87,7 +86,7 @@ class DataDetail extends Component {
     files.sort(this.numDescending);
 
     // Get convertion array
-    var filedict = this.filedict(files);
+    files = this.addAverageTime(files);
 
     // Get min and max
     var { min, max } = this.fileBounds(files);
@@ -110,7 +109,6 @@ class DataDetail extends Component {
       data: dataArray,
       min,
       max,
-      filedict,
       lower,
       upper,
       dropdown,
@@ -216,7 +214,8 @@ class DataDetail extends Component {
   };
 
   onChangeFile = values => {
-    var { filedict, file: oldFile, data } = this.state;
+    var { files, file: oldFile, data } = this.state;
+    let filedict = files.map(a => a.ave);
     var file = this.closest(values[0] / 1000, filedict);
     if (file !== oldFile && this.isInt(values[0])) {
       if (data[file] === 0) {
@@ -228,13 +227,13 @@ class DataDetail extends Component {
     }
   };
 
-  selectedFiles = (upper, lower, filedict, data) => {
+  selectedFiles = (upper, lower, files, data) => {
     if (data === "download") {
-      data = new Array(filedict.length).fill(0);
+      data = new Array(files.length).fill(0);
     }
     var fileList = [];
-    for (var i = 0; i < filedict.length; i++) {
-      if (filedict[i] < upper && filedict[i] > lower && data[i] === 0) {
+    for (var i = 0; i < files.length; i++) {
+      if (files[i].min < upper && files[i].max > lower && data[i] === 0) {
         fileList.push(i);
       }
     }
@@ -242,14 +241,14 @@ class DataDetail extends Component {
   };
 
   onChangeTime = values => {
-    var { filedict, data } = this.state;
+    var { files, data } = this.state;
     const lower = values[0] / 1000;
     const upper = values[1] / 1000;
     if (
       Math.round(lower) !== Math.round(this.state.lower) ||
       Math.round(upper) !== Math.round(this.state.upper)
     ) {
-      var toDownload = this.selectedFiles(upper, lower, filedict, data);
+      var toDownload = this.selectedFiles(upper, lower, files, data);
       if (toDownload.length > 0) {
         this.setState({ innerLoading: true });
         this.downloadMultipleFiles(toDownload);
@@ -259,9 +258,9 @@ class DataDetail extends Component {
   };
 
   onChangeUpper = value => {
-    var { filedict, data, lower } = this.state;
+    var { files, data, lower } = this.state;
     var upper = value.getTime() / 1000;
-    var toDownload = this.selectedFiles(upper, lower, filedict, data);
+    var toDownload = this.selectedFiles(upper, lower, files, data);
     if (toDownload.length > 0) {
       this.setState({ innerLoading: true });
       this.downloadMultipleFiles(toDownload);
@@ -270,9 +269,9 @@ class DataDetail extends Component {
   };
 
   onChangeLower = value => {
-    var { filedict, data, upper } = this.state;
+    var { files, data, upper } = this.state;
     var lower = value.getTime() / 1000;
-    var toDownload = this.selectedFiles(upper, lower, filedict, data);
+    var toDownload = this.selectedFiles(upper, lower, files, data);
     if (toDownload.length > 0) {
       this.setState({ innerLoading: true });
       this.downloadMultipleFiles(toDownload);
@@ -347,13 +346,12 @@ class DataDetail extends Component {
     return { upper: upper, lower: lower };
   };
 
-  filedict = array => {
-    var out = [];
+  addAverageTime = array => {
     for (var i = 0; i < array.length; i++) {
-      out.push((parseFloat(array[i].min) + parseFloat(array[i].max)) / 2);
+      array[i].ave = (parseFloat(array[i].min) + parseFloat(array[i].max)) / 2
     }
-    return out;
-  };
+    return array
+  }
 
   fileBounds = array => {
     var min = Math.min.apply(
@@ -429,7 +427,6 @@ class DataDetail extends Component {
       allowedStep,
       files,
       file,
-      filedict,
       innerLoading,
       combined
     } = this.state;
@@ -496,7 +493,6 @@ class DataDetail extends Component {
               min={min}
               files={files}
               file={file}
-              filedict={filedict}
               downloadData={this.downloadData}
               loading={innerLoading}
               combined={combined}
@@ -531,7 +527,6 @@ class DataDetail extends Component {
             <Download
               dataset={dataset}
               files={files}
-              filedict={filedict}
               selectedFiles={this.selectedFiles}
               getLabel={this.getLabel}
               max={max}

@@ -71,7 +71,7 @@ class Download extends Component {
       apiUrl,
       min,
       max,
-      filedict,
+      files,
       selectedFiles
     } = this.props;
     var { upper, lower } = this.state;
@@ -80,8 +80,8 @@ class Download extends Component {
     if (lower === "NA") lower = min;
 
     var arr = [0];
-    if (filedict.length > 1){
-      arr = selectedFiles(upper, lower, filedict, "download");
+    if (files.length > 1){
+      arr = selectedFiles(upper, lower, files, "download");
     } 
     var selectedArray = this.fileIdSelect(arr);
 
@@ -100,7 +100,7 @@ class Download extends Component {
         <div className="info-title">Download</div>
 
         <div className="multipledownload">
-          {filedict.length > 1 && <div>
+          {files.length > 1 && <div>
             <div className="subheading">Select time period for downloads.</div>
             <SliderDouble
               onChange={this.onChangeTime}
@@ -110,10 +110,10 @@ class Download extends Component {
               max={max}
               lower={lower}
               upper={upper}
-              filedict={filedict}
+              files={files}
             />
             <div className="selected-download">
-              {selectedArray.length} of {filedict.length} files selected for
+              {selectedArray.length} of {files.length} files selected for
               download.
             </div>
           </div>}

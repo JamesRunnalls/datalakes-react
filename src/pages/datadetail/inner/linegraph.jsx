@@ -45,7 +45,13 @@ class LineGraph extends Component {
     bcolor: "#ffffff",
     xaxis: "x",
     yaxis: "y",
-    title: "test",
+    title: "NoPlot",
+    xlabel: "None",
+    ylabel: "None",
+    xscale: "Linear",
+    yscale: "Linear",
+    xunits: "None",
+    yunits: "None",
     download: false
   };
 
@@ -58,20 +64,13 @@ class LineGraph extends Component {
     var lweight = document.getElementById("lweight").value;
     var bcolor = document.getElementById("bcolor").value;
     var title = document.getElementById("title").value;
-    this.setState({ lcolor, lweight, bcolor, title });
+    var xscale = document.getElementById("xscale").value;
+    var yscale = document.getElementById("yscale").value;
+    this.setState({ lcolor, lweight, bcolor, title, xscale, yscale });
   };
 
   reset = () => {
-    this.setState({
-      lcolor: "#000000",
-      lweight: "0.5",
-      bcolor: "#ffffff",
-      title: ""
-    });
-    document.getElementById("lcolor").value = "#000000";
-    document.getElementById("lweight").value = 0.5;
-    document.getElementById("bcolor").value = "#ffffff";
-    document.getElementById("title").value = "";
+    this.setDefault();
   };
 
   handleAxisSelect = axis => event => {
@@ -115,19 +114,47 @@ class LineGraph extends Component {
     }
   };
 
+  setDefault = () => {
+    var { parameters, dataset, getLabel } = this.props;
+    var { xaxis, yaxis } = this.state;
+
+    // Get axis labels and units
+    const xparam = parameters.find(x => x.axis === xaxis);
+    const yparam = parameters.find(y => y.axis === yaxis);
+    var xlabel = getLabel("parameters", xparam.parameters_id, "name");
+    var ylabel = getLabel("parameters", yparam.parameters_id, "name");
+    var xunits = xparam.unit;
+    var yunits = yparam.unit;
+    const title = dataset.title;
+
+    // Set initial axis scale
+    var xscale = "Linear";
+    var yscale = "Linear";
+    if (xlabel === "Time") xscale = "Time";
+    if (ylabel === "TIme") yscale = "Time";
+
+    this.setState({
+      title,
+      xlabel,
+      ylabel,
+      xunits,
+      yunits,
+      yscale,
+      xscale,
+      lcolor: "#000000",
+      lweight: "0.5",
+      bcolor: "#ffffff"
+    });
+  };
+
   componentDidMount() {
-    var { dataset } = this.props;
-    this.setState({ title: dataset.title });
+    this.setDefault();
     document.addEventListener("keydown", this.handleKeyDown);
   }
 
   componentWillUnmount() {
-    document.addEventListener("keydown", this.handleKeyDown);
+    document.removeEventListener("keydown", this.handleKeyDown);
   }
-
-  formatDate = raw => {
-    return new Date(raw * 1000);
-  };
 
   render() {
     var {
@@ -145,19 +172,24 @@ class LineGraph extends Component {
       min,
       files,
       file,
-      filedict,
       downloadData,
       loading,
       combined
     } = this.props;
-    const { lweight, bcolor, lcolor, xaxis, yaxis, title } = this.state;
-
-    var xoptions = [];
-    var yoptions = [];
-    var xlabel = "";
-    var ylabel = "";
-    var xunits = "";
-    var yunits = "";
+    const {
+      lweight,
+      bcolor,
+      lcolor,
+      xaxis,
+      yaxis,
+      title,
+      xlabel,
+      ylabel,
+      xscale,
+      yscale,
+      xunits,
+      yunits
+    } = this.state;
 
     // Show time slider or multiple files
     var time = parameters.filter(p => p.parameters_id === 1);
@@ -174,6 +206,8 @@ class LineGraph extends Component {
     }
 
     // Axis Options
+    var xoptions = [];
+    var yoptions = [];
     for (var j = 0; j < parameters.length; j++) {
       if (parameters[j]["axis"].includes("x")) {
         xoptions.push({
@@ -203,16 +237,16 @@ class LineGraph extends Component {
         plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
       }
 
-      // Get axis labels
-      const xparam = parameters.find(x => x.axis === xaxis);
-      const yparam = parameters.find(y => y.axis === yaxis);
-      xlabel = getLabel("parameters", xparam.parameters_id, "name");
-      ylabel = getLabel("parameters", yparam.parameters_id, "name");
-      xunits = xparam.unit;
-      yunits = yparam.unit;
+      // Format data
+      var { x, y } = plotdata;
+      if (xlabel === "Time") x = x.map(i => this.formatDate(i));
+      if (ylabel === "Time") y = y.map(i => this.formatDate(i));
+      if (xlabel === "Depth") x = x.map(i => -i);
+      if (ylabel === "Depth") y = y.map(i => -i);
+      plotdata = { x: x, y: y };
 
       // Value
-      var value = this.formatDate(filedict[file]);
+      var value = this.formatDate(files[file].ave);
     }
 
     return (
@@ -241,10 +275,11 @@ class LineGraph extends Component {
                     ylabel={ylabel}
                     xunits={xunits}
                     yunits={yunits}
-                    sequential="x"
                     lcolor={lcolor}
                     lweight={lweight}
                     bcolor={bcolor}
+                    xscale={xscale}
+                    yscale={yscale}
                     setDownloadGraph={this.setDownloadGraph}
                   />
                   <div className="linegraph-bottombox">
@@ -297,8 +332,7 @@ class LineGraph extends Component {
                         value={value}
                         min={min}
                         max={max}
-                        arr={files}
-                        filedict={filedict}
+                        files={files}
                         type="time"
                       />
                       <LoadDataSets data={data} downloadData={downloadData} />
@@ -320,7 +354,7 @@ class LineGraph extends Component {
                         max={max}
                         lower={lower}
                         upper={upper}
-                        filedict={filedict}
+                        files={files}
                       />
                       <LoadDataSets data={data} downloadData={downloadData} />
                     </div>
@@ -373,6 +407,36 @@ class LineGraph extends Component {
                               id="bcolor"
                               defaultValue={bcolor}
                             />
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>X Scale</td>
+                          <td colSpan="2">
+                            <select
+                              id="xscale"
+                              defaultValue={xscale}
+                              className="scale-select"
+                            >
+                              <option value="Time">Time</option>
+                              <option value="Linear">Linear</option>
+                              <option value="Log">Logarithmic</option>
+                            </select>
+                          </td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Y Scale</td>
+                          <td colSpan="2">
+                            <select
+                              id="yscale"
+                              defaultValue={yscale}
+                              className="scale-select"
+                            >
+                              <option value="Time">Time</option>
+                              <option value="Linear">Linear</option>
+                              <option value="Log">Logarithmic</option>
+                            </select>
                           </td>
                           <td></td>
                         </tr>
