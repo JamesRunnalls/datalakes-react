@@ -70,13 +70,15 @@
 
 .righthead-mobile img {
   width: 25px;
+  padding: 11px;
+  padding-left: 60px;
 }
 
 .righthead-mobile {
   display: none;
   position: absolute;
-  right: 10px;
-  top: 12px;
+  right: 0;
+  top: 0;
 }
 
 @media screen and (max-width: 960px) {

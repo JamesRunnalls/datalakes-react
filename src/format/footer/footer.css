@@ -23,26 +23,19 @@ footer {
 }
 
 @media screen and (max-width: 500px) {
-  footer .container .copyright {
-    text-align: center;
-    margin-bottom: 65px;
-    padding-right: 20px;
-  }
-  .copyright .contact {
-    padding-left: 20px !important;
-  }
-  footer .container .partners img {
-    margin: 5px 10px !important;
+  footer {
+    display: none;
   }
 }
 
 footer .container .partners {
-  padding: 30px 0 10px 0;
+  padding: 0;
+  border: none;
   text-align: center;
 }
 
 footer .container .partners img {
-  height: 30px;
+  height: 20px;
   margin: 5px 25px;
 }
 
