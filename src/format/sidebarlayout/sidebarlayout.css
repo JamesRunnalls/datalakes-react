@@ -82,13 +82,16 @@
 }
 
 @media screen and (max-width: 960px) {
-  body .rightcontainer {
-    width: 100%;
-  }
   .rightcontainer.hide {
     position: absolute;
     right: 10px;
     height: auto;
+  }
+
+  .rightcontainer {
+    position: absolute!important;
+    z-index: 9999;
+    right: 0;
   }
 
   body .leftcontainer {

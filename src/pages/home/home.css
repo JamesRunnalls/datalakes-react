@@ -117,6 +117,17 @@
   background-repeat: no-repeat;
 }
 
+.home-partners {
+  display: none;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.home-partner-logo img {
+  height: 20px;
+  padding: 0 10px;
+}
+
 @media screen and (max-width: 960px) {
   #home-left {
     display: block;
@@ -155,6 +166,10 @@
 
   .twitter {
     display: none;
+  }
+
+  .home-partners{
+    display: block;
   }
 }
 
