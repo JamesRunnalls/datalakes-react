@@ -155,6 +155,22 @@
   }
 }
 
+
+@media screen and (max-width: 960px) {
+  .data-subnav .subnav-item .subnav-text {
+    display: none;
+  }
+  .data-subnav .subnav-item .subnav-img {
+    padding: 0 3px;
+  }
+  .data-subnav .subnav-item {
+    margin: 0 0 -1px 0;
+  }
+  .data-subnav {
+    margin: 0 0 10px 15px;
+  }
+}
+
 .colors-table .color-value {
   height: 100%;
   width: 100%;

@@ -79,7 +79,7 @@ header {
     width: 140px;
   }
   .MainNav {
-    display: none;
+    top:5px!important;
   }
 
   header {

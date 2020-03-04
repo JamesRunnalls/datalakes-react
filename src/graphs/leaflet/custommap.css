@@ -12,19 +12,22 @@
   z-index: 99999;
 }
 
-@media screen and (max-width: 500px) {
-  .map {
-    height: calc(100vh - 160px);
-  }
-}
-
 .map.full {
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   position: fixed;
   top: 0;
   left: 0;
 }
+
+@media screen and (max-width: 500px) {
+  .map {
+    margin-top: 30px;
+    height: calc(100vh - 190px);
+  }
+}
+
+
 
 .help {
   z-index: 999;

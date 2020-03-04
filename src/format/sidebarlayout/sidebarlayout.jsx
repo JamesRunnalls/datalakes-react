@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import "./sidebarlayout.css";
-import menu from "./img/menu.svg";
 
 class SidebarLayout extends Component {
   state = {
@@ -39,9 +38,6 @@ class SidebarLayout extends Component {
     }
     return (
       <React.Fragment>
-        <div className="righthead-mobile" onClick={() => this.toggle()}>
-          <img alt="Menu" src={menu} />
-        </div>
         <div className={rightClass.join(" ")} id="rightcontainer">
           <div
             className="righthead side"
