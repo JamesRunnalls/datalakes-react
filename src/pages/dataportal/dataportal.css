@@ -173,6 +173,9 @@ input.SearchBar {
     box-sizing: border-box;
     margin-top: 10px;
   }
+  .filterbar {
+    padding: 0 5px;
+  }
 }
 
 .sortbar select {
@@ -188,6 +191,8 @@ input.SearchBar {
   font-size: 13.333px;
   padding: 1px 5px;
   cursor: pointer;
+  height: 19px;
+  box-sizing: border-box;
 }
 
 .sortbar-x {
@@ -197,6 +202,8 @@ input.SearchBar {
   padding: 1px 5px;
   cursor: pointer;
   margin-left: -1px;
+  height: 19px;
+  box-sizing: border-box;
 }
 
 .characteristics {

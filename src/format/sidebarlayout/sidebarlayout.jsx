@@ -28,11 +28,6 @@ class SidebarLayout extends Component {
     if (this.props.open === "False") {
       this.setState({ addClass: true });
     }
-    window.addEventListener("resize", this.hideOnResize);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.hideOnResize);
   }
 
   render() {

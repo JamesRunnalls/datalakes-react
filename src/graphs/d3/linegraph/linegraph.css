@@ -10,7 +10,7 @@
 
 @media screen and (max-width: 500px) {
   #vis {
-    height: calc(100vh - 140px);
+    height: calc(100vh - 200px);
   }
 }
 
