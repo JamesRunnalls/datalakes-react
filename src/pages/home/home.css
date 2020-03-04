@@ -154,10 +154,12 @@
   }
   .home-banners {
     padding: 0;
+    padding-top: calc(50vh - 285px);
   }
 
   .home-banner {
     margin: 8px 0;
+    border: 2px solid white;
   }
 
   .home-text {
@@ -171,8 +173,4 @@
   .home-partners{
     display: block;
   }
-}
-
-.home-banner:hover {
- border: 1px solid black;
 }
