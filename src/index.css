@@ -8,9 +8,9 @@ _/ __ \ \__  \  \ \/ \/ /\__  \    /  ___/
 
 /* ------------------- General --------------------------- */
 
-@font-face{
-  font-family:'The Serif Bold';
-  src:url('./font/theserifbold.woff') format('woff');
+@font-face {
+  font-family: "The Serif Bold";
+  src: url("./font/theserifbold.woff") format("woff");
 }
 
 body {
@@ -20,7 +20,12 @@ body {
   margin: 0;
 }
 
-h1,h2,h3,h4,h5,h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: "The Serif Bold", Arial, sans-serif;
 }
 
@@ -39,9 +44,15 @@ h1 {
   text-size-adjust: 100%;
 }
 
-h3{
-font-size: 15px;
-font-weight: 500;
+@media screen and (max-width: 500px) {
+  h1 {
+    display: none;
+  }
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 500;
 }
 
 h4 {

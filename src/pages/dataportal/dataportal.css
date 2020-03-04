@@ -167,6 +167,14 @@ input.SearchBar {
   display: inline-block;
 }
 
+@media screen and (max-width: 500px) {
+  .sortbar {
+    padding: 0 5px;
+    box-sizing: border-box;
+    margin-top: 10px;
+  }
+}
+
 .sortbar select {
   display: inline-block;
   background-color: white;

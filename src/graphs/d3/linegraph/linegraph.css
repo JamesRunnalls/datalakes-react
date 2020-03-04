@@ -8,6 +8,12 @@
     height: 500px;
 }
 
+@media screen and (max-width: 500px) {
+  #vis {
+    height: calc(100vh - 140px);
+  }
+}
+
 .vis-header {
   position: absolute;
   right: 50px;

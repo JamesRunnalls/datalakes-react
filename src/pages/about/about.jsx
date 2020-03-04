@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import SidebarLayout from '../../format/sidebarlayout/sidebarlayout';
 import ContactForm from '../../components/contactform/contactform';
+import "./about.css";
 
 class About extends Component {
     render() { 
@@ -11,7 +12,7 @@ class About extends Component {
                 <SidebarLayout 
                     sidebartitle="Get in touch" 
                     left={
-                        <React.Fragment>
+                        <div className="about-main">
                            <div><b>Heterogeneous data platform for operational modeling and forecasting of Swiss lakes</b></div>
                            The objective of this project is to advance the forecasting capabilities of the data-driven hydrological and ecological
                             lake modeling algorithms using methodologies inspired by data science and accelerated by high performance computing. We 
@@ -21,7 +22,7 @@ class About extends Component {
                             accurate data assimilation and uncertainty quantification in both model parameters and the associated forecasts. DATALAKES 
                             project is a collaboration with the Swiss Data Science Center (SDSC), EPF Lausanne and ETH Zurich, aiming at a sensor-to
                             -frontend data platform providing and analyzing the dynamics of lake ecosystems at high spatial and temporal resolutions. 
-                        </React.Fragment>
+                        </div>
                         } 
                     right={
                         <ContactForm />
