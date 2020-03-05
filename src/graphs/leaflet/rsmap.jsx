@@ -105,9 +105,9 @@ class RSmap extends Component {
   };
 
   plotPolygons = async () => {
-    if ("polygons" in this) {
-      this.map.removeLayer(this.polygons);
-    }
+    try {
+      this.map.removeLayer(this.polygonLayer);
+    } catch (e) {}
     if (!this.props.loading) {
       var { data, colorbar, color } = this.props;
       var { min, max, minColor, maxColor } = colorbar;
@@ -134,8 +134,7 @@ class RSmap extends Component {
             .on({ mouseout: this.hoverOut })
         );
       }
-      var polgonLayer = L.featureGroup(polygons).addTo(this.map);
-      this.polygons = L.layerGroup(polgonLayer);
+      this.polygonLayer = L.layerGroup(polygons).addTo(this.map);
       this.setState({ loading: false });
     }
   };

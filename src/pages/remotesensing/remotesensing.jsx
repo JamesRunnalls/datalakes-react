@@ -54,9 +54,9 @@ class RemoteSensing extends Component {
     var gradient = generateColorRGB(minColor, maxColor, 100);
     var pixelcolor = "";
     if (value > max) {
-      pixelcolor = "#000000";
+      pixelcolor = "transparent";
     } else if (value < min) {
-      pixelcolor = "#FFFFFF";
+      pixelcolor = "transparent";
     } else {
       pixelcolor =
         gradient[parseInt(gradient.length / ((max - min) / (value - min)), 10)];
