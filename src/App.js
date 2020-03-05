@@ -14,6 +14,7 @@ import About from './pages/about/about';
 import API from './pages/api/api';
 import DataDetail from './pages/datadetail/datadetail';
 import AddDataset from './pages/adddataset/adddataset';
+import RemoteSensing from './pages/remotesensing/remotesensing';
 
 class App extends Component {
   render() {
@@ -24,6 +25,8 @@ class App extends Component {
               <Switch>
                 <Route path='/live' exact component={Live} />
                 <Route path='/live' component={WeatherStationDetail} />
+
+                <Route path='/remotesensing' exact component={RemoteSensing} />
 
                 <Route path='/predictions' exact component={Predictions} />
                 <Route path='/predictions' component={HydrodynamicModel} />

@@ -172,7 +172,7 @@ class D3LineGraph extends Component {
         this.removeErrorWarning(clip);
 
         // Add the X Axis
-        var gX = svg
+        svg
           .append("g")
           .attr("class", "x axis")
           .attr("id", "axis--x")
@@ -196,7 +196,7 @@ class D3LineGraph extends Component {
         }
 
         // Add the Y Axis
-        var gY = svg
+        svg
           .append("g")
           .attr("class", "y axis")
           .attr("id", "axis--y")

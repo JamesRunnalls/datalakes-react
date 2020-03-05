@@ -4,63 +4,10 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import SwissTopoMap from "../../graphs/leaflet/custommap";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
+import ColorBar from '../../components/colorbar/colorbar';
 import { generateColorRGB } from "../../components/gradients/gradients";
 import { apiUrl } from "../../../config.json";
 import "./prediction.css";
-
-class ColorBar extends Component {
-  render() {
-    var {
-      setMinTemp,
-      setMaxTemp,
-      MinTemp,
-      MaxTemp,
-      minColor,
-      maxColor,
-      setMinColor,
-      setMaxColor
-    } = this.props;
-    const barStyle = {
-      background: `linear-gradient(90deg,${minColor} 0%,${maxColor} 100%)`
-    };
-    return (
-      <div id="colorbar">
-        <div className="colorbar-inner">
-          <input
-            title="Edit minimum temperature"
-            type="text"
-            defaultValue={MinTemp}
-            onBlur={setMinTemp}
-          ></input>{" "}
-          °C
-          <div id="bar" style={barStyle} title="Legend colorbar">
-            <input
-              type="color"
-              defaultValue={minColor}
-              onFocus={setMinColor}
-              className="color-picker"
-              title="Edit minimum color"
-            />
-            <input
-              type="color"
-              defaultValue={maxColor}
-              onFocus={setMaxColor}
-              className="color-picker right"
-              title="Edit maximum color"
-            />
-          </div>
-          <input
-            title="Edit maximum temperature"
-            type="text"
-            defaultValue={MaxTemp}
-            onBlur={setMaxTemp}
-          ></input>{" "}
-          °C
-        </div>
-      </div>
-    );
-  }
-}
 
 class ModelInfo extends Component {
   sendPanInfo = geometry => {
@@ -375,14 +322,15 @@ class Predictions extends Component {
                 threeD={this.state.meteolakes}
                 legend={
                   <ColorBar
-                    MinTemp={MinTemp}
-                    MaxTemp={MaxTemp}
-                    setMaxTemp={this.setMaxTemp}
-                    setMinTemp={this.setMinTemp}
+                    min={MinTemp}
+                    max={MaxTemp}
+                    setMax={this.setMaxTemp}
+                    setMin={this.setMinTemp}
                     minColor={minColor}
                     maxColor={maxColor}
                     setMinColor={this.setMinColor}
                     setMaxColor={this.setMaxColor}
+                    unit="°C"
                   />
                 }
                 hover={<div ref="hoverTemp" className="hoverTemp"></div>}
