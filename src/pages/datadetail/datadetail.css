@@ -179,6 +179,25 @@
   .info-width {
     margin: 0;
   }
+  .pipeline img {
+    height: 30px;
+  }
+  .separator {
+    width: 20px !important;
+    margin: 10px 10px;
+  }
+
+  .pipeline .pipeline-header {
+    margin-top: 20px;
+  }
+
+  .pipeline .diagram a {
+    width: 60px;
+  }
+
+  .pipeline .diagram {
+    padding-top: 30px;
+  }
 }
 
 .colors-table .color-value {

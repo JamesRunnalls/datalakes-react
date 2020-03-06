@@ -10,6 +10,7 @@
 .map {
   height: 500px;
   z-index: 99999;
+  position: relative;
 }
 
 .map.full {

@@ -1,19 +1,13 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import SwissTopoMap from "../../graphs/leaflet/custommap";
+import LiveMap from "../../graphs/leaflet/live_map";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
+import { generateColorRGB } from "../../components/gradients/gradients";
+import axios from "axios";
 import { apiUrl } from "../../../config.json";
-import DW from "../../../public/img/DW.svg";
-import MW from "../../../public/img/MW.svg";
-import MP from "../../../public/img/MP.svg";
-import MC from "../../../public/img/MC.svg";
-import FR from "../../../public/img/FR.svg";
-import PW from "../../../public/img/PW.svg";
-import PP from "../../../public/img/PP.svg";
-import PR from "../../../public/img/PR.svg";
-import PA from "../../../public/img/PA.svg";
-import "./live.css";
+import ColorBar from "../../components/colorbar/colorbar";
+import DataSelect from "../../components/dataselect/dataselect";
+import FilterBox from "../../components/filterbox/filterbox";
 
 class WeatherStation extends Component {
   render() {
@@ -21,11 +15,7 @@ class WeatherStation extends Component {
     return (
       <div className="weatherstation" title="See live data">
         <Link to={link}>
-          <img
-            alt={this.props.name}
-            src={require("./img/" + this.props.imgname)}
-          />
-          <h4>{this.props.name}</h4>
+          <b>{this.props.name}</b>
           <div className="desc">{this.props.desc}</div>
         </Link>
       </div>
@@ -53,168 +43,301 @@ class WeatherStations extends Component {
 
 class Live extends Component {
   state = {
-    addClass: false,
-    meteoStations: [],
-    lakeStations: []
+    list: [{ name: "" }],
+    dataArray: [],
+    min: "",
+    max: "",
+    minColor: "#0000FF",
+    maxColor: "#FF0000",
+    dataIndex: 0,
+    loading: false,
+    unit: "",
+    markerData: {},
+    visibleMarkers: [],
+    stations: []
+  };
+
+  setMinColor = event => {
+    var { minColor } = this.state;
+    if (minColor !== event.target.value) {
+      this.setState({ minColor: event.target.value });
+    }
+  };
+
+  setMaxColor = event => {
+    var { maxColor } = this.state;
+    if (maxColor !== event.target.value) {
+      this.setState({ maxColor: event.target.value });
+    }
+  };
+
+  setMin = event => {
+    const min = parseFloat(event.target.value);
+    if (this.isNumeric(min)) {
+      this.setState({ min });
+    }
+  };
+
+  setMax = event => {
+    const max = parseFloat(event.target.value);
+    if (this.isNumeric(max)) {
+      this.setState({ max });
+    }
+  };
+
+  color = (minColor, maxColor, value, min, max) => {
+    var gradient = generateColorRGB(minColor, maxColor, 100);
+    var pixelcolor = "";
+    if (value > max) {
+      pixelcolor = "transparent";
+    } else if (value < min) {
+      pixelcolor = "transparent";
+    } else {
+      pixelcolor =
+        gradient[parseInt(gradient.length / ((max - min) / (value - min)), 10)];
+    }
+    return pixelcolor;
+  };
+
+  isNumeric = n => {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+  };
+
+  hoverFunc = (target, type) => {
+    if (type === "over") {
+      document.getElementById("color-table").style.display = "block";
+      document.getElementById("hoverValue").innerHTML =
+        Math.round(parseFloat(target.options.title) * 100) / 100 +
+        this.state.unit;
+      document.getElementById("hoverLat").innerHTML =
+        Math.round(parseFloat(target._latlngs[0][0].lat) * 1000) / 1000;
+      document.getElementById("hoverLon").innerHTML =
+        Math.round(parseFloat(target._latlngs[0][0].lng) * 1000) / 1000;
+    } else {
+      document.getElementById("color-table").style.display = "none";
+    }
+  };
+
+  downloadFile = async dataIndex => {
+    this.setState({ loading: true });
+    var { list, dataArray } = this.state;
+    const { data } = await axios.get(
+      apiUrl + "/rs/" + list[dataIndex].endpoint
+    );
+    dataArray[dataIndex] = data[0];
+    var min = Math.round(Math.min(...dataArray[dataIndex].v) * 100) / 100;
+    var max = Math.round(Math.max(...dataArray[dataIndex].v) * 100) / 100;
+    var unit = list[dataIndex].unit;
+    this.setState({ dataArray, min, max, loading: false, unit });
+  };
+
+  handleSelect = async event => {
+    var {
+      list,
+      dataIndex: oldDataIndex,
+      dataArray,
+      min,
+      max,
+      unit
+    } = this.state;
+    var dataIndex = list.findIndex(x => x.name === event.value);
+    if (oldDataIndex !== dataIndex) {
+      if (dataArray[dataIndex] === 0) {
+        this.setState({ dataIndex, loading: true });
+        this.downloadFile(dataIndex);
+      } else {
+        min = Math.round(Math.min(...dataArray[dataIndex].v) * 100) / 100;
+        max = Math.round(Math.max(...dataArray[dataIndex].v) * 100) / 100;
+        unit = list[dataIndex].unit;
+        this.setState({ dataIndex, min, max, unit });
+      }
+    }
+  };
+
+  makerChange = event => {
+    var { visibleMarkers } = this.state;
+    var value = event.target.value;
+    if (visibleMarkers.includes(value)) {
+      visibleMarkers = visibleMarkers.filter(x => x !== value);
+    } else {
+      visibleMarkers.push(value);
+    }
+    this.setState({ visibleMarkers });
+  };
+
+  stationPopup = info => {
+    if ("parameters" in info) {
+      return (
+        "<b>" +
+        info.name +
+        "</b><br>Surface Temperature: " +
+        info.parameters.watertemperature.value +
+        '&deg;C<br><a title="See live data" href="/live/' +
+        info.url +
+        '">See live data</a>'
+      );
+    } else {
+      return (
+        "<b>" +
+        info.name +
+        "</b><br>" +
+        info.type +
+        "<br>Elevation: " +
+        info.elevation +
+        'mAOD<br><a target="_blank" href="' +
+        info.link +
+        '">See live data</a>'
+      );
+    }
   };
 
   async componentDidMount() {
-    const { data: meteoStations } = await axios.get(
-      apiUrl + "/live/meteostations"
-    );
-    const { data: lakeStations } = await axios.get(
-      apiUrl + "/live/lakestations"
-    );
-    this.setState({ meteoStations, lakeStations });
-  }
+    // Get list of available layers
+    const { data: list } = await axios.get(apiUrl + "/rs");
+    var dataArray = new Array(list.length).fill(0);
 
-  toggle = () => {
-    this.setState({ addClass: !this.state.addClass });
-  };
+    // Download meteo stations
+    const { data: stations } = await axios.get(apiUrl + "/live");
+
+    var markerData = {};
+
+    for (var stationType of stations) {
+      const { data } = await axios.get(apiUrl + "/" + stationType.endpoint);
+      markerData[stationType.value] = data;
+    }
+
+    // Download first layer
+    const { data } = await axios.get(apiUrl + "/rs/" + list[0].endpoint);
+
+    var min = Math.round(Math.min(...data[0].v) * 100) / 100;
+    var max = Math.round(Math.max(...data[0].v) * 100) / 100;
+    var unit = list[0].unit;
+    dataArray[0] = data[0];
+
+    this.setState({
+      list,
+      dataArray,
+      min,
+      max,
+      unit,
+      markerData,
+      stations
+    });
+  }
 
   render() {
     document.title = "Live - Datalakes";
-    var center = [46.375, 6.535];
-    var zoom = 9;
-
-    var markers = [];
-    for (var data of this.state.lakeStations) {
-      var marker = {
-        lon: data.lon,
-        lat: data.lat,
-        tooltip:
-          '<a title="See live data" href="/live/' +
-          data.url +
-          '">' +
-          String(data.name) +
-          "<br>" +
-          String(data.parameters.watertemperature.value) +
-          "&deg;C</a>"
-      };
-      markers.push(marker);
-    }
-    for (data of this.state.meteoStations) {
-      marker = {
-        lon: data.lon,
-        lat: data.lat,
-        popup:
-          "<b>" +
-          String(data.name) +
-          "</b><br>" +
-          data.type +
-          "<br>Elevation: " +
-          data.elevation +
-          'mAOD<br><a target="_blank" href="' +
-          data.link +
-          '">See live data</a>',
-        icon: data.icon
-      };
-      markers.push(marker);
-    }
-
-    let legend = ["legend hide"];
-    let legendsmall = ["legend-small"];
-    if (this.state.addClass) {
-      legend = ["legend"];
-      legendsmall = ["legend-small hide"];
-    }
-
+    var {
+      list,
+      dataArray,
+      dataIndex,
+      min,
+      max,
+      minColor,
+      maxColor,
+      loading,
+      markerData,
+      visibleMarkers,
+      stations
+    } = this.state;
+    var colorbar = {
+      max: max,
+      min: min,
+      minColor: minColor,
+      maxColor: maxColor
+    };
+    var unit = list[dataIndex].unit;
     return (
       <React.Fragment>
         <h1>Live Conditions</h1>
         <SidebarLayout
-          sidebartitle="Lake Weather Stations"
+          sidebartitle="Plot Controls"
           left={
             <React.Fragment>
-              <SwissTopoMap
-                markers={markers}
-                zoom={zoom}
-                center={center}
+              <LiveMap
+                polygon={dataArray[dataIndex]}
+                polygonOpacity={1}
+                colorbar={colorbar}
+                color={this.color}
+                hoverFunc={this.hoverFunc}
+                unit={unit}
+                loading={loading}
+                visibleMarkers={visibleMarkers}
+                markerData={markerData}
+                markerGroups={stations}
+                markerOpacity={1}
+                popup={this.stationPopup}
                 legend={
-                  <React.Fragment>
-                    <div className={legend}>
-                      <div
-                        className="legend-top"
-                        title="Hide legend"
-                        onClick={this.toggle.bind(this)}
-                      >
-                        <h3>
-                          <div className="legend-title">Legend</div>
-                          <span>></span>
-                        </h3>
-                      </div>
-                      <div className="legend-block">
-                        <div className="legend-item">
-                          <img src={DW} alt="" />
-                          <div className="legend-text">
-                            Lake Weather Station
-                          </div>
-                        </div>
-                        <div className="legend-item">
-                          <img src={FR} alt="" />
-                          <div className="legend-text">FOEN River Station</div>
-                        </div>
-                        <div className="legend-item">
-                          <img src={PR} alt="" />
-                          <div className="legend-text">
-                            Partner Road Weather Station
-                          </div>
-                        </div>
-                      </div>
-                      <div className="legend-block">
-                        <div className="legend-item">
-                          <img src={PW} alt="" />
-                          <div className="legend-text">
-                            Partner Weather Station
-                          </div>
-                        </div>
-                        <div className="legend-item">
-                          <img src={PP} alt="" />
-                          <div className="legend-text">Partner Rain Gauge</div>
-                        </div>
-                        <div className="legend-item">
-                          <img src={PA} alt="" />
-                          <div className="legend-text">
-                            Partner Agrometeoro Station
-                          </div>
-                        </div>
-                      </div>
-                      <div className="legend-block">
-                        <div className="legend-item">
-                          <img src={MW} alt="" />
-                          <div className="legend-text">
-                            MeteoSwiss Weather Station
-                          </div>
-                        </div>
-                        <div className="legend-item">
-                          <img src={MP} alt="" />
-                          <div className="legend-text">
-                            MeteoSwiss Rain Gauge
-                          </div>
-                        </div>
-                        <div className="legend-item">
-                          <img src={MC} alt="" />
-                          <div className="legend-text">MeteoSwiss Webcam</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className={legendsmall}
-                      onClick={this.toggle.bind(this)}
-                    >
-                      <div className="legend-top" title="Show legend">
-                        <h3>
-                          <div className="legend-title">Legend</div>
-                          <span>></span>
-                        </h3>
-                      </div>
-                    </div>
-                  </React.Fragment>
+                  <ColorBar
+                    min={min}
+                    max={max}
+                    setMax={this.setMax}
+                    setMin={this.setMin}
+                    minColor={minColor}
+                    maxColor={maxColor}
+                    setMinColor={this.setMinColor}
+                    setMaxColor={this.setMaxColor}
+                    unit={unit}
+                    text={list[dataIndex].description}
+                  />
                 }
               />
             </React.Fragment>
           }
-          right={<WeatherStations datalist={this.state.lakeStations} />}
+          rightNoScroll={
+            <React.Fragment>
+              <table>
+                <tbody>
+                  {stations.map(station => (
+                    <tr key={station.value}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          id={station.value}
+                          value={station.value}
+                          onChange={this.makerChange}
+                        />
+                      </td>
+                      <td>{station.name}</td>
+                      <td>
+                        <div
+                          className={station.shape}
+                        ></div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <FilterBox
+                title="Satellite Data"
+                content={
+                  <React.Fragment>
+                    <DataSelect
+                      value="name"
+                      label="name"
+                      dataList={list}
+                      defaultValue={list[dataIndex].name}
+                      onChange={this.handleSelect}
+                    />
+                    <Link to="remotesensing"><button>Advanced remote sensing features</button></Link>
+                  </React.Fragment>
+                }
+                preopen="true"
+              />
+              <FilterBox
+                title="Lake Stations"
+                content={
+                  <React.Fragment>
+                    <WeatherStations datalist={markerData.lakestations} />
+                  </React.Fragment>
+                }
+              />
+              <FilterBox
+                title="Display Setting"
+                content={<React.Fragment>Colorbar settings</React.Fragment>}
+              />
+            </React.Fragment>
+          }
         />
       </React.Fragment>
     );

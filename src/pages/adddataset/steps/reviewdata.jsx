@@ -196,8 +196,8 @@ class ReviewData extends Component {
     // Multiple files
     var fT = datasetparameters.filter(dp => dp.parameters_id === 1);
     var filesTime = fT.length > 0 && fT[0].included;
-    var fD = datasetparameters.filter(dp => dp.parameters_id === 2);
-    var filesDepth = fD.length > 0 && fD[0].included;
+    //var fD = datasetparameters.filter(dp => dp.parameters_id === 2);
+    //var filesDepth = fD.length > 0 && fD[0].included;
 
     return (
       <React.Fragment>
