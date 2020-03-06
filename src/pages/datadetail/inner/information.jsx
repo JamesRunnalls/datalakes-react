@@ -28,7 +28,7 @@ class Information extends Component {
     }
 
     return (
-      <React.Fragment>
+      <div className="datadetail-padding">
         <div className="info-width">
           <div className="info-head">Parameters</div>
           <table>
@@ -70,7 +70,7 @@ class Information extends Component {
               <tr>
                 <th>Longitude</th>
                 <td>{dataset.longitude}</td>
-              </tr>         
+              </tr>
               <tr>
                 <th>Depth (m)</th>
                 <td>
@@ -137,7 +137,7 @@ class Information extends Component {
             </tbody>
           </table>
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }

@@ -4,19 +4,27 @@ import Python from "../img/python.svg";
 import "../datadetail.css";
 
 class Pipeline extends Component {
-    render() {
-      const { dataset } = this.props;
-      if (dataset.renku === 1) {
-        return (
+  render() {
+    const { dataset } = this.props;
+    if (dataset.renku === 1) {
+      return (
+        <div className="datadetail-padding">
           <div className="pipeline">
             <div className="pipeline-header">
               Lineage information for this dataset has not been provided by the
               Renku knowledge graph. <br />
-              The lineage information has been added by the data owner and cannot
-              be guaranteed to be reproducible.
+              The lineage information has been added by the data owner and
+              cannot be guaranteed to be reproducible.
             </div>
             <div className="diagram">
-              <a target="_blank" href={dataset.pre_file.includes("http") ? dataset.pre_file : `http://${dataset.pre_file}`}>
+              <a
+                target="_blank"
+                href={
+                  dataset.pre_file.includes("http")
+                    ? dataset.pre_file
+                    : `http://${dataset.pre_file}`
+                }
+              >
                 <img
                   src={Database}
                   alt="Database"
@@ -25,7 +33,14 @@ class Pipeline extends Component {
                 <div className="">Precursor Dataset</div>
               </a>
               <div className="separator half"></div>
-              <a target="_blank" href={dataset.pre_script.includes("http") ? dataset.pre_script : `http://${dataset.pre_script}`}>
+              <a
+                target="_blank"
+                href={
+                  dataset.pre_script.includes("http")
+                    ? dataset.pre_script
+                    : `http://${dataset.pre_script}`
+                }
+              >
                 <img
                   src={Python}
                   alt="Python"
@@ -40,11 +55,12 @@ class Pipeline extends Component {
               </a>
             </div>
           </div>
-        );
-      } else {
-        return <div>See lineage in Renku</div>;
-      }
+        </div>
+      );
+    } else {
+      return <div>See lineage in Renku</div>;
     }
   }
+}
 
-  export default Pipeline;
+export default Pipeline;

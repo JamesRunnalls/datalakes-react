@@ -331,6 +331,7 @@ class Predictions extends Component {
                     setMinColor={this.setMinColor}
                     setMaxColor={this.setMaxColor}
                     unit="°C"
+                    text="Lake surface temperature"
                   />
                 }
                 hover={<div ref="hoverTemp" className="hoverTemp"></div>}

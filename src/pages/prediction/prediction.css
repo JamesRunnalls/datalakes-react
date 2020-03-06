@@ -13,14 +13,13 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .hoverTemp {
   display: none;
-  width: 80px;
   text-align: center;
   z-index: 999;
   position: absolute;
-  top: 0;
-  right: 30px;
+  bottom: 48px;
+  left: 10px;
   font-size: 14px;
-  padding: 5px;
+  padding: 5px 10px;
   background-color: rgba(255, 255, 255, 0.7);
 }
 
@@ -59,5 +58,3 @@ input[type="search"]::-webkit-search-cancel-button {
 .top:hover > .lakeTitle {
   text-decoration: underline;
 }
-
-

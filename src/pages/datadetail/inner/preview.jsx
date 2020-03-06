@@ -2,11 +2,10 @@ import React, { Component } from "react";
 import "../datadetail.css";
 
 class Preview extends Component {
-  
   tableHeader = (i, parameters, getLabel) => {
     return (
       parameters[i] &&
-      `${getLabel("parameters", parameters[i].parameters_id,"name")} (${
+      `${getLabel("parameters", parameters[i].parameters_id, "name")} (${
         parameters[i].unit
       })`
     );
@@ -14,7 +13,7 @@ class Preview extends Component {
 
   tableBody = (i, l, parameters, data) => {
     return parameters[i] && data[parameters[i].axis][l];
-  }
+  };
 
   render() {
     var { data, parameters, getLabel } = this.props;
@@ -37,35 +36,37 @@ class Preview extends Component {
       inner.push(
         <tr key={"h" + l}>
           <th>{l + 2}</th>
-          <td>{this.tableBody(0,l,parameters,data)}</td>
-          <td>{this.tableBody(1,l,parameters,data)}</td>
-          <td>{this.tableBody(2,l,parameters,data)}</td>
-          <td>{this.tableBody(3,l,parameters,data)}</td>
-          <td>{this.tableBody(4,l,parameters,data)}</td>
-          <td>{this.tableBody(5,l,parameters,data)}</td>
-          <td>{this.tableBody(6,l,parameters,data)}</td>
+          <td>{this.tableBody(0, l, parameters, data)}</td>
+          <td>{this.tableBody(1, l, parameters, data)}</td>
+          <td>{this.tableBody(2, l, parameters, data)}</td>
+          <td>{this.tableBody(3, l, parameters, data)}</td>
+          <td>{this.tableBody(4, l, parameters, data)}</td>
+          <td>{this.tableBody(5, l, parameters, data)}</td>
+          <td>{this.tableBody(6, l, parameters, data)}</td>
         </tr>
       );
     }
 
     return (
       <React.Fragment>
-        <div className="preview-table">
-          <table className="excel">
-            <tbody>
-              <tr>
-                <th></th>
-                <th>a</th>
-                <th>b</th>
-                <th>c</th>
-                <th>d</th>
-                <th>e</th>
-                <th>f</th>
-                <th>g</th>
-              </tr>
-              {inner}
-            </tbody>
-          </table>
+        <div className="datadetail-padding">
+          <div className="preview-table">
+            <table className="excel">
+              <tbody>
+                <tr>
+                  <th></th>
+                  <th>a</th>
+                  <th>b</th>
+                  <th>c</th>
+                  <th>d</th>
+                  <th>e</th>
+                  <th>f</th>
+                  <th>g</th>
+                </tr>
+                {inner}
+              </tbody>
+            </table>
+          </div>
         </div>
       </React.Fragment>
     );

@@ -43,3 +43,15 @@
   .color-picker.right {
     float: right;
   }
+
+  .colorbar-text {
+    text-align: center;
+    padding-bottom: 2px;
+  }
+
+  .color-table{
+    display: none;
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }

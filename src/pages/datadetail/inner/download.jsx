@@ -80,13 +80,13 @@ class Download extends Component {
     if (lower === "NA") lower = min;
 
     var arr = [0];
-    if (files.length > 1){
+    if (files.length > 1) {
       arr = selectedFiles(upper, lower, files, "download");
-    } 
+    }
     var selectedArray = this.fileIdSelect(arr);
 
     return (
-      <React.Fragment>
+      <div className="datadetail-padding">
         <div className="info-title">Licence</div>
         <a
           href={getLabel("licenses", dataset.licenses_id, "link")}
@@ -100,23 +100,27 @@ class Download extends Component {
         <div className="info-title">Download</div>
 
         <div className="multipledownload">
-          {files.length > 1 && <div>
-            <div className="subheading">Select time period for downloads.</div>
-            <SliderDouble
-              onChange={this.onChangeTime}
-              onChangeLower={this.onChangeLower}
-              onChangeUpper={this.onChangeUpper}
-              min={min}
-              max={max}
-              lower={lower}
-              upper={upper}
-              files={files}
-            />
-            <div className="selected-download">
-              {selectedArray.length} of {files.length} files selected for
-              download.
+          {files.length > 1 && (
+            <div>
+              <div className="subheading">
+                Select time period for downloads.
+              </div>
+              <SliderDouble
+                onChange={this.onChangeTime}
+                onChangeLower={this.onChangeLower}
+                onChangeUpper={this.onChangeUpper}
+                min={min}
+                max={max}
+                lower={lower}
+                upper={upper}
+                files={files}
+              />
+              <div className="selected-download">
+                {selectedArray.length} of {files.length} files selected for
+                download.
+              </div>
             </div>
-          </div>}
+          )}
 
           <div className="subheading">Select file type for download.</div>
           <button
@@ -132,7 +136,7 @@ class Download extends Component {
             className="download-button"
             title="Download datasets in NetCDF format"
           >
-            .nc
+            NetCDF
           </button>
           <button
             onClick={() =>
@@ -147,10 +151,10 @@ class Download extends Component {
             className="download-button"
             title="Download datasets in JSON format"
           >
-            .json
+            JSON
           </button>
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }

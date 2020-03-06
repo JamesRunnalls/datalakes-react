@@ -1,6 +1,7 @@
 import "./custommap.css";
 import "./leaflet.css";
 import React, { Component } from "react";
+import { isEqual } from "lodash";
 import L from "leaflet";
 import Loading from "../../components/loading/loading";
 
@@ -90,18 +91,62 @@ class RSmap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps !== this.props) {
+    if (
+      !isEqual(prevProps.polygon, this.props.polygon) ||
+      !isEqual(prevProps.colorbar, this.props.colorbar)
+    ) {
       this.plotPolygons();
+    } else {
+      this.plotMarkers();
     }
     this.map.invalidateSize();
   }
 
   hoverOver = e => {
-    this.props.hoverFunc(e.target.options.title, "over");
+    this.props.hoverFunc(e.target, "over");
   };
 
   hoverOut = e => {
-    this.props.hoverFunc(e.target.options.title, "out");
+    this.props.hoverFunc(e.target, "out");
+  };
+
+  plotMarkers = async () => {
+    var { visibleMarkers, markerData, markerGroups } = this.props;
+    if (!("markerGroup" in this)) this.markerGroup = [];
+
+    // Remove deleted markers
+    for (var group in this.markerGroup) {
+      if (!visibleMarkers.includes(group)) {
+        console.log("Delete", group, this.markerGroup[group]);
+        this.map.removeLayer(this.markerGroup[group]);
+        delete this.markerGroup[group];
+      }
+    }
+
+    var i, j, marker, color, shape, markerValue, groupInfo, markerInfo;
+    // Loop over visible marker groups
+    for (i = 0; i < visibleMarkers.length; i++) {
+      markerValue = visibleMarkers[i];
+      groupInfo = markerGroups.find(x => x.value == markerValue);
+      color = groupInfo.color;
+      shape = groupInfo.shape;
+
+      // Marker group
+      this.markerGroup[markerValue] = L.layerGroup().addTo(this.map);
+      // Loop over markers
+      for (j = 0; j < markerData[markerValue].length; j++) {
+        // Set icon values
+        markerInfo = markerData[markerValue][j];
+        marker = new L.marker([markerInfo["lat"], markerInfo["lon"]], {
+          icon: L.divIcon({
+            className: "map-marker",
+            html: `<div class="${shape}" style="background-color:${color}"></div> `
+          })
+        }).addTo(this.markerGroup[markerValue]);
+        marker.bindPopup(markerInfo["popup"]);
+      }
+    }
+    console.log(visibleMarkers, this.markerGroup);
   };
 
   plotPolygons = async () => {
@@ -109,7 +154,7 @@ class RSmap extends Component {
       this.map.removeLayer(this.polygonLayer);
     } catch (e) {}
     if (!this.props.loading) {
-      var { data, colorbar, color } = this.props;
+      var { polygon: data, colorbar, color } = this.props;
       var { min, max, minColor, maxColor } = colorbar;
       var polygons = [];
       var coords;
