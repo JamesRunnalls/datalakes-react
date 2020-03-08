@@ -5,11 +5,12 @@ import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
 import DataSelect from "../../components/dataselect/dataselect";
-import './remotesensing.css';
+import GradientSelect from "../../components/gradientselect/gradientselect";
+import "./remotesensing.css";
 
 class RemoteSensingSidebar extends Component {
   render() {
-    var { list, dataIndex, handleSelect } = this.props;
+    var { list, dataIndex, handleSelect, array } = this.props;
     return (
       <div className="map-sidebar">
         <DataSelect
@@ -19,6 +20,7 @@ class RemoteSensingSidebar extends Component {
           defaultValue={list[dataIndex].name}
           onChange={handleSelect}
         />
+        <GradientSelect array={array} />
       </div>
     );
   }
@@ -178,6 +180,10 @@ class RemoteSensing extends Component {
       maxColor: maxColor
     };
     var unit = list[dataIndex].unit;
+
+    var array = [];
+    if (dataArray[dataIndex]) array = dataArray[dataIndex].v;
+
     return (
       <React.Fragment>
         <h1>Remote Sensing</h1>
@@ -195,6 +201,7 @@ class RemoteSensing extends Component {
               list={list}
               dataIndex={dataIndex}
               handleSelect={this.handleSelect}
+              array={array}
             />
           }
           legend={
