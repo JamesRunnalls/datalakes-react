@@ -201,7 +201,7 @@ class ReviewData extends Component {
 
     return (
       <React.Fragment>
-        <form>
+        <form className="adddataset-form">
           <table className="datareview">
             <tbody>
               <tr>

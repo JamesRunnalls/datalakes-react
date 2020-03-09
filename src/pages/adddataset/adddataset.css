@@ -79,18 +79,14 @@
   margin-bottom: 120px;
 }
 
-.adddataform {
-  text-align: center;
-}
-
-form select {
+form.adddataset-form select {
   font-size: 14px;
   margin-left: 5px;
   margin-right: 5px;
   background-color: white;
 }
 
-form .form-group {
+form.adddataset-form .form-group {
   display: inline-block;
   text-align: center;
   padding: 10px 20px;
@@ -98,13 +94,13 @@ form .form-group {
   box-sizing: border-box;
 }
 
-form .form-group label {
+form.adddataset-form .form-group label {
   display: block;
   color: grey;
   padding-bottom: 3px;
 }
 
-form input {
+form.adddataset-form input {
   font-size: 14px;
   width: 100%;
   border: solid 1px rgb(169,169,169);
@@ -112,6 +108,7 @@ form input {
   padding: 7px 5px;
   margin-bottom: 0;
   background-color: white;
+  text-align: center;
 }
 
 .repo-connection {

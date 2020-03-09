@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
-import "./gradientselect.css";
+import "./colorslider.css";
 
-class GradientSelect extends Component {
-  state = {};
+class ColorSlider extends Component {
+  state = {
+  };
 
   histogram = (array, bins) => {
     var min = Math.min(...array);
@@ -27,16 +28,16 @@ class GradientSelect extends Component {
       d3.select("#histogramsvg").remove();
     } catch (e) {}
 
-    var { array } = this.props;
+    var { array, colors } = this.props;
+
     if (this.props.array.length > 0) {
       try {
-        var bins = 200;
+        var bins = 500;
 
         var { bin_width, data } = this.histogram(array, bins);
 
         // Set graph size
-        var margin = { top: 0, right: 0, bottom: 0, left: 0 },
-          histogramwidth = d3
+        var histogramwidth = d3
             .select("#histogram")
             .node()
             .getBoundingClientRect().width,
@@ -53,11 +54,7 @@ class GradientSelect extends Component {
           .attr("id", "histogramsvg")
           .attr("width", width)
           .attr("height", height)
-          .append("g")
-          .attr(
-            "transform",
-            "translate(" + margin.left + "," + margin.top + ")"
-          );
+          .append("g");
 
         var x = d3
           .scaleLinear()
@@ -100,7 +97,37 @@ class GradientSelect extends Component {
           .attr("height", function(d) {
             return height - y(d.y);
           })
-          .style("fill", "#000");
+          .style("fill", "#fff");
+
+        // Create gradients
+
+        var defs = svg.append("defs");
+        defs
+          .append("linearGradient")
+          .attr("id", "svgGradient")
+          .attr("x1", "0%")
+          .attr("y1", "0%")
+          .attr("x2", "100%")
+          .attr("y2", "0%")
+          .selectAll("stop")
+          .data(colors)
+          .enter()
+          .append("stop")
+          .attr("offset", function(d) {
+            return d.point;
+          })
+          .attr("stop-color", function(d) {
+            return d.color;
+          });
+
+        svg
+          .append("g")
+          .append("rect")
+          .attr("width", width)
+          .attr("height", 20)
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("fill", "url(#svgGradient)");
 
         // Zooming and Panning
         var zoom = d3
@@ -134,7 +161,6 @@ class GradientSelect extends Component {
           x.domain(d3.event.transform.rescaleX(xx).domain());
           //y.domain(d3.event.transform.rescaleY(yy).domain());
 
-
           bars
             .attr("x", function(d) {
               return x(d.x);
@@ -165,10 +191,10 @@ class GradientSelect extends Component {
   render() {
     return (
       <div>
-        <div id="histogram" className="gradientselect-histogram"></div>
+        <div id="histogram" className="colorslider-histogram"></div>
       </div>
     );
   }
 }
 
-export default GradientSelect;
+export default ColorSlider;

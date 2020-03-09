@@ -4,12 +4,12 @@ import React, { Component } from "react";
 import { isEqual } from "lodash";
 import L from "leaflet";
 import Loading from "../../components/loading/loading";
+import { getColor } from "../../components/gradients/gradients";
 
 class LiveMap extends Component {
   state = {
     help: false,
-    fullsize: false,
-    loading: true
+    fullsize: false
   };
 
   toggleHelp = () => {
@@ -91,14 +91,9 @@ class LiveMap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (
-      !isEqual(prevProps.polygon, this.props.polygon) ||
-      !isEqual(prevProps.colorbar, this.props.colorbar)
-    ) {
-      this.plotPolygons();
-    } else {
-      this.plotMarkers();
-    }
+    this.refs.loadingl.style.display = "block";
+    this.plotPolygons();
+    this.plotMarkers();
     this.map.invalidateSize();
   }
 
@@ -110,23 +105,37 @@ class LiveMap extends Component {
     this.props.hoverFunc(e.target, "out");
   };
 
-  findGroupInfo = (group,value) => {
+  findGroupInfo = (group, value) => {
     return group.find(x => x.value === value);
-  }
+  };
 
   plotMarkers = async () => {
-    var { visibleMarkers, markerData, markerGroups, popup, markerOpacity } = this.props;
+    var {
+      visibleMarkers,
+      markerData,
+      markerGroups,
+      popup,
+      markerOpacity
+    } = this.props;
     // Remove old markers
     if ("markerGroup" in this) {
       this.map.removeLayer(this.markerGroup);
     }
     this.markerGroup = L.layerGroup().addTo(this.map);
 
-    var i, j, marker, color, shape, markerValue, groupInfo, markerInfo, markerPopup;
+    var i,
+      j,
+      marker,
+      color,
+      shape,
+      markerValue,
+      groupInfo,
+      markerInfo,
+      markerPopup;
     // Loop over visible marker groups
     for (i = 0; i < visibleMarkers.length; i++) {
       markerValue = visibleMarkers[i];
-      groupInfo = this.findGroupInfo(markerGroups,markerValue);
+      groupInfo = this.findGroupInfo(markerGroups, markerValue);
       color = groupInfo.color;
       shape = groupInfo.shape;
 
@@ -134,7 +143,7 @@ class LiveMap extends Component {
       for (j = 0; j < markerData[markerValue].length; j++) {
         // Set icon values
         markerInfo = markerData[markerValue][j];
-        markerPopup = popup(markerInfo)
+        markerPopup = popup(markerInfo);
         marker = new L.marker([markerInfo["lat"], markerInfo["lon"]], {
           icon: L.divIcon({
             className: "map-marker",
@@ -151,8 +160,8 @@ class LiveMap extends Component {
       this.map.removeLayer(this.polygonLayer);
     } catch (e) {}
     if (!this.props.loading) {
-      var { polygon: data, colorbar, color, polygonOpacity } = this.props;
-      var { min, max, minColor, maxColor } = colorbar;
+      var { polygon: data, polygonOpacity, colors, min, max } = this.props;
+
       var polygons = [];
       var coords;
       var x = data.lonres / 2;
@@ -164,7 +173,7 @@ class LiveMap extends Component {
           [data.lat[i] + y, data.lon[i] + x],
           [data.lat[i] - y, data.lon[i] + x]
         ];
-        var pixelcolor = color(minColor, maxColor, data.v[i], min, max);
+        var pixelcolor = getColor(data.v[i], min, max, colors);
         polygons.push(
           L.polygon(coords, {
             color: pixelcolor,
@@ -178,24 +187,21 @@ class LiveMap extends Component {
         );
       }
       this.polygonLayer = L.layerGroup(polygons).addTo(this.map);
-      this.setState({ loading: false });
+      this.refs.loadingl.style.display = "none";
     }
   };
 
   render() {
-    var { help, fullsize, loading: mapLoading } = this.state;
-    var { legend, hover, loading: parentLoading } = this.props;
-    var loading = mapLoading || parentLoading;
+    var { help, fullsize } = this.state;
+    var { legend } = this.props;
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
           <div id="map">
-            {loading && (
-              <div ref="loader" className="map-loader">
-                <Loading />
-                Downloading and plotting data
-              </div>
-            )}
+            <div ref="loadingl" className="map-loader">
+              <Loading />
+              Downloading and plotting data
+            </div>
             {help && (
               <div className="help-container show">
                 <div
@@ -213,7 +219,6 @@ class LiveMap extends Component {
             )}
           </div>
           {legend}
-          {hover}
         </div>
       </React.Fragment>
     );

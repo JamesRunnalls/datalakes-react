@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import SwissTopoMap from "../../graphs/leaflet/custommap";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
-import ColorBar from '../../components/colorbar/colorbar';
+import ColorBar from "../../components/colorbar/colorbar";
 import { generateColorRGB } from "../../components/gradients/gradients";
 import { apiUrl } from "../../../config.json";
 import "./prediction.css";
+import PredictionMap from "../../graphs/leaflet/prediction_map";
 
 class ModelInfo extends Component {
   sendPanInfo = geometry => {
@@ -105,8 +105,16 @@ class Predictions extends Component {
     MinTemp: "",
     MaxTemp: "",
     Temp: "",
-    minColor: "#0000FF",
-    maxColor: "#FF0000"
+    colors: [
+      { color: "#000080", point: 0 },
+      { color: "#3366FF", point: 0.142857142857143 },
+      { color: "#00B0DC", point: 0.285714285714286 },
+      { color: "#009933", point: 0.428571428571429 },
+      { color: "#FFFF5B", point: 0.571428571428571 },
+      { color: "#E63300", point: 0.714285714285714 },
+      { color: "#CC0000", point: 0.857142857142857 },
+      { color: "#800000", point: 1 }
+    ]
   };
 
   async componentDidMount() {
@@ -170,17 +178,17 @@ class Predictions extends Component {
     return !isNaN(parseFloat(n)) && isFinite(n);
   };
 
-  setMinColor = event => {
-    var { minColor } = this.state;
-    if (minColor !== event.target.value) {
-      this.setState({ minColor: event.target.value });
-    }
-  };
-
-  setMaxColor = event => {
-    var { maxColor } = this.state;
-    if (maxColor !== event.target.value) {
-      this.setState({ maxColor: event.target.value });
+  hoverFunc = (target, type) => {
+    if (type === "over") {
+      document.getElementById("color-table").style.display = "block";
+      document.getElementById("hoverValue").innerHTML =
+        Math.round(parseFloat(target.options.title) * 100) / 100 + "°C";
+      document.getElementById("hoverLat").innerHTML =
+        Math.round(parseFloat(target._latlngs[0][0].lat) * 1000) / 1000;
+      document.getElementById("hoverLon").innerHTML =
+        Math.round(parseFloat(target._latlngs[0][0].lng) * 1000) / 1000;
+    } else {
+      document.getElementById("color-table").style.display = "none";
     }
   };
 
@@ -202,11 +210,6 @@ class Predictions extends Component {
     if (this.isNumeric(MaxTemp) && MaxTemp < 40) {
       this.setState({ MaxTemp });
     }
-  };
-
-  hideTemp = () => {
-    ReactDOM.findDOMNode(this.refs.hoverTemp).style.display = "none";
-    ReactDOM.findDOMNode(this.refs.hoverTemp).innerHTML = "";
   };
 
   setMap = map => {
@@ -260,25 +263,6 @@ class Predictions extends Component {
     );
   };
 
-  lakeColor = (minColor, maxColor, temp, mintemp, maxtemp) => {
-    var gradient = generateColorRGB(minColor, maxColor, 100);
-    var lakecolor = "";
-    if (temp > maxtemp) {
-      lakecolor = "#000000";
-    } else if (temp < mintemp) {
-      lakecolor = "#FFFFFF";
-    } else {
-      lakecolor =
-        gradient[
-          parseInt(
-            gradient.length / ((maxtemp - mintemp) / (temp - mintemp)),
-            10
-          )
-        ];
-    }
-    return lakecolor;
-  };
-
   keyPress = (e, data) => {
     if (e.keyCode === 13) {
       var dataset = data.properties;
@@ -294,7 +278,7 @@ class Predictions extends Component {
 
   render() {
     document.title = "Predictions - Datalakes";
-    var { MaxTemp, MinTemp, minColor, maxColor } = this.state;
+    var { MaxTemp, MinTemp, colors } = this.state;
 
     // Filter lakes
     var lowercasedSearch = this.state.search.toLowerCase();
@@ -309,32 +293,25 @@ class Predictions extends Component {
           sidebartitle="Lake Models"
           left={
             <React.Fragment>
-              <SwissTopoMap
+              <PredictionMap
                 geojson={this.state.geojson}
                 popupfunction={this.propertiesPopup}
-                lakeColor={this.lakeColor}
-                colorbar={[this.state.MinTemp, this.state.MaxTemp]}
+                colors={colors}
+                min={MinTemp}
+                max={MaxTemp}
                 setMap={this.setMap}
                 setTemp={this.setTemp}
-                minColor={minColor}
-                maxColor={maxColor}
-                hideTemp={this.hideTemp}
                 threeD={this.state.meteolakes}
+                hoverFunc={this.hoverFunc}
                 legend={
                   <ColorBar
                     min={MinTemp}
                     max={MaxTemp}
-                    setMax={this.setMaxTemp}
-                    setMin={this.setMinTemp}
-                    minColor={minColor}
-                    maxColor={maxColor}
-                    setMinColor={this.setMinColor}
-                    setMaxColor={this.setMaxColor}
+                    colors={colors}
                     unit="°C"
                     text="Lake surface temperature"
                   />
                 }
-                hover={<div ref="hoverTemp" className="hoverTemp"></div>}
               />
             </React.Fragment>
           }

@@ -45,7 +45,7 @@ class AddData extends Component {
 
     return (
       <React.Fragment>
-        <form className="adddataform">
+        <form className="adddataset-form">
           <div className="form-group">
             <label htmlFor="git">Link to Git File</label>
             <input

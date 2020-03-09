@@ -2,69 +2,48 @@ import React, { Component } from "react";
 import "./colorbar.css";
 
 class ColorBar extends Component {
+  linearGradient = colors => {
+    if (colors) {
+      var lineargradient = [];
+      for (var i = 0; i < colors.length; i++) {
+        lineargradient.push(`${colors[i].color} ${colors[i].point * 100}%`);
+      }
+      return `linear-gradient(90deg,${lineargradient.join(",")})`;
+    }
+  };
   render() {
-    var {
-      setMin,
-      setMax,
-      min,
-      max,
-      minColor,
-      maxColor,
-      setMinColor,
-      setMaxColor,
-      unit,
-      text
-    } = this.props;
+    var { min, max, unit, text, colors } = this.props;
     const barStyle = {
-      background: `linear-gradient(90deg,${minColor} 0%,${maxColor} 100%)`
+      background: this.linearGradient(colors)
     };
     return (
       <div id="colorbar">
-        <div className="colorbar-text">{text}</div>
-        <table className="color-table" id="color-table">
-          <tbody>
-            <tr>
-              <td>Value:</td>
-              <td id="hoverValue"></td>
-              <td style={{paddingLeft: "10px"}}>Lat:</td>
-              <td id="hoverLat"></td>
-              <td style={{paddingLeft: "10px"}}>Lon:</td>
-              <td id="hoverLon"></td>
-            </tr>
-          </tbody>
-        </table>
-        <div className="colorbar-inner">
-          <input
-            title="Edit minimum"
-            type="text"
-            defaultValue={min}
-            onBlur={setMin}
-          ></input>{" "}
-          {unit}
-          <div id="bar" style={barStyle} title="Legend colorbar">
-            <input
-              type="color"
-              defaultValue={minColor}
-              onFocus={setMinColor}
-              className="color-picker"
-              title="Edit minimum color"
-            />
-            <input
-              type="color"
-              defaultValue={maxColor}
-              onFocus={setMaxColor}
-              className="color-picker right"
-              title="Edit maximum color"
-            />
+        {text && (
+          <div>
+            <div className="colorbar-text">{`${text} (${unit})`}</div>
+            <table className="color-table" id="color-table">
+              <tbody>
+                <tr>
+                  <td>Value:</td>
+                  <td id="hoverValue"></td>
+                  <td style={{ paddingLeft: "10px" }}>Lat:</td>
+                  <td id="hoverLat"></td>
+                  <td style={{ paddingLeft: "10px" }}>Lon:</td>
+                  <td id="hoverLon"></td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="colorbar-inner">
+              <div className="colorbar-value" title="Minimum value">
+                {min}
+              </div>
+              <div id="bar" style={barStyle} title="Legend colorbar"></div>
+              <div className="colorbar-value" title="Maximum value">
+                {max}
+              </div>
+            </div>
           </div>
-          <input
-            title="Edit maximum"
-            type="text"
-            defaultValue={max}
-            onBlur={setMax}
-          ></input>{" "}
-          {unit}
-        </div>
+        )}
       </div>
     );
   }

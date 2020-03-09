@@ -41,3 +41,7 @@
 .inner__indicator.inner__clear-indicator {
   cursor: pointer;
 }
+
+.multi-select {
+  color: black;
+}

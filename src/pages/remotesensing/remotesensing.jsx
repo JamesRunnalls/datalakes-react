@@ -5,22 +5,71 @@ import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
 import DataSelect from "../../components/dataselect/dataselect";
-import GradientSelect from "../../components/gradientselect/gradientselect";
+import ColorSlider from "../../components/colorslider/colorslider";
+import FilterBox from "../../components/filterbox/filterbox";
 import "./remotesensing.css";
+import ColorTable from "../../components/colortable/colortable";
+import ColorRamp from "../../components/colorramp/colorramp";
 
 class RemoteSensingSidebar extends Component {
+  state = {
+    open: true
+  };
+  toggle = () => {
+    this.setState({ open: !this.state.open });
+  };
   render() {
-    var { list, dataIndex, handleSelect, array } = this.props;
+    var {
+      list,
+      dataIndex,
+      handleSelect,
+      array,
+      colors,
+      min,
+      max,
+      updateParentColors
+    } = this.props;
+    var { open } = this.state;
     return (
-      <div className="map-sidebar">
-        <DataSelect
-          value="name"
-          label="name"
-          dataList={list}
-          defaultValue={list[dataIndex].name}
-          onChange={handleSelect}
-        />
-        <GradientSelect array={array} />
+      <div className={open ? "map-sidebar" : "map-sidebar minimised"}>
+        <div
+          className="map-sidebar-symbol"
+          onClick={this.toggle}
+          title="Toggle Sidebar"
+        >
+          {open ? "\u2715" : "\u2630"}
+        </div>
+        <div className="map-sidebar-content">
+          <FilterBox
+            title="Layers"
+            content={
+              <DataSelect
+                value="name"
+                label="name"
+                dataList={list}
+                defaultValue={list[dataIndex].name}
+                onChange={handleSelect}
+              />
+            }
+            preopen="true"
+          />
+          <FilterBox preopen="true" title="Color Ramp" content={<ColorRamp />} />
+          <FilterBox
+            title="Color Table"
+            content={
+              <ColorTable
+                colors={colors}
+                min={min}
+                max={max}
+                updateParentColors={updateParentColors}
+              />
+            }
+          />
+          <FilterBox
+            title="Color Sliders"
+            content={<ColorSlider array={array} colors={colors} />}
+          />
+        </div>
       </div>
     );
   }
@@ -32,28 +81,22 @@ class RemoteSensing extends Component {
     dataArray: [],
     min: "",
     max: "",
-    minColor: "#0000FF",
-    maxColor: "#FF0000",
     dataIndex: 0,
     loading: false,
     unit: "",
     markerData: {},
     visibleMarkers: [],
-    stations: []
-  };
-
-  setMinColor = event => {
-    var { minColor } = this.state;
-    if (minColor !== event.target.value) {
-      this.setState({ minColor: event.target.value });
-    }
-  };
-
-  setMaxColor = event => {
-    var { maxColor } = this.state;
-    if (maxColor !== event.target.value) {
-      this.setState({ maxColor: event.target.value });
-    }
+    stations: [],
+    colors: [
+      { color: "#000080", point: 0 },
+      { color: "#3366FF", point: 0.142857142857143 },
+      { color: "#00B0DC", point: 0.285714285714286 },
+      { color: "#009933", point: 0.428571428571429 },
+      { color: "#FFFF5B", point: 0.571428571428571 },
+      { color: "#E63300", point: 0.714285714285714 },
+      { color: "#CC0000", point: 0.857142857142857 },
+      { color: "#800000", point: 1 }
+    ]
   };
 
   setMin = event => {
@@ -70,18 +113,8 @@ class RemoteSensing extends Component {
     }
   };
 
-  color = (minColor, maxColor, value, min, max) => {
-    var gradient = generateColorRGB(minColor, maxColor, 100);
-    var pixelcolor = "";
-    if (value > max) {
-      pixelcolor = "transparent";
-    } else if (value < min) {
-      pixelcolor = "transparent";
-    } else {
-      pixelcolor =
-        gradient[parseInt(gradient.length / ((max - min) / (value - min)), 10)];
-    }
-    return pixelcolor;
+  updateParentColors = colors => {
+    this.setState({ colors });
   };
 
   isNumeric = n => {
@@ -163,22 +196,7 @@ class RemoteSensing extends Component {
 
   render() {
     document.title = "Remote Sensing - Datalakes";
-    var {
-      list,
-      dataArray,
-      dataIndex,
-      min,
-      max,
-      minColor,
-      maxColor,
-      loading
-    } = this.state;
-    var colorbar = {
-      max: max,
-      min: min,
-      minColor: minColor,
-      maxColor: maxColor
-    };
+    var { list, dataArray, dataIndex, min, max, loading, colors } = this.state;
     var unit = list[dataIndex].unit;
 
     var array = [];
@@ -190,30 +208,30 @@ class RemoteSensing extends Component {
         <RemoteSensingMap
           polygon={dataArray[dataIndex]}
           polygonOpacity={1}
-          colorbar={colorbar}
-          color={this.color}
+          min={min}
+          max={max}
           hoverFunc={this.hoverFunc}
           unit={unit}
           loading={loading}
           popup={this.stationPopup}
+          colors={colors}
           sidebar={
             <RemoteSensingSidebar
               list={list}
               dataIndex={dataIndex}
               handleSelect={this.handleSelect}
               array={array}
+              colors={colors}
+              min={min}
+              max={max}
+              updateParentColors={this.updateParentColors}
             />
           }
           legend={
             <ColorBar
               min={min}
               max={max}
-              setMax={this.setMax}
-              setMin={this.setMin}
-              minColor={minColor}
-              maxColor={maxColor}
-              setMinColor={this.setMinColor}
-              setMaxColor={this.setMaxColor}
+              colors={colors}
               unit={unit}
               text={list[dataIndex].description}
             />

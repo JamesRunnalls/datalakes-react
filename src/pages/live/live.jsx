@@ -8,6 +8,7 @@ import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
 import DataSelect from "../../components/dataselect/dataselect";
 import FilterBox from "../../components/filterbox/filterbox";
+import ColorTable from "../../components/colortable/colortable";
 
 class WeatherStation extends Component {
   render() {
@@ -47,28 +48,22 @@ class Live extends Component {
     dataArray: [],
     min: "",
     max: "",
-    minColor: "#0000FF",
-    maxColor: "#FF0000",
     dataIndex: 0,
     loading: false,
     unit: "",
     markerData: {},
     visibleMarkers: [],
-    stations: []
-  };
-
-  setMinColor = event => {
-    var { minColor } = this.state;
-    if (minColor !== event.target.value) {
-      this.setState({ minColor: event.target.value });
-    }
-  };
-
-  setMaxColor = event => {
-    var { maxColor } = this.state;
-    if (maxColor !== event.target.value) {
-      this.setState({ maxColor: event.target.value });
-    }
+    stations: [],
+    colors: [
+      { color: "#000080", point: 0 },
+      { color: "#3366FF", point: 0.142857142857143 },
+      { color: "#00B0DC", point: 0.285714285714286 },
+      { color: "#009933", point: 0.428571428571429 },
+      { color: "#FFFF5B", point: 0.571428571428571 },
+      { color: "#E63300", point: 0.714285714285714 },
+      { color: "#CC0000", point: 0.857142857142857 },
+      { color: "#800000", point: 1 }
+    ]
   };
 
   setMin = event => {
@@ -154,6 +149,10 @@ class Live extends Component {
     }
   };
 
+  updateParentColors = colors => {
+    this.setState({ colors });
+  };
+
   makerChange = event => {
     var { visibleMarkers } = this.state;
     var value = event.target.value;
@@ -233,19 +232,12 @@ class Live extends Component {
       dataIndex,
       min,
       max,
-      minColor,
-      maxColor,
       loading,
       markerData,
       visibleMarkers,
-      stations
+      stations,
+      colors
     } = this.state;
-    var colorbar = {
-      max: max,
-      min: min,
-      minColor: minColor,
-      maxColor: maxColor
-    };
     var unit = list[dataIndex].unit;
     return (
       <React.Fragment>
@@ -257,8 +249,6 @@ class Live extends Component {
               <LiveMap
                 polygon={dataArray[dataIndex]}
                 polygonOpacity={1}
-                colorbar={colorbar}
-                color={this.color}
                 hoverFunc={this.hoverFunc}
                 unit={unit}
                 loading={loading}
@@ -267,16 +257,14 @@ class Live extends Component {
                 markerGroups={stations}
                 markerOpacity={1}
                 popup={this.stationPopup}
+                colors={colors}
+                min={min}
+                max={max}
                 legend={
                   <ColorBar
                     min={min}
                     max={max}
-                    setMax={this.setMax}
-                    setMin={this.setMin}
-                    minColor={minColor}
-                    maxColor={maxColor}
-                    setMinColor={this.setMinColor}
-                    setMaxColor={this.setMaxColor}
+                    colors={colors}
                     unit={unit}
                     text={list[dataIndex].description}
                   />
@@ -300,9 +288,7 @@ class Live extends Component {
                       </td>
                       <td>{station.name}</td>
                       <td>
-                        <div
-                          className={station.shape}
-                        ></div>
+                        <div className={station.shape}></div>
                       </td>
                     </tr>
                   ))}
@@ -319,7 +305,11 @@ class Live extends Component {
                       defaultValue={list[dataIndex].name}
                       onChange={this.handleSelect}
                     />
-                    <Link to="remotesensing"><button>Advanced remote sensing features</button></Link>
+                    <Link to="remotesensing">
+                      <button style={{ width: "100%" }}>
+                        Advanced remote sensing features
+                      </button>
+                    </Link>
                   </React.Fragment>
                 }
                 preopen="true"
@@ -333,8 +323,15 @@ class Live extends Component {
                 }
               />
               <FilterBox
-                title="Display Setting"
-                content={<React.Fragment>Colorbar settings</React.Fragment>}
+                title="Display Settings"
+                content={
+                  <ColorTable
+                    colors={colors}
+                    min={min}
+                    max={max}
+                    updateParentColors={this.updateParentColors}
+                  />
+                }
               />
             </React.Fragment>
           }

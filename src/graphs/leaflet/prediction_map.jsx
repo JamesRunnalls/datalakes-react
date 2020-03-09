@@ -5,11 +5,10 @@ import L from "leaflet";
 import Loading from "../../components/loading/loading";
 import { getColor } from "../../components/gradients/gradients";
 
-class SwissTopoMap extends Component {
+class PredictionMap extends Component {
   state = {
     help: false,
-    fullsize: false,
-    loading: true
+    fullsize: false
   };
 
   toggleHelp = () => {
@@ -91,11 +90,9 @@ class SwissTopoMap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps !== this.props) {
-      this.plotGeoJSON(this.props);
-      this.plotPolygons(this.props);
-      this.plotMarkers(this.props);
-    }
+    this.refs.loadingp.style.display = "block";
+    this.plotGeoJSON(this.props);
+    this.plotPolygons(this.props);
     this.map.invalidateSize();
   }
 
@@ -111,8 +108,16 @@ class SwissTopoMap extends Component {
     this.props.hideTemp();
   };
 
+  hoverOver = e => {
+    this.props.hoverFunc(e.target, "over");
+  };
+
+  hoverOut = e => {
+    this.props.hoverFunc(e.target, "out");
+  };
+
   plotPolygons = props => {
-    if ("threeD" in props && props.colorbar[0] !== "") {
+    if ("threeD" in props) {
       // Remove old layers
       if ("polygons" in this) {
         this.map.removeLayer(this.polygons);
@@ -122,20 +127,13 @@ class SwissTopoMap extends Component {
       const findLake = (geo, lake) => {
         return geo.find(c => c.properties.name === lake.name);
       };
+      var { min, max, colors } = this.props;
       for (var lake of props.threeD) {
         // Plot polygons
         var polygons = [];
-        let mintemp = props.colorbar[0];
-        let maxtemp = props.colorbar[1];
         let GeoPopupFunction = props.popupfunction;
         for (var px of lake.data) {
-          var lakecolor = props.lakeColor(
-            props.minColor,
-            props.maxColor,
-            px["v"],
-            mintemp,
-            maxtemp
-          );
+          var lakecolor = getColor(px["v"], min, max, colors);
           polygons.push(
             L.polygon(px["g"], {
               color: lakecolor,
@@ -143,8 +141,8 @@ class SwissTopoMap extends Component {
               fillOpacity: 1,
               title: px["v"]
             })
-              .on({ mouseover: this.showPolygonTemp })
-              .on({ mouseout: this.hideGeojsonTemp })
+              .on({ mouseover: this.hoverOver })
+              .on({ mouseout: this.hoverOut })
           );
         }
         var popup = findLake(props.geojson, lake);
@@ -155,59 +153,17 @@ class SwissTopoMap extends Component {
         );
       }
       this.polygons = L.layerGroup(lakes);
-      this.setState({ loading: false });
-    }
-  };
-
-  plotMarkers = props => {
-    if ("markers" in props) {
-      var Icon = L.icon({
-        iconUrl: "./img/DW.svg",
-        iconSize: [12, 12]
-      });
-
-      for (var marker of props.markers) {
-        if ("icon" in marker) {
-          Icon = L.icon({
-            iconUrl: "./img/" + marker["icon"] + ".svg",
-            iconSize: [9, 9]
-          });
-        }
-
-        var mark = new L.marker([marker["lat"], marker["lon"]], {
-          icon: Icon
-        }).addTo(this.map);
-
-        if ("popup" in marker) {
-          mark.bindPopup(marker["popup"]);
-        }
-
-        if ("tooltip" in marker) {
-          mark.bindTooltip(marker["tooltip"], {
-            permanent: true,
-            direction: "top",
-            interactive: true
-          });
-        }
-      }
-      this.setState({ loading: false });
+      this.refs.loadingp.style.display = "none";
     }
   };
 
   plotGeoJSON = props => {
-    if (
-      "geojson" in props &&
-      "popupfunction" in props &&
-      "colorbar" in props &&
-      props.colorbar[0] !== ""
-    ) {
+    if ("geojson" in props && "popupfunction" in props) {
       if ("geojson" in this) {
         this.map.removeLayer(this.geojson);
       }
-      let LakeColor = props.lakeColor;
+      var { min, max, colors } = this.props;
       let GeoPopupFunction = props.popupfunction;
-      let mintemp = props.colorbar[0];
-      let maxtemp = props.colorbar[1];
       let geojson = {
         type: "FeatureCollection",
         name: "Swiss Lake Models",
@@ -220,22 +176,9 @@ class SwissTopoMap extends Component {
       this.geojson = L.geoJSON(geojson, {
         style: layer => {
           var lakeTemp = layer.properties.surfacetemperature;
-          var lakeColor = LakeColor(
-            props.minColor,
-            props.maxColor,
-            lakeTemp,
-            mintemp,
-            maxtemp
-          );
+          var lakeColor = getColor(lakeTemp, min, max, colors);
           var fillopacity = 1;
           var opacity = 1;
-          //if (
-          //  layer.properties.meteolakes !== "" ||
-          //  layer.properties.datalakes !== ""
-          //) {
-          //  fillopacity = 0;
-          //  opacity = 0;
-          //}
           return {
             color: lakeColor,
             fillOpacity: fillopacity,
@@ -247,29 +190,20 @@ class SwissTopoMap extends Component {
           return GeoPopupFunction(layer.feature.properties);
         })
         .addTo(this.map);
-      this.geojson.eachLayer(layer => {
-        layer.on("mouseover", () =>
-          this.showGeojsonTemp(layer.feature.properties.surfacetemperature)
-        );
-        layer.on("mouseout", this.hideGeojsonTemp);
-      });
-      this.setState({ loading: false });
     }
   };
 
   render() {
-    var { help, fullsize, loading } = this.state;
+    var { help, fullsize } = this.state;
     var { legend, hover } = this.props;
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
           <div id="map">
-            {loading && (
-              <div ref="loader" className="map-loader">
-                <Loading />
-                Downloading map data
-              </div>
-            )}
+            <div ref="loadingp" className="map-loader">
+              <Loading />
+              Downloading map data
+            </div>
             {help && (
               <div className="help-container show">
                 <div
@@ -294,4 +228,4 @@ class SwissTopoMap extends Component {
   }
 }
 
-export default SwissTopoMap;
+export default PredictionMap;

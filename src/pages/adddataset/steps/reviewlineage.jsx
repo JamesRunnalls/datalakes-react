@@ -76,7 +76,7 @@ class ReviewLineage extends Component {
     }
     return (
       <React.Fragment>
-        <form>
+        <form className="adddataset-form">
           {content}
           <div className="error-message">{message}</div>
           <div className="buttonnav">

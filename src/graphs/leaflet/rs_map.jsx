@@ -4,12 +4,12 @@ import React, { Component } from "react";
 import { isEqual } from "lodash";
 import L from "leaflet";
 import Loading from "../../components/loading/loading";
+import { getColor } from "../../components/gradients/gradients";
 
 class RemoteSensingMap extends Component {
   state = {
     help: false,
-    fullsize: false,
-    loading: true
+    fullsize: false
   };
 
   toggleHelp = () => {
@@ -91,12 +91,8 @@ class RemoteSensingMap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (
-      !isEqual(prevProps.polygon, this.props.polygon) ||
-      !isEqual(prevProps.colorbar, this.props.colorbar)
-    ) {
-      this.plotPolygons();
-    }
+    this.refs.loadingrs.style.display = "block";
+    this.plotPolygons();
     this.map.invalidateSize();
   }
 
@@ -108,13 +104,16 @@ class RemoteSensingMap extends Component {
     this.props.hoverFunc(e.target, "out");
   };
 
+  showLoading = () => {};
+
+  hideLoading = () => {};
+
   plotPolygons = async () => {
     try {
       this.map.removeLayer(this.polygonLayer);
     } catch (e) {}
     if (!this.props.loading) {
-      var { polygon: data, colorbar, color, polygonOpacity } = this.props;
-      var { min, max, minColor, maxColor } = colorbar;
+      var { polygon: data, min, max, polygonOpacity, colors } = this.props;
       var polygons = [];
       var coords;
       var x = data.lonres / 2;
@@ -126,7 +125,7 @@ class RemoteSensingMap extends Component {
           [data.lat[i] + y, data.lon[i] + x],
           [data.lat[i] - y, data.lon[i] + x]
         ];
-        var pixelcolor = color(minColor, maxColor, data.v[i], min, max);
+        var pixelcolor = getColor(data.v[i], min, max, colors);
         polygons.push(
           L.polygon(coords, {
             color: pixelcolor,
@@ -140,24 +139,21 @@ class RemoteSensingMap extends Component {
         );
       }
       this.polygonLayer = L.layerGroup(polygons).addTo(this.map);
-      this.setState({ loading: false });
     }
+    this.refs.loadingrs.style.display = "none";
   };
 
   render() {
-    var { help, fullsize, loading: mapLoading } = this.state;
-    var { legend, loading: parentLoading, sidebar } = this.props;
-    var loading = mapLoading || parentLoading;
+    var { help, fullsize } = this.state;
+    var { legend, sidebar } = this.props;
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
           <div id="map">
-            {loading && (
-              <div ref="loader" className="map-loader">
-                <Loading />
-                Downloading and plotting data
-              </div>
-            )}
+            <div ref="loadingrs" className="map-loader">
+              <Loading />
+              Downloading and plotting data
+            </div>
             {help && (
               <div className="help-container show">
                 <div

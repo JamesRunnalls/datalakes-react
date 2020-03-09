@@ -1,57 +1,42 @@
 #bar {
-    width: 150px;
-    height: 20px;
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 5px;
-  }
-  
+  width: 250px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 5px;
+}
+
+#colorbar {
+  z-index: 999;
+  position: absolute;
+  bottom: 0;
+  left: 0px;
+  font-size: 14px;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+@media screen and (max-width: 500px) {
   #colorbar {
-    z-index: 999;
-    position: absolute;
-    bottom: 0;
-    left: 0px;
-    font-size: 14px;
-    padding: 5px;
-    background-color: rgba(255, 255, 255, 0.7);
-  }
-  
-  @media screen and (max-width: 500px) {
-    #colorbar {
-      box-sizing: border-box;
-      bottom: 16px;
-      width: 100%;
-      text-align: center;
-    }
-  }
-  
-  #colorbar input[type="text"] {
-    border: none;
-    background: none;
-    max-width: 40px;
-    text-align: right;
-  }
-
-  .color-picker {
-    height: 20px;
     box-sizing: border-box;
-    width: 75px;
-    opacity: 0;
-    cursor: pointer;
-  }
-  
-  .color-picker.right {
-    float: right;
-  }
-
-  .colorbar-text {
-    text-align: center;
-    padding-bottom: 2px;
-  }
-
-  .color-table{
-    display: none;
+    bottom: 16px;
     width: 100%;
-    padding: 0 10px;
-    box-sizing: border-box;
+    text-align: center;
   }
+}
+
+.colorbar-value {
+  display: inline-block;
+}
+
+.colorbar-text {
+  text-align: center;
+  padding-bottom: 2px;
+}
+
+.color-table {
+  display: none;
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
