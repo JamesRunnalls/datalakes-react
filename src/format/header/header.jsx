@@ -44,13 +44,20 @@ class Header extends Component {
                 </div>
                 <div className="hamburger" onClick={this.toggle}><h3>More <div className="header-rotate">{symbol}</div></h3></div>
                 <div className="header-dropdown">
-                    <div className="mobile"><NavLink onClick={this.closeMenu} to="/"><img alt="Home" src={home} /></NavLink></div>
-                    <div className="desktop"><NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/live"><img alt="Live Data" src={live} /></NavLink></div>
-                    <div className="mobile"><NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/remotesensing"><img alt="Remote Sensing" src={rs} /></NavLink></div>
-                    <div className="desktop"><NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/predictions"><img alt="Predictions" src={predictions} /></NavLink></div>
-                    <div className="desktop"><NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/dataportal"><img alt="Data Portal" src={data} /></NavLink></div>
-                    <div className="mobile"><NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/api"><img alt="API" src={api} /></NavLink></div>
-                    <div className="mobile"><NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/about"><img alt="Contact" src={contact} /></NavLink></div>
+                    
+                    <div className="desktop links-widescreen">
+                        <NavLink activeClassName="home" onClick={this.closeMenu} to="/">Home</NavLink>
+                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/remotesensing">Remote Sensing</NavLink>
+                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
+                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink>
+                    </div>
+                    
+                    <div className="mobile">
+                        <NavLink onClick={this.closeMenu} to="/"><img alt="Home" src={home} /></NavLink>
+                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/remotesensing"><img alt="Remote Sensing" src={rs} /></NavLink>
+                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/api"><img alt="API" src={api} /></NavLink>
+                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/about"><img alt="Contact" src={contact} /></NavLink>
+                    </div>
                 </div>
             </div>
             <div className="footer-nav">

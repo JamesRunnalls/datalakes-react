@@ -327,6 +327,7 @@ class Live extends Component {
                 content={
                   <ColorRamp
                     onChange={this.updateParentColors}
+                    colors={colors}
                   />
                 }
               />

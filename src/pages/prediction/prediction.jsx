@@ -345,7 +345,7 @@ class Predictions extends Component {
               <FilterBox
                 title="Display Options"
                 preopen="true"
-                content={<ColorRamp onChange={this.updateParentColors} />}
+                content={<ColorRamp colors={colors} onChange={this.updateParentColors} />}
               />
             </React.Fragment>
           }

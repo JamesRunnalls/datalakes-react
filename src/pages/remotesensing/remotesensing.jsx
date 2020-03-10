@@ -55,7 +55,9 @@ class RemoteSensingSidebar extends Component {
           <FilterBox
             preopen="true"
             title="Color Ramp"
-            content={<ColorRamp onChange={updateParentColors} />}
+            content={
+              <ColorRamp onChange={updateParentColors} colors={colors} />
+            }
           />
           <FilterBox
             title="Color Table"
