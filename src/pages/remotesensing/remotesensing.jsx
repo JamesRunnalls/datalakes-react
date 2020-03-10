@@ -4,11 +4,9 @@ import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
 import DataSelect from "../../components/dataselect/dataselect";
-import ColorSlider from "../../components/colorslider/colorslider";
 import FilterBox from "../../components/filterbox/filterbox";
+import ColorManipulation from "../../components/colormanipulation/colormanipulation";
 import "./remotesensing.css";
-import ColorTable from "../../components/colortable/colortable";
-import ColorRamp from "../../components/colorramp/colorramp";
 
 class RemoteSensingSidebar extends Component {
   state = {
@@ -24,8 +22,6 @@ class RemoteSensingSidebar extends Component {
       handleSelect,
       array,
       colors,
-      min,
-      max,
       updateParentColors
     } = this.props;
     var { open } = this.state;
@@ -54,25 +50,14 @@ class RemoteSensingSidebar extends Component {
           />
           <FilterBox
             preopen="true"
-            title="Color Ramp"
+            title="Color Manipulation"
             content={
-              <ColorRamp onChange={updateParentColors} colors={colors} />
-            }
-          />
-          <FilterBox
-            title="Color Table"
-            content={
-              <ColorTable
+              <ColorManipulation
+                onChange={updateParentColors}
                 colors={colors}
-                min={min}
-                max={max}
-                updateParentColors={updateParentColors}
+                array={array}
               />
             }
-          />
-          <FilterBox
-            title="Color Sliders"
-            content={<ColorSlider array={array} colors={colors} />}
           />
         </div>
       </div>
@@ -143,7 +128,7 @@ class RemoteSensing extends Component {
 
   downloadFile = async dataIndex => {
     this.setState({ loading: true });
-    var { list, dataArray } = this.state;
+    var { list, dataArray, colors } = this.state;
     const { data } = await axios.get(
       apiUrl + "/rs/" + list[dataIndex].endpoint
     );
@@ -151,7 +136,8 @@ class RemoteSensing extends Component {
     var min = Math.round(Math.min(...dataArray[dataIndex].v) * 100) / 100;
     var max = Math.round(Math.max(...dataArray[dataIndex].v) * 100) / 100;
     var unit = list[dataIndex].unit;
-    this.setState({ dataArray, min, max, loading: false, unit });
+    colors = this.optimisePoints(colors, data[0].v);
+    this.setState({ dataArray, min, max, colors, loading: false, unit });
   };
 
   handleSelect = async event => {
@@ -161,7 +147,8 @@ class RemoteSensing extends Component {
       dataArray,
       min,
       max,
-      unit
+      unit,
+      colors
     } = this.state;
     var dataIndex = list.findIndex(x => x.name === event.value);
     if (oldDataIndex !== dataIndex) {
@@ -172,12 +159,44 @@ class RemoteSensing extends Component {
         min = Math.round(Math.min(...dataArray[dataIndex].v) * 100) / 100;
         max = Math.round(Math.max(...dataArray[dataIndex].v) * 100) / 100;
         unit = list[dataIndex].unit;
-        this.setState({ dataIndex, min, max, unit });
+        colors = this.optimisePoints(colors, dataArray[dataIndex].v);
+        this.setState({ dataIndex, min, max, unit, colors });
       }
     }
   };
 
+  optimisePoints = (colors, array) => {
+    var min = Math.min(...array);
+    var max = Math.max(...array);
+    var q, val, point;
+    for (var i = 0; i < colors.length; i++) {
+      if (i === 0) colors[i].point = 0;
+      else if (i === colors.length - 1) colors[i].point = 1;
+      else {
+        q = (1 / (colors.length - 1)) * i;
+        val = this.quantile(array, q);
+        point = (val - min) / (max - min);
+        colors[i].point = point;
+      }
+    }
+    return colors;
+  };
+
+  quantile = (arr, q) => {
+    const sorted = arr.slice(0).sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+      return sorted[base];
+    }
+  };
+
   async componentDidMount() {
+    var { colors } = this.state;
+
     // Get list of available layers
     const { data: list } = await axios.get(apiUrl + "/rs");
     var dataArray = new Array(list.length).fill(0);
@@ -190,9 +209,12 @@ class RemoteSensing extends Component {
     var unit = list[0].unit;
     dataArray[0] = data[0];
 
+    colors = this.optimisePoints(colors, data[0].v);
+
     this.setState({
       list,
       dataArray,
+      colors,
       min,
       max,
       unit
@@ -201,7 +223,7 @@ class RemoteSensing extends Component {
 
   render() {
     document.title = "Remote Sensing - Datalakes";
-    var { list, dataArray, dataIndex, min, max, loading, colors } = this.state;
+    var { list, dataArray, dataIndex, loading, colors, max, min } = this.state;
     var unit = list[dataIndex].unit;
 
     var array = [];
@@ -227,8 +249,6 @@ class RemoteSensing extends Component {
               handleSelect={this.handleSelect}
               array={array}
               colors={colors}
-              min={min}
-              max={max}
               updateParentColors={this.updateParentColors}
             />
           }

@@ -30,18 +30,56 @@ class ColorTable extends Component {
     this.setState({ colors });
   };
 
+  optimisePoints = () => {
+    if ("array" in this.props) {
+      var { colors } = this.state;
+      var { array, onChange } = this.props;
+      var min = Math.min(...array);
+      var max = Math.max(...array);
+      var q, val, point;
+      for (var i = 0; i < colors.length; i++) {
+        if (i === 0) colors[i].point = 0;
+        else if (i === colors.length - 1) colors[i].point = 1;
+        else {
+          q = (1 / (colors.length - 1)) * i;
+          val = this.quantile(array, q);
+          point = (val - min) / (max - min);
+          colors[i].point = point;
+        }
+      }
+      this.setState({ colors }, () => {
+        document.getElementById("colortable").reset();
+        onChange(colors)
+      });
+    }
+  };
+
+  quantile = (arr, q) => {
+    const sorted = arr.slice(0).sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+      return sorted[base];
+    }
+  };
+
   componentDidUpdate(prevProps) {
-    if (prevProps.min !== this.props.min || prevProps.max !== this.props.max) {
-      document.getElementById("colortable").reset();
+    if (prevProps.colors !== this.props.colors) {
+      this.setState({ colors: this.props.colors });
     }
   }
 
   render() {
-    var { updateParentColors, min, max } = this.props;
+    var { onChange, array } = this.props;
     var { colors } = this.state;
 
-    if (min === undefined) min = 0;
-    if (max === undefined) max = 1;
+    var min = Math.min(...array);
+    var max = Math.max(...array);
+
+   
 
     return (
       <form id="colortable" className="colortable">
@@ -91,15 +129,28 @@ class ColorTable extends Component {
                 </tr>
               );
             })}
+            <tr>
+              <td>
+                <button
+                  type="button"
+                  title="Update plot color scheme"
+                  onClick={() => onChange(colors)}
+                >
+                  Update Plot
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  title="Optimise point distribution"
+                  onClick={this.optimisePoints}
+                >
+                  Optimise Points
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
-        <button
-          type="button"
-          title="Update plot color scheme"
-          onClick={() => updateParentColors(colors)}
-        >
-          Update Plot
-        </button>
       </form>
     );
   }

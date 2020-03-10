@@ -323,7 +323,7 @@ class Live extends Component {
                 }
               />
               <FilterBox
-                title="Display Settings"
+                title="Color Ramp"
                 content={
                   <ColorRamp
                     onChange={this.updateParentColors}

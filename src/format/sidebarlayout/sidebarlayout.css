@@ -77,7 +77,7 @@
 
   .rightcontainer {
     position: absolute !important;
-    z-index: 9999;
+    z-index: 999999;
     right: 0;
   }
 

@@ -320,7 +320,7 @@ class Predictions extends Component {
               />
             </React.Fragment>
           }
-          right={
+          rightNoScroll={
             <React.Fragment>
               <FilterBox
                 title="Lake Models"
@@ -343,7 +343,7 @@ class Predictions extends Component {
                 }
               />
               <FilterBox
-                title="Display Options"
+                title="Color Ramp"
                 preopen="true"
                 content={<ColorRamp colors={colors} onChange={this.updateParentColors} />}
               />

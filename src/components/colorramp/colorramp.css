@@ -4,14 +4,14 @@
 
 .colorramp-option {
   width: 100%;
-  height: 20px;
+  height: 25px;
   text-align: center;
   color: transparent;
-  line-height: 20px;
+  line-height: 25px;
   font-size: 12px;
   cursor: pointer;
   border-radius: 5px;
-  margin: 2px 0;
+  margin: 0 0 4px 0;
 }
 
 .colorramp-option:hover {
@@ -22,7 +22,11 @@
   width: 100%;
   max-height: 100px;
   overflow-y: auto;
-  padding-top: 7px;
+  border: 1px solid grey;
+  border-radius: 5px;
+  -webkit-box-shadow: 0px 5px 10px 0px rgba(150, 144, 150, 0.6);
+  -moz-box-shadow: 0px 5px 10px 0px rgba(150, 144, 150, 0.6);
+  box-shadow: 0px 5px 10px 0px rgba(150, 144, 150, 0.6);
 }
 
 .colorramp-dropdown.hide {
@@ -31,11 +35,13 @@
 
 .colorramp-select {
   width: 100%;
-  height: 20px;
+  height: 25px;
   cursor: pointer;
   text-align: right;
   padding: 0 6px;
   box-sizing: border-box;
+  margin-bottom: 6px;
+  border: 1px solid black;
 }
 
 .colorramp-select .colorramp-arrow {
@@ -45,4 +51,13 @@
   color: black;
   height: 20px;
   font-family: "The Serif Bold", Arial, sans-serif;
+}
+
+.colorramp-dropdown::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE and Edge */
+.colorramp-dropdown {
+  -ms-overflow-style: none;
 }
