@@ -4,10 +4,11 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import ColorBar from "../../components/colorbar/colorbar";
-import { generateColorRGB } from "../../components/gradients/gradients";
 import { apiUrl } from "../../../config.json";
 import "./prediction.css";
 import PredictionMap from "../../graphs/leaflet/prediction_map";
+import FilterBox from "../../components/filterbox/filterbox";
+import ColorRamp from "../../components/colorramp/colorramp";
 
 class ModelInfo extends Component {
   sendPanInfo = geometry => {
@@ -76,7 +77,7 @@ class ModelInfo extends Component {
 class ModelList extends Component {
   render() {
     return (
-      <React.Fragment>
+      <div className="modellist-parent">
         {this.props.geojson.map(data => (
           <ModelInfo
             key={data.properties.id}
@@ -91,7 +92,7 @@ class ModelList extends Component {
             geometry={data.geometry.coordinates}
           />
         ))}
-      </React.Fragment>
+      </div>
     );
   }
 }
@@ -276,6 +277,10 @@ class Predictions extends Component {
     }
   };
 
+  updateParentColors = colors => {
+    this.setState({ colors });
+  };
+
   render() {
     document.title = "Predictions - Datalakes";
     var { MaxTemp, MinTemp, colors } = this.state;
@@ -290,7 +295,7 @@ class Predictions extends Component {
       <React.Fragment>
         <h1>Model Predictions</h1>
         <SidebarLayout
-          sidebartitle="Lake Models"
+          sidebartitle="Plot Controls"
           left={
             <React.Fragment>
               <PredictionMap
@@ -316,20 +321,33 @@ class Predictions extends Component {
             </React.Fragment>
           }
           right={
-            <ModelList
-              geojson={filteredData}
-              panTo={this.panTo}
-              onSearch={this.searchDatasets}
-            />
-          }
-          rightNoScroll={
-            <input
-              onChange={this.searchDatasets}
-              onKeyDown={e => this.keyPress(e, filteredData[0])}
-              type="search"
-              placeholder="Search"
-              className="modelSearch"
-            ></input>
+            <React.Fragment>
+              <FilterBox
+                title="Lake Models"
+                preopen="true"
+                content={
+                  <React.Fragment>
+                    <input
+                      onChange={this.searchDatasets}
+                      onKeyDown={e => this.keyPress(e, filteredData[0])}
+                      type="search"
+                      placeholder="Search"
+                      className="modelSearch"
+                    ></input>
+                    <ModelList
+                      geojson={filteredData}
+                      panTo={this.panTo}
+                      onSearch={this.searchDatasets}
+                    />
+                  </React.Fragment>
+                }
+              />
+              <FilterBox
+                title="Display Options"
+                preopen="true"
+                content={<ColorRamp onChange={this.updateParentColors} />}
+              />
+            </React.Fragment>
           }
         />
       </React.Fragment>

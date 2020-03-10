@@ -8,7 +8,7 @@ import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
 import DataSelect from "../../components/dataselect/dataselect";
 import FilterBox from "../../components/filterbox/filterbox";
-import ColorTable from "../../components/colortable/colortable";
+import ColorRamp from "../../components/colorramp/colorramp";
 
 class WeatherStation extends Component {
   render() {
@@ -325,11 +325,8 @@ class Live extends Component {
               <FilterBox
                 title="Display Settings"
                 content={
-                  <ColorTable
-                    colors={colors}
-                    min={min}
-                    max={max}
-                    updateParentColors={this.updateParentColors}
+                  <ColorRamp
+                    onChange={this.updateParentColors}
                   />
                 }
               />

@@ -49,7 +49,6 @@ class ColorTable extends Component {
           <tbody>
             {colors.map((color, index) => {
               var value = min + color.point * (max - min);
-              var ends = index === 0 || index === colors.length - 1;
               return (
                 <tr key={index}>
                   <td style={{ width: "45%" }}>

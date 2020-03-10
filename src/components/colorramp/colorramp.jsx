@@ -3,6 +3,8 @@ import "./colorramp.css";
 
 class ColorRamp extends Component {
   state = {
+    open: false,
+    selected: 0,
     gradients: [
       {
         name: "Rainbow",
@@ -20,11 +22,39 @@ class ColorRamp extends Component {
       {
         name: "Blue Red",
         data: [
-          { color: "#ff0000", point: 0 },
-          { color: "#0000ff", point: 1 }
+          { color: "#0000ff", point: 0 },
+          { color: "#ff0000", point: 1 }
         ]
       }
     ]
+  };
+  toggle = () => {
+    this.setState({ open: !this.state.open });
+  };
+
+  closeEvent = event => {
+    var { open } = this.state;
+    var targetClass = "noclassselected";
+    try {
+      targetClass = event.target.attributes.class.value;
+    } catch (e) {}
+    var classes = [
+      "colorramp-select",
+      "colorramp-dropdown",
+      "colorramp-option"
+    ];
+    if (!classes.includes(targetClass) && open) {
+      this.setState({ open: false });
+    }
+  };
+
+  selectColorRamp = index => {
+    this.setState({ selected: index, open: false });
+    if ("onChange" in this.props) {
+      var { gradients } = this.state;
+      var { onChange } = this.props;
+      onChange(gradients[index].data);
+    }
   };
   linearGradient = colors => {
     if (colors) {
@@ -35,18 +65,48 @@ class ColorRamp extends Component {
       return `linear-gradient(90deg,${lineargradient.join(",")})`;
     }
   };
+
+  componentDidMount() {
+    window.addEventListener("click", this.closeEvent);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("click", this.closeEvent);
+  }
+
   render() {
-    var { gradients } = this.state;
+    var { gradients, selected, open } = this.state;
+    var selectStyle = {
+      background: this.linearGradient(gradients[selected].data)
+    };
     return (
-      <div>
-        <select className="colorramp-selct">
+      <div className="colorramp">
+        <div
+          className="colorramp-select"
+          onClick={this.toggle}
+          style={selectStyle}
+        >
+          <div className="colorramp-arrow">{open ? "<" : ">"}</div>
+        </div>
+        <div
+          className={open ? "colorramp-dropdown" : "colorramp-dropdown hide"}
+        >
           {gradients.map((gradient, index) => {
             var style = {
               background: this.linearGradient(gradient.data)
             };
-            return <option className="colorramp-option" key={gradient.name} style={style}></option>;
+            return (
+              <div
+                className="colorramp-option"
+                key={gradient.name}
+                style={style}
+                onClick={() => this.selectColorRamp(index)}
+              >
+                {gradient.name}
+              </div>
+            );
           })}
-        </select>
+        </div>
       </div>
     );
   }

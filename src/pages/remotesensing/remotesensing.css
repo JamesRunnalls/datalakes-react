@@ -9,7 +9,7 @@
   padding: 10px;
   box-sizing: border-box;
   height: 100%;
-  overflow: scroll;
+  overflow: auto;
   max-width: 100%;
 }
 

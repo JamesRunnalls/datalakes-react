@@ -131,6 +131,10 @@ header {
   margin: 0 5px;
 }
 
+.MainNav.Show .header-dropdown .imgactive img {
+  border-bottom: 1px black solid;
+}
+
 .MainNav.Show .header-dropdown img:hover {
   border-bottom: 1px black solid;
 }
@@ -211,6 +215,11 @@ header {
     width: 100%;
     justify-content: space-between;
     display: flex;
+    border-top: 1px solid #d8d6d3;
+  }
+
+  .MainNav.Show .header-dropdown a {
+    padding: 0 5px;
   }
 
   .MainNav.Show .header-dropdown .desktop {

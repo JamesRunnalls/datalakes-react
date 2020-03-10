@@ -20,11 +20,11 @@
 
 .rightcontent .scroll {
   overflow: hidden;
-  height: 420px;
+  height: 458px;
 }
 
 .rightcontent .scroll:hover {
-  overflow: auto;
+  overflow-y: auto;
 }
 
 .righthead span {

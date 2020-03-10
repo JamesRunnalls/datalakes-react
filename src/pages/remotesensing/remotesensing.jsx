@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import RemoteSensingMap from "../../graphs/leaflet/rs_map";
-import { generateColorRGB } from "../../components/gradients/gradients";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
@@ -13,7 +12,7 @@ import ColorRamp from "../../components/colorramp/colorramp";
 
 class RemoteSensingSidebar extends Component {
   state = {
-    open: true
+    open: window.innerWidth > 500
   };
   toggle = () => {
     this.setState({ open: !this.state.open });
@@ -53,7 +52,11 @@ class RemoteSensingSidebar extends Component {
             }
             preopen="true"
           />
-          <FilterBox preopen="true" title="Color Ramp" content={<ColorRamp />} />
+          <FilterBox
+            preopen="true"
+            title="Color Ramp"
+            content={<ColorRamp onChange={updateParentColors} />}
+          />
           <FilterBox
             title="Color Table"
             content={

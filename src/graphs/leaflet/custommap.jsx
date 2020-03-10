@@ -3,7 +3,6 @@ import "./leaflet.css";
 import React, { Component } from "react";
 import L from "leaflet";
 import Loading from "../../components/loading/loading";
-import { getColor } from "../../components/gradients/gradients";
 
 class SwissTopoMap extends Component {
   state = {
