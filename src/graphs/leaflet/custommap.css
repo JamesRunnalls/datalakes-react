@@ -159,3 +159,13 @@
   background-color: white;
   cursor: pointer;
 }
+
+/* Tocuhscreen changes */
+
+@media (hover: none) and (pointer: coarse) {
+  .customcontrol {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+  }
+}

@@ -517,20 +517,30 @@ class DataPortal extends Component {
           left={
             <React.Fragment>
               <div className="sortbar">
-                <div
-                  className="sortbar-selected"
-                  title="Download multiple datasets"
-                  onClick={this.download}
-                >
-                  {selected.length} selected of {fDatasets.length} datasets
-                </div>
-                <div
-                  className="sortbar-x"
-                  title="Clear selected datasets"
-                  onClick={this.clearSelected}
-                >
-                  &#10005;
-                </div>
+                <table className="sortbar-table">
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div
+                          title="Download multiple datasets"
+                          onClick={this.download}
+                        >
+                          {selected.length} selected of {fDatasets.length}{" "}
+                          datasets
+                        </div>
+                      </td>
+                      <td>
+                        <div
+                          title="Clear selected datasets"
+                          onClick={this.clearSelected}
+                        >
+                          &#10005;
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
                 <select
                   title="Sort by"
                   onChange={this.setSelect}

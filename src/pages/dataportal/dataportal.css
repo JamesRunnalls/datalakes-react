@@ -183,27 +183,17 @@ input.SearchBar {
   background-color: white;
   margin-left: 5px;
   float: right;
+  margin: 2px;
 }
 
-.sortbar-selected {
+table.sortbar-table {
   display: inline-block;
-  border: solid 1px rgb(169, 169, 169);
-  font-size: 13.333px;
-  padding: 1px 5px;
-  cursor: pointer;
-  height: 19px;
-  box-sizing: border-box;
 }
 
-.sortbar-x {
-  display: inline-block;
+table.sortbar-table td {
+  padding: 1px 4px;
   border: solid 1px rgb(169, 169, 169);
   font-size: 13.333px;
-  padding: 1px 5px;
-  cursor: pointer;
-  margin-left: -1px;
-  height: 19px;
-  box-sizing: border-box;
 }
 
 .characteristics {

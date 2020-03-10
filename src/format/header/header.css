@@ -61,37 +61,6 @@ header {
   border-bottom: 1px black solid;
 }
 
-@media screen and (max-width: 800px) {
-  .logo {
-    top: 80px;
-  }
-  .logo a {
-    width: 180px;
-  }
-}
-
-@media screen and (max-width: 500px) {
-  .logo {
-    top: 16px;
-    left: 5px;
-  }
-  .logo a {
-    width: 140px;
-  }
-  .MainNav {
-    top: 5px !important;
-  }
-
-  header {
-    height: 40px;
-  }
-
-  .footer-nav {
-    display: block;
-    display: flex;
-  }
-}
-
 /* Languages */
 
 .langs {
@@ -121,6 +90,12 @@ header {
   display: inline-block;
 }
 
+.header-rotate {
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+  display: inline-block;
+}
+
 .MainNav {
   position: absolute;
   right: 0;
@@ -136,7 +111,7 @@ header {
   cursor: pointer;
 }
 
-.MainNav ul {
+.MainNav .header-dropdown {
   display: none;
   position: relative;
   background-color: white;
@@ -148,30 +123,28 @@ header {
   margin: 0;
   padding: 0;
   max-width: 100%;
-}
-
-.MainNav.Show ul {
-  display: block;
-}
-
-.MainNav ul li {
-  display: block;
-  padding: 10px;
-  box-sizing: border-box;
-  border-bottom: 1px solid #d7d7d7;
   text-align: right;
 }
-.MainNav ul li a {
-  color: black;
-  text-decoration: none;
-  display: block;
-  font-size: 16px;
-  font-family: Arial, sans-serif;
-  font-weight: bold;
+
+.MainNav.Show .header-dropdown img {
+  width: 80px;
+  margin: 0 5px;
 }
 
-.MainNav ul li a:hover {
-  color: rgb(70, 70, 70);
+.MainNav.Show .header-dropdown img:hover {
+  border-bottom: 1px black solid;
+}
+
+.MainNav .header-dropdown .mobile {
+  display: inline-block;
+}
+
+.MainNav .header-dropdown .desktop {
+  display: inline-block;
+}
+
+.MainNav.Show .header-dropdown {
+  display: block;
 }
 
 .active {
@@ -194,5 +167,62 @@ header {
 @media screen and (max-width: 670px) {
   .links-widescreen {
     display: none;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .logo {
+    top: 80px;
+  }
+  .logo a {
+    width: 180px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .logo {
+    top: 16px;
+    left: 5px;
+  }
+  .logo a {
+    width: 140px;
+  }
+  .MainNav {
+    top: 5px !important;
+  }
+
+  header {
+    height: 40px;
+  }
+
+  .footer-nav {
+    display: block;
+    display: flex;
+  }
+
+  .hamburger {
+    display: none;
+  }
+
+  .MainNav.Show .header-dropdown {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    width: 100%;
+    justify-content: space-between;
+    display: flex;
+  }
+
+  .MainNav.Show .header-dropdown .desktop {
+    display: none;
+  }
+
+  .MainNav.Show .header-dropdown .desktop {
+    display: none;
+  }
+
+  .MainNav.Show .header-dropdown img {
+    width: 60px;
+    margin: 5px 2px;
   }
 }
