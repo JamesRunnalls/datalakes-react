@@ -141,14 +141,11 @@ class AddDataset extends Component {
     }
 
     // Lineage from Renku
-    var { data: renkuData } = await axios
+    dataset["renku"] = 1;
+    /*var { data: renkuData } = await axios
       .get(apiUrl + "/renku/" + encodeURIComponent(dataset.git))
       .catch(error => {
         console.error(error.message);
-        this.setState({ allowedStep: [1, 2, 0, 0, 0] });
-        throw new Error(
-          "There was an error connecting to the Renku API please try again."
-        );
       });
     dataset["renku"] = 1;
     if ("data" in renkuData) {
@@ -158,6 +155,7 @@ class AddDataset extends Component {
         dataset["pre_script"] = "NA";
       }
     }
+    */
 
     // Set real axis values
     var axis = [];
@@ -221,7 +219,7 @@ class AddDataset extends Component {
     dataset["longitude"] = longitude;
     dataset["latitude"] = latitude;
     this.setState({
-      renkuResponse: renkuData,
+      renkuResponse: "",
       datasetparameters,
       allowedStep: [1, 2, 3, 0, 0],
       dataset,

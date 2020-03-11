@@ -165,14 +165,15 @@ class Live extends Component {
   };
 
   stationPopup = info => {
-    if ("parameters" in info) {
+    console.log(info)
+    if ("update" in info) {
       return (
         "<b>" +
         info.name +
-        "</b><br>Surface Temperature: " +
-        info.parameters.watertemperature.value +
-        '&deg;C<br><a title="See live data" href="/live/' +
-        info.url +
+        '</b><br>' +
+        info.description +
+        '<br><a title="See live data" href="/live/' +
+        info.link +
         '">See live data</a>'
       );
     } else {

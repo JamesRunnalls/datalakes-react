@@ -74,7 +74,18 @@ class LineGraph extends Component {
   };
 
   handleAxisSelect = axis => event => {
-    this.setState({ [axis]: event.value });
+    var { parameters } = this.props;
+    var { xlabel, ylabel, xunits, yunits } = this.state;
+    var parameter = parameters.find(x => x.axis === event.value);
+    console.log(parameter);
+    if (axis === "yaxis") {
+      ylabel = parameter.name;
+      yunits = parameter.unit;
+    } else if (axis === "xaxis") {
+      xlabel = parameter.name;
+      xunits = parameter.unit;
+    }
+    this.setState({ ylabel, xlabel, yunits, xunits, [axis]: event.value });
   };
 
   datetimeFilter = (data, lower, upper, min, max) => {
@@ -111,7 +122,7 @@ class LineGraph extends Component {
     } else if (event.keyCode === 39) {
       // right
       onChangeFileInt([file - 1]);
-    } 
+    }
   };
 
   setDefault = () => {
