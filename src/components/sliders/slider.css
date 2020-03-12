@@ -35,7 +35,6 @@
   border-radius: 7px;
   pointer-events: none;
   background-color: rgb(184, 184, 184);
-  z-index: -1;
 }
 
 .datetime-selector {

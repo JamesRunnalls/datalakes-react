@@ -4,7 +4,7 @@ import axios from "axios";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import { apiUrl } from "../../../config.json";
 import "./weatherstationdetail.css";
-import { Select } from "react-select";
+import D3LineGraph from "../../graphs/d3/linegraph/linegraph";
 
 class LiveParameterSummary extends Component {
   render() {
@@ -57,11 +57,8 @@ class LiveParameter extends Component {
       var hour = a.getHours();
       var min = a.getMinutes();
       var time =
-        (hour < 10 ? "0" + hour : hour) +
-        ":" +
-        (min < 10 ? "0" + min : min);
+        (hour < 10 ? "0" + hour : hour) + ":" + (min < 10 ? "0" + min : min);
 
-        
       return (
         <div className={paramClass} title={title} onClick={() => select(index)}>
           <div className="value">{time}</div>
@@ -85,22 +82,39 @@ class LiveParameter extends Component {
 
 class WeatherStationRight extends Component {
   render() {
-    var link = this.props.selected.link;
-    if ("time" in this.props.data) {
+    var { dataset, datainfo, selected } = this.props;
+    if (dataset.length > 0) {
+      var x = dataset.find(x => x.label === "Time").value.map(i => i * 1000);
+      var y = dataset[selected].value.map(i => i * 1);
+      var data = { x: x, y: y };
       return (
-        <div className="timeseries">
-          <div>{this.props.data.update}</div>
-          <div>Last Updated: {this.props.data.time}</div>
-          <div className="graph-container"></div>
-          <a href={link}>
-            <div className="view-download">
-              View and Dowload Timeseries Data
+        <div className="weatherstation-right">
+          {dataset[selected].label !== "Time" && (
+            <div className="weatherstation-graph">
+              <D3LineGraph
+                data={data}
+                title={""}
+                xlabel={"Time"}
+                ylabel={dataset[selected].label}
+                xunits={"Time"}
+                yunits={dataset[selected].units}
+                lcolor={"black"}
+                lweight={1}
+                bcolor={"white"}
+                xscale={"Time"}
+                yscale={"Linear"}
+              />
             </div>
+          )}
+          <div>{datainfo.description}</div>
+          <div>{datainfo.update}</div>
+          <a href={dataset[selected].link}>
+            <button>Explore meteostation data</button>
           </a>
         </div>
       );
     } else {
-      return "";
+      return <div></div>;
     }
   }
 }
@@ -110,7 +124,7 @@ class WeatherStationDetail extends Component {
     dataset: [],
     datainfo: [],
     error: false,
-    selected: 0
+    selected: 1
   };
 
   setSelectedState = selected => {
@@ -150,7 +164,13 @@ class WeatherStationDetail extends Component {
                 select={this.setSelectedState}
               />
             }
-            right={<WeatherStationRight data={dataset} selected={selected} />}
+            rightNoScroll={
+              <WeatherStationRight
+                dataset={dataset}
+                datainfo={datainfo}
+                selected={selected}
+              />
+            }
           />
         </React.Fragment>
       );

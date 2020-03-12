@@ -279,20 +279,22 @@ class LineGraph extends Component {
                 </table>
               ) : (
                 <React.Fragment>
-                  <D3LineGraph
-                    data={plotdata}
-                    title={title}
-                    xlabel={xlabel}
-                    ylabel={ylabel}
-                    xunits={xunits}
-                    yunits={yunits}
-                    lcolor={lcolor}
-                    lweight={lweight}
-                    bcolor={bcolor}
-                    xscale={xscale}
-                    yscale={yscale}
-                    setDownloadGraph={this.setDownloadGraph}
-                  />
+                  <div className="detaillinegraph">
+                    <D3LineGraph
+                      data={plotdata}
+                      title={title}
+                      xlabel={xlabel}
+                      ylabel={ylabel}
+                      xunits={xunits}
+                      yunits={yunits}
+                      lcolor={lcolor}
+                      lweight={lweight}
+                      bcolor={bcolor}
+                      xscale={xscale}
+                      yscale={yscale}
+                      setDownloadGraph={this.setDownloadGraph}
+                    />
+                  </div>
                   <div className="linegraph-bottombox">
                     {fileSlider && (
                       <div className="linegraph-file">{value.toString()}</div>

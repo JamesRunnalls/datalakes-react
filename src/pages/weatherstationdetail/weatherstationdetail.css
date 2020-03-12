@@ -1,55 +1,66 @@
 .parameter-block {
-    display: inline-block;
-    padding: 20px 30px;
-    width: 160px;
-    max-width: 50%;
-    box-sizing: border-box;
-    text-align: center;
-    cursor: pointer;
-    vertical-align: top;
+  display: inline-block;
+  padding: 20px 30px;
+  width: 180px;
+  max-width: 50%;
+  box-sizing: border-box;
+  text-align: center;
+  cursor: pointer;
+  vertical-align: top;
 }
 
 .parameter-block.selected {
-    background-color: rgba(32, 33, 36, 0.1);
+  background-color: rgba(32, 33, 36, 0.1);
 }
 
 .parameter-block .value {
-    font-size: 50px;
-} 
+  font-size: 50px;
+}
 
 .parameter-block .units {
-    font-size: 20px;
-    color: grey;
+  font-size: 20px;
+  color: grey;
 }
 
 .parameter-block .label {
-    padding: 2px 0;
+  padding: 2px 0;
 }
 
 .map-container {
-    height:150px;
-    width: 100%;
+  height: 150px;
+  width: 100%;
 }
 
 .graph-container {
-    height:180px;
-    margin: 20px 0;
-    background-color: grey;
+  height: 180px;
+  margin: 20px 0;
+  background-color: grey;
 }
 
 .view-download {
-    color: black;
-    width: 100%;
-    border: solid 1px black;
-    text-align: center;
-    box-sizing: border-box;
-    padding: 10px 0
+  color: black;
+  width: 100%;
+  border: solid 1px black;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 10px 0;
 }
 
 .view-download:hover {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .timeseries a {
-    text-decoration: none;
+  text-decoration: none;
 }
+
+.weatherstation-graph {
+    height: 350px;
+}
+
+@media screen and (max-width: 500px) {
+  .live-parameter-container {
+    margin-top: 30px;
+  }
+}
+

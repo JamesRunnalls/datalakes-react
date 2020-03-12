@@ -31,7 +31,7 @@ class WeatherStations extends Component {
         {this.props.datalist.map(data => (
           <WeatherStation
             key={data.name}
-            url={data.url}
+            url={data.link}
             name={data.name}
             desc={data.description}
             imgname={data.imgname}

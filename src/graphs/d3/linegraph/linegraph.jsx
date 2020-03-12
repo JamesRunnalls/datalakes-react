@@ -433,7 +433,9 @@ class D3LineGraph extends Component {
               "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
           }
 
-          setDownloadGraph(downloadGraph);
+          if (setDownloadGraph) {
+            setDownloadGraph(downloadGraph);
+          }
         }
       } catch (e) {
         console.error("Error plotting line graph", e);

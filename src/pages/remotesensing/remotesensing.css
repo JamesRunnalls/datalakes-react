@@ -48,3 +48,26 @@
 .map-sidebar button:hover {
   background-color: transparent;
 }
+
+.remotesensing-layers-dataset {
+  border-bottom: 1px solid;
+  margin: 5px;
+  width: calc(100% - 10px);
+  box-sizing: border-box;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.remotesensing-layers-dataset.selected {
+  background-color: rgba(255,255,255,0.2);
+}
+
+.remotesensing-layers {
+  border: 1px solid;
+  height: 200px;
+  overflow-y: scroll;
+}
+
+.remotesensing-name {
+  font-size: 16px;
+}

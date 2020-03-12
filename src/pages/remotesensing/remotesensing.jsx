@@ -3,10 +3,37 @@ import RemoteSensingMap from "../../graphs/leaflet/rs_map";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
-import DataSelect from "../../components/dataselect/dataselect";
 import FilterBox from "../../components/filterbox/filterbox";
 import ColorManipulation from "../../components/colormanipulation/colormanipulation";
 import "./remotesensing.css";
+
+class RemoteSensingLayers extends Component {
+  state = {};
+  render() {
+    var { dataList, dataIndex, onChange } = this.props;
+    return (
+      <div className="remotesensing-layers">
+        {dataList.map((dataset, index) => {
+          return (
+            <div
+              onClick={() => onChange(index)}
+              key={dataset.name}
+              className={
+                dataIndex === index
+                  ? "remotesensing-layers-dataset selected"
+                  : "remotesensing-layers-dataset"
+              }
+            >
+              <div className="remotesensing-name">{dataset.name}</div>
+              <div>{dataset.description}</div>
+              <div>{dataset.unit}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+}
 
 class RemoteSensingSidebar extends Component {
   state = {
@@ -38,11 +65,9 @@ class RemoteSensingSidebar extends Component {
           <FilterBox
             title="Layers"
             content={
-              <DataSelect
-                value="name"
-                label="name"
+              <RemoteSensingLayers
                 dataList={list}
-                defaultValue={list[dataIndex].name}
+                dataIndex={dataIndex}
                 onChange={handleSelect}
               />
             }
@@ -140,7 +165,7 @@ class RemoteSensing extends Component {
     this.setState({ dataArray, min, max, colors, loading: false, unit });
   };
 
-  handleSelect = async event => {
+  handleSelect = async index => {
     var {
       list,
       dataIndex: oldDataIndex,
@@ -150,7 +175,7 @@ class RemoteSensing extends Component {
       unit,
       colors
     } = this.state;
-    var dataIndex = list.findIndex(x => x.name === event.value);
+    var dataIndex = index;
     if (oldDataIndex !== dataIndex) {
       if (dataArray[dataIndex] === 0) {
         this.setState({ dataIndex, loading: true });
