@@ -10,6 +10,7 @@
 
 .filterbox .title {
   display: inline-block;
+  font-size: 15px;
 }
 
 .filterbox .symbol {
@@ -19,4 +20,17 @@
 
 .filterbox .content {
   padding-top: 10px;
+}
+
+.filterbox.inner {
+  padding: 5px 0px;
+  border: none;
+}
+
+.filterbox.inner .title {
+  font-size: 14px;
+}
+
+.filterbox.inner .symbol {
+  font-size: 20px;
 }

@@ -1,0 +1,31 @@
+.maplayers-box {
+
+}
+
+.maplayers-box .maplayers-layer {
+    border: 1px solid rgb(169, 169, 169);
+    padding: 4px 6px;
+    margin: 2px 0;
+    cursor: pointer;
+}
+
+.maplayers-box .maplayers-layer:hover {
+    background-color: rgb(240,240,240);
+}
+
+.maplayers-contents {
+    border: 1px solid rgb(169, 169, 169);
+    height: 300px;
+}
+
+.maplayers-contentsinner {
+
+}
+
+.maplayers-contentsinner .contentssymbol {
+    display: inline-block;
+}
+
+.maplayers-contentsinner .checkbox {
+    display: inline-block;
+}

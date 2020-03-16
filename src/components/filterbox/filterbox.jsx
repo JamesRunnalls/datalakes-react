@@ -15,7 +15,7 @@ class FilterBox extends Component {
       }
     }
     render() {
-      const { content, title } = this.props;
+      const { content, title, inner } = this.props;
       const { open } = this.state;
       var symbol;
       if (open) {
@@ -25,7 +25,7 @@ class FilterBox extends Component {
       }
   
       return (
-        <div className="filterbox">
+        <div className={ inner ? "filterbox inner" : "filterbox"}>
           <div className="toprow" onClick={this.toggle}>
             <div className="title">{title}</div>
             <span className="symbol">{symbol}</span>

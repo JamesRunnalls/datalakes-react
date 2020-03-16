@@ -50,6 +50,9 @@ class LiveMap extends Component {
       ]
     });
 
+    // Add attribution
+    this.map.attributionControl.setPrefix('datalakes © | <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');
+
     // Full screen
     L.control
       .custom({
@@ -192,7 +195,7 @@ class LiveMap extends Component {
 
   render() {
     var { help, fullsize } = this.state;
-    var { legend } = this.props;
+    var { legend, selector } = this.props;
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
@@ -218,6 +221,7 @@ class LiveMap extends Component {
             )}
           </div>
           {legend}
+          {selector}
         </div>
       </React.Fragment>
     );

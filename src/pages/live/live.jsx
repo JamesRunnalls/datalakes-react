@@ -2,43 +2,32 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import LiveMap from "../../graphs/leaflet/live_map";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
-import { generateColorRGB } from "../../components/gradients/gradients";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import ColorBar from "../../components/colorbar/colorbar";
 import DataSelect from "../../components/dataselect/dataselect";
 import FilterBox from "../../components/filterbox/filterbox";
-import ColorRamp from "../../components/colorramp/colorramp";
+import "./live.css";
+import MapLayers from "../../components/maplayers/maplayers";
 
-class WeatherStation extends Component {
+class LakeStations extends Component {
   render() {
-    var link = "/live/" + String(this.props.url);
-    return (
-      <div className="weatherstation" title="See live data">
-        <Link to={link}>
-          <b>{this.props.name}</b>
-          <div className="desc">{this.props.desc}</div>
-        </Link>
-      </div>
-    );
-  }
-}
-
-class WeatherStations extends Component {
-  render() {
-    return (
-      <React.Fragment>
-        {this.props.datalist.map(data => (
-          <WeatherStation
-            key={data.name}
-            url={data.link}
-            name={data.name}
-            desc={data.description}
-            imgname={data.imgname}
-          />
-        ))}
-      </React.Fragment>
-    );
+    if (this.props.datalist) {
+      return (
+        <React.Fragment>
+          {this.props.datalist.map(data => (
+            <div className="lakestation" title="See live data" key={data.name}>
+              <Link to={"/live/" + String(data.link)}>
+                {data.name}
+                <div className="description">{data.description}</div>
+              </Link>
+            </div>
+          ))}
+        </React.Fragment>
+      );
+    } else {
+      return <div></div>;
+    }
   }
 }
 
@@ -63,39 +52,91 @@ class Live extends Component {
       { color: "#E63300", point: 0.714285714285714 },
       { color: "#CC0000", point: 0.857142857142857 },
       { color: "#800000", point: 1 }
-    ]
+    ],
+    parameters: [],
+    maplayers: [
+      {
+        id: 0,
+        type: "measurement",
+        api: "http://...",
+        array: [],
+        parameter_id: 5,
+        sourcelink: "http://...",
+        sourcetext: "FOEN",
+        description: "Here is a description of the data",
+        name: "Some name"
+      },
+      {
+        id: 1,
+        type: "measurement",
+        api: "http://...",
+        array: [],
+        parameter_id: 5,
+        sourcelink: "http://...",
+        sourcetext: "FOEN",
+        description: "Here is a description of the data",
+        name: "Some name"
+      },
+      {
+        id: 3,
+        type: "measurement",
+        api: "http://...",
+        array: [],
+        parameter_id: 2,
+        sourcelink: "http://...",
+        sourcetext: "FOEN",
+        description: "Here is a description of the data",
+        name: "Some name"
+      }
+    ],
+    selected: []
   };
 
-  setMin = event => {
-    const min = parseFloat(event.target.value);
-    if (this.isNumeric(min)) {
-      this.setState({ min });
+  addSelected = id => {
+    var { selected } = this.state;
+    for (var i = 0; i < id.length; i++) {
+      if (!selected.includes(id[i])) {
+        selected.push(id[i]);
+      }
     }
+    this.setState({ selected });
   };
 
-  setMax = event => {
-    const max = parseFloat(event.target.value);
-    if (this.isNumeric(max)) {
-      this.setState({ max });
+  removeSelected = id => {
+    var { selected } = this.state;
+    for (var i = 0; i < id.length; i++) {
+      selected = selected.filter(selectid => selectid !== id[i]);
     }
+    this.setState({ selected });
   };
 
-  color = (minColor, maxColor, value, min, max) => {
-    var gradient = generateColorRGB(minColor, maxColor, 100);
-    var pixelcolor = "";
-    if (value > max) {
-      pixelcolor = "transparent";
-    } else if (value < min) {
-      pixelcolor = "transparent";
+  optimisePoints = (colors, array) => {
+    var min = Math.min(...array);
+    var max = Math.max(...array);
+    var q, val, point;
+    for (var i = 0; i < colors.length; i++) {
+      if (i === 0) colors[i].point = 0;
+      else if (i === colors.length - 1) colors[i].point = 1;
+      else {
+        q = (1 / (colors.length - 1)) * i;
+        val = this.quantile(array, q);
+        point = (val - min) / (max - min);
+        colors[i].point = point;
+      }
+    }
+    return colors;
+  };
+
+  quantile = (arr, q) => {
+    const sorted = arr.slice(0).sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
     } else {
-      pixelcolor =
-        gradient[parseInt(gradient.length / ((max - min) / (value - min)), 10)];
+      return sorted[base];
     }
-    return pixelcolor;
-  };
-
-  isNumeric = n => {
-    return !isNaN(parseFloat(n)) && isFinite(n);
   };
 
   hoverFunc = (target, type) => {
@@ -150,6 +191,8 @@ class Live extends Component {
   };
 
   updateParentColors = colors => {
+    var { dataArray, dataIndex } = this.state;
+    colors = this.optimisePoints(colors, dataArray[dataIndex].v);
     this.setState({ colors });
   };
 
@@ -165,12 +208,12 @@ class Live extends Component {
   };
 
   stationPopup = info => {
-    console.log(info)
+    console.log(info);
     if ("update" in info) {
       return (
         "<b>" +
         info.name +
-        '</b><br>' +
+        "</b><br>" +
         info.description +
         '<br><a title="See live data" href="/live/' +
         info.link +
@@ -192,6 +235,27 @@ class Live extends Component {
   };
 
   async componentDidMount() {
+    // Get parameter details
+    const { data: parameters } = await axios.get(
+      apiUrl + "/selectiontables/parameters"
+    );
+
+    // Add default display settings for parameters
+    parameters.map(x => {
+      x.symbol = "circle";
+      x.colors = [
+        { color: "#000080", point: 0 },
+        { color: "#3366FF", point: 0.142857142857143 },
+        { color: "#00B0DC", point: 0.285714285714286 },
+        { color: "#009933", point: 0.428571428571429 },
+        { color: "#FFFF5B", point: 0.571428571428571 },
+        { color: "#E63300", point: 0.714285714285714 },
+        { color: "#CC0000", point: 0.857142857142857 },
+        { color: "#800000", point: 1 }
+      ];
+      return x;
+    });
+
     // Get list of available layers
     const { data: list } = await axios.get(apiUrl + "/rs");
     var dataArray = new Array(list.length).fill(0);
@@ -221,7 +285,8 @@ class Live extends Component {
       max,
       unit,
       markerData,
-      stations
+      stations,
+      parameters
     });
   }
 
@@ -237,7 +302,10 @@ class Live extends Component {
       markerData,
       visibleMarkers,
       stations,
-      colors
+      colors,
+      maplayers,
+      parameters,
+      selected
     } = this.state;
     var unit = list[dataIndex].unit;
     return (
@@ -268,37 +336,11 @@ class Live extends Component {
                     colors={colors}
                     unit={unit}
                     text={list[dataIndex].description}
+                    onChange={this.updateParentColors}
                   />
                 }
-              />
-            </React.Fragment>
-          }
-          rightNoScroll={
-            <React.Fragment>
-              <table>
-                <tbody>
-                  {stations.map(station => (
-                    <tr key={station.value}>
-                      <td>
-                        <input
-                          type="checkbox"
-                          id={station.value}
-                          value={station.value}
-                          onChange={this.makerChange}
-                        />
-                      </td>
-                      <td>{station.name}</td>
-                      <td>
-                        <div className={station.shape}></div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <FilterBox
-                title="Satellite Data"
-                content={
-                  <React.Fragment>
+                selector={
+                  <div className="live-dataselector">
                     <DataSelect
                       value="name"
                       label="name"
@@ -306,29 +348,28 @@ class Live extends Component {
                       defaultValue={list[dataIndex].name}
                       onChange={this.handleSelect}
                     />
-                    <Link to="remotesensing">
-                      <button style={{ width: "100%" }}>
-                        Advanced remote sensing features
-                      </button>
-                    </Link>
-                  </React.Fragment>
+                  </div>
                 }
-                preopen="true"
               />
+            </React.Fragment>
+          }
+          rightNoScroll={
+            <React.Fragment>
               <FilterBox
                 title="Lake Stations"
-                content={
-                  <React.Fragment>
-                    <WeatherStations datalist={markerData.lakestations} />
-                  </React.Fragment>
-                }
+                preopen="true"
+                content={<LakeStations datalist={markerData.lakestations} />}
               />
               <FilterBox
-                title="Color Ramp"
+                title="Map Layers"
                 content={
-                  <ColorRamp
-                    onChange={this.updateParentColors}
-                    colors={colors}
+                  <MapLayers
+                    maplayers={maplayers}
+                    parameters={parameters}
+                    selected={selected}
+                    addSelected={this.addSelected}
+                    removeSelected={this.removeSelected}
+                    updateMapLayers={this.updateMapLayers}
                   />
                 }
               />

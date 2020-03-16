@@ -635,6 +635,7 @@ class ColorRamp extends Component {
       onChange(gradients[index].data);
     }
   };
+  
   linearGradient = colors => {
     if (colors) {
       var lineargradient = [];
