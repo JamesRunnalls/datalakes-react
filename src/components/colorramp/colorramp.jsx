@@ -632,7 +632,8 @@ class ColorRamp extends Component {
     if ("onChange" in this.props) {
       var { gradients } = this.state;
       var { onChange } = this.props;
-      onChange(gradients[index].data);
+      var ramp = JSON.parse(JSON.stringify(gradients[index].data));
+      onChange(ramp);
     }
   };
   

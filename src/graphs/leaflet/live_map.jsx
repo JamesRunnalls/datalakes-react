@@ -41,6 +41,7 @@ class LiveMap extends Component {
       center: center,
       zoom: zoom,
       minZoom: 7,
+      attributionControl: false,
       layers: [
         //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'})
         L.tileLayer(
@@ -49,6 +50,8 @@ class LiveMap extends Component {
         )
       ]
     });
+
+    L.control.attribution({position: 'bottomleft'}).addTo(this.map);
 
     // Add attribution
     this.map.attributionControl.setPrefix('datalakes © | <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>');

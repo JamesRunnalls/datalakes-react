@@ -32,37 +32,233 @@ class Contents extends Component {
 }
 
 class ContentsInner extends Component {
+  state = {
+    open: true,
+    visible: true
+  };
+  toggleOpen = () => {
+    this.setState({ open: !this.state.open });
+  };
+  toggleVisible = () => {
+    this.setState({ visible: !this.state.visible });
+  };
   render() {
     var { parameter } = this.props;
+    var { open, visible } = this.state;
     return (
-      <div className="maplayers-contentsinner">
-          <div className="contentssymbol">&#9660;</div><input className="checkbox" type="checkbox" />{parameter.name}
-        <ContentsMeasurement parameter={parameter}/>
-        <ContentsSatellite />
-        <ContentsModel />
-        <ContentsVis />
+      <div className="maplayers-contents-inner1">
+        <div className="contentssymbol" onClick={this.toggleOpen}>
+          {open ? "◢" : "▹"}
+        </div>
+        <input
+          className="checkbox"
+          type="checkbox"
+          onChange={this.toggleVisible}
+          checked={visible}
+        />
+        {parameter.name}
+        <div
+          className={
+            open
+              ? "maplayers-contents-inner2"
+              : "maplayers-contents-inner2 hide"
+          }
+        >
+          <ContentsInnerInner
+            parameter={parameter}
+            name="Measurement Value"
+            type="measurement"
+          />
+          <ContentsInnerInner
+            parameter={parameter}
+            name="Satellite Data"
+            type="satellite"
+          />
+          <ContentsInnerInner
+            parameter={parameter}
+            name="Lake Simulations"
+            type="model"
+          />
+          <ContentsVis />
+        </div>
       </div>
     );
   }
 }
-class ContentsMeasurement extends Component {
-  state = {};
+
+class ContentsInnerInner extends Component {
+  state = {
+    open: true,
+    visible: true
+  };
+  toggleOpen = () => {
+    this.setState({ open: !this.state.open });
+  };
+  toggleVisible = () => {
+    this.setState({ visible: !this.state.visible });
+  };
   render() {
-    var { parameter } = this.props;
-    var layers = parameter.layers.filter(layer => layer.type === "measurement")
-    return <div></div>;
+    var { parameter, name, type } = this.props;
+    var { open, visible } = this.state;
+    var layers = parameter.layers.filter(layer => layer.type === type);
+    if (layers.length > 0) {
+      return (
+        <React.Fragment>
+          <div className="contentssymbol" onClick={this.toggleOpen}>
+            {open ? "◢" : "▹"}
+          </div>
+          <input
+            className="checkbox"
+            type="checkbox"
+            onChange={this.toggleVisible}
+            checked={visible}
+          />
+          {name}
+          <div
+            className={
+              open
+                ? "maplayers-contents-inner2"
+                : "maplayers-contents-inner2 hide"
+            }
+          >
+            {layers.map(layer => {
+              if ((type = "measurement")) {
+                return <ContentsMarker layer={layer} key={layer.id} />;
+              } else {
+                return <ContentsRaster layer={layer} key={layer.id} />;
+              }
+            })}
+          </div>
+        </React.Fragment>
+      );
+    } else {
+      return <div></div>;
+    }
   }
 }
-class ContentsSatellite extends Component {
-  state = {};
+
+class ContentsMarker extends Component {
+  state = {
+    open: false,
+    visible: true
+  };
+  toggleOpen = () => {
+    this.setState({ open: !this.state.open });
+  };
+  toggleVisible = () => {
+    this.setState({ visible: !this.state.visible });
+  };
   render() {
-    return <div></div>;
+    var { layer } = this.props;
+    var { open, visible } = this.state;
+    return (
+      <div className="maplayers-contents-inner3">
+        <div className="contentssymbol" onClick={this.toggleOpen}>
+          {open ? "◢" : "▹"}
+        </div>
+        <input
+          className="checkbox"
+          type="checkbox"
+          onChange={this.toggleVisible}
+          checked={visible}
+        />
+        {layer.name}
+        <div
+          className={
+            open
+              ? "maplayers-contents-inner4"
+              : "maplayers-contents-inner4 hide"
+          }
+        >
+          <table>
+            <tbody>
+              <tr>
+                <td>Symbol</td>
+                <td>
+                  <select>
+                    <option value="circle">&#9679; Circle</option>
+                    <option value="square">&#9632; Square</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Size</td>
+                <td>
+                  <select>
+                    <option value="circle">Fixed</option>
+                    <option value="square">By Parameter</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="text"></input>px
+                </td>
+              </tr>
+              <tr>
+                <td>Color</td>
+                <td>
+                  <select>
+                    <option value="circle">Fixed</option>
+                    <option value="square">By Parameter</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Labels</td>
+                <td>
+                  <input type="checkbox"></input>
+                </td>
+              </tr>
+              <tr>
+                <td>Legend</td>
+                <td>
+                  <input type="checkbox"></input>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   }
 }
-class ContentsModel extends Component {
-  state = {};
+
+class ContentsRaster extends Component {
+  state = {
+    open: true,
+    visible: true
+  };
+  toggleOpen = () => {
+    this.setState({ open: !this.state.open });
+  };
+  toggleVisible = () => {
+    this.setState({ visible: !this.state.visible });
+  };
   render() {
-    return <div></div>;
+    var { layer } = this.props;
+    var { open, visible } = this.state;
+    return (
+      <div className="maplayers-contents-inner3">
+        <div className="contentssymbol" onClick={this.toggleOpen}>
+          {open ? "◢" : "▹"}
+        </div>
+        <input
+          className="checkbox"
+          type="checkbox"
+          onChange={this.toggleVisible}
+          checked={visible}
+        />
+        {layer.name}
+        <div
+          className={
+            open
+              ? "maplayers-contents-inner4"
+              : "maplayers-contents-inner4 hide"
+          }
+        >
+          tbd
+        </div>
+      </div>
+    );
   }
 }
 
@@ -76,10 +272,12 @@ class ContentsVis extends Component {
 class AddLayers extends Component {
   render() {
     var { maplayers, parameters, addSelected, type } = this.props;
-    var mlayers = maplayers.filter(layer => layer.type === type);
+    var cmaplayers = JSON.parse(JSON.stringify(maplayers));
+    var cparameters = JSON.parse(JSON.stringify(parameters));
+    var mlayers = cmaplayers.filter(layer => layer.type === type);
     var layers = mlayers.map(layer => layer.parameter_id);
     layers = [...new Set(layers)];
-    var availableparameters = parameters.filter(p => layers.includes(p.id));
+    var availableparameters = cparameters.filter(p => layers.includes(p.id));
     availableparameters = availableparameters.map(x => {
       x.layerids = mlayers.filter(y => y.parameter_id === x.id).map(z => z.id);
       return x;
@@ -91,7 +289,7 @@ class AddLayers extends Component {
             key={layer.id}
             className="maplayers-layer"
             onClick={() => addSelected(layer.layerids)}
-            title="Add layer to map"
+            title={layer.layerids}
           >
             {layer.name}
           </div>
@@ -124,6 +322,7 @@ class MapLayers extends Component {
           updateMapLayers={updateMapLayers}
           getParameterDetails={getParameterDetails}
         />
+        <div>Add Layers</div>
         <FilterBox
           title="Measured Values"
           inner="true"

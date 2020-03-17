@@ -16,10 +16,15 @@
 .filterbox .symbol {
   float: right;
   font-size: 22px;
+  transform: none!important;
 }
 
 .filterbox .content {
   padding-top: 10px;
+}
+
+.filterbox .content.hide {
+  display: none;
 }
 
 .filterbox.inner {

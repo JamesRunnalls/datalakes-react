@@ -31,6 +31,16 @@ class LakeStations extends Component {
   }
 }
 
+class MapLegend extends Component {
+  state = {  }
+  render() { 
+    return ( <div className="leaflet-legend">
+
+    </div> );
+  }
+}
+ 
+
 class Live extends Component {
   state = {
     list: [{ name: "" }],
@@ -62,9 +72,9 @@ class Live extends Component {
         array: [],
         parameter_id: 5,
         sourcelink: "http://...",
-        sourcetext: "FOEN",
+        sourcetext: "Lexplore Lake Platform",
         description: "Here is a description of the data",
-        name: "Some name"
+        name: "Lexplore Lake Platform"
       },
       {
         id: 1,
@@ -75,7 +85,7 @@ class Live extends Component {
         sourcelink: "http://...",
         sourcetext: "FOEN",
         description: "Here is a description of the data",
-        name: "Some name"
+        name: "FOEN Water Temperature"
       },
       {
         id: 3,
@@ -87,9 +97,42 @@ class Live extends Component {
         sourcetext: "FOEN",
         description: "Here is a description of the data",
         name: "Some name"
+      },
+      {
+        id: 4,
+        type: "satellite",
+        api: "http://...",
+        array: [],
+        parameter_id: 5,
+        sourcelink: "http://...",
+        sourcetext: "FOEN",
+        description: "Here is a description of the data",
+        name: "Some name"
+      },
+      {
+        id: 5,
+        type: "model",
+        api: "http://...",
+        array: [],
+        parameter_id: 5,
+        sourcelink: "http://...",
+        sourcetext: "FOEN",
+        description: "Here is a description of the data",
+        name: "Some name"
+      },
+      {
+        id: 6,
+        type: "satellite",
+        api: "http://...",
+        array: [],
+        parameter_id: 8,
+        sourcelink: "http://...",
+        sourcetext: "FOEN",
+        description: "Here is a description of the data",
+        name: "Some name"
       }
     ],
-    selected: []
+    selected: [0,1]
   };
 
   addSelected = id => {
@@ -330,14 +373,16 @@ class Live extends Component {
                 min={min}
                 max={max}
                 legend={
-                  <ColorBar
-                    min={min}
-                    max={max}
-                    colors={colors}
-                    unit={unit}
-                    text={list[dataIndex].description}
-                    onChange={this.updateParentColors}
-                  />
+                  <div className="legend">
+                    <ColorBar
+                      min={min}
+                      max={max}
+                      colors={colors}
+                      unit={unit}
+                      text={list[dataIndex].description}
+                      onChange={this.updateParentColors}
+                    />
+                  </div>
                 }
                 selector={
                   <div className="live-dataselector">
@@ -357,11 +402,11 @@ class Live extends Component {
             <React.Fragment>
               <FilterBox
                 title="Lake Stations"
-                preopen="true"
                 content={<LakeStations datalist={markerData.lakestations} />}
               />
               <FilterBox
                 title="Map Layers"
+                preopen="true"
                 content={
                   <MapLayers
                     maplayers={maplayers}
