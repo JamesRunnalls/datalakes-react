@@ -84,6 +84,10 @@ header {
 
 /* Navigation Menu */
 
+.header-more {
+  cursor: pointer;
+}
+
 .hamburger {
   margin-right: 25px;
   cursor: pointer;

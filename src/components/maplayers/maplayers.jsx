@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "./maplayers.css";
 import FilterBox from "../filterbox/filterbox";
+import { getColor } from "../../components/gradients/gradients";
 
 class Contents extends Component {
   state = {};
@@ -23,18 +24,127 @@ class Contents extends Component {
     });
     return (
       <div className="maplayers-contents">
-        {selectparameters.map(parameter => (
-          <ContentsInner parameter={parameter} />
-        ))}
+        {selectparameters.map(parameter => {
+          var layers1 = parameter.layers.filter(
+            layer => layer.type === "measurement"
+          );
+          var layers2 = parameter.layers.filter(
+            layer => layer.type === "satellite"
+          );
+          var layers3 = parameter.layers.filter(
+            layer => layer.type === "model"
+          );
+          return (
+            <DropDown
+              name={parameter.name}
+              key={parameter.id}
+              defaultOpen={true}
+              allowSettings={true}
+              content={
+                <React.Fragment>
+                  {layers1.length > 0 && (
+                    <DropDown
+                      name={"Measurement Value"}
+                      defaultOpen={true}
+                      allowSettings={false}
+                      content={
+                        <React.Fragment>
+                          {layers1.map(layer => (
+                            <DropDown
+                              name={layer.name}
+                              allowSettings={true}
+                              key={layer.id}
+                              content={
+                                <MarkerDisplay
+                                  key={layer.id}
+                                  fixedSize={layer.fixedSize}
+                                  fixedColor={layer.fixedColor}
+                                  min={parameter.min}
+                                  max={parameter.max}
+                                  symbol={layer.symbol}
+                                  unit={parameter.unit}
+                                  colors={layer.colors}
+                                />
+                              }
+                            />
+                          ))}
+                        </React.Fragment>
+                      }
+                    />
+                  )}
+                  {layers2.length > 0 && (
+                    <DropDown
+                      name={"Satellite Data"}
+                      defaultOpen={true}
+                      allowSettings={false}
+                      content={
+                        <React.Fragment>
+                          {layers2.map(layer => (
+                            <DropDown
+                              key={layer.id}
+                              name={layer.name}
+                              defaultOpen={false}
+                              allowSettings={true}
+                              content={
+                                <RasterDisplay
+                                  key={layer.id}
+                                  fixedColor={layer.fixedColor}
+                                  min={parameter.min}
+                                  max={parameter.max}
+                                  unit={parameter.unit}
+                                  colors={layer.colors}
+                                />
+                              }
+                            />
+                          ))}
+                        </React.Fragment>
+                      }
+                    />
+                  )}
+                  {layers3.length > 0 && (
+                    <DropDown
+                      name={"Lake Simulations"}
+                      defaultOpen={true}
+                      allowSettings={false}
+                      content={
+                        <React.Fragment>
+                          {layers3.map(layer => (
+                            <DropDown
+                              key={layer.id}
+                              name={layer.name}
+                              defaultOpen={false}
+                              allowSettings={true}
+                              content={
+                                <RasterDisplay
+                                  key={layer.id}
+                                  fixedColor={layer.fixedColor}
+                                  min={parameter.min}
+                                  max={parameter.max}
+                                  unit={parameter.unit}
+                                  colors={layer.colors}
+                                />
+                              }
+                            />
+                          ))}
+                        </React.Fragment>
+                      }
+                    />
+                  )}
+                </React.Fragment>
+              }
+            />
+          );
+        })}
       </div>
     );
   }
 }
 
-class ContentsInner extends Component {
+class DropDown extends Component {
   state = {
-    open: true,
-    visible: true
+    open: this.props.defaultOpen,
+    visible: true,
+    settings: false
   };
   toggleOpen = () => {
     this.setState({ open: !this.state.open });
@@ -42,222 +152,228 @@ class ContentsInner extends Component {
   toggleVisible = () => {
     this.setState({ visible: !this.state.visible });
   };
+  toggleSettings = () => {
+    this.setState({ settings: !this.state.settings });
+  };
   render() {
-    var { parameter } = this.props;
-    var { open, visible } = this.state;
+    var { open, visible, settings } = this.state;
+    var { name, content, allowSettings } = this.props;
     return (
-      <div className="maplayers-contents-inner1">
-        <div className="contentssymbol" onClick={this.toggleOpen}>
-          {open ? "◢" : "▹"}
+      <div className="maplayers-dropdown">
+        <table className="maplayers-dropdown-table">
+          <tbody>
+            <tr className="maplayers-dropdown-title">
+              <td
+                className="maplayers-symbol"
+                onClick={this.toggleOpen}
+                style={{ width: "10px" }}
+              >
+                {open ? "◢" : "▹"}
+              </td>
+              <td style={{ width: "10px" }}>
+                {" "}
+                <input
+                  className="maplayers-checkbox"
+                  type="checkbox"
+                  onChange={this.toggleVisible}
+                  checked={visible}
+                />
+              </td>
+              <td style={{ width: "100%" }}>{name}</td>
+              {allowSettings && (
+                <td onClick={this.toggleSettings} style={{ width: "10px" }} className="maplayers-settings">
+                  &#9881;
+                </td>
+              )}
+            </tr>
+          </tbody>
+        </table>
+        <div
+          className={
+            settings
+              ? "maplayers-dropdown-content"
+              : "maplayers-dropdown-content hide"
+          }
+        >
+          <EditSettings />
         </div>
-        <input
-          className="checkbox"
-          type="checkbox"
-          onChange={this.toggleVisible}
-          checked={visible}
-        />
-        {parameter.name}
         <div
           className={
             open
-              ? "maplayers-contents-inner2"
-              : "maplayers-contents-inner2 hide"
+              ? "maplayers-dropdown-content"
+              : "maplayers-dropdown-content hide"
           }
         >
-          <ContentsInnerInner
-            parameter={parameter}
-            name="Measurement Value"
-            type="measurement"
-          />
-          <ContentsInnerInner
-            parameter={parameter}
-            name="Satellite Data"
-            type="satellite"
-          />
-          <ContentsInnerInner
-            parameter={parameter}
-            name="Lake Simulations"
-            type="model"
-          />
-          <ContentsVis />
+          {content}
         </div>
       </div>
     );
   }
 }
 
-class ContentsInnerInner extends Component {
-  state = {
-    open: true,
-    visible: true
-  };
-  toggleOpen = () => {
-    this.setState({ open: !this.state.open });
-  };
-  toggleVisible = () => {
-    this.setState({ visible: !this.state.visible });
-  };
+class MarkerDisplay extends Component {
   render() {
-    var { parameter, name, type } = this.props;
-    var { open, visible } = this.state;
-    var layers = parameter.layers.filter(layer => layer.type === type);
-    if (layers.length > 0) {
-      return (
-        <React.Fragment>
-          <div className="contentssymbol" onClick={this.toggleOpen}>
-            {open ? "◢" : "▹"}
-          </div>
-          <input
-            className="checkbox"
-            type="checkbox"
-            onChange={this.toggleVisible}
-            checked={visible}
-          />
-          {name}
-          <div
-            className={
-              open
-                ? "maplayers-contents-inner2"
-                : "maplayers-contents-inner2 hide"
-            }
+    var { fixedSize, fixedColor, min, max, colors, symbol, unit } = this.props;
+    var values = 5,
+      minSize = 10,
+      maxSize = 40,
+      inner = [],
+      color,
+      fontSize,
+      symbolDiv;
+
+    if (symbol === "circle") symbolDiv = <div>&#9679;</div>;
+    if (symbol === "square") symbolDiv = <div>&#9724;</div>;
+    if (symbol === "triangle") symbolDiv = <div>&#9650;</div>;
+
+    if (fixedSize && fixedColor) {
+      inner.push(
+        <tr>
+          <td
+            className="markerdisplay-symbol"
+            style={{ fontSize: maxSize, color: fixedColor }}
           >
-            {layers.map(layer => {
-              if ((type = "measurement")) {
-                return <ContentsMarker layer={layer} key={layer.id} />;
-              } else {
-                return <ContentsRaster layer={layer} key={layer.id} />;
-              }
-            })}
-          </div>
-        </React.Fragment>
+            {symbolDiv}
+          </td>
+        </tr>
       );
     } else {
-      return <div></div>;
+      for (var i = 0; i < values; i++) {
+        var value = max - (max - min) * (i / 4);
+        if (fixedColor) {
+          color = fixedColor;
+        } else {
+          color = getColor(value, min, max, colors);
+        }
+        if (fixedSize) {
+          fontSize = (maxSize + minSize) / 2;
+        } else {
+          fontSize = maxSize - (maxSize - minSize) * (i / 4);
+        }
+        inner.push(
+          <tr key={i}>
+            <td
+              className="markerdisplay-symbol"
+              style={{ fontSize: fontSize, color: color }}
+            >
+              {symbolDiv}
+            </td>
+            <td>
+              {value}
+              {i === 0 && unit}
+            </td>
+          </tr>
+        );
+      }
     }
-  }
-}
-
-class ContentsMarker extends Component {
-  state = {
-    open: false,
-    visible: true
-  };
-  toggleOpen = () => {
-    this.setState({ open: !this.state.open });
-  };
-  toggleVisible = () => {
-    this.setState({ visible: !this.state.visible });
-  };
-  render() {
-    var { layer } = this.props;
-    var { open, visible } = this.state;
     return (
-      <div className="maplayers-contents-inner3">
-        <div className="contentssymbol" onClick={this.toggleOpen}>
-          {open ? "◢" : "▹"}
-        </div>
-        <input
-          className="checkbox"
-          type="checkbox"
-          onChange={this.toggleVisible}
-          checked={visible}
-        />
-        {layer.name}
-        <div
-          className={
-            open
-              ? "maplayers-contents-inner4"
-              : "maplayers-contents-inner4 hide"
-          }
-        >
-          <table>
-            <tbody>
-              <tr>
-                <td>Symbol</td>
-                <td>
-                  <select>
-                    <option value="circle">&#9679; Circle</option>
-                    <option value="square">&#9632; Square</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>Size</td>
-                <td>
-                  <select>
-                    <option value="circle">Fixed</option>
-                    <option value="square">By Parameter</option>
-                  </select>
-                </td>
-                <td>
-                  <input type="text"></input>px
-                </td>
-              </tr>
-              <tr>
-                <td>Color</td>
-                <td>
-                  <select>
-                    <option value="circle">Fixed</option>
-                    <option value="square">By Parameter</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>Labels</td>
-                <td>
-                  <input type="checkbox"></input>
-                </td>
-              </tr>
-              <tr>
-                <td>Legend</td>
-                <td>
-                  <input type="checkbox"></input>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <table>
+        <tbody>{inner}</tbody>
+      </table>
     );
   }
 }
 
-class ContentsRaster extends Component {
-  state = {
-    open: true,
-    visible: true
-  };
-  toggleOpen = () => {
-    this.setState({ open: !this.state.open });
-  };
-  toggleVisible = () => {
-    this.setState({ visible: !this.state.visible });
+class RasterDisplay extends Component {
+  linearGradient = colors => {
+    if (colors) {
+      var lineargradient = [];
+      for (var i = 0; i < colors.length; i++) {
+        lineargradient.push(`${colors[i].color} ${colors[i].point * 100}%`);
+      }
+      return `linear-gradient(180deg,${lineargradient.join(",")})`;
+    }
   };
   render() {
-    var { layer } = this.props;
-    var { open, visible } = this.state;
+    var { fixedColor, min, max, colors, unit } = this.props;
+    var values = 5,
+      inner = [],
+      value;
+      var selectStyle = {
+        background: this.linearGradient(colors)
+      };
+    if (fixedColor) {
+      inner.push(
+        <tr>
+          <td>
+            <div></div>
+          </td>
+        </tr>
+      );
+    } else {
+      inner.push(
+        <tr key={0}>
+          <td rowSpan={values} className="rasterdisplay-colorbar" style={selectStyle}></td>
+          <td>{max + " " + unit}</td>
+        </tr>
+      );
+      for (var i = 1; i < values; i++) {
+        value = max - (max - min) * (i / 4);
+        inner.push(
+          <tr key={i}>
+            <td>{value}</td>
+          </tr>
+        );
+      }
+    }
     return (
-      <div className="maplayers-contents-inner3">
-        <div className="contentssymbol" onClick={this.toggleOpen}>
-          {open ? "◢" : "▹"}
-        </div>
-        <input
-          className="checkbox"
-          type="checkbox"
-          onChange={this.toggleVisible}
-          checked={visible}
-        />
-        {layer.name}
-        <div
-          className={
-            open
-              ? "maplayers-contents-inner4"
-              : "maplayers-contents-inner4 hide"
-          }
-        >
-          tbd
-        </div>
-      </div>
+      <table>
+        <tbody>{inner}</tbody>
+      </table>
+    );
+  }
+}
+
+class EditSettings extends Component {
+  state = {};
+  render() {
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <td>Symbol</td>
+            <td>
+              <select>
+                <option value="circle">&#9679; Circle</option>
+                <option value="square">&#9632; Square</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Size</td>
+            <td>
+              <select>
+                <option value="circle">Fixed</option>
+                <option value="square">By Parameter</option>
+              </select>
+            </td>
+            <td>
+              <input type="text"></input>px
+            </td>
+          </tr>
+          <tr>
+            <td>Color</td>
+            <td>
+              <select>
+                <option value="circle">Fixed</option>
+                <option value="square">By Parameter</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Labels</td>
+            <td>
+              <input type="checkbox"></input>
+            </td>
+          </tr>
+          <tr>
+            <td>Legend</td>
+            <td>
+              <input type="checkbox"></input>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 }

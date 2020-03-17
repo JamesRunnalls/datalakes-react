@@ -32,14 +32,11 @@ class LakeStations extends Component {
 }
 
 class MapLegend extends Component {
-  state = {  }
-  render() { 
-    return ( <div className="leaflet-legend">
-
-    </div> );
+  state = {};
+  render() {
+    return <div className="leaflet-legend"></div>;
   }
 }
- 
 
 class Live extends Component {
   state = {
@@ -132,7 +129,7 @@ class Live extends Component {
         name: "Some name"
       }
     ],
-    selected: [0,1]
+    selected: [0, 1]
   };
 
   addSelected = id => {
@@ -296,6 +293,30 @@ class Live extends Component {
         { color: "#CC0000", point: 0.857142857142857 },
         { color: "#800000", point: 1 }
       ];
+      x.min = 0;
+      x.max = 1;
+      return x;
+    });
+
+    // Get maplayers 
+    //const { data: maplayers } = await axios.get(apiUrl + "/maplayers");
+    var maplayers = this.state.maplayers; // temporary
+
+    // Add default display settings for maplayers
+    maplayers.map(x => {
+      x.fixedColor = false;
+      x.fixedSize = false;
+      x.symbol = "circle";
+      x.colors = [
+        { color: "#000080", point: 0 },
+        { color: "#3366FF", point: 0.142857142857143 },
+        { color: "#00B0DC", point: 0.285714285714286 },
+        { color: "#009933", point: 0.428571428571429 },
+        { color: "#FFFF5B", point: 0.571428571428571 },
+        { color: "#E63300", point: 0.714285714285714 },
+        { color: "#CC0000", point: 0.857142857142857 },
+        { color: "#800000", point: 1 }
+      ];
       return x;
     });
 
@@ -329,7 +350,8 @@ class Live extends Component {
       unit,
       markerData,
       stations,
-      parameters
+      parameters,
+      maplayers
     });
   }
 

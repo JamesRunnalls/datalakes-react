@@ -64,7 +64,7 @@ class Header extends Component {
                     <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/live"><img alt="Live Data" src={live} /></NavLink>
                     <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/predictions"><img alt="Predictions" src={predictions} /></NavLink>
                     <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/dataportal"><img alt="Data Portal" src={data} /></NavLink>
-                    <div onClick={this.toggle} ><img alt="More" src={more} /></div>
+                    <div onClick={this.toggle} className="header-more"><img alt="More" src={more} /></div>
             </div>
         </header>
         );

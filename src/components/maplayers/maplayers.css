@@ -13,40 +13,48 @@
 }
 
 .maplayers-contents {
-  min-height: 260px;
-  max-height: 400px;
+  margin-bottom: 15px;
 }
 
-.maplayers-contents-inner1 {
-  line-height: 22px;
-  margin: 0 0 10px 0;
+.maplayers-dropdown {
+  margin: 2px 0;
 }
 
-.maplayers-contents-inner2 {
-  margin-left: 12px;
+.maplayers-dropdown .maplayers-dropdown-table {
+  width: 100%;
 }
 
-.maplayers-contents-inner2.hide {
-  display: none;
+.maplayers-dropdown .maplayers-dropdown-title {
 }
 
-.maplayers-contents-inner4 {
-  margin-left: 12px;
+.maplayers-dropdown .maplayers-checkbox {
+  display: inline-block;
 }
 
-.maplayers-contents-inner4.hide {
-  display: none;
-}
-
-.maplayers-contents-inner2 {
-  margin-left: 12px;
-}
-
-.maplayers-contents .contentssymbol {
+.maplayers-dropdown .maplayers-symbol {
   display: inline-block;
   cursor: pointer;
 }
 
-.maplayers-contents .checkbox {
-  display: inline-block;
+.maplayers-dropdown .maplayers-settings {
+    cursor: pointer;
+  }
+
+.maplayers-dropdown-content {
+  margin-left: 12px;
+}
+
+.maplayers-dropdown-content.hide {
+  display: none;
+}
+
+.markerdisplay-symbol {
+  line-height: 22px;
+  text-align: center;
+}
+
+.rasterdisplay-colorbar {
+  width: 20px;
+  height: 100%;
+  background-color: red;
 }
