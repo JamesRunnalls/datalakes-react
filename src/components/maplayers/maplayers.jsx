@@ -39,9 +39,10 @@ class Contents extends Component {
             <DropDown
               name={parameter.name}
               key={parameter.id}
+              marker={true}
               defaultOpen={true}
               allowSettings={true}
-              colors={parameter.colors}
+              display={parameter}
               content={
                 <React.Fragment>
                   {layers1.length > 0 && (
@@ -49,6 +50,7 @@ class Contents extends Component {
                       name={"Measurement Value"}
                       defaultOpen={true}
                       allowSettings={false}
+                      display={parameter}
                       content={
                         <React.Fragment>
                           {layers1.map(layer => (
@@ -56,17 +58,15 @@ class Contents extends Component {
                               name={layer.name}
                               allowSettings={true}
                               key={layer.id}
-                              colors={layer.colors}
+                              display={layer}
+                              marker={true}
                               content={
                                 <MarkerDisplay
                                   key={layer.id}
-                                  fixedSize={layer.fixedSize}
-                                  fixedColor={layer.fixedColor}
                                   min={parameter.min}
                                   max={parameter.max}
-                                  symbol={layer.symbol}
                                   unit={parameter.unit}
-                                  colors={layer.colors}
+                                  display={layer}
                                 />
                               }
                             />
@@ -80,23 +80,23 @@ class Contents extends Component {
                       name={"Satellite Data"}
                       defaultOpen={true}
                       allowSettings={false}
+                      display={parameter}
                       content={
                         <React.Fragment>
                           {layers2.map(layer => (
                             <DropDown
                               key={layer.id}
-                              colors={layer.colors}
+                              display={layer}
                               name={layer.name}
                               defaultOpen={false}
                               allowSettings={true}
                               content={
                                 <RasterDisplay
                                   key={layer.id}
-                                  fixedColor={layer.fixedColor}
                                   min={parameter.min}
                                   max={parameter.max}
                                   unit={parameter.unit}
-                                  colors={layer.colors}
+                                  display={layer}
                                 />
                               }
                             />
@@ -110,23 +110,23 @@ class Contents extends Component {
                       name={"Lake Simulations"}
                       defaultOpen={true}
                       allowSettings={false}
+                      display={parameter}
                       content={
                         <React.Fragment>
                           {layers3.map(layer => (
                             <DropDown
                               key={layer.id}
-                              colors={layer.colors}
+                              display={layer}
                               name={layer.name}
                               defaultOpen={false}
                               allowSettings={true}
                               content={
                                 <RasterDisplay
                                   key={layer.id}
-                                  fixedColor={layer.fixedColor}
                                   min={parameter.min}
                                   max={parameter.max}
                                   unit={parameter.unit}
-                                  colors={layer.colors}
+                                  display={layer}
                                 />
                               }
                             />
@@ -162,7 +162,7 @@ class DropDown extends Component {
   };
   render() {
     var { open, visible, settings } = this.state;
-    var { name, content, allowSettings, colors } = this.props;
+    var { name, content, allowSettings, marker, display } = this.props;
     return (
       <div className="maplayers-dropdown">
         <table className="maplayers-dropdown-table">
@@ -204,7 +204,7 @@ class DropDown extends Component {
               : "maplayers-dropdown-content hide"
           }
         >
-          <EditSettings colors={colors} />
+          <EditSettings marker={marker} display={display} />
         </div>
         <div
           className={
@@ -222,20 +222,26 @@ class DropDown extends Component {
 
 class MarkerDisplay extends Component {
   render() {
-    var { fixedSize, fixedColor, min, max, colors, symbol, unit } = this.props;
-    console.log(colors);
+    var {
+      min,
+      max,
+      unit,
+      display
+    } = this.props;
+    var { colors, markerFixedSize, markerSymbol, description, sourcetext, sourcelink } = display;
     var minSize = 10,
       maxSize = 40,
       inner = [],
       color,
       fontSize,
-      symbolDiv;
+      symbolDiv,
+      fixedColor;
 
-    if (symbol === "circle") symbolDiv = <div>&#9679;</div>;
-    if (symbol === "square") symbolDiv = <div>&#9724;</div>;
-    if (symbol === "triangle") symbolDiv = <div>&#9650;</div>;
+    if (markerSymbol === "circle") symbolDiv = <div>&#9679;</div>;
+    if (markerSymbol === "square") symbolDiv = <div>&#9724;</div>;
+    if (markerSymbol === "triangle") symbolDiv = <div>&#9650;</div>;
 
-    if (fixedSize && fixedColor) {
+    if (markerFixedSize && fixedColor) {
       inner.push(
         <tr>
           <td
@@ -251,7 +257,7 @@ class MarkerDisplay extends Component {
       for (var i = 0; i < colors.length; i++) {
         var value =
           Math.round((min + (max - min) * colors[i].point) * 100) / 100;
-        if (fixedSize) {
+        if (markerFixedSize) {
           fontSize = (maxSize + minSize) / 2;
         } else {
           fontSize = minSize + (maxSize - minSize) * (i / colors.length);
@@ -274,7 +280,17 @@ class MarkerDisplay extends Component {
           }
           color = colors[i].color;
         }
-
+        // Check possibility of tiny change
+        if (i === 0) {
+          if (colors[1].point < 0.0001) {
+            continue;
+          }
+        }
+        if (i === colors.length - 1) {
+          if (1 - colors[colors.length - 2].point < 0.0001) {
+            continue;
+          }
+        }
         inner.push(
           <tr key={i}>
             <td
@@ -290,9 +306,16 @@ class MarkerDisplay extends Component {
       }
     }
     return (
-      <table>
-        <tbody>{inner}</tbody>
-      </table>
+      <div>
+        <div>{description}</div>
+        <table>
+          <tbody>{inner}</tbody>
+        </table>
+        Source:{" "}
+        <a href={sourcelink} target="_blank">
+          {sourcetext}
+        </a>
+      </div>
     );
   }
 }
@@ -302,17 +325,16 @@ class RasterDisplay extends Component {
     if (colors) {
       var lineargradient = [];
       for (var i = 0; i < colors.length; i++) {
-        console.log(colors[i].color, colors[i].point * 100);
         lineargradient.push(`${colors[i].color} ${colors[i].point * 100}%`);
       }
       return `linear-gradient(180deg,${lineargradient.join(",")})`;
     }
   };
   render() {
-    var { fixedColor, min, max, colors, unit } = this.props;
-    var len = colors.length,
-      inner = [],
-      value;
+    var { min, max, unit, display } = this.props;
+    var { colors, description, sourcelink, sourcetext } = display
+    var inner = [],
+      fixedColor;
     if (fixedColor) {
       var selectStyle = {
         background: fixedColor
@@ -361,68 +383,132 @@ class RasterDisplay extends Component {
       );
     }
     return (
-      <table className="rasterdisplay-table">
-        <tbody>{inner}</tbody>
-      </table>
+      <div>
+        <div>{description}</div>
+        <table className="rasterdisplay-table">
+          <tbody>{inner}</tbody>
+        </table>
+        Source:{" "}
+        <a href={sourcelink} target="_blank">
+          {sourcetext}
+        </a>
+      </div>
     );
   }
 }
 
 class EditSettings extends Component {
-  state = {};
+  state = {
+    colors: JSON.parse(
+      JSON.stringify(this.props.display.colors ? this.props.display.colors : [])
+    ),
+    markerLabel: this.props.display.markerLabel,
+    legend: this.props.display.legend,
+    markerSymbol: this.props.display.markerSymbol,
+    markerFixedSize: this.props.display.markerFixedSize,
+    markerSize: this.props.display.markerSize
+  };
+  localColorChange = colors => {
+    this.setState({ colors });
+  };
+  localMarkerLabelChange = () => {
+    this.setState({ markerLabel: !this.state.markerLabel });
+  };
+  localLegendChange = () => {
+    this.setState({ legend: !this.state.legend });
+  };
+  localMarkerSymbolChange = () => {
+    this.setState({ markerSymbol: event.target.value });
+  };
+  localMarkerFixedSizeChange = () => {
+    var markerFixedSize = false;
+    if (event.target.value === "true") markerFixedSize = true;
+    this.setState({ markerFixedSize });
+  };
+  localMarkerSizeChange = () => {
+    this.setState({ markerSize: event.target.value });
+  };
   render() {
-    var { colors } = this.props;
+    var {
+      colors,
+      markerLabel,
+      legend,
+      markerSymbol,
+      markerFixedSize,
+      markerSize
+    } = this.state;
+    var { onChange, marker } = this.props;
     return (
-      <div>
-        <div className="editsettings-markeroptions">
-          <table>
-            <tbody>
-              <tr>
-                <td>Symbol</td>
-                <td>
-                  <select>
-                    <option value="circle">&#9679; Circle</option>
-                    <option value="square">&#9632; Square</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>Size</td>
-                <td>
-                  <select>
-                    <option value="circle">Fixed</option>
-                    <option value="square">By Parameter</option>
-                  </select>
-                </td>
-                <td>
-                  <input type="text"></input>px
-                </td>
-              </tr>
-              <tr>
-                <td>Color</td>
-                <td>
-                  <select>
-                    <option value="circle">Fixed</option>
-                    <option value="square">By Parameter</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>Labels</td>
-                <td>
-                  <input type="checkbox"></input>
-                </td>
-              </tr>
-              <tr>
-                <td>Legend</td>
-                <td>
-                  <input type="checkbox"></input>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div className="editsettings">
+        {marker && (
+          <div className="editsettings-markeroptions">
+            <div className="editsettings-title">Marker Options</div>
+            <table className="editsettings-table">
+              <tbody>
+                <tr>
+                  <td>Symbol</td>
+                  <td>
+                    <select
+                      value={markerSymbol}
+                      onChange={this.localMarkerSymbolChange}
+                    >
+                      <option value="circle">&#9679; Circle</option>
+                      <option value="square">&#9632; Square</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Size</td>
+                  <td>
+                    <select
+                      value={markerFixedSize}
+                      onChange={this.localMarkerFixedSizeChange}
+                    >
+                      <option value="true">Fixed</option>
+                      <option value="false">By Value</option>
+                    </select>
+                  </td>
+                  <td>
+                    {markerFixedSize && (
+                      <input
+                        type="text"
+                        value={markerSize}
+                        onChange={this.localMarkerSizeChange}
+                      />
+                    )}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Show Labels</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={markerLabel}
+                      onChange={this.localMarkerLabelChange}
+                    ></input>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="editsettings-title">Color Options</div>
+        <ColorManipulation colors={colors} onChange={this.localColorChange} />
+        Show in Legend{" "}
+        <input
+          type="checkbox"
+          checked={legend}
+          onChange={this.localLegendChange}
+        ></input>
+        <div className="editsettings-button">
+          <button
+            type="button"
+            title="Update plot settings"
+            onClick={() => onChange(this.state)}
+          >
+            Update Plot
+          </button>
         </div>
-        <ColorManipulation colors={colors} />
       </div>
     );
   }

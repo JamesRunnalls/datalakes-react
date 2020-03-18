@@ -6,16 +6,16 @@
   display: inline-block;
   padding: 15px;
   padding: 5px;
-  margin: 1px 20px 1px 1px;
+  margin: 1px 15px 1px 1px;
   cursor: pointer;
 }
 
 .colormanipulation-header:hover {
   border: 1px solid;
-  margin: 0 19px 0 0;
+  margin: 0 14px 0 0;
 }
 
 .colormanipulation-header.header-active {
   border: 1px solid;
-  margin: 0 19px 0 0;
+  margin: 0 14px 0 0;
 }

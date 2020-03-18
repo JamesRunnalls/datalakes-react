@@ -9,14 +9,20 @@ class ColorManipulation extends Component {
   state = {
     manipulation: "ramp"
   };
+
   setManipulation = manipulation => {
     if (manipulation !== this.state.manipulation) {
       this.setState({ manipulation });
     }
   };
+
+  localColorChange = colors => {
+    this.setState({ colors });
+  };
+
   render() {
     var { manipulation } = this.state;
-    var { onChange, colors, array } = this.props;
+    var { onChange, array, colors } = this.props;
     return (
       <div>
         <div className="colormanipulation-headerbar">
@@ -77,7 +83,11 @@ class ColorManipulation extends Component {
             />
           )}
           {manipulation === "slider" && (
-            <ColorSlider onChange={onChange} colors={colors} array={array} />
+            <ColorSlider
+              onChange={onChange}
+              colors={colors}
+              array={array}
+            />
           )}
         </div>
       </div>

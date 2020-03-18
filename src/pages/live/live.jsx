@@ -71,7 +71,12 @@ class Live extends Component {
         sourcelink: "http://...",
         sourcetext: "Lexplore Lake Platform",
         description: "Here is a description of the data",
-        name: "Lexplore Lake Platform"
+        name: "Lexplore Lake Platform",
+        markerLabel: true,
+        legend: true,
+        markerSymbol: "circle",
+        markerFixedSize: true,
+        markerSize: 10
       },
       {
         id: 1,
@@ -82,7 +87,12 @@ class Live extends Component {
         sourcelink: "http://...",
         sourcetext: "FOEN",
         description: "Here is a description of the data",
-        name: "FOEN Water Temperature"
+        name: "FOEN Water Temperature",
+        markerLabel: true,
+        legend: true,
+        markerSymbol: "circle",
+        markerFixedSize: true,
+        markerSize: 10
       },
       {
         id: 3,
@@ -93,7 +103,12 @@ class Live extends Component {
         sourcelink: "http://...",
         sourcetext: "FOEN",
         description: "Here is a description of the data",
-        name: "Some name"
+        name: "Some name",
+        markerLabel: true,
+        legend: true,
+        markerSymbol: "circle",
+        markerFixedSize: true,
+        markerSize: 10
       },
       {
         id: 4,
@@ -104,7 +119,12 @@ class Live extends Component {
         sourcelink: "http://...",
         sourcetext: "FOEN",
         description: "Here is a description of the data",
-        name: "Some name"
+        name: "Some name",
+        markerLabel: true,
+        legend: true,
+        markerSymbol: "circle",
+        markerFixedSize: true,
+        markerSize: 10
       },
       {
         id: 5,
@@ -115,7 +135,12 @@ class Live extends Component {
         sourcelink: "http://...",
         sourcetext: "FOEN",
         description: "Here is a description of the data",
-        name: "Some name"
+        name: "Some name",
+        markerLabel: true,
+        legend: true,
+        markerSymbol: "circle",
+        markerFixedSize: true,
+        markerSize: 10
       },
       {
         id: 6,
@@ -126,7 +151,12 @@ class Live extends Component {
         sourcelink: "http://...",
         sourcetext: "FOEN",
         description: "Here is a description of the data",
-        name: "Some name"
+        name: "Some name",
+        markerLabel: true,
+        legend: true,
+        markerSymbol: "circle",
+        markerFixedSize: true,
+        markerSize: 10
       }
     ],
     selected: [0, 1, 4]
@@ -282,7 +312,11 @@ class Live extends Component {
 
     // Add default display settings for parameters
     parameters.map(x => {
-      x.symbol = "circle";
+      x.markerLabel = true;
+      x.legend = true;
+      x.markerSymbol = "circle";
+      x.markerFixedSize = true;
+      x.markerSize = 10;
       x.colors = [
         { color: "#000080", point: 0 },
         { color: "#3366FF", point: 0.142857142857143 },
@@ -302,25 +336,20 @@ class Live extends Component {
     //const { data: maplayers } = await axios.get(apiUrl + "/maplayers");
     var maplayers = this.state.maplayers; // temporary
 
-    // Add default display settings for maplayers
+    // Add default color settings for maplayers if non already
     maplayers.map(x => {
-      x.fixedColor = false;
-      x.fixedSize = false;
-      x.symbol = "circle";
-      x.colors = [
-        { color: "#000000", point: 0.0 },
-        { color: "#ffffff", point: 7.798751492142183e-10 },
-        { color: "#ffffff", point: 0.09021989254746032 },
-        { color: "#98d8e8", point: 0.09021989366743141 },
-        { color: "#98d8e8", point: 0.2239942187605194 },
-        { color: "#98ce16", point: 0.22399422121823376 },
-        { color: "#98ce16", point: 0.5008759613950504 },
-        { color: "#ffe500", point: 0.5008759666215821 },
-        { color: "#ffe500", point: 0.816549214785635 },
-        { color: "#ff3300", point: 0.8165492232074433 },
-        { color: "#ff3300", point: 0.9999999897436841 },
-        { color: "#000000", point: 1.0 }
-      ];
+      if (!("colors" in x)) {
+        x.colors = [
+          { color: "#000080", point: 0 },
+          { color: "#3366FF", point: 0.142857142857143 },
+          { color: "#00B0DC", point: 0.285714285714286 },
+          { color: "#009933", point: 0.428571428571429 },
+          { color: "#FFFF5B", point: 0.571428571428571 },
+          { color: "#E63300", point: 0.714285714285714 },
+          { color: "#CC0000", point: 0.857142857142857 },
+          { color: "#800000", point: 1 }
+        ];
+      }
       return x;
     });
 

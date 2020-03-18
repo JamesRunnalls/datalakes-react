@@ -2,38 +2,34 @@ import React, { Component } from "react";
 import "./colortable.css";
 
 class ColorTable extends Component {
-  state = {
-    colors: this.props.colors
-  };
-
   deleteRow = row => {
-    var { colors } = this.state;
+    var { colors, onChange } = this.props;
     colors.splice(row, 1);
-    this.setState({ colors });
+    onChange(colors);
   };
 
   addRow = () => {
-    var { colors } = this.state;
+    var { colors, onChange } = this.props;
     colors.push({ color: "#000000", point: 1 });
-    this.setState({ colors });
+    onChange(colors);
   };
 
   updateColors = row => {
-    var { colors } = this.state;
+    var { colors, onChange } = this.props;
     colors[row].color = event.target.value;
-    this.setState({ colors });
+    onChange(colors);
   };
 
   updatePoint = (row, min, max) => {
-    var { colors } = this.state;
+    var { colors, onChange } = this.props;
     colors[row].point = (event.target.value - min) / (max - min);
-    this.setState({ colors });
+    onChange(colors);
   };
 
   optimisePoints = () => {
-    if ("array" in this.props) {
-      var { colors } = this.state;
-      var { array, onChange } = this.props;
+    var { array } = this.props;
+    if (array) {
+      var { array, onChange, colors } = this.props;
       var min = Math.min(...array);
       var max = Math.max(...array);
       var q, val, point;
@@ -47,10 +43,7 @@ class ColorTable extends Component {
           colors[i].point = point;
         }
       }
-      this.setState({ colors }, () => {
-        document.getElementById("colortable").reset();
-        onChange(colors);
-      });
+      onChange(colors);
     }
   };
 
@@ -66,18 +59,14 @@ class ColorTable extends Component {
     }
   };
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.colors !== this.props.colors) {
-      this.setState({ colors: this.props.colors });
-    }
-  }
-
   render() {
-    var { onChange, array } = this.props;
-    var { colors } = this.state;
-
-    var min = Math.min(...array);
-    var max = Math.max(...array);
+    var { array, colors } = this.props;
+    var max = 1,
+      min = 0;
+    if (array) {
+      min = Math.min(...array);
+      max = Math.max(...array);
+    }
 
     return (
       <form id="colortable" className="colortable">
@@ -129,15 +118,6 @@ class ColorTable extends Component {
               );
             })}
             <tr>
-              <td>
-                <button
-                  type="button"
-                  title="Update plot color scheme"
-                  onClick={() => onChange(colors)}
-                >
-                  Update Plot
-                </button>
-              </td>
               <td>
                 <button
                   type="button"

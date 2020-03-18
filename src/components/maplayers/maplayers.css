@@ -76,3 +76,34 @@
   padding: 0;
   font-size: 8px;
 }
+
+.editsettings {
+  background-color: rgb(240, 240, 240);
+  padding: 5px;
+}
+
+.editsettings-title {
+  margin: 10px 0 10px 4px;
+  text-decoration: underline;
+}
+
+.editsettings-table {
+  table-layout: fixed;
+}
+
+.editsettings-table input[type=text] {
+  width: 50px;
+}
+
+.editsettings-table select {
+  width: 80px;
+}
+
+.editsettings-button {
+  width: 100%;
+  text-align: center;
+}
+
+.editsettings-button button {
+  margin: 10px;
+}
