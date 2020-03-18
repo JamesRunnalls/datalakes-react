@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import "./maplayers.css";
 import FilterBox from "../filterbox/filterbox";
-import { getColor } from "../../components/gradients/gradients";
 import ColorManipulation from "../colormanipulation/colormanipulation";
 
 class Contents extends Component {
@@ -11,7 +10,8 @@ class Contents extends Component {
       maplayers,
       parameters,
       selected,
-      addSelected,
+      updateMapLayers,
+      updateParameters,
       removeSelected
     } = this.props;
     var selectlayers = maplayers.filter(layer => selected.includes(layer.id));
@@ -43,6 +43,10 @@ class Contents extends Component {
               defaultOpen={true}
               allowSettings={true}
               display={parameter}
+              displayGroup={parameters}
+              removeSelected={removeSelected}
+              ids={parameter.layers.map(layer => layer.id)}
+              onUpdate={updateParameters}
               content={
                 <React.Fragment>
                   {layers1.length > 0 && (
@@ -51,6 +55,9 @@ class Contents extends Component {
                       defaultOpen={true}
                       allowSettings={false}
                       display={parameter}
+                      displayGroup={parameters}
+                      removeSelected={removeSelected}
+                      ids={[]}
                       content={
                         <React.Fragment>
                           {layers1.map(layer => (
@@ -59,7 +66,11 @@ class Contents extends Component {
                               allowSettings={true}
                               key={layer.id}
                               display={layer}
+                              displayGroup={maplayers}
                               marker={true}
+                              removeSelected={removeSelected}
+                              ids={[layer.id]}
+                              onUpdate={updateMapLayers}
                               content={
                                 <MarkerDisplay
                                   key={layer.id}
@@ -81,15 +92,22 @@ class Contents extends Component {
                       defaultOpen={true}
                       allowSettings={false}
                       display={parameter}
+                      displayGroup={parameters}
+                      removeSelected={removeSelected}
+                      ids={[]}
                       content={
                         <React.Fragment>
                           {layers2.map(layer => (
                             <DropDown
                               key={layer.id}
                               display={layer}
+                              displayGroup={maplayers}
                               name={layer.name}
                               defaultOpen={false}
                               allowSettings={true}
+                              removeSelected={removeSelected}
+                              ids={[layer.id]}
+                              onUpdate={updateMapLayers}
                               content={
                                 <RasterDisplay
                                   key={layer.id}
@@ -111,15 +129,22 @@ class Contents extends Component {
                       defaultOpen={true}
                       allowSettings={false}
                       display={parameter}
+                      displayGroup={parameters}
+                      removeSelected={removeSelected}
+                      ids={[]}
                       content={
                         <React.Fragment>
                           {layers3.map(layer => (
                             <DropDown
                               key={layer.id}
                               display={layer}
+                              displayGroup={maplayers}
                               name={layer.name}
                               defaultOpen={false}
                               allowSettings={true}
+                              removeSelected={removeSelected}
+                              ids={[layer.id]}
+                              onUpdate={updateMapLayers}
                               content={
                                 <RasterDisplay
                                   key={layer.id}
@@ -162,7 +187,17 @@ class DropDown extends Component {
   };
   render() {
     var { open, visible, settings } = this.state;
-    var { name, content, allowSettings, marker, display } = this.props;
+    var {
+      name,
+      content,
+      allowSettings,
+      marker,
+      display,
+      removeSelected,
+      ids,
+      onUpdate,
+      displayGroup
+    } = this.props;
     return (
       <div className="maplayers-dropdown">
         <table className="maplayers-dropdown-table">
@@ -204,7 +239,14 @@ class DropDown extends Component {
               : "maplayers-dropdown-content hide"
           }
         >
-          <EditSettings marker={marker} display={display} />
+          <EditSettings
+            marker={marker}
+            display={display}
+            removeSelected={removeSelected}
+            ids={ids}
+            onUpdate={onUpdate}
+            displayGroup={displayGroup}
+          />
         </div>
         <div
           className={
@@ -222,35 +264,41 @@ class DropDown extends Component {
 
 class MarkerDisplay extends Component {
   render() {
+    var { min, max, unit, display } = this.props;
     var {
-      min,
-      max,
-      unit,
-      display
-    } = this.props;
-    var { colors, markerFixedSize, markerSymbol, description, sourcetext, sourcelink } = display;
+      colors,
+      markerFixedSize,
+      markerSymbol,
+      description,
+      sourcetext,
+      sourcelink
+    } = display;
     var minSize = 10,
       maxSize = 40,
       inner = [],
       color,
       fontSize,
-      symbolDiv,
-      fixedColor;
+      symbolDiv;
 
     if (markerSymbol === "circle") symbolDiv = <div>&#9679;</div>;
     if (markerSymbol === "square") symbolDiv = <div>&#9724;</div>;
     if (markerSymbol === "triangle") symbolDiv = <div>&#9650;</div>;
+
+    var fixedColor = false;
+    if (colors.length === 2 && colors[0].color === colors[1].color) {
+      fixedColor = true;
+    }
 
     if (markerFixedSize && fixedColor) {
       inner.push(
         <tr>
           <td
             className="markerdisplay-symbol"
-            style={{ fontSize: maxSize, color: fixedColor }}
+            style={{ fontSize: maxSize, color: colors[0].color }}
           >
             {symbolDiv}
           </td>
-          <td>Fixed Size and Color</td>
+          <td>Fixed size and color</td>
         </tr>
       );
     } else {
@@ -263,7 +311,7 @@ class MarkerDisplay extends Component {
           fontSize = minSize + (maxSize - minSize) * (i / colors.length);
         }
         if (fixedColor) {
-          color = fixedColor;
+          color = colors[0].color;
         } else {
           // Check possibility of color bars
           if (i < colors.length - 1) {
@@ -332,17 +380,20 @@ class RasterDisplay extends Component {
   };
   render() {
     var { min, max, unit, display } = this.props;
-    var { colors, description, sourcelink, sourcetext } = display
-    var inner = [],
-      fixedColor;
+    var { colors, description, sourcelink, sourcetext } = display;
+    var inner = [];
+    var fixedColor = false;
+    if (colors.length === 2 && colors[0].color === colors[1].color) {
+      fixedColor = true;
+    }
     if (fixedColor) {
       var selectStyle = {
-        background: fixedColor
+        background: colors[0].color
       };
       inner.push(
-        <tr>
-          <td style={selectStyle}></td>
-          <td>Fixed Color</td>
+        <tr key={0}>
+          <td className="rasterdisplay-colorbar" style={selectStyle}></td>
+          <td>Fixed color</td>
         </tr>
       );
     } else {
@@ -399,6 +450,9 @@ class RasterDisplay extends Component {
 
 class EditSettings extends Component {
   state = {
+    display: JSON.parse(
+      JSON.stringify(this.props.display ? this.props.display : [])
+    ),
     colors: JSON.parse(
       JSON.stringify(this.props.display.colors ? this.props.display.colors : [])
     ),
@@ -409,26 +463,46 @@ class EditSettings extends Component {
     markerSize: this.props.display.markerSize
   };
   localColorChange = colors => {
-    this.setState({ colors });
+    var { display } = this.state;
+    display.colors = colors;
+    this.setState({ display });
   };
   localMarkerLabelChange = () => {
-    this.setState({ markerLabel: !this.state.markerLabel });
+    var { display } = this.state;
+    display.markerLabel = !display.markerLabel;
+    this.setState({ display });
   };
   localLegendChange = () => {
-    this.setState({ legend: !this.state.legend });
+    var { display } = this.state;
+    display.legend = !display.legend;
+    this.setState({ display });
   };
   localMarkerSymbolChange = () => {
-    this.setState({ markerSymbol: event.target.value });
+    var { display } = this.state;
+    display.markerSymbol = event.target.value;
+    this.setState({ display });
   };
   localMarkerFixedSizeChange = () => {
+    var { display } = this.state;
     var markerFixedSize = false;
     if (event.target.value === "true") markerFixedSize = true;
-    this.setState({ markerFixedSize });
+    display.markerFixedSize = markerFixedSize;
+    this.setState({ display });
   };
   localMarkerSizeChange = () => {
-    this.setState({ markerSize: event.target.value });
+    var { display } = this.state;
+    display.markerSize = event.target.value;
+    this.setState({ display });
+  };
+  updateDisplay = () => {
+    var { onUpdate, displayGroup } = this.props;
+    var { display } = this.state;
+    var index = displayGroup.findIndex(x => x.id === display.id);
+    displayGroup[index] = display;
+    onUpdate(displayGroup);
   };
   render() {
+    var { display } = this.state;
     var {
       colors,
       markerLabel,
@@ -436,8 +510,8 @@ class EditSettings extends Component {
       markerSymbol,
       markerFixedSize,
       markerSize
-    } = this.state;
-    var { onChange, marker } = this.props;
+    } = display;
+    var { marker, removeSelected, ids } = this.props;
     return (
       <div className="editsettings">
         {marker && (
@@ -454,6 +528,7 @@ class EditSettings extends Component {
                     >
                       <option value="circle">&#9679; Circle</option>
                       <option value="square">&#9632; Square</option>
+                      <option value="triangle">&#9650; Triangle</option>
                     </select>
                   </td>
                 </tr>
@@ -504,9 +579,16 @@ class EditSettings extends Component {
           <button
             type="button"
             title="Update plot settings"
-            onClick={() => onChange(this.state)}
+            onClick={this.updateDisplay}
           >
             Update Plot
+          </button>
+          <button
+            type="button"
+            title="Delete layer"
+            onClick={() => removeSelected(ids)}
+          >
+            {ids.length > 1 ? "Delete Layer Group" : "Delete Layer"}
           </button>
         </div>
       </div>
@@ -552,9 +634,9 @@ class MapLayers extends Component {
       selected,
       parameters,
       updateMapLayers,
+      updateParameters,
       addSelected,
-      removeSelected,
-      getParameterDetails
+      removeSelected
     } = this.props;
     return (
       <div>
@@ -562,10 +644,9 @@ class MapLayers extends Component {
           maplayers={maplayers}
           parameters={parameters}
           selected={selected}
-          addSelected={addSelected}
           removeSelected={removeSelected}
           updateMapLayers={updateMapLayers}
-          getParameterDetails={getParameterDetails}
+          updateParameters={updateParameters}
         />
         <FilterBox
           title="Add Layers"

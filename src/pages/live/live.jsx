@@ -180,6 +180,14 @@ class Live extends Component {
     this.setState({ selected });
   };
 
+  updateMapLayers = maplayers => {
+    this.setState({ maplayers })
+  }
+
+  updateParameters = parameters => {
+    this.setState({ parameters })
+  }
+
   optimisePoints = (colors, array) => {
     var min = Math.min(...array);
     var max = Math.max(...array);
@@ -470,6 +478,7 @@ class Live extends Component {
                     addSelected={this.addSelected}
                     removeSelected={this.removeSelected}
                     updateMapLayers={this.updateMapLayers}
+                    updateParameters={this.updateParameters}
                   />
                 }
               />
