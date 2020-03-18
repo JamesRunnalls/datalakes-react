@@ -129,7 +129,7 @@ class Live extends Component {
         name: "Some name"
       }
     ],
-    selected: [0, 1]
+    selected: [0, 1, 4]
   };
 
   addSelected = id => {
@@ -293,12 +293,12 @@ class Live extends Component {
         { color: "#CC0000", point: 0.857142857142857 },
         { color: "#800000", point: 1 }
       ];
-      x.min = 0;
-      x.max = 1;
+      x.min = 5;
+      x.max = 200;
       return x;
     });
 
-    // Get maplayers 
+    // Get maplayers
     //const { data: maplayers } = await axios.get(apiUrl + "/maplayers");
     var maplayers = this.state.maplayers; // temporary
 
@@ -308,14 +308,18 @@ class Live extends Component {
       x.fixedSize = false;
       x.symbol = "circle";
       x.colors = [
-        { color: "#000080", point: 0 },
-        { color: "#3366FF", point: 0.142857142857143 },
-        { color: "#00B0DC", point: 0.285714285714286 },
-        { color: "#009933", point: 0.428571428571429 },
-        { color: "#FFFF5B", point: 0.571428571428571 },
-        { color: "#E63300", point: 0.714285714285714 },
-        { color: "#CC0000", point: 0.857142857142857 },
-        { color: "#800000", point: 1 }
+        { color: "#000000", point: 0.0 },
+        { color: "#ffffff", point: 7.798751492142183e-10 },
+        { color: "#ffffff", point: 0.09021989254746032 },
+        { color: "#98d8e8", point: 0.09021989366743141 },
+        { color: "#98d8e8", point: 0.2239942187605194 },
+        { color: "#98ce16", point: 0.22399422121823376 },
+        { color: "#98ce16", point: 0.5008759613950504 },
+        { color: "#ffe500", point: 0.5008759666215821 },
+        { color: "#ffe500", point: 0.816549214785635 },
+        { color: "#ff3300", point: 0.8165492232074433 },
+        { color: "#ff3300", point: 0.9999999897436841 },
+        { color: "#000000", point: 1.0 }
       ];
       return x;
     });

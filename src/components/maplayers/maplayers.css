@@ -37,8 +37,8 @@
 }
 
 .maplayers-dropdown .maplayers-settings {
-    cursor: pointer;
-  }
+  cursor: pointer;
+}
 
 .maplayers-dropdown-content {
   margin-left: 12px;
@@ -56,5 +56,23 @@
 .rasterdisplay-colorbar {
   width: 20px;
   height: 100%;
-  background-color: red;
+}
+
+.rasterdisplay-table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-top: -11px;
+}
+
+.rasterdisplay-table tr {
+  height: 22px;
+}
+
+.rasterdisplay-table .rasterdisplay-innerlabel {
+  font-size: 11px;
+}
+
+.rasterdisplay-table .rasterdisplay-bar {
+  padding: 0;
+  font-size: 8px;
 }

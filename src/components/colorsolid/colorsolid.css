@@ -1,0 +1,27 @@
+.colortable table {
+  width: 100%;
+}
+
+.colortable table td {
+}
+
+form.colortable table input {
+  width: 100%;
+}
+
+form.colortable table input[type="color"] {
+  padding: 0;
+  border: none;
+}
+
+form.colortable table input[type="text"] {
+  background-color: transparent;
+  border: none;
+  font-size: 14px;
+}
+
+.colortable-deleterow {
+  cursor: pointer;
+  text-align: center;
+  font-size: 20px;
+}

@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "./maplayers.css";
 import FilterBox from "../filterbox/filterbox";
 import { getColor } from "../../components/gradients/gradients";
+import ColorManipulation from "../colormanipulation/colormanipulation";
 
 class Contents extends Component {
   state = {};
@@ -40,6 +41,7 @@ class Contents extends Component {
               key={parameter.id}
               defaultOpen={true}
               allowSettings={true}
+              colors={parameter.colors}
               content={
                 <React.Fragment>
                   {layers1.length > 0 && (
@@ -54,6 +56,7 @@ class Contents extends Component {
                               name={layer.name}
                               allowSettings={true}
                               key={layer.id}
+                              colors={layer.colors}
                               content={
                                 <MarkerDisplay
                                   key={layer.id}
@@ -82,6 +85,7 @@ class Contents extends Component {
                           {layers2.map(layer => (
                             <DropDown
                               key={layer.id}
+                              colors={layer.colors}
                               name={layer.name}
                               defaultOpen={false}
                               allowSettings={true}
@@ -111,6 +115,7 @@ class Contents extends Component {
                           {layers3.map(layer => (
                             <DropDown
                               key={layer.id}
+                              colors={layer.colors}
                               name={layer.name}
                               defaultOpen={false}
                               allowSettings={true}
@@ -157,7 +162,7 @@ class DropDown extends Component {
   };
   render() {
     var { open, visible, settings } = this.state;
-    var { name, content, allowSettings } = this.props;
+    var { name, content, allowSettings, colors } = this.props;
     return (
       <div className="maplayers-dropdown">
         <table className="maplayers-dropdown-table">
@@ -181,7 +186,11 @@ class DropDown extends Component {
               </td>
               <td style={{ width: "100%" }}>{name}</td>
               {allowSettings && (
-                <td onClick={this.toggleSettings} style={{ width: "10px" }} className="maplayers-settings">
+                <td
+                  onClick={this.toggleSettings}
+                  style={{ width: "10px" }}
+                  className="maplayers-settings"
+                >
                   &#9881;
                 </td>
               )}
@@ -195,7 +204,7 @@ class DropDown extends Component {
               : "maplayers-dropdown-content hide"
           }
         >
-          <EditSettings />
+          <EditSettings colors={colors} />
         </div>
         <div
           className={
@@ -214,8 +223,8 @@ class DropDown extends Component {
 class MarkerDisplay extends Component {
   render() {
     var { fixedSize, fixedColor, min, max, colors, symbol, unit } = this.props;
-    var values = 5,
-      minSize = 10,
+    console.log(colors);
+    var minSize = 10,
       maxSize = 40,
       inner = [],
       color,
@@ -235,21 +244,37 @@ class MarkerDisplay extends Component {
           >
             {symbolDiv}
           </td>
+          <td>Fixed Size and Color</td>
         </tr>
       );
     } else {
-      for (var i = 0; i < values; i++) {
-        var value = max - (max - min) * (i / 4);
-        if (fixedColor) {
-          color = fixedColor;
-        } else {
-          color = getColor(value, min, max, colors);
-        }
+      for (var i = 0; i < colors.length; i++) {
+        var value =
+          Math.round((min + (max - min) * colors[i].point) * 100) / 100;
         if (fixedSize) {
           fontSize = (maxSize + minSize) / 2;
         } else {
-          fontSize = maxSize - (maxSize - minSize) * (i / 4);
+          fontSize = minSize + (maxSize - minSize) * (i / colors.length);
         }
+        if (fixedColor) {
+          color = fixedColor;
+        } else {
+          // Check possibility of color bars
+          if (i < colors.length - 1) {
+            var color1 = colors[i].color;
+            var color2 = colors[i + 1].color;
+            if (color1 === color2) {
+              value =
+                value +
+                " - " +
+                Math.round((min + (max - min) * colors[i + 1].point) * 100) /
+                  100;
+              i++;
+            }
+          }
+          color = colors[i].color;
+        }
+
         inner.push(
           <tr key={i}>
             <td
@@ -258,10 +283,8 @@ class MarkerDisplay extends Component {
             >
               {symbolDiv}
             </td>
-            <td>
-              {value}
-              {i === 0 && unit}
-            </td>
+            <td>{value}</td>
+            <td>{i === 0 && unit}</td>
           </tr>
         );
       }
@@ -279,6 +302,7 @@ class RasterDisplay extends Component {
     if (colors) {
       var lineargradient = [];
       for (var i = 0; i < colors.length; i++) {
+        console.log(colors[i].color, colors[i].point * 100);
         lineargradient.push(`${colors[i].color} ${colors[i].point * 100}%`);
       }
       return `linear-gradient(180deg,${lineargradient.join(",")})`;
@@ -286,38 +310,58 @@ class RasterDisplay extends Component {
   };
   render() {
     var { fixedColor, min, max, colors, unit } = this.props;
-    var values = 5,
+    var len = colors.length,
       inner = [],
       value;
-      var selectStyle = {
-        background: this.linearGradient(colors)
-      };
     if (fixedColor) {
+      var selectStyle = {
+        background: fixedColor
+      };
       inner.push(
         <tr>
-          <td>
-            <div></div>
-          </td>
+          <td style={selectStyle}></td>
+          <td>Fixed Color</td>
         </tr>
       );
     } else {
+      var selectStyle = {
+        background: this.linearGradient(colors),
+        border: "1px solid black",
+        borderTop: "22px solid white",
+        borderBottom: "22px solid white"
+      };
       inner.push(
         <tr key={0}>
-          <td rowSpan={values} className="rasterdisplay-colorbar" style={selectStyle}></td>
-          <td>{max + " " + unit}</td>
+          <td
+            className="rasterdisplay-colorbar"
+            style={selectStyle}
+            rowSpan={6}
+          ></td>
+          <td className="rasterdisplay-bar">&#9472;</td>
+          <td>{min}</td>
+          <td>{unit}</td>
         </tr>
       );
-      for (var i = 1; i < values; i++) {
-        value = max - (max - min) * (i / 4);
-        inner.push(
-          <tr key={i}>
-            <td>{value}</td>
-          </tr>
-        );
-      }
+      inner.push(
+        <tr
+          key={1}
+          style={{
+            height: "60px"
+          }}
+        >
+          <td className="rasterdisplay-bar">&#9472;</td>
+          <td className="rasterdisplay-innerlabel">{(max + min) / 2}</td>
+        </tr>
+      );
+      inner.push(
+        <tr key={2}>
+          <td className="rasterdisplay-bar">&#9472;</td>
+          <td>{max}</td>
+        </tr>
+      );
     }
     return (
-      <table>
+      <table className="rasterdisplay-table">
         <tbody>{inner}</tbody>
       </table>
     );
@@ -327,61 +371,60 @@ class RasterDisplay extends Component {
 class EditSettings extends Component {
   state = {};
   render() {
+    var { colors } = this.props;
     return (
-      <table>
-        <tbody>
-          <tr>
-            <td>Symbol</td>
-            <td>
-              <select>
-                <option value="circle">&#9679; Circle</option>
-                <option value="square">&#9632; Square</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Size</td>
-            <td>
-              <select>
-                <option value="circle">Fixed</option>
-                <option value="square">By Parameter</option>
-              </select>
-            </td>
-            <td>
-              <input type="text"></input>px
-            </td>
-          </tr>
-          <tr>
-            <td>Color</td>
-            <td>
-              <select>
-                <option value="circle">Fixed</option>
-                <option value="square">By Parameter</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Labels</td>
-            <td>
-              <input type="checkbox"></input>
-            </td>
-          </tr>
-          <tr>
-            <td>Legend</td>
-            <td>
-              <input type="checkbox"></input>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div>
+        <div className="editsettings-markeroptions">
+          <table>
+            <tbody>
+              <tr>
+                <td>Symbol</td>
+                <td>
+                  <select>
+                    <option value="circle">&#9679; Circle</option>
+                    <option value="square">&#9632; Square</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Size</td>
+                <td>
+                  <select>
+                    <option value="circle">Fixed</option>
+                    <option value="square">By Parameter</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="text"></input>px
+                </td>
+              </tr>
+              <tr>
+                <td>Color</td>
+                <td>
+                  <select>
+                    <option value="circle">Fixed</option>
+                    <option value="square">By Parameter</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>Labels</td>
+                <td>
+                  <input type="checkbox"></input>
+                </td>
+              </tr>
+              <tr>
+                <td>Legend</td>
+                <td>
+                  <input type="checkbox"></input>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ColorManipulation colors={colors} />
+      </div>
     );
-  }
-}
-
-class ContentsVis extends Component {
-  state = {};
-  render() {
-    return <div></div>;
   }
 }
 
@@ -438,41 +481,48 @@ class MapLayers extends Component {
           updateMapLayers={updateMapLayers}
           getParameterDetails={getParameterDetails}
         />
-        <div>Add Layers</div>
         <FilterBox
-          title="Measured Values"
+          title="Add Layers"
           inner="true"
           content={
-            <AddLayers
-              maplayers={maplayers}
-              parameters={parameters}
-              addSelected={addSelected}
-              type="measurement"
-            />
-          }
-        />
-        <FilterBox
-          title="Satellite Data"
-          inner="true"
-          content={
-            <AddLayers
-              maplayers={maplayers}
-              parameters={parameters}
-              addSelected={addSelected}
-              type="satellite"
-            />
-          }
-        />
-        <FilterBox
-          title="Lake Simulations"
-          inner="true"
-          content={
-            <AddLayers
-              maplayers={maplayers}
-              parameters={parameters}
-              addSelected={addSelected}
-              type="model"
-            />
+            <React.Fragment>
+              <FilterBox
+                title="Measured Values"
+                inner="true"
+                content={
+                  <AddLayers
+                    maplayers={maplayers}
+                    parameters={parameters}
+                    addSelected={addSelected}
+                    type="measurement"
+                  />
+                }
+              />
+              <FilterBox
+                title="Satellite Data"
+                inner="true"
+                content={
+                  <AddLayers
+                    maplayers={maplayers}
+                    parameters={parameters}
+                    addSelected={addSelected}
+                    type="satellite"
+                  />
+                }
+              />
+              <FilterBox
+                title="Lake Simulations"
+                inner="true"
+                content={
+                  <AddLayers
+                    maplayers={maplayers}
+                    parameters={parameters}
+                    addSelected={addSelected}
+                    type="model"
+                  />
+                }
+              />
+            </React.Fragment>
           }
         />
       </div>

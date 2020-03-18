@@ -3,6 +3,7 @@ import "./colormanipulation.css";
 import ColorRamp from "../colorramp/colorramp";
 import ColorTable from "../colortable/colortable";
 import ColorSlider from "../colorslider/colorslider";
+import ColorSolid from "../colorsolid/colorsolid";
 
 class ColorManipulation extends Component {
   state = {
@@ -19,6 +20,16 @@ class ColorManipulation extends Component {
     return (
       <div>
         <div className="colormanipulation-headerbar">
+          <div
+            className={
+              manipulation === "solid"
+                ? "colormanipulation-header header-active"
+                : "colormanipulation-header"
+            }
+            onClick={() => this.setManipulation("solid")}
+          >
+            Solid
+          </div>
           <div
             className={
               manipulation === "ramp"
@@ -51,11 +62,19 @@ class ColorManipulation extends Component {
           </div>
         </div>
         <div>
+          {manipulation === "solid" && (
+            <ColorSolid onChange={onChange} colors={colors} />
+          )}
           {manipulation === "ramp" && (
             <ColorRamp onChange={onChange} colors={colors} />
           )}
           {manipulation === "table" && (
-            <ColorTable onChange={onChange} colors={colors} array={array} autoOptimise={true} />
+            <ColorTable
+              onChange={onChange}
+              colors={colors}
+              array={array}
+              autoOptimise={true}
+            />
           )}
           {manipulation === "slider" && (
             <ColorSlider onChange={onChange} colors={colors} array={array} />

@@ -49,7 +49,7 @@ class ColorTable extends Component {
       }
       this.setState({ colors }, () => {
         document.getElementById("colortable").reset();
-        onChange(colors)
+        onChange(colors);
       });
     }
   };
@@ -79,8 +79,6 @@ class ColorTable extends Component {
     var min = Math.min(...array);
     var max = Math.max(...array);
 
-   
-
     return (
       <form id="colortable" className="colortable">
         <table>
@@ -108,21 +106,22 @@ class ColorTable extends Component {
                     )}
                   </td>
                   <td style={{ width: "10%" }}>
-                    {index === colors.length - 1 ? (
-                      <div
-                        className="colortable-deleterow"
-                        title="Add extra color"
-                        onClick={this.addRow}
-                      >
-                        +
-                      </div>
-                    ) : (
+                    {index !== colors.length - 1 && index !== 0 && (
                       <div
                         className="colortable-deleterow"
                         title="Delete color"
                         onClick={() => this.deleteRow(index)}
                       >
                         -
+                      </div>
+                    )}
+                    {index === colors.length - 1 && (
+                      <div
+                        className="colortable-deleterow"
+                        title="Add extra color"
+                        onClick={this.addRow}
+                      >
+                        +
                       </div>
                     )}
                   </td>
