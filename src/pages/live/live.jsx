@@ -61,105 +61,8 @@ class Live extends Component {
       { color: "#800000", point: 1 }
     ],
     parameters: [],
-    maplayers: [
-      {
-        id: 0,
-        type: "measurement",
-        api: "http://...",
-        array: [],
-        parameter_id: 5,
-        sourcelink: "http://...",
-        sourcetext: "Lexplore Lake Platform",
-        description: "Here is a description of the data",
-        name: "Lexplore Lake Platform",
-        markerLabel: true,
-        legend: true,
-        markerSymbol: "circle",
-        markerFixedSize: true,
-        markerSize: 10
-      },
-      {
-        id: 1,
-        type: "measurement",
-        api: "http://...",
-        array: [],
-        parameter_id: 5,
-        sourcelink: "http://...",
-        sourcetext: "FOEN",
-        description: "Here is a description of the data",
-        name: "FOEN Water Temperature",
-        markerLabel: true,
-        legend: true,
-        markerSymbol: "circle",
-        markerFixedSize: true,
-        markerSize: 10
-      },
-      {
-        id: 3,
-        type: "measurement",
-        api: "http://...",
-        array: [],
-        parameter_id: 2,
-        sourcelink: "http://...",
-        sourcetext: "FOEN",
-        description: "Here is a description of the data",
-        name: "Some name",
-        markerLabel: true,
-        legend: true,
-        markerSymbol: "circle",
-        markerFixedSize: true,
-        markerSize: 10
-      },
-      {
-        id: 4,
-        type: "satellite",
-        api: "http://...",
-        array: [],
-        parameter_id: 5,
-        sourcelink: "http://...",
-        sourcetext: "FOEN",
-        description: "Here is a description of the data",
-        name: "Some name",
-        markerLabel: true,
-        legend: true,
-        markerSymbol: "circle",
-        markerFixedSize: true,
-        markerSize: 10
-      },
-      {
-        id: 5,
-        type: "model",
-        api: "http://...",
-        array: [],
-        parameter_id: 5,
-        sourcelink: "http://...",
-        sourcetext: "FOEN",
-        description: "Here is a description of the data",
-        name: "Some name",
-        markerLabel: true,
-        legend: true,
-        markerSymbol: "circle",
-        markerFixedSize: true,
-        markerSize: 10
-      },
-      {
-        id: 6,
-        type: "satellite",
-        api: "http://...",
-        array: [],
-        parameter_id: 8,
-        sourcelink: "http://...",
-        sourcetext: "FOEN",
-        description: "Here is a description of the data",
-        name: "Some name",
-        markerLabel: true,
-        legend: true,
-        markerSymbol: "circle",
-        markerFixedSize: true,
-        markerSize: 10
-      }
-    ],
-    selected: [0, 1, 4]
+    maplayers: [],
+    selected: [0, 1]
   };
 
   addSelected = id => {
@@ -181,12 +84,12 @@ class Live extends Component {
   };
 
   updateMapLayers = maplayers => {
-    this.setState({ maplayers })
-  }
+    this.setState({ maplayers });
+  };
 
   updateParameters = parameters => {
-    this.setState({ parameters })
-  }
+    this.setState({ parameters });
+  };
 
   optimisePoints = (colors, array) => {
     var min = Math.min(...array);
@@ -232,17 +135,9 @@ class Live extends Component {
     }
   };
 
-  downloadFile = async dataIndex => {
-    this.setState({ loading: true });
-    var { list, dataArray } = this.state;
-    const { data } = await axios.get(
-      apiUrl + "/rs/" + list[dataIndex].endpoint
-    );
-    dataArray[dataIndex] = data[0];
-    var min = Math.round(Math.min(...dataArray[dataIndex].v) * 100) / 100;
-    var max = Math.round(Math.max(...dataArray[dataIndex].v) * 100) / 100;
-    var unit = list[dataIndex].unit;
-    this.setState({ dataArray, min, max, loading: false, unit });
+  downloadFile = async (index, maplayers) => {
+    console.log(maplayers[index].api);
+    return maplayers;
   };
 
   handleSelect = async event => {
@@ -320,29 +215,32 @@ class Live extends Component {
 
     // Add default display settings for parameters
     parameters.map(x => {
-      x.markerLabel = true;
-      x.legend = true;
-      x.markerSymbol = "circle";
-      x.markerFixedSize = true;
-      x.markerSize = 10;
-      x.colors = [
-        { color: "#000080", point: 0 },
-        { color: "#3366FF", point: 0.142857142857143 },
-        { color: "#00B0DC", point: 0.285714285714286 },
-        { color: "#009933", point: 0.428571428571429 },
-        { color: "#FFFF5B", point: 0.571428571428571 },
-        { color: "#E63300", point: 0.714285714285714 },
-        { color: "#CC0000", point: 0.857142857142857 },
-        { color: "#800000", point: 1 }
-      ];
-      x.min = 5;
-      x.max = 200;
+      if (!("plot" in x)) x.plot = "group";
+      if (!("min" in x)) x.min = 0;
+      if (!("max" in x)) x.max = 1;
+      if (!("colors" in x)) {
+        x.colors = [
+          { color: "#000080", point: 0 },
+          { color: "#3366FF", point: 0.142857142857143 },
+          { color: "#00B0DC", point: 0.285714285714286 },
+          { color: "#009933", point: 0.428571428571429 },
+          { color: "#FFFF5B", point: 0.571428571428571 },
+          { color: "#E63300", point: 0.714285714285714 },
+          { color: "#CC0000", point: 0.857142857142857 },
+          { color: "#800000", point: 1 }
+        ];
+      }
+      if (!("markerLabel" in x)) x.markerLabel = true;
+      if (!("legend" in x)) x.legend = true;
+      if (!("markerSymbol" in x)) x.markerSymbol = "circle";
+      if (!("markerFixedSize" in x)) x.markerFixedSize = true;
+      if (!("markerSize" in x)) x.markerSize = 10;
+      if (!("field" in x)) x.field = "vector";
       return x;
     });
 
     // Get maplayers
-    //const { data: maplayers } = await axios.get(apiUrl + "/maplayers");
-    var maplayers = this.state.maplayers; // temporary
+    var { data: maplayers } = await axios.get(apiUrl + "/maplayers");
 
     // Add default color settings for maplayers if non already
     maplayers.map(x => {
@@ -358,39 +256,24 @@ class Live extends Component {
           { color: "#800000", point: 1 }
         ];
       }
+      if (!("markerLabel" in x)) x.markerLabel = true;
+      if (!("legend" in x)) x.legend = true;
+      if (!("markerSymbol" in x)) x.markerSymbol = "circle";
+      if (!("markerFixedSize" in x)) x.markerFixedSize = true;
+      if (!("markerSize" in x)) x.markerSize = 10;
+      if (!("field" in x)) x.field = "vector";
       return x;
     });
 
-    // Get list of available layers
-    const { data: list } = await axios.get(apiUrl + "/rs");
-    var dataArray = new Array(list.length).fill(0);
 
-    // Download meteo stations
-    const { data: stations } = await axios.get(apiUrl + "/live");
 
-    var markerData = {};
-
-    for (var stationType of stations) {
-      const { data } = await axios.get(apiUrl + "/" + stationType.endpoint);
-      markerData[stationType.value] = data;
-    }
-
-    // Download first layer
-    const { data } = await axios.get(apiUrl + "/rs/" + list[0].endpoint);
-
-    var min = Math.round(Math.min(...data[0].v) * 100) / 100;
-    var max = Math.round(Math.max(...data[0].v) * 100) / 100;
-    var unit = list[0].unit;
-    dataArray[0] = data[0];
+    // Download default layers
+    //var { selected } = this.state;
+    //for (var i = 0; i < selected.length; i++) {
+    //  maplayers = await this.downloadFile(selected[i], maplayers);
+    //}
 
     this.setState({
-      list,
-      dataArray,
-      min,
-      max,
-      unit,
-      markerData,
-      stations,
       parameters,
       maplayers
     });

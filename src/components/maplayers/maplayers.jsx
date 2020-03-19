@@ -15,31 +15,27 @@ class Contents extends Component {
       removeSelected
     } = this.props;
     var selectlayers = maplayers.filter(layer => selected.includes(layer.id));
-    var selectlayersparameterid = selectlayers.map(layer => layer.parameter_id);
+    var selectlayersparameterid = selectlayers.map(layer => layer.parameters_id);
     var visibleparameters = parameters.filter(param =>
       selectlayersparameterid.includes(param.id)
     );
     var selectparameters = visibleparameters.map(x => {
-      x.layers = selectlayers.filter(layer => layer.parameter_id === x.id);
+      x.layers = selectlayers.filter(layer => layer.parameters_id === x.id);
       return x;
     });
+    var types = [
+      { name: "Measurement Value", type: "measurement" },
+      { name: "Satellite Data", type: "satellite" },
+      { name: "Lake Simulations", type: "model" }
+    ];
     return (
       <div className="maplayers-contents">
+        {/* Loop over all parameters (parameters are parent groups) */}
         {selectparameters.map(parameter => {
-          var layers1 = parameter.layers.filter(
-            layer => layer.type === "measurement"
-          );
-          var layers2 = parameter.layers.filter(
-            layer => layer.type === "satellite"
-          );
-          var layers3 = parameter.layers.filter(
-            layer => layer.type === "model"
-          );
           return (
             <DropDown
               name={parameter.name}
               key={parameter.id}
-              marker={true}
               defaultOpen={true}
               allowSettings={true}
               display={parameter}
@@ -48,119 +44,52 @@ class Contents extends Component {
               ids={parameter.layers.map(layer => layer.id)}
               onUpdate={updateParameters}
               content={
-                <React.Fragment>
-                  {layers1.length > 0 && (
-                    <DropDown
-                      name={"Measurement Value"}
-                      defaultOpen={true}
-                      allowSettings={false}
-                      display={parameter}
-                      displayGroup={parameters}
-                      removeSelected={removeSelected}
-                      ids={[]}
-                      content={
-                        <React.Fragment>
-                          {layers1.map(layer => (
-                            <DropDown
-                              name={layer.name}
-                              allowSettings={true}
-                              key={layer.id}
-                              display={layer}
-                              displayGroup={maplayers}
-                              marker={true}
-                              removeSelected={removeSelected}
-                              ids={[layer.id]}
-                              onUpdate={updateMapLayers}
-                              content={
-                                <MarkerDisplay
-                                  key={layer.id}
-                                  min={parameter.min}
-                                  max={parameter.max}
-                                  unit={parameter.unit}
-                                  display={layer}
-                                />
-                              }
-                            />
-                          ))}
-                        </React.Fragment>
-                      }
-                    />
-                  )}
-                  {layers2.length > 0 && (
-                    <DropDown
-                      name={"Satellite Data"}
-                      defaultOpen={true}
-                      allowSettings={false}
-                      display={parameter}
-                      displayGroup={parameters}
-                      removeSelected={removeSelected}
-                      ids={[]}
-                      content={
-                        <React.Fragment>
-                          {layers2.map(layer => (
-                            <DropDown
-                              key={layer.id}
-                              display={layer}
-                              displayGroup={maplayers}
-                              name={layer.name}
-                              defaultOpen={false}
-                              allowSettings={true}
-                              removeSelected={removeSelected}
-                              ids={[layer.id]}
-                              onUpdate={updateMapLayers}
-                              content={
-                                <RasterDisplay
-                                  key={layer.id}
-                                  min={parameter.min}
-                                  max={parameter.max}
-                                  unit={parameter.unit}
-                                  display={layer}
-                                />
-                              }
-                            />
-                          ))}
-                        </React.Fragment>
-                      }
-                    />
-                  )}
-                  {layers3.length > 0 && (
-                    <DropDown
-                      name={"Lake Simulations"}
-                      defaultOpen={true}
-                      allowSettings={false}
-                      display={parameter}
-                      displayGroup={parameters}
-                      removeSelected={removeSelected}
-                      ids={[]}
-                      content={
-                        <React.Fragment>
-                          {layers3.map(layer => (
-                            <DropDown
-                              key={layer.id}
-                              display={layer}
-                              displayGroup={maplayers}
-                              name={layer.name}
-                              defaultOpen={false}
-                              allowSettings={true}
-                              removeSelected={removeSelected}
-                              ids={[layer.id]}
-                              onUpdate={updateMapLayers}
-                              content={
-                                <RasterDisplay
-                                  key={layer.id}
-                                  min={parameter.min}
-                                  max={parameter.max}
-                                  unit={parameter.unit}
-                                  display={layer}
-                                />
-                              }
-                            />
-                          ))}
-                        </React.Fragment>
-                      }
-                    />
-                  )}
-                </React.Fragment>
+                /* Loop over all types (type are sub groups) */
+                types.map(type => {
+                  var layers = parameter.layers.filter(
+                    layer => layer.type === type.type
+                  );
+                  return (
+                    layers.length > 0 && (
+                      <DropDown
+                        key={type.name}
+                        name={type.name}
+                        defaultOpen={true}
+                        allowSettings={false}
+                        display={parameter}
+                        displayGroup={parameters}
+                        removeSelected={removeSelected}
+                        ids={[]}
+                        content={
+                          <React.Fragment>
+                            {/* Loop over layers (layers are sub-sub groups) */}
+                            {layers.map(layer => (
+                              <DropDown
+                                key={layer.id}
+                                name={layer.name}
+                                allowSettings={true}
+                                display={layer}
+                                displayGroup={maplayers}
+                                removeSelected={removeSelected}
+                                ids={[layer.id]}
+                                onUpdate={updateMapLayers}
+                                content={
+                                  <GroupDisplay
+                                    key={layer.id}
+                                    min={parameter.min}
+                                    max={parameter.max}
+                                    unit={parameter.unit}
+                                    display={layer}
+                                  />
+                                }
+                              />
+                            ))}
+                          </React.Fragment>
+                        }
+                      />
+                    )
+                  );
+                })
               }
             />
           );
@@ -191,7 +120,6 @@ class DropDown extends Component {
       name,
       content,
       allowSettings,
-      marker,
       display,
       removeSelected,
       ids,
@@ -240,7 +168,6 @@ class DropDown extends Component {
           }
         >
           <EditSettings
-            marker={marker}
             display={display}
             removeSelected={removeSelected}
             ids={ids}
@@ -259,6 +186,26 @@ class DropDown extends Component {
         </div>
       </div>
     );
+  }
+}
+
+class GroupDisplay extends Component {
+  state = {};
+  render() {
+    var { display, min, max, unit } = this.props;
+    if (display.plot === "marker") {
+      return (
+        <MarkerDisplay min={min} max={max} unit={unit} display={display} />
+      );
+    } else if (display.plot === "raster") {
+      return (
+        <RasterDisplay min={min} max={max} unit={unit} display={display} />
+      );
+    } else if (display.plot === "field") {
+      return <FieldDisplay min={min} max={max} unit={unit} display={display} />;
+    } else {
+      return <div></div>;
+    }
   }
 }
 
@@ -448,19 +395,28 @@ class RasterDisplay extends Component {
   }
 }
 
+class FieldDisplay extends Component {
+  render() {
+    var { min, max, unit, display } = this.props;
+    var { colors, description, sourcelink, sourcetext } = display;
+    return (
+      <div>
+        <div>{description}</div>
+        
+        Source:{" "}
+        <a href={sourcelink} target="_blank">
+          {sourcetext}
+        </a>
+      </div>
+    );
+  }
+}
+
 class EditSettings extends Component {
   state = {
     display: JSON.parse(
       JSON.stringify(this.props.display ? this.props.display : [])
-    ),
-    colors: JSON.parse(
-      JSON.stringify(this.props.display.colors ? this.props.display.colors : [])
-    ),
-    markerLabel: this.props.display.markerLabel,
-    legend: this.props.display.legend,
-    markerSymbol: this.props.display.markerSymbol,
-    markerFixedSize: this.props.display.markerFixedSize,
-    markerSize: this.props.display.markerSize
+    )
   };
   localColorChange = colors => {
     var { display } = this.state;
@@ -494,6 +450,11 @@ class EditSettings extends Component {
     display.markerSize = event.target.value;
     this.setState({ display });
   };
+  localFieldChange = () => {
+    var { display } = this.state;
+    display.field = event.target.value;
+    this.setState({ display });
+  };
   updateDisplay = () => {
     var { onUpdate, displayGroup } = this.props;
     var { display } = this.state;
@@ -509,12 +470,13 @@ class EditSettings extends Component {
       legend,
       markerSymbol,
       markerFixedSize,
-      markerSize
+      markerSize,
+      field
     } = display;
-    var { marker, removeSelected, ids } = this.props;
+    var { removeSelected, ids } = this.props;
     return (
       <div className="editsettings">
-        {marker && (
+        {["marker", "group"].includes(display.plot) && (
           <div className="editsettings-markeroptions">
             <div className="editsettings-title">Marker Options</div>
             <table className="editsettings-table">
@@ -567,6 +529,24 @@ class EditSettings extends Component {
             </table>
           </div>
         )}
+        {["field", "group"].includes(display.plot) && (
+          <div className="editsettings-fieldoptions">
+            <div className="editsettings-title">Field Options</div>
+            <table>
+              <tbody>
+                <tr>
+                  <td>Display</td>
+                  <td>
+                    <select value={field} onChange={this.localFieldChange}>
+                      <option value="vector">Animated Vector Field</option>
+                      <option value="scalar">Static Scalar Field</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
         <div className="editsettings-title">Color Options</div>
         <ColorManipulation colors={colors} onChange={this.localColorChange} />
         Show in Legend{" "}
@@ -602,11 +582,11 @@ class AddLayers extends Component {
     var cmaplayers = JSON.parse(JSON.stringify(maplayers));
     var cparameters = JSON.parse(JSON.stringify(parameters));
     var mlayers = cmaplayers.filter(layer => layer.type === type);
-    var layers = mlayers.map(layer => layer.parameter_id);
+    var layers = mlayers.map(layer => layer.parameters_id);
     layers = [...new Set(layers)];
     var availableparameters = cparameters.filter(p => layers.includes(p.id));
     availableparameters = availableparameters.map(x => {
-      x.layerids = mlayers.filter(y => y.parameter_id === x.id).map(z => z.id);
+      x.layerids = mlayers.filter(y => y.parameters_id === x.id).map(z => z.id);
       return x;
     });
     return (

@@ -96,7 +96,7 @@ class LiveMap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this.refs.loadingl.style.display = "block";
+    //this.refs.loadingl.style.display = "block";
     this.plotPolygons();
     this.plotMarkers();
     this.map.invalidateSize();
@@ -192,7 +192,6 @@ class LiveMap extends Component {
         );
       }
       this.polygonLayer = L.layerGroup(polygons).addTo(this.map);
-      this.refs.loadingl.style.display = "none";
     }
   };
 
@@ -203,10 +202,6 @@ class LiveMap extends Component {
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
           <div id="map">
-            <div ref="loadingl" className="map-loader">
-              <Loading />
-              Downloading and plotting data
-            </div>
             {help && (
               <div className="help-container show">
                 <div
