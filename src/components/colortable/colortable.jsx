@@ -27,9 +27,8 @@ class ColorTable extends Component {
   };
 
   optimisePoints = () => {
-    var { array } = this.props;
+    var { array, onChange, colors } = this.props;
     if (array) {
-      var { array, onChange, colors } = this.props;
       var min = Math.min(...array);
       var max = Math.max(...array);
       var q, val, point;

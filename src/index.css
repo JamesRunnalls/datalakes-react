@@ -126,14 +126,12 @@ button:hover {
   width: 9px;
   border-radius: 50%;
   background-color: black;
-  border: 2px solid white;
 }
 
 .square {
   height: 8px;
   width: 8px;
   background-color: black;
-  border: 1px solid white;
 }
 
 .triangle {

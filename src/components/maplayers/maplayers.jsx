@@ -330,11 +330,12 @@ class RasterDisplay extends Component {
     var { colors, description, sourcelink, sourcetext } = display;
     var inner = [];
     var fixedColor = false;
+    var selectStyle;
     if (colors.length === 2 && colors[0].color === colors[1].color) {
       fixedColor = true;
     }
     if (fixedColor) {
-      var selectStyle = {
+      selectStyle = {
         background: colors[0].color
       };
       inner.push(
@@ -344,7 +345,7 @@ class RasterDisplay extends Component {
         </tr>
       );
     } else {
-      var selectStyle = {
+      selectStyle = {
         background: this.linearGradient(colors),
         border: "1px solid black",
         borderTop: "22px solid white",

@@ -42,7 +42,6 @@
 
 .maplayers-dropdown-content {
   margin-left: 12px;
-  margin-top: 8px;
 }
 
 .maplayers-dropdown-content.hide {
@@ -81,6 +80,7 @@
   background-color: rgb(240, 240, 240);
   box-shadow: 1px 2px 4px rgba(0, 0, 0, .5);
   padding: 5px;
+  margin-bottom: 10px;
 }
 
 .editsettings-title {

@@ -40,45 +40,35 @@ class MapLegend extends Component {
 
 class Live extends Component {
   state = {
-    list: [{ name: "" }],
-    dataArray: [],
-    min: "",
-    max: "",
-    dataIndex: 0,
-    loading: false,
-    unit: "",
-    markerData: {},
-    visibleMarkers: [],
-    stations: [],
-    colors: [
-      { color: "#000080", point: 0 },
-      { color: "#3366FF", point: 0.142857142857143 },
-      { color: "#00B0DC", point: 0.285714285714286 },
-      { color: "#009933", point: 0.428571428571429 },
-      { color: "#FFFF5B", point: 0.571428571428571 },
-      { color: "#E63300", point: 0.714285714285714 },
-      { color: "#CC0000", point: 0.857142857142857 },
-      { color: "#800000", point: 1 }
-    ],
     parameters: [],
     maplayers: [],
-    selected: [0, 1]
+    selected: [1]
   };
 
-  addSelected = id => {
-    var { selected } = this.state;
+  addSelected = async id => {
+    function maplayersfind(maplayers, id) {
+      return maplayers.find(x => x.id === id);
+    }
+    var { selected, maplayers, parameters } = this.state;
     for (var i = 0; i < id.length; i++) {
       if (!selected.includes(id[i])) {
+        if (!("data" in maplayersfind(maplayers, id[i]))) {
+          maplayers = await this.downloadFile(id[i], maplayers);
+          parameters = this.updateMinMax(id[i], maplayers, parameters);
+        }
         selected.push(id[i]);
       }
     }
-    this.setState({ selected });
+    this.setState({ selected, maplayers, parameters });
   };
 
   removeSelected = id => {
+    function selectedfilter(selected, id) {
+      return selected.filter(selectid => selectid !== id);
+    }
     var { selected } = this.state;
     for (var i = 0; i < id.length; i++) {
-      selected = selected.filter(selectid => selectid !== id[i]);
+      selected = selectedfilter(selected, id[i]);
     }
     this.setState({ selected });
   };
@@ -89,35 +79,6 @@ class Live extends Component {
 
   updateParameters = parameters => {
     this.setState({ parameters });
-  };
-
-  optimisePoints = (colors, array) => {
-    var min = Math.min(...array);
-    var max = Math.max(...array);
-    var q, val, point;
-    for (var i = 0; i < colors.length; i++) {
-      if (i === 0) colors[i].point = 0;
-      else if (i === colors.length - 1) colors[i].point = 1;
-      else {
-        q = (1 / (colors.length - 1)) * i;
-        val = this.quantile(array, q);
-        point = (val - min) / (max - min);
-        colors[i].point = point;
-      }
-    }
-    return colors;
-  };
-
-  quantile = (arr, q) => {
-    const sorted = arr.slice(0).sort((a, b) => a - b);
-    const pos = (sorted.length - 1) * q;
-    const base = Math.floor(pos);
-    const rest = pos - base;
-    if (sorted[base + 1] !== undefined) {
-      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
-    } else {
-      return sorted[base];
-    }
   };
 
   hoverFunc = (target, type) => {
@@ -135,89 +96,91 @@ class Live extends Component {
     }
   };
 
-  downloadFile = async (index, maplayers) => {
-    console.log(maplayers[index].api);
+  downloadFile = async (id, maplayers) => {
+    var index = maplayers.findIndex(x => x.id === id);
+    var { data } = await axios.get(maplayers[index].api);
+    if (Array.isArray(data)) data = data[0];
+    maplayers[index].data = data;
     return maplayers;
   };
 
-  handleSelect = async event => {
-    var {
-      list,
-      dataIndex: oldDataIndex,
-      dataArray,
-      min,
-      max,
-      unit
-    } = this.state;
-    var dataIndex = list.findIndex(x => x.name === event.value);
-    if (oldDataIndex !== dataIndex) {
-      if (dataArray[dataIndex] === 0) {
-        this.setState({ dataIndex, loading: true });
-        this.downloadFile(dataIndex);
-      } else {
-        min = Math.round(Math.min(...dataArray[dataIndex].v) * 100) / 100;
-        max = Math.round(Math.max(...dataArray[dataIndex].v) * 100) / 100;
-        unit = list[dataIndex].unit;
-        this.setState({ dataIndex, min, max, unit });
-      }
+  updateMinMax = (id, maplayers, parameters) => {
+    var index = maplayers.findIndex(x => x.id === id);
+    var layer = JSON.parse(JSON.stringify(maplayers[index]));
+    var layerData = layer.data;
+    var parameterIndex = parameters.findIndex(
+      x => x.id === layer.parameters_id
+    );
+    var parseArray = layer.parseArray.split(",");
+    var parseValue = layer.parseValue.split(",");
+
+    for (var i = 0; i < parseArray.length; i++) {
+      layerData = layerData[parseArray[i]];
     }
-  };
 
-  updateParentColors = colors => {
-    var { dataArray, dataIndex } = this.state;
-    colors = this.optimisePoints(colors, dataArray[dataIndex].v);
-    this.setState({ colors });
-  };
-
-  makerChange = event => {
-    var { visibleMarkers } = this.state;
-    var value = event.target.value;
-    if (visibleMarkers.includes(value)) {
-      visibleMarkers = visibleMarkers.filter(x => x !== value);
+    var min, max, keys;
+    if (parseValue[0] === "array") {
+      max = this.getMax(layerData);
+      min = this.getMin(layerData);
     } else {
-      visibleMarkers.push(value);
+      keys = layerData.map(x => {
+        for (var i = 0; i < parseValue.length; i++) {
+          x = x[parseValue[i]];
+        }
+        return x;
+      });
+      keys = keys.filter(x => x !== 9999);
+      max = this.getMax(keys);
+      min = this.getMin(keys);
     }
-    this.setState({ visibleMarkers });
-  };
-
-  stationPopup = info => {
-    console.log(info);
-    if ("update" in info) {
-      return (
-        "<b>" +
-        info.name +
-        "</b><br>" +
-        info.description +
-        '<br><a title="See live data" href="/live/' +
-        info.link +
-        '">See live data</a>'
+    if (parameters[parameterIndex].min) {
+      parameters[parameterIndex].min = Math.min(
+        parameters[parameterIndex].min,
+        min
       );
     } else {
-      return (
-        "<b>" +
-        info.name +
-        "</b><br>" +
-        info.type +
-        "<br>Elevation: " +
-        info.elevation +
-        'mAOD<br><a target="_blank" href="' +
-        info.link +
-        '">See live data</a>'
-      );
+      parameters[parameterIndex].min = min;
     }
+    if (parameters[parameterIndex].max) {
+      parameters[parameterIndex].max = Math.max(
+        parameters[parameterIndex].max,
+        max
+      );
+    } else {
+      parameters[parameterIndex].max = max;
+    }
+    return parameters;
+  };
+
+  getMax = arr => {
+    let len = arr.length;
+    let max = -Infinity;
+
+    while (len--) {
+      max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
+  };
+
+  getMin = arr => {
+    let len = arr.length;
+    let min = Infinity;
+
+    while (len--) {
+      min = arr[len] < min ? arr[len] : min;
+    }
+    return min;
   };
 
   async componentDidMount() {
     // Get parameter details
-    const { data: parameters } = await axios.get(
+    var { data: parameters } = await axios.get(
       apiUrl + "/selectiontables/parameters"
     );
 
     // Add default display settings for parameters
     parameters.map(x => {
       if (!("plot" in x)) x.plot = "group";
-      if (!("min" in x)) x.min = 0;
-      if (!("max" in x)) x.max = 1;
       if (!("colors" in x)) {
         x.colors = [
           { color: "#000080", point: 0 },
@@ -265,13 +228,12 @@ class Live extends Component {
       return x;
     });
 
-
-
     // Download default layers
-    //var { selected } = this.state;
-    //for (var i = 0; i < selected.length; i++) {
-    //  maplayers = await this.downloadFile(selected[i], maplayers);
-    //}
+    var { selected } = this.state;
+    for (var i = 0; i < selected.length; i++) {
+      maplayers = await this.downloadFile(selected[i], maplayers);
+      parameters = this.updateMinMax(selected[i], maplayers, parameters);
+    }
 
     this.setState({
       parameters,
@@ -281,22 +243,7 @@ class Live extends Component {
 
   render() {
     document.title = "Live - Datalakes";
-    var {
-      list,
-      dataArray,
-      dataIndex,
-      min,
-      max,
-      loading,
-      markerData,
-      visibleMarkers,
-      stations,
-      colors,
-      maplayers,
-      parameters,
-      selected
-    } = this.state;
-    var unit = list[dataIndex].unit;
+    var { maplayers, parameters, selected } = this.state;
     return (
       <React.Fragment>
         <h1>Live Conditions</h1>
@@ -305,51 +252,16 @@ class Live extends Component {
           left={
             <React.Fragment>
               <LiveMap
-                polygon={dataArray[dataIndex]}
-                polygonOpacity={1}
-                hoverFunc={this.hoverFunc}
-                unit={unit}
-                loading={loading}
-                visibleMarkers={visibleMarkers}
-                markerData={markerData}
-                markerGroups={stations}
-                markerOpacity={1}
-                popup={this.stationPopup}
-                colors={colors}
-                min={min}
-                max={max}
-                legend={
-                  <div className="legend">
-                    <ColorBar
-                      min={min}
-                      max={max}
-                      colors={colors}
-                      unit={unit}
-                      text={list[dataIndex].description}
-                      onChange={this.updateParentColors}
-                    />
-                  </div>
-                }
-                selector={
-                  <div className="live-dataselector">
-                    <DataSelect
-                      value="name"
-                      label="name"
-                      dataList={list}
-                      defaultValue={list[dataIndex].name}
-                      onChange={this.handleSelect}
-                    />
-                  </div>
-                }
+                maplayers={maplayers}
+                parameters={parameters}
+                selected={selected}
+                legend={<div className="legend"></div>}
+                selector={<div className="live-dataselector"></div>}
               />
             </React.Fragment>
           }
           rightNoScroll={
             <React.Fragment>
-              <FilterBox
-                title="Lake Stations"
-                content={<LakeStations datalist={markerData.lakestations} />}
-              />
               <FilterBox
                 title="Map Layers"
                 preopen="true"
