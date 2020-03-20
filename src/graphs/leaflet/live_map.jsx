@@ -26,87 +26,6 @@ class LiveMap extends Component {
     this.props.hoverFunc(e.target, "out");
   };
 
-  plotMarkers = async () => {
-    var {
-      visibleMarkers,
-      markerData,
-      markerGroups,
-      popup,
-      markerOpacity
-    } = this.props;
-    // Remove old markers
-    if ("markerGroup" in this) {
-      this.map.removeLayer(this.markerGroup);
-    }
-    this.markerGroup = L.layerGroup().addTo(this.map);
-
-    var i,
-      j,
-      marker,
-      color,
-      shape,
-      markerValue,
-      groupInfo,
-      markerInfo,
-      markerPopup;
-    // Loop over visible marker groups
-    for (i = 0; i < visibleMarkers.length; i++) {
-      markerValue = visibleMarkers[i];
-      groupInfo = this.findGroupInfo(markerGroups, markerValue);
-      color = groupInfo.color;
-      shape = groupInfo.shape;
-
-      // Loop over markers
-      for (j = 0; j < markerData[markerValue].length; j++) {
-        // Set icon values
-        markerInfo = markerData[markerValue][j];
-        markerPopup = popup(markerInfo);
-        marker = new L.marker([markerInfo["lat"], markerInfo["lon"]], {
-          icon: L.divIcon({
-            className: "map-marker",
-            html: `<div class="${shape}" style="background-color:${color};opacity:${markerOpacity}"></div> `
-          })
-        }).addTo(this.markerGroup);
-        marker.bindPopup(markerPopup);
-      }
-    }
-  };
-
-  plotPolygons = async () => {
-    try {
-      this.map.removeLayer(this.polygonLayer);
-    } catch (e) {}
-    if (!this.props.loading) {
-      var { polygon: data, polygonOpacity, colors, min, max } = this.props;
-
-      var polygons = [];
-      var coords;
-      var x = data.lonres / 2;
-      var y = data.latres / 2;
-      for (var i = 0; i < data.lon.length; i++) {
-        coords = [
-          [data.lat[i] - y, data.lon[i] - x],
-          [data.lat[i] + y, data.lon[i] - x],
-          [data.lat[i] + y, data.lon[i] + x],
-          [data.lat[i] - y, data.lon[i] + x]
-        ];
-        var pixelcolor = getColor(data.v[i], min, max, colors);
-        polygons.push(
-          L.polygon(coords, {
-            color: pixelcolor,
-            fillColor: pixelcolor,
-            fillOpacity: polygonOpacity,
-            opacity: polygonOpacity,
-            title: data.v[i]
-          })
-            .on({ mouseover: this.hoverOver })
-            .on({ mouseout: this.hoverOut })
-        );
-      }
-      this.polygonLayer = L.layerGroup(polygons).addTo(this.map);
-    }
-  };
-
   CHtoWGSlatlng = yx => {
     var y_aux = (yx[0] - 600000) / 1000000;
     var x_aux = (yx[1] - 200000) / 1000000;
@@ -317,7 +236,7 @@ class LiveMap extends Component {
     }
 
     // Add new layers
-    for (var i = 0; i < selected.length; i++) {
+    for (var i = selected.length -1; i > -1; i--) {
       var layer = findlayer(maplayers, selected[i]);
       var { plotFunction, parameters_id } = layer;
       var parameter = findparameter(parameters, parameters_id);

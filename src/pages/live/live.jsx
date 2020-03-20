@@ -42,7 +42,7 @@ class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [8]
+    selected: [0,8]
   };
 
   addSelected = async id => {
