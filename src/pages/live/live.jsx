@@ -42,7 +42,7 @@ class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [1]
+    selected: [8]
   };
 
   addSelected = async id => {
@@ -99,7 +99,6 @@ class Live extends Component {
   downloadFile = async (id, maplayers) => {
     var index = maplayers.findIndex(x => x.id === id);
     var { data } = await axios.get(maplayers[index].api);
-    if (Array.isArray(data)) data = data[0];
     maplayers[index].data = data;
     return maplayers;
   };
@@ -111,13 +110,21 @@ class Live extends Component {
     var parameterIndex = parameters.findIndex(
       x => x.id === layer.parameters_id
     );
-    var parseArray = layer.parseArray.split(",");
-    var parseValue = layer.parseValue.split(",");
+    var parseArray, parseValue;
+    if (!layer.parseArray) {
+      parseArray = [];
+    } else {
+      parseArray = layer.parseArray.split(",");
+    }
+    if (!layer.parseValue) {
+      parseValue = [];
+    } else {
+      parseValue = layer.parseValue.split(",");
+    }
 
     for (var i = 0; i < parseArray.length; i++) {
       layerData = layerData[parseArray[i]];
     }
-
     var min, max, keys;
     if (parseValue[0] === "array") {
       max = this.getMax(layerData);

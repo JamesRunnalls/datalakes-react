@@ -97,6 +97,7 @@
     z-index: 999999;
     position: absolute !important;
     width: 100%!important;
+    min-height: auto!important;
   }
 
   .rightcontent .scroll {
@@ -130,6 +131,8 @@
 
   .rightcontent {
     margin-top: 20px;
+    margin-bottom: 20px;
+    max-width: 500px;
   }
 }
 
@@ -157,4 +160,5 @@
   float: right;
   position: relative;
   background-color: white;
+  min-height: 500px;
 }

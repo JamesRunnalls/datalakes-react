@@ -191,6 +191,33 @@ class LiveMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
+  simstrat = async (layer, min, max) => {
+    var layerData = JSON.parse(JSON.stringify(layer.data));
+    var polygons = [];
+    for (var i = 0; i < layerData.length; i++) {
+      var pixelcolor = getColor(layerData[i].value, min, max, layer.colors);
+      polygons.push(
+        L.polygon(layerData[i].latlng, {
+          color: pixelcolor,
+          fillColor: pixelcolor,
+          fillOpacity: 1,
+          title: layerData[i].value
+        }).bindPopup(
+          "<table><tbody>" +
+            "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>"+layerData[i].name+"</td></tr>" +
+            "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat</td></tr>" +
+            "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+            "<tr><td><strong>Surface water temperature:</strong></td><td>"+layerData[i].value+"°C</td></tr>" +
+            "<tr><td class='text-nowrap'><strong>Elevation</strong></td><td>"+layerData[i].elevation+"m</td></tr>" +
+            "<tr><td class='text-nowrap'><strong>Depth</strong></td><td>"+layerData[i].depth+" m</td></tr>" +
+            '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="'+layerData[i].link+'">Information about this lake model</a></td></tr>' +
+            "</tbody></table>"
+        )
+      );
+    }
+    this.raster.push(L.layerGroup(polygons).addTo(this.map));
+  };
+
   componentDidMount() {
     var center = [46.85, 7.55];
     if ("center" in this.props) {
@@ -211,10 +238,17 @@ class LiveMap extends Component {
       minZoom: 7,
       attributionControl: false,
       layers: [
-        //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'})
+        //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'}),
         L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
           { attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ" }
+        ),
+        L.tileLayer(
+          "https://maps.heigit.org/openmapsurfer/tiles/asterh/webmercator/{z}/{x}/{y}.png",
+          {
+            attribution:
+              'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> | Map data  <a href="https://lpdaac.usgs.gov/products/aster_policies">ASTER GDEM</a>, <a href="http://srtm.csi.cgiar.org/">SRTM</a>'
+          }
         )
       ]
     });
@@ -291,6 +325,7 @@ class LiveMap extends Component {
       plotFunction === "meteoSwissMarkers" &&
         this.meteoSwissMarkers(layer, min, max);
       plotFunction === "remoteSensing" && this.remoteSensing(layer, min, max);
+      plotFunction === "simstrat" && this.simstrat(layer, min, max);
     }
     this.map.invalidateSize();
   }
