@@ -123,18 +123,59 @@ class LiveMap extends Component {
           title: layerData[i].value
         }).bindPopup(
           "<table><tbody>" +
-            "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>"+layerData[i].name+"</td></tr>" +
+            "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+            layerData[i].name +
+            "</td></tr>" +
             "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat</td></tr>" +
             "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-            "<tr><td><strong>Surface water temperature:</strong></td><td>"+layerData[i].value+"°C</td></tr>" +
-            "<tr><td class='text-nowrap'><strong>Elevation</strong></td><td>"+layerData[i].elevation+"m</td></tr>" +
-            "<tr><td class='text-nowrap'><strong>Depth</strong></td><td>"+layerData[i].depth+" m</td></tr>" +
-            '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="'+layerData[i].link+'">Information about this lake model</a></td></tr>' +
+            "<tr><td><strong>Surface water temperature:</strong></td><td>" +
+            layerData[i].value +
+            "°C</td></tr>" +
+            "<tr><td class='text-nowrap'><strong>Elevation</strong></td><td>" +
+            layerData[i].elevation +
+            "m</td></tr>" +
+            "<tr><td class='text-nowrap'><strong>Depth</strong></td><td>" +
+            layerData[i].depth +
+            " m</td></tr>" +
+            '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+            layerData[i].link +
+            '">Information about this lake model</a></td></tr>' +
             "</tbody></table>"
         )
       );
     }
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
+  };
+
+  meteolakesScalar = async (layer, min, max) => {
+    console.log(layer)
+    var data = layer.data;
+    var matrix, polygons;
+    for (var k = 0; k < data.length; k++) {
+      polygons = [];
+      matrix = data[k].data;
+      for (var i = 0; i < matrix.length - 1; i++) {
+        var row = matrix[i];
+        var nextRow = matrix[i + 1];
+        for (var j = 0; j < row.length - 1; j++) {
+          var coords = [
+            [row[j][0], [row[j][1]]],
+            [row[j+1][0], [row[j+1][1]]],
+            [nextRow[j][0], [nextRow[j][1]]],
+            [nextRow[j+1][0], [nextRow[j+1][1]]]
+          ];
+          var pixelcolor = getColor(row[j][2], min, max, layer.colors);
+          polygons.push(
+            L.polygon(coords, {
+              color: pixelcolor,
+              fillColor: pixelcolor,
+              fillOpacity: 1,
+              title: data.v[i]
+            })
+          );
+        }
+      }
+    }
   };
 
   componentDidMount() {
@@ -236,7 +277,7 @@ class LiveMap extends Component {
     }
 
     // Add new layers
-    for (var i = selected.length -1; i > -1; i--) {
+    for (var i = selected.length - 1; i > -1; i--) {
       var layer = findlayer(maplayers, selected[i]);
       var { plotFunction, parameters_id } = layer;
       var parameter = findparameter(parameters, parameters_id);
@@ -245,6 +286,8 @@ class LiveMap extends Component {
         this.meteoSwissMarkers(layer, min, max);
       plotFunction === "remoteSensing" && this.remoteSensing(layer, min, max);
       plotFunction === "simstrat" && this.simstrat(layer, min, max);
+      plotFunction === "meteolakesScalar" &&
+        this.meteolakesScalar(layer, min, max);
     }
     this.map.invalidateSize();
   }

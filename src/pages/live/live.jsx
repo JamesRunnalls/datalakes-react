@@ -42,7 +42,7 @@ class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [0,8]
+    selected: [0, 8]
   };
 
   addSelected = async id => {
@@ -50,6 +50,7 @@ class Live extends Component {
       return maplayers.find(x => x.id === id);
     }
     var { selected, maplayers, parameters } = this.state;
+    console.log(selected,id)
     for (var i = 0; i < id.length; i++) {
       if (!selected.includes(id[i])) {
         if (!("data" in maplayersfind(maplayers, id[i]))) {
@@ -59,6 +60,7 @@ class Live extends Component {
         selected.push(id[i]);
       }
     }
+    console.log("eee",selected)
     this.setState({ selected, maplayers, parameters });
   };
 
@@ -103,43 +105,57 @@ class Live extends Component {
     return maplayers;
   };
 
+  meteoSwissMarkersMinMax = layer => {
+    var array = layer.data.features;
+    array = array.map(x => x.properties.value);
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { min: min, max: max };
+  };
+
+  simstratMinMax = layer => {
+    var array = layer.data;
+    array = array.map(x => x.value);
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { min: min, max: max };
+  };
+
+  remoteSensingMinMax = layer => {
+    var array = layer.data;
+    array = array.v;
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { min: min, max: max };
+  };
+
+  meteolakesScalarMinMax = layer => {
+    var array = layer.data;
+    
+    return { min: 0, max: 10 };
+  };
+
   updateMinMax = (id, maplayers, parameters) => {
     var index = maplayers.findIndex(x => x.id === id);
     var layer = JSON.parse(JSON.stringify(maplayers[index]));
-    var layerData = layer.data;
     var parameterIndex = parameters.findIndex(
       x => x.id === layer.parameters_id
     );
-    var parseArray, parseValue;
-    if (!layer.parseArray) {
-      parseArray = [];
-    } else {
-      parseArray = layer.parseArray.split(",");
+    var plotFunction = layer.plotFunction;
+
+    if (plotFunction === "meteoSwissMarkers") {
+      var { min, max } = this.meteoSwissMarkersMinMax(layer);
     }
-    if (!layer.parseValue) {
-      parseValue = [];
-    } else {
-      parseValue = layer.parseValue.split(",");
+    if (plotFunction === "simstrat") {
+      var { min, max } = this.simstratMinMax(layer);
+    }
+    if (plotFunction === "remoteSensing") {
+      var { min, max } = this.remoteSensingMinMax(layer);
+    }
+    if (plotFunction === "meteolakesScalar") {
+      var { min, max } = this.meteolakesScalarMinMax(layer);
     }
 
-    for (var i = 0; i < parseArray.length; i++) {
-      layerData = layerData[parseArray[i]];
-    }
-    var min, max, keys;
-    if (parseValue[0] === "array") {
-      max = this.getMax(layerData);
-      min = this.getMin(layerData);
-    } else {
-      keys = layerData.map(x => {
-        for (var i = 0; i < parseValue.length; i++) {
-          x = x[parseValue[i]];
-        }
-        return x;
-      });
-      keys = keys.filter(x => x !== 9999);
-      max = this.getMax(keys);
-      min = this.getMin(keys);
-    }
     if (parameters[parameterIndex].min) {
       parameters[parameterIndex].min = Math.min(
         parameters[parameterIndex].min,
