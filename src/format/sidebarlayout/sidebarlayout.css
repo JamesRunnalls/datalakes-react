@@ -107,6 +107,7 @@
     right: 0;
     padding: 2px 5px;
     width: auto;
+    min-height: 0!important;
   }
 
   .rightcontainer.hide .righthead {
