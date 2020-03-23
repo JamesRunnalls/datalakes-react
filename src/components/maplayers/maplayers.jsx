@@ -4,7 +4,27 @@ import FilterBox from "../filterbox/filterbox";
 import ColorManipulation from "../colormanipulation/colormanipulation";
 
 class Contents extends Component {
-  state = {};
+  dragStart = e => {
+    this.dragged = e.currentTarget;
+    e.dataTransfer.effectAllowed = "move";
+    // Firefox requires calling dataTransfer.setData
+    // for the drag to properly work
+    e.dataTransfer.setData("text/html", e.currentTarget);
+  };
+  dragEnd = e => {
+    this.dragged.style.display = "block";
+    // Update state
+    var data = this.state.data;
+    var from = Number(this.dragged.dataset.id);
+    var to = Number(this.over.dataset.id);
+    if (from < to) to--;
+    data.splice(to, 0, data.splice(from, 1)[0]);
+    console.log(data)
+  };
+  dragOver = e => {
+    e.preventDefault();
+    this.dragged.style.display = "none";
+  };
   render() {
     var {
       maplayers,
@@ -15,85 +35,47 @@ class Contents extends Component {
       removeSelected
     } = this.props;
     var selectlayers = maplayers.filter(layer => selected.includes(layer.id));
-    var selectlayersparameterid = selectlayers.map(layer => layer.parameters_id);
-    var visibleparameters = parameters.filter(param =>
-      selectlayersparameterid.includes(param.id)
-    );
-    var selectparameters = visibleparameters.map(x => {
-      x.layers = selectlayers.filter(layer => layer.parameters_id === x.id);
-      return x;
+    selectlayers = selectlayers.map(layer => {
+      var parameter = parameters.find(
+        parameter => parameter.id === layer.parameters_id
+      );
+      layer.min = parameter.min;
+      layer.max = parameter.max;
+      return layer;
     });
-    var types = [
-      { name: "Measurement Value", type: "measurement" },
-      { name: "Satellite Data", type: "satellite" },
-      { name: "Lake Simulations", type: "model" }
-    ];
     return (
       <div className="maplayers-contents">
-        {/* Loop over all parameters (parameters are parent groups) */}
-        {selectparameters.map(parameter => {
-          return (
-            <DropDown
-              name={parameter.name}
-              key={parameter.id}
-              defaultOpen={true}
-              allowSettings={true}
-              display={parameter}
-              displayGroup={parameters}
-              removeSelected={removeSelected}
-              ids={parameter.layers.map(layer => layer.id)}
-              onUpdate={updateParameters}
-              content={
-                /* Loop over all types (type are sub groups) */
-                types.map(type => {
-                  var layers = parameter.layers.filter(
-                    layer => layer.type === type.type
-                  );
-                  return (
-                    layers.length > 0 && (
-                      <DropDown
-                        key={type.name}
-                        name={type.name}
-                        defaultOpen={true}
-                        allowSettings={false}
-                        display={parameter}
-                        displayGroup={parameters}
-                        removeSelected={removeSelected}
-                        ids={[]}
-                        content={
-                          <React.Fragment>
-                            {/* Loop over layers (layers are sub-sub groups) */}
-                            {layers.map(layer => (
-                              <DropDown
-                                key={layer.id}
-                                name={layer.name}
-                                allowSettings={true}
-                                display={layer}
-                                displayGroup={maplayers}
-                                removeSelected={removeSelected}
-                                ids={[layer.id]}
-                                onUpdate={updateMapLayers}
-                                content={
-                                  <GroupDisplay
-                                    key={layer.id}
-                                    min={parameter.min}
-                                    max={parameter.max}
-                                    unit={parameter.unit}
-                                    display={layer}
-                                  />
-                                }
-                              />
-                            ))}
-                          </React.Fragment>
-                        }
-                      />
-                    )
-                  );
-                })
-              }
-            />
-          );
-        })}
+        <ul className="maplayers-list" onDragOver={this.dragOver}>
+          {/* Loop over layers */}
+          {selectlayers.map(layer => (
+            <li
+              key={layer.id}
+              draggable="true"
+              onDragEnd={this.dragEnd}
+              onDragStart={this.dragStart}
+            >
+              <DropDown
+                key={layer.id}
+                name={layer.name}
+                allowSettings={true}
+                display={layer}
+                displayGroup={maplayers}
+                removeSelected={removeSelected}
+                ids={[layer.id]}
+                onUpdate={updateMapLayers}
+                content={
+                  <GroupDisplay
+                    key={layer.id}
+                    min={layer.min}
+                    max={layer.max}
+                    unit={layer.unit}
+                    display={layer}
+                  />
+                }
+              />
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
@@ -403,7 +385,6 @@ class FieldDisplay extends Component {
     return (
       <div>
         <div>{description}</div>
-        
         Source:{" "}
         <a href={sourcelink} target="_blank">
           {sourcetext}

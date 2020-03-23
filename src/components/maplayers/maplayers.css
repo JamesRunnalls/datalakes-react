@@ -1,4 +1,22 @@
-.maplayers-box {
+ul.maplayers-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+ul.maplayers-list li {
+  border-bottom: 1px solid white;
+}
+
+ul.maplayers-list li:hover {
+  border-bottom: 1px solid rgb(169, 169, 169);
+}
+
+ul.maplayers-list li.placeholder {background: rgb(255,240,120);}
+ul.maplayers-list li.placeholder:before {
+  content: "Drop here";
+  color: rgb(225,210,90);
 }
 
 .maplayers-box .maplayers-layer {
@@ -78,7 +96,7 @@
 
 .editsettings {
   background-color: rgb(240, 240, 240);
-  box-shadow: 1px 2px 4px rgba(0, 0, 0, .5);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
   padding: 5px;
   margin-bottom: 10px;
 }
@@ -92,7 +110,7 @@
   table-layout: fixed;
 }
 
-.editsettings-table input[type=text] {
+.editsettings-table input[type="text"] {
   width: 50px;
 }
 

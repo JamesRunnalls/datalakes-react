@@ -42,7 +42,8 @@ class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [0, 8]
+    selected: [1,2,3,8,9],
+    plotted: [1,2]
   };
 
   addSelected = async id => {
@@ -50,7 +51,6 @@ class Live extends Component {
       return maplayers.find(x => x.id === id);
     }
     var { selected, maplayers, parameters } = this.state;
-    console.log(selected,id)
     for (var i = 0; i < id.length; i++) {
       if (!selected.includes(id[i])) {
         if (!("data" in maplayersfind(maplayers, id[i]))) {
@@ -60,7 +60,6 @@ class Live extends Component {
         selected.push(id[i]);
       }
     }
-    console.log("eee",selected)
     this.setState({ selected, maplayers, parameters });
   };
 
@@ -73,6 +72,34 @@ class Live extends Component {
       selected = selectedfilter(selected, id[i]);
     }
     this.setState({ selected });
+  };
+
+  addPlotted = async id => {
+    function maplayersfind(maplayers, id) {
+      return maplayers.find(x => x.id === id);
+    }
+    var { plotted, maplayers, parameters } = this.state;
+    for (var i = 0; i < id.length; i++) {
+      if (!plotted.includes(id[i])) {
+        if (!("data" in maplayersfind(maplayers, id[i]))) {
+          maplayers = await this.downloadFile(id[i], maplayers);
+          parameters = this.updateMinMax(id[i], maplayers, parameters);
+        }
+        plotted.push(id[i]);
+      }
+    }
+    this.setState({ plotted, maplayers, parameters });
+  };
+
+  removePlotted = id => {
+    function plottedfilter(plotted, id) {
+      return plotted.filter(selectid => selectid !== id);
+    }
+    var { plotted } = this.state;
+    for (var i = 0; i < id.length; i++) {
+      plotted = plottedfilter(plotted, id[i]);
+    }
+    this.setState({ plotted });
   };
 
   updateMapLayers = maplayers => {
@@ -242,7 +269,7 @@ class Live extends Component {
           { color: "#800000", point: 1 }
         ];
       }
-      if (!("markerLabel" in x)) x.markerLabel = true;
+      if (!("markerLabel" in x)) x.markerLabel = false;
       if (!("legend" in x)) x.legend = true;
       if (!("markerSymbol" in x)) x.markerSymbol = "circle";
       if (!("markerFixedSize" in x)) x.markerFixedSize = true;
@@ -266,7 +293,7 @@ class Live extends Component {
 
   render() {
     document.title = "Live - Datalakes";
-    var { maplayers, parameters, selected } = this.state;
+    var { maplayers, parameters, selected, plotted } = this.state;
     return (
       <React.Fragment>
         <h1>Live Conditions</h1>
@@ -277,7 +304,8 @@ class Live extends Component {
               <LiveMap
                 maplayers={maplayers}
                 parameters={parameters}
-                selected={selected}
+                selected={plotted}
+                hoverFunc={this.hoverFunc}
                 legend={<div className="legend"></div>}
                 selector={<div className="live-dataselector"></div>}
               />
@@ -293,6 +321,7 @@ class Live extends Component {
                     maplayers={maplayers}
                     parameters={parameters}
                     selected={selected}
+                    plotted={plotted}
                     addSelected={this.addSelected}
                     removeSelected={this.removeSelected}
                     updateMapLayers={this.updateMapLayers}

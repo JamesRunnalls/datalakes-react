@@ -51,18 +51,14 @@ class LiveMap extends Component {
   meteoSwissMarkers = async (layer, min, max) => {
     var minSize = 5;
     var maxSize = 30;
-    var parseArray = layer.parseArray.split(",");
-    var layerData = JSON.parse(JSON.stringify(layer.data));
-
-    for (var i = 0; i < parseArray.length; i++) {
-      layerData = layerData[parseArray[i]];
-    }
-
+    var layerData = JSON.parse(JSON.stringify(layer.data.features));
     var markerGroup = L.layerGroup().addTo(this.map);
+    var showlabel = layer.markerLabel;
 
-    var marker, value, color, shape, size, latlng;
+    var marker, value, color, shape, size, latlng, valuestring;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
+      valuestring = String(value) + String(layerData[j].properties.unit);
       color = getColor(value, min, max, layer.colors);
       shape = layer.markerSymbol;
       if (layer.markerFixedSize) {
@@ -76,7 +72,12 @@ class LiveMap extends Component {
           className: "map-marker",
           html: `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;"></div> `
         })
-      }).addTo(markerGroup);
+      })
+        .bindTooltip(valuestring, {
+          permanent: showlabel,
+          direction: "top"
+        })
+        .addTo(markerGroup);
       marker.bindPopup(layerData[j].properties.description);
     }
     this.marker.push(markerGroup);
@@ -95,6 +96,7 @@ class LiveMap extends Component {
         [data.lat[i] + y, data.lon[i] + x],
         [data.lat[i] - y, data.lon[i] + x]
       ];
+      var valuestring = String(Math.round(data.v[i] * 1000) / 1000);
       var pixelcolor = getColor(data.v[i], min, max, layer.colors);
       polygons.push(
         L.polygon(coords, {
@@ -102,9 +104,10 @@ class LiveMap extends Component {
           fillColor: pixelcolor,
           fillOpacity: 1,
           title: data.v[i]
+        }).bindTooltip(valuestring, {
+          permanent: false,
+          direction: "top"
         })
-          .on({ mouseover: this.hoverOver })
-          .on({ mouseout: this.hoverOut })
       );
     }
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
@@ -148,7 +151,6 @@ class LiveMap extends Component {
   };
 
   meteolakesScalar = async (layer, min, max) => {
-    console.log(layer)
     var data = layer.data;
     var matrix, polygons;
     for (var k = 0; k < data.length; k++) {
@@ -158,23 +160,52 @@ class LiveMap extends Component {
         var row = matrix[i];
         var nextRow = matrix[i + 1];
         for (var j = 0; j < row.length - 1; j++) {
-          var coords = [
-            [row[j][0], [row[j][1]]],
-            [row[j+1][0], [row[j+1][1]]],
-            [nextRow[j][0], [nextRow[j][1]]],
-            [nextRow[j+1][0], [nextRow[j+1][1]]]
-          ];
-          var pixelcolor = getColor(row[j][2], min, max, layer.colors);
-          polygons.push(
-            L.polygon(coords, {
-              color: pixelcolor,
-              fillColor: pixelcolor,
-              fillOpacity: 1,
-              title: data.v[i]
-            })
-          );
+          if (
+            row[j] === null ||
+            nextRow[j] === null ||
+            row[j + 1] === null ||
+            nextRow[j + 1] === null
+          ) {
+          } else {
+            var coords = [
+              this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
+              this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
+              this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
+              this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]])
+            ];
+            var valuestring = String(row[j][2]) + data[k].unit;
+            var pixelcolor = getColor(row[j][2], min, max, layer.colors);
+            polygons.push(
+              L.polygon(coords, {
+                color: pixelcolor,
+                fillColor: pixelcolor,
+                fillOpacity: 1,
+                title: row[j][2]
+              })
+                .bindPopup(
+                  "<table><tbody>" +
+                    "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+                    data[k].name +
+                    "</td></tr>" +
+                    "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+                    "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                    "<tr><td><strong>Surface water temperature:</strong></td><td>" +
+                    row[j][2] +
+                    data[k].unit +
+                    '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+                    data[k].link +
+                    '">More information</a></td></tr>' +
+                    "</tbody></table>"
+                )
+                .bindTooltip(valuestring, {
+                  permanent: false,
+                  direction: "top"
+                })
+            );
+          }
         }
       }
+      this.raster.push(L.layerGroup(polygons).addTo(this.map));
     }
   };
 

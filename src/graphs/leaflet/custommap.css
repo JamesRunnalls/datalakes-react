@@ -178,3 +178,7 @@
     line-height: 30px;
   }
 }
+
+.my-labels {
+  background-color: none;
+}
