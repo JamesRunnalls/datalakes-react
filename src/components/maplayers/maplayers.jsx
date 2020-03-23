@@ -3,110 +3,30 @@ import "./maplayers.css";
 import FilterBox from "../filterbox/filterbox";
 import ColorManipulation from "../colormanipulation/colormanipulation";
 
-class Contents extends Component {
-  dragStart = e => {
-    this.dragged = e.currentTarget;
-    e.dataTransfer.effectAllowed = "move";
-    // Firefox requires calling dataTransfer.setData
-    // for the drag to properly work
-    e.dataTransfer.setData("text/html", e.currentTarget);
-  };
-  dragEnd = e => {
-    this.dragged.style.display = "block";
-    // Update state
-    var data = this.state.data;
-    var from = Number(this.dragged.dataset.id);
-    var to = Number(this.over.dataset.id);
-    if (from < to) to--;
-    data.splice(to, 0, data.splice(from, 1)[0]);
-    console.log(data)
-  };
-  dragOver = e => {
-    e.preventDefault();
-    this.dragged.style.display = "none";
-  };
-  render() {
-    var {
-      maplayers,
-      parameters,
-      selected,
-      updateMapLayers,
-      updateParameters,
-      removeSelected
-    } = this.props;
-    var selectlayers = maplayers.filter(layer => selected.includes(layer.id));
-    selectlayers = selectlayers.map(layer => {
-      var parameter = parameters.find(
-        parameter => parameter.id === layer.parameters_id
-      );
-      layer.min = parameter.min;
-      layer.max = parameter.max;
-      return layer;
-    });
-    return (
-      <div className="maplayers-contents">
-        <ul className="maplayers-list" onDragOver={this.dragOver}>
-          {/* Loop over layers */}
-          {selectlayers.map(layer => (
-            <li
-              key={layer.id}
-              draggable="true"
-              onDragEnd={this.dragEnd}
-              onDragStart={this.dragStart}
-            >
-              <DropDown
-                key={layer.id}
-                name={layer.name}
-                allowSettings={true}
-                display={layer}
-                displayGroup={maplayers}
-                removeSelected={removeSelected}
-                ids={[layer.id]}
-                onUpdate={updateMapLayers}
-                content={
-                  <GroupDisplay
-                    key={layer.id}
-                    min={layer.min}
-                    max={layer.max}
-                    unit={layer.unit}
-                    display={layer}
-                  />
-                }
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
-}
-
 class DropDown extends Component {
   state = {
     open: this.props.defaultOpen,
-    visible: true,
     settings: false
   };
   toggleOpen = () => {
     this.setState({ open: !this.state.open });
   };
-  toggleVisible = () => {
-    this.setState({ visible: !this.state.visible });
-  };
   toggleSettings = () => {
     this.setState({ settings: !this.state.settings });
   };
   render() {
-    var { open, visible, settings } = this.state;
+    var { open, settings } = this.state;
     var {
       name,
       content,
       allowSettings,
       display,
       removeSelected,
-      ids,
+      id,
+      hidden,
       onUpdate,
-      displayGroup
+      displayGroup,
+      toggleLayerView
     } = this.props;
     return (
       <div className="maplayers-dropdown">
@@ -125,8 +45,8 @@ class DropDown extends Component {
                 <input
                   className="maplayers-checkbox"
                   type="checkbox"
-                  onChange={this.toggleVisible}
-                  checked={visible}
+                  onChange={() => toggleLayerView(id)}
+                  checked={!hidden.includes(id)}
                 />
               </td>
               <td style={{ width: "100%" }}>{name}</td>
@@ -152,7 +72,7 @@ class DropDown extends Component {
           <EditSettings
             display={display}
             removeSelected={removeSelected}
-            ids={ids}
+            id={id}
             onUpdate={onUpdate}
             displayGroup={displayGroup}
           />
@@ -455,7 +375,7 @@ class EditSettings extends Component {
       markerSize,
       field
     } = display;
-    var { removeSelected, ids } = this.props;
+    var { removeSelected, id } = this.props;
     return (
       <div className="editsettings">
         {["marker", "group"].includes(display.plot) && (
@@ -548,9 +468,9 @@ class EditSettings extends Component {
           <button
             type="button"
             title="Delete layer"
-            onClick={() => removeSelected(ids)}
+            onClick={() => removeSelected([id])}
           >
-            {ids.length > 1 ? "Delete Layer Group" : "Delete Layer"}
+            Delete Layer
           </button>
         </div>
       </div>
@@ -558,102 +478,83 @@ class EditSettings extends Component {
   }
 }
 
-class AddLayers extends Component {
-  render() {
-    var { maplayers, parameters, addSelected, type } = this.props;
-    var cmaplayers = JSON.parse(JSON.stringify(maplayers));
-    var cparameters = JSON.parse(JSON.stringify(parameters));
-    var mlayers = cmaplayers.filter(layer => layer.type === type);
-    var layers = mlayers.map(layer => layer.parameters_id);
-    layers = [...new Set(layers)];
-    var availableparameters = cparameters.filter(p => layers.includes(p.id));
-    availableparameters = availableparameters.map(x => {
-      x.layerids = mlayers.filter(y => y.parameters_id === x.id).map(z => z.id);
-      return x;
-    });
-    return (
-      <div className="maplayers-box">
-        {availableparameters.map(layer => (
-          <div
-            key={layer.id}
-            className="maplayers-layer"
-            onClick={() => addSelected(layer.layerids)}
-            title={layer.layerids}
-          >
-            {layer.name}
-          </div>
-        ))}
-      </div>
-    );
-  }
-}
-
 class MapLayers extends Component {
-  state = {};
+  dragStart = e => {
+    this.dragged = e.currentTarget;
+    e.dataTransfer.effectAllowed = "move";
+    // Firefox requires calling dataTransfer.setData
+    // for the drag to properly work
+    e.dataTransfer.setData("text/html", e.currentTarget);
+  };
+  dragEnd = e => {
+    this.dragged.style.display = "block";
+    // Update state
+    var data = this.state.data;
+    var from = Number(this.dragged.dataset.id);
+    var to = Number(this.over.dataset.id);
+    if (from < to) to--;
+    data.splice(to, 0, data.splice(from, 1)[0]);
+    console.log(data);
+  };
+  dragOver = e => {
+    e.preventDefault();
+    this.dragged.style.display = "none";
+  };
   render() {
     var {
       maplayers,
-      selected,
       parameters,
+      selected,
+      hidden,
       updateMapLayers,
       updateParameters,
-      addSelected,
-      removeSelected
+      removeSelected,
+      toggleLayerView,
     } = this.props;
+    var selectlayers = maplayers.filter(layer => selected.includes(layer.id));
+    selectlayers = selectlayers.map(layer => {
+      var parameter = parameters.find(
+        parameter => parameter.id === layer.parameters_id
+      );
+      layer.min = parameter.min;
+      layer.max = parameter.max;
+      return layer;
+    });
     return (
-      <div>
-        <Contents
-          maplayers={maplayers}
-          parameters={parameters}
-          selected={selected}
-          removeSelected={removeSelected}
-          updateMapLayers={updateMapLayers}
-          updateParameters={updateParameters}
-        />
-        <FilterBox
-          title="Add Layers"
-          inner="true"
-          content={
-            <React.Fragment>
-              <FilterBox
-                title="Measured Values"
-                inner="true"
+      <div className="maplayers-contents">
+        <ul className="maplayers-list" onDragOver={this.dragOver}>
+          {/* Loop over layers */}
+          {selectlayers.map(layer => (
+            <li
+              key={layer.id}
+              draggable="true"
+              onDragEnd={this.dragEnd}
+              onDragStart={this.dragStart}
+            >
+              <DropDown
+                key={layer.id}
+                name={layer.name}
+                allowSettings={true}
+                display={layer}
+                displayGroup={maplayers}
+                removeSelected={removeSelected}
+                id={layer.id}
+                hidden={hidden}
+                onUpdate={updateMapLayers}
+                toggleLayerView={toggleLayerView}
                 content={
-                  <AddLayers
-                    maplayers={maplayers}
-                    parameters={parameters}
-                    addSelected={addSelected}
-                    type="measurement"
+                  <GroupDisplay
+                    key={layer.id}
+                    min={layer.min}
+                    max={layer.max}
+                    unit={layer.unit}
+                    display={layer}
                   />
                 }
               />
-              <FilterBox
-                title="Satellite Data"
-                inner="true"
-                content={
-                  <AddLayers
-                    maplayers={maplayers}
-                    parameters={parameters}
-                    addSelected={addSelected}
-                    type="satellite"
-                  />
-                }
-              />
-              <FilterBox
-                title="Lake Simulations"
-                inner="true"
-                content={
-                  <AddLayers
-                    maplayers={maplayers}
-                    parameters={parameters}
-                    addSelected={addSelected}
-                    type="model"
-                  />
-                }
-              />
-            </React.Fragment>
-          }
-        />
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }

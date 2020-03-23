@@ -289,7 +289,7 @@ class LiveMap extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    var { selected, maplayers, parameters } = this.props;
+    var { selected, maplayers, parameters, hidden } = this.props;
     var { selected: prevSelected } = prevProps;
 
     // Remove old layers
@@ -309,16 +309,18 @@ class LiveMap extends Component {
 
     // Add new layers
     for (var i = selected.length - 1; i > -1; i--) {
-      var layer = findlayer(maplayers, selected[i]);
-      var { plotFunction, parameters_id } = layer;
-      var parameter = findparameter(parameters, parameters_id);
-      var { min, max } = parameter;
-      plotFunction === "meteoSwissMarkers" &&
-        this.meteoSwissMarkers(layer, min, max);
-      plotFunction === "remoteSensing" && this.remoteSensing(layer, min, max);
-      plotFunction === "simstrat" && this.simstrat(layer, min, max);
-      plotFunction === "meteolakesScalar" &&
-        this.meteolakesScalar(layer, min, max);
+      if (!hidden.includes(selected[i])) {
+        var layer = findlayer(maplayers, selected[i]);
+        var { plotFunction, parameters_id } = layer;
+        var parameter = findparameter(parameters, parameters_id);
+        var { min, max } = parameter;
+        plotFunction === "meteoSwissMarkers" &&
+          this.meteoSwissMarkers(layer, min, max);
+        plotFunction === "remoteSensing" && this.remoteSensing(layer, min, max);
+        plotFunction === "simstrat" && this.simstrat(layer, min, max);
+        plotFunction === "meteolakesScalar" &&
+          this.meteolakesScalar(layer, min, max);
+      }
     }
     this.map.invalidateSize();
   }

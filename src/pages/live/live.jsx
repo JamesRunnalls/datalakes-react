@@ -9,6 +9,7 @@ import DataSelect from "../../components/dataselect/dataselect";
 import FilterBox from "../../components/filterbox/filterbox";
 import "./live.css";
 import MapLayers from "../../components/maplayers/maplayers";
+import AddLayers from "../../components/addlayers/addlayers";
 
 class LakeStations extends Component {
   render() {
@@ -42,64 +43,47 @@ class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [1,2,3,8,9],
-    plotted: [1,2]
+    selected: [1, 2],
+    hidden: []
   };
 
-  addSelected = async id => {
+  addSelected = async ids => {
     function maplayersfind(maplayers, id) {
       return maplayers.find(x => x.id === id);
     }
     var { selected, maplayers, parameters } = this.state;
-    for (var i = 0; i < id.length; i++) {
-      if (!selected.includes(id[i])) {
-        if (!("data" in maplayersfind(maplayers, id[i]))) {
-          maplayers = await this.downloadFile(id[i], maplayers);
-          parameters = this.updateMinMax(id[i], maplayers, parameters);
+    for (var i = 0; i < ids.length; i++) {
+      if (!selected.includes(ids[i])) {
+        if (!("data" in maplayersfind(maplayers, ids[i]))) {
+          maplayers = await this.downloadFile(ids[i], maplayers);
+          parameters = this.updateMinMax(ids[i], maplayers, parameters);
         }
-        selected.push(id[i]);
+        selected.push(ids[i]);
       }
     }
     this.setState({ selected, maplayers, parameters });
   };
 
-  removeSelected = id => {
+  removeSelected = ids => {
     function selectedfilter(selected, id) {
       return selected.filter(selectid => selectid !== id);
     }
-    var { selected } = this.state;
-    for (var i = 0; i < id.length; i++) {
-      selected = selectedfilter(selected, id[i]);
+    var { selected, hidden } = this.state;
+    for (var i = 0; i < ids.length; i++) {
+      selected = selectedfilter(selected, ids[i]);
+      hidden = selectedfilter(hidden, ids[i]);
     }
-    this.setState({ selected });
+    this.setState({ selected, hidden });
   };
 
-  addPlotted = async id => {
-    function maplayersfind(maplayers, id) {
-      return maplayers.find(x => x.id === id);
+  toggleLayerView = id => {
+    var { hidden } = this.state;
+    if (hidden.includes(id)) {
+      hidden = hidden.filter(selectid => selectid !== id);
+    } else {
+      hidden.push(id);
     }
-    var { plotted, maplayers, parameters } = this.state;
-    for (var i = 0; i < id.length; i++) {
-      if (!plotted.includes(id[i])) {
-        if (!("data" in maplayersfind(maplayers, id[i]))) {
-          maplayers = await this.downloadFile(id[i], maplayers);
-          parameters = this.updateMinMax(id[i], maplayers, parameters);
-        }
-        plotted.push(id[i]);
-      }
-    }
-    this.setState({ plotted, maplayers, parameters });
-  };
-
-  removePlotted = id => {
-    function plottedfilter(plotted, id) {
-      return plotted.filter(selectid => selectid !== id);
-    }
-    var { plotted } = this.state;
-    for (var i = 0; i < id.length; i++) {
-      plotted = plottedfilter(plotted, id[i]);
-    }
-    this.setState({ plotted });
+    this.setState({ hidden });
   };
 
   updateMapLayers = maplayers => {
@@ -158,7 +142,7 @@ class Live extends Component {
 
   meteolakesScalarMinMax = layer => {
     var array = layer.data;
-    
+
     return { min: 0, max: 10 };
   };
 
@@ -293,7 +277,7 @@ class Live extends Component {
 
   render() {
     document.title = "Live - Datalakes";
-    var { maplayers, parameters, selected, plotted } = this.state;
+    var { maplayers, parameters, selected, hidden } = this.state;
     return (
       <React.Fragment>
         <h1>Live Conditions</h1>
@@ -304,7 +288,8 @@ class Live extends Component {
               <LiveMap
                 maplayers={maplayers}
                 parameters={parameters}
-                selected={plotted}
+                selected={selected}
+                hidden={hidden}
                 hoverFunc={this.hoverFunc}
                 legend={<div className="legend"></div>}
                 selector={<div className="live-dataselector"></div>}
@@ -321,11 +306,21 @@ class Live extends Component {
                     maplayers={maplayers}
                     parameters={parameters}
                     selected={selected}
-                    plotted={plotted}
-                    addSelected={this.addSelected}
+                    hidden={hidden}
                     removeSelected={this.removeSelected}
+                    toggleLayerView={this.toggleLayerView}
                     updateMapLayers={this.updateMapLayers}
                     updateParameters={this.updateParameters}
+                  />
+                }
+              />
+              <FilterBox
+                title="Add Layers"
+                content={
+                  <AddLayers
+                    maplayers={maplayers}
+                    parameters={parameters}
+                    addSelected={this.addSelected}
                   />
                 }
               />
