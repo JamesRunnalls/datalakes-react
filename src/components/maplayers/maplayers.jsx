@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import "./maplayers.css";
-import FilterBox from "../filterbox/filterbox";
+import {
+  SortableContainer,
+  SortableElement,
+  arrayMove
+} from "react-sortable-hoc";
 import ColorManipulation from "../colormanipulation/colormanipulation";
 
 class DropDown extends Component {
@@ -38,7 +42,7 @@ class DropDown extends Component {
                 onClick={this.toggleOpen}
                 style={{ width: "10px" }}
               >
-                {open ? "◢" : "▹"}
+                {open ? "▿" : "▹"}
               </td>
               <td style={{ width: "10px" }}>
                 {" "}
@@ -49,7 +53,9 @@ class DropDown extends Component {
                   checked={!hidden.includes(id)}
                 />
               </td>
-              <td style={{ width: "100%" }}>{name}</td>
+              <td style={{ width: "100%" }} onClick={this.toggleOpen}>
+                {name}
+              </td>
               {allowSettings && (
                 <td
                   onClick={this.toggleSettings}
@@ -300,8 +306,8 @@ class RasterDisplay extends Component {
 
 class FieldDisplay extends Component {
   render() {
-    var { min, max, unit, display } = this.props;
-    var { colors, description, sourcelink, sourcetext } = display;
+    var { display } = this.props;
+    var { description, sourcelink, sourcetext } = display;
     return (
       <div>
         <div>{description}</div>
@@ -478,85 +484,78 @@ class EditSettings extends Component {
   }
 }
 
+const SortableItem = SortableElement(({ layer, props }) => {
+  var { id, name, min, max, unit } = layer;
+  var {
+    maplayers,
+    removeSelected,
+    hidden,
+    updateMapLayers,
+    toggleLayerView,
+  } = props;
+  return (
+    <li tabIndex={0}>
+      <DropDown
+        key={id}
+        name={name}
+        allowSettings={true}
+        display={layer}
+        displayGroup={maplayers}
+        removeSelected={removeSelected}
+        id={id}
+        hidden={hidden}
+        onUpdate={updateMapLayers}
+        toggleLayerView={toggleLayerView}
+        content={
+          <GroupDisplay
+            key={id}
+            min={min}
+            max={max}
+            unit={unit}
+            display={layer}
+          />
+        }
+      />
+    </li>
+  );
+});
+
+const SortableList = SortableContainer(({ props }) => {
+  var { selected, maplayers, parameters } = props;
+  if (maplayers.length < 1) selected = [];
+  var selectlayers = selected.map(id =>
+    maplayers.find(layer => layer.id === id)
+  );
+  selectlayers = selectlayers.map(layer => {
+    var parameter = parameters.find(
+      parameter => parameter.id === layer.parameters_id
+    );
+    layer.min = parameter.min;
+    layer.max = parameter.max;
+    return layer;
+  });
+  return (
+    <ul className="maplayers-list">
+      {selectlayers.map((layer, index) => (
+        <SortableItem
+          key={`item-${index}`}
+          index={index}
+          layer={layer}
+          props={props}
+        />
+      ))}
+    </ul>
+  );
+});
+
 class MapLayers extends Component {
-  dragStart = e => {
-    this.dragged = e.currentTarget;
-    e.dataTransfer.effectAllowed = "move";
-    // Firefox requires calling dataTransfer.setData
-    // for the drag to properly work
-    e.dataTransfer.setData("text/html", e.currentTarget);
-  };
-  dragEnd = e => {
-    this.dragged.style.display = "block";
-    // Update state
-    var data = this.state.data;
-    var from = Number(this.dragged.dataset.id);
-    var to = Number(this.over.dataset.id);
-    if (from < to) to--;
-    data.splice(to, 0, data.splice(from, 1)[0]);
-    console.log(data);
-  };
-  dragOver = e => {
-    e.preventDefault();
-    this.dragged.style.display = "none";
+  onSortEnd = ({ oldIndex, newIndex }) => {
+    var { selected, setSelected } = this.props;
+    selected = arrayMove(selected, oldIndex, newIndex);
+    setSelected(selected);
   };
   render() {
-    var {
-      maplayers,
-      parameters,
-      selected,
-      hidden,
-      updateMapLayers,
-      updateParameters,
-      removeSelected,
-      toggleLayerView,
-    } = this.props;
-    var selectlayers = maplayers.filter(layer => selected.includes(layer.id));
-    selectlayers = selectlayers.map(layer => {
-      var parameter = parameters.find(
-        parameter => parameter.id === layer.parameters_id
-      );
-      layer.min = parameter.min;
-      layer.max = parameter.max;
-      return layer;
-    });
-    return (
-      <div className="maplayers-contents">
-        <ul className="maplayers-list" onDragOver={this.dragOver}>
-          {/* Loop over layers */}
-          {selectlayers.map(layer => (
-            <li
-              key={layer.id}
-              draggable="true"
-              onDragEnd={this.dragEnd}
-              onDragStart={this.dragStart}
-            >
-              <DropDown
-                key={layer.id}
-                name={layer.name}
-                allowSettings={true}
-                display={layer}
-                displayGroup={maplayers}
-                removeSelected={removeSelected}
-                id={layer.id}
-                hidden={hidden}
-                onUpdate={updateMapLayers}
-                toggleLayerView={toggleLayerView}
-                content={
-                  <GroupDisplay
-                    key={layer.id}
-                    min={layer.min}
-                    max={layer.max}
-                    unit={layer.unit}
-                    display={layer}
-                  />
-                }
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
+    return <SortableList props={this.props} onSortEnd={this.onSortEnd} distance={1}/>;
   }
 }
 

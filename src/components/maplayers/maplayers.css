@@ -5,37 +5,17 @@ ul.maplayers-list {
   cursor: pointer;
 }
 
-ul.maplayers-list li {
-  border-bottom: 1px solid white;
+li {
+  list-style-type: none;
 }
 
-ul.maplayers-list li:hover {
-  border-bottom: 1px solid rgb(169, 169, 169);
-}
-
-ul.maplayers-list li.placeholder {background: rgb(255,240,120);}
-ul.maplayers-list li.placeholder:before {
-  content: "Drop here";
-  color: rgb(225,210,90);
-}
-
-.maplayers-box .maplayers-layer {
-  border: 1px solid rgb(169, 169, 169);
-  padding: 4px 6px;
-  margin: 2px 0;
-  cursor: pointer;
-}
-
-.maplayers-box .maplayers-layer:hover {
-  background-color: rgb(240, 240, 240);
-}
 
 .maplayers-contents {
   margin-bottom: 15px;
 }
 
 .maplayers-dropdown {
-  margin: 2px 0;
+  margin: 2px 0 8px 0;
 }
 
 .maplayers-dropdown .maplayers-dropdown-table {
@@ -56,6 +36,7 @@ ul.maplayers-list li.placeholder:before {
 
 .maplayers-dropdown .maplayers-settings {
   cursor: pointer;
+  font-size: 16px;
 }
 
 .maplayers-dropdown-content {

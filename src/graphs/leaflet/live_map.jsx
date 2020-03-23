@@ -118,33 +118,39 @@ class LiveMap extends Component {
     var polygons = [];
     for (var i = 0; i < layerData.length; i++) {
       var pixelcolor = getColor(layerData[i].value, min, max, layer.colors);
+      var valuestring = String(layerData[i].value) + "°C";
       polygons.push(
         L.polygon(layerData[i].latlng, {
           color: pixelcolor,
           fillColor: pixelcolor,
           fillOpacity: 1,
           title: layerData[i].value
-        }).bindPopup(
-          "<table><tbody>" +
-            "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-            layerData[i].name +
-            "</td></tr>" +
-            "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat</td></tr>" +
-            "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-            "<tr><td><strong>Surface water temperature:</strong></td><td>" +
-            layerData[i].value +
-            "°C</td></tr>" +
-            "<tr><td class='text-nowrap'><strong>Elevation</strong></td><td>" +
-            layerData[i].elevation +
-            "m</td></tr>" +
-            "<tr><td class='text-nowrap'><strong>Depth</strong></td><td>" +
-            layerData[i].depth +
-            " m</td></tr>" +
-            '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-            layerData[i].link +
-            '">Information about this lake model</a></td></tr>' +
-            "</tbody></table>"
-        )
+        })
+          .bindPopup(
+            "<table><tbody>" +
+              "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+              layerData[i].name +
+              "</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              "<tr><td><strong>Surface water temperature:</strong></td><td>" +
+              layerData[i].value +
+              "°C</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Elevation</strong></td><td>" +
+              layerData[i].elevation +
+              "m</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Depth</strong></td><td>" +
+              layerData[i].depth +
+              " m</td></tr>" +
+              '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+              layerData[i].link +
+              '">Information about this lake model</a></td></tr>' +
+              "</tbody></table>"
+          )
+          .bindTooltip(valuestring, {
+            permanent: false,
+            direction: "top"
+          })
       );
     }
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
@@ -288,9 +294,9 @@ class LiveMap extends Component {
     this.raster = [];
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  updatePlot = async () => {
     var { selected, maplayers, parameters, hidden } = this.props;
-    var { selected: prevSelected } = prevProps;
+    //var { selected: prevSelected } = prevProps;
 
     // Remove old layers
     this.marker.forEach(layer => {
@@ -322,7 +328,12 @@ class LiveMap extends Component {
           this.meteolakesScalar(layer, min, max);
       }
     }
+
     this.map.invalidateSize();
+  };
+
+  componentDidUpdate(prevProps, prevState) {
+    this.updatePlot();
   }
 
   render() {

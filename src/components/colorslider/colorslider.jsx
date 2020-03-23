@@ -16,7 +16,7 @@ class ColorSlider extends Component {
       x = min + i * bin_width;
       data.push({ x: x, y: 0 });
     }
-    for (var i = 0; i < array.length; i++) {
+    for (i = 0; i < array.length; i++) {
       index = Math.max(Math.ceil((array[i] - min) / bin_width) - 1, 0);
       data[index].y++;
     }
@@ -61,11 +61,6 @@ class ColorSlider extends Component {
           .range([0, width])
           .domain([Math.min(...array), Math.max(...array)]);
 
-        var xx = d3
-          .scaleLinear()
-          .range([0, width])
-          .domain([Math.min(...array), Math.max(...array)]);
-
         var y = d3.scaleLinear().range([height, 0]);
         y.domain([
           0,
@@ -74,15 +69,9 @@ class ColorSlider extends Component {
           })
         ]);
 
-        var yy = d3.scaleLinear().range([height, 0]);
-        y.domain([
-          0,
-          d3.max(data, function(d) {
-            return d.y;
-          })
-        ]);
+        
 
-        var bars = svg
+        svg
           .selectAll("rect")
           .data(data)
           .enter()
@@ -129,51 +118,6 @@ class ColorSlider extends Component {
           .attr("y", 0)
           .attr("fill", "url(#svgGradient)");
 
-        // Zooming and Panning
-        var zoom = d3
-          .zoom()
-          .extent([
-            [0, 0],
-            [width, height]
-          ])
-          .scaleExtent([1, 32])
-          .translateExtent([
-            [0, 0],
-            [width, height]
-          ])
-          .on("zoom", normalzoom);
-
-        var zoombox = svg
-          .append("rect")
-          .attr("id", "zoombox")
-          .attr("width", width)
-          .attr("height", height)
-          .style("fill", "none")
-          .style("cursor", "move")
-          .attr("pointer-events", "all")
-          .call(zoom);
-
-        function plotbars() {}
-
-        function normalzoom() {
-          //console.log(d3.event.transform.rescaleY(yy))
-          //console.log(y.domain(),d3.event.transform.rescaleX(yy).domain())
-          x.domain(d3.event.transform.rescaleX(xx).domain());
-          //y.domain(d3.event.transform.rescaleY(yy).domain());
-
-          bars
-            .attr("x", function(d) {
-              return x(d.x);
-            })
-            .attr("y", function(d) {
-              return y(d.y);
-            })
-            .attr("width", x(bin_width))
-            .attr("height", function(d) {
-              return height - y(d.y);
-            })
-            .style("fill", "#23D63B");
-        }
       } catch (e) {
         console.error("Error plotting histogram", e);
       }

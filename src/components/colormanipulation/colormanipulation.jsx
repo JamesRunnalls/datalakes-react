@@ -56,7 +56,7 @@ class ColorManipulation extends Component {
           >
             Table
           </div>
-          <div
+          {/*<div
             className={
               manipulation === "slider"
                 ? "colormanipulation-header header-active"
@@ -65,7 +65,7 @@ class ColorManipulation extends Component {
             onClick={() => this.setManipulation("slider")}
           >
             Slider
-          </div>
+          </div>*/}
         </div>
         <div>
           {manipulation === "solid" && (
@@ -83,11 +83,7 @@ class ColorManipulation extends Component {
             />
           )}
           {manipulation === "slider" && (
-            <ColorSlider
-              onChange={onChange}
-              colors={colors}
-              array={array}
-            />
+            <ColorSlider onChange={onChange} colors={colors} array={array} />
           )}
         </div>
       </div>

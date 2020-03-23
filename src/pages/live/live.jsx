@@ -1,17 +1,15 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
+//import { Link } from "react-router-dom";
 import LiveMap from "../../graphs/leaflet/live_map";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
-import ColorBar from "../../components/colorbar/colorbar";
-import DataSelect from "../../components/dataselect/dataselect";
 import FilterBox from "../../components/filterbox/filterbox";
 import "./live.css";
 import MapLayers from "../../components/maplayers/maplayers";
 import AddLayers from "../../components/addlayers/addlayers";
 
-class LakeStations extends Component {
+/*class LakeStations extends Component {
   render() {
     if (this.props.datalist) {
       return (
@@ -30,21 +28,25 @@ class LakeStations extends Component {
       return <div></div>;
     }
   }
-}
+}*/
 
-class MapLegend extends Component {
+/*class MapLegend extends Component {
   state = {};
   render() {
     return <div className="leaflet-legend"></div>;
   }
-}
+}*/
 
 class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [1, 2],
+    selected: [9,8],
     hidden: []
+  };
+
+  setSelected = selected => {
+    this.setState({ selected });
   };
 
   addSelected = async ids => {
@@ -141,7 +143,7 @@ class Live extends Component {
   };
 
   meteolakesScalarMinMax = layer => {
-    var array = layer.data;
+    //var array = layer.data;
 
     return { min: 0, max: 10 };
   };
@@ -153,18 +155,19 @@ class Live extends Component {
       x => x.id === layer.parameters_id
     );
     var plotFunction = layer.plotFunction;
+    var min, max;
 
     if (plotFunction === "meteoSwissMarkers") {
-      var { min, max } = this.meteoSwissMarkersMinMax(layer);
+      ({ min, max } = this.meteoSwissMarkersMinMax(layer));
     }
     if (plotFunction === "simstrat") {
-      var { min, max } = this.simstratMinMax(layer);
+      ({ min, max } = this.simstratMinMax(layer));
     }
     if (plotFunction === "remoteSensing") {
-      var { min, max } = this.remoteSensingMinMax(layer);
+      ({ min, max } = this.remoteSensingMinMax(layer));
     }
     if (plotFunction === "meteolakesScalar") {
-      var { min, max } = this.meteolakesScalarMinMax(layer);
+      ({ min, max } = this.meteolakesScalarMinMax(layer));
     }
 
     if (parameters[parameterIndex].min) {
@@ -307,6 +310,7 @@ class Live extends Component {
                     parameters={parameters}
                     selected={selected}
                     hidden={hidden}
+                    setSelected={this.setSelected}
                     removeSelected={this.removeSelected}
                     toggleLayerView={this.toggleLayerView}
                     updateMapLayers={this.updateMapLayers}

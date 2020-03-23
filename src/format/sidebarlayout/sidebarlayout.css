@@ -97,7 +97,6 @@
     z-index: 999999;
     position: absolute !important;
     width: 100%!important;
-    min-height: auto!important;
   }
 
   .rightcontent .scroll {
