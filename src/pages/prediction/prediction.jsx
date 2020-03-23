@@ -1,189 +1,107 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
-import { Link } from "react-router-dom";
-import axios from "axios";
+//import { Link } from "react-router-dom";
+import GISMap from "../../graphs/leaflet/gis_map";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
-import ColorBar from "../../components/colorbar/colorbar";
+import axios from "axios";
 import { apiUrl } from "../../../config.json";
-import "./prediction.css";
-import PredictionMap from "../../graphs/leaflet/prediction_map";
 import FilterBox from "../../components/filterbox/filterbox";
-import ColorRamp from "../../components/colorramp/colorramp";
+import "./prediction.css";
+import MapLayers from "../../components/maplayers/maplayers";
+import AddLayers from "../../components/addlayers/addlayers";
 
-class ModelInfo extends Component {
-  sendPanInfo = geometry => {
-    var lat = [];
-    var lon = [];
-    for (var x of geometry[0]) {
-      lat.push(x[1]);
-      lon.push(x[0]);
-    }
-    var zoom = [
-      [Math.max.apply(Math, lat), Math.min.apply(Math, lon)],
-      [Math.min.apply(Math, lat), Math.max.apply(Math, lon)]
-    ];
-    var latc =
-      Math.min.apply(Math, lat) +
-      (Math.max.apply(Math, lat) - Math.min.apply(Math, lat)) / 2;
-    var lonc =
-      Math.min.apply(Math, lon) +
-      (Math.max.apply(Math, lon) - Math.min.apply(Math, lon)) / 2;
-    this.props.panTo([latc, lonc], zoom);
-  };
-
+/*class LakeStations extends Component {
   render() {
-    var datalakes = "model";
-    var meteolakes = "model";
-    var simstrat = "model";
-    if (this.props.datalakes === "") {
-      datalakes = "model hide";
+    if (this.props.datalist) {
+      return (
+        <React.Fragment>
+          {this.props.datalist.map(data => (
+            <div className="lakestation" title="See live data" key={data.name}>
+              <Link to={"/live/" + String(data.link)}>
+                {data.name}
+                <div className="description">{data.description}</div>
+              </Link>
+            </div>
+          ))}
+        </React.Fragment>
+      );
+    } else {
+      return <div></div>;
     }
-    if (this.props.meteolakes === "") {
-      meteolakes = "model hide";
-    }
-    if (this.props.simstrat === "") {
-      simstrat = "model hide";
-    }
-    return (
-      <div className="modellist">
-        <div
-          className="top"
-          onClick={() => this.sendPanInfo(this.props.geometry)}
-          title={"Pan to " + this.props.name}
-        >
-          <div className="lakeTitle">
-            <h4>{this.props.name}</h4>
-          </div>
-          <div>
-            <div>Surface Temperature: {this.props.surfacetemperature} °C</div>
-          </div>
-        </div>
-        <ul>
-          <li className={datalakes}>
-            <Link to={this.props.datalakes}>Five Day Forecast (Datalakes)</Link>
-          </li>
-          <li className={meteolakes}>
-            <a href={this.props.meteolakes}>Three Day Forecast (Meteolakes)</a>
-          </li>
-          <li className={simstrat}>
-            <a href={this.props.simstrat}>1D Lake Simulation (Simstrat)</a>
-          </li>
-        </ul>
-      </div>
-    );
   }
-}
+}*/
 
-class ModelList extends Component {
+/*class MapLegend extends Component {
+  state = {};
   render() {
-    return (
-      <div className="modellist-parent">
-        {this.props.geojson.map(data => (
-          <ModelInfo
-            key={data.properties.id}
-            name={data.properties.name}
-            elevation={data.properties.elevation}
-            depth={data.properties.depth}
-            surfacetemperature={data.properties.surfacetemperature}
-            simstrat={data.properties.simstrat}
-            meteolakes={data.properties.meteolakes}
-            datalakes={data.properties.datalakes}
-            panTo={this.props.panTo}
-            geometry={data.geometry.coordinates}
-          />
-        ))}
-      </div>
-    );
+    return <div className="leaflet-legend"></div>;
   }
-}
+}*/
 
-class Predictions extends Component {
+class Prediction extends Component {
   state = {
-    geojson: [],
-    meteolakes: [],
-    map: "",
-    search: "",
-    MinTemp: "",
-    MaxTemp: "",
-    Temp: "",
-    colors: [
-      { color: "#000080", point: 0 },
-      { color: "#3366FF", point: 0.142857142857143 },
-      { color: "#00B0DC", point: 0.285714285714286 },
-      { color: "#009933", point: 0.428571428571429 },
-      { color: "#FFFF5B", point: 0.571428571428571 },
-      { color: "#E63300", point: 0.714285714285714 },
-      { color: "#CC0000", point: 0.857142857142857 },
-      { color: "#800000", point: 1 }
-    ]
+    parameters: [],
+    maplayers: [],
+    selected: [9,8],
+    hidden: []
   };
 
-  async componentDidMount() {
-    // Lake Models
-    const { data: geojson } = await axios.get(apiUrl + "/predictions");
+  setSelected = selected => {
+    this.setState({ selected });
+  };
 
-    // Simstrat Data
-    try {
-      const { data: simstratSurfaceTemperature } = await axios.get(
-        apiUrl + "/predictions/simstrat"
-      );
-      var temp = [];
-
-      const simfind = (sim, lake) => {
-        return sim.find(c => c.urlID === lake.properties.simstrat);
-      };
-
-      for (var lake of geojson) {
-        var laketemp = simfind(simstratSurfaceTemperature, lake);
-        lake.properties.surfacetemperature = parseFloat(
-          laketemp.surfacetemperature
-        );
-        temp.push(parseFloat(laketemp.surfacetemperature));
-      }
-
-      var MinTemp = Math.floor(Math.min(...temp));
-      var MaxTemp = Math.ceil(Math.max(...temp));
-      this.setState({ geojson, MinTemp, MaxTemp });
-    } catch (e) {
-      console.log(e);
-      this.setState({ geojson });
+  addSelected = async ids => {
+    function maplayersfind(maplayers, id) {
+      return maplayers.find(x => x.id === id);
     }
-
-    // Meteolakes Data
-    try {
-      const { data: meteolakes } = await axios.get(
-        apiUrl + "/predictions/meteolakes"
-      );
-      var tempMin, tempMax;
-      for (var i = 0; i < meteolakes.length; i++) {
-        tempMin = Math.floor(this.getMinMeteolakes(meteolakes[i].data));
-        tempMax = Math.ceil(this.getMaxMeteolakes(meteolakes[i].data));
-        if (tempMin < MinTemp) MinTemp = tempMin;
-        if (tempMax > MaxTemp) MaxTemp = tempMax;
+    var { selected, maplayers, parameters } = this.state;
+    for (var i = 0; i < ids.length; i++) {
+      if (!selected.includes(ids[i])) {
+        if (!("data" in maplayersfind(maplayers, ids[i]))) {
+          maplayers = await this.downloadFile(ids[i], maplayers);
+          parameters = this.updateMinMax(ids[i], maplayers, parameters);
+        }
+        selected.push(ids[i]);
       }
-      this.setState({ meteolakes, MinTemp, MaxTemp });
-    } catch (e) {
-      console.log(e);
     }
-  }
-
-  getMinMeteolakes = data => {
-    return data.reduce((min, p) => (p.v < min ? p.v : min), data[0].v);
+    this.setState({ selected, maplayers, parameters });
   };
 
-  getMaxMeteolakes = data => {
-    return data.reduce((max, p) => (p.v > max ? p.v : max), data[0].v);
+  removeSelected = ids => {
+    function selectedfilter(selected, id) {
+      return selected.filter(selectid => selectid !== id);
+    }
+    var { selected, hidden } = this.state;
+    for (var i = 0; i < ids.length; i++) {
+      selected = selectedfilter(selected, ids[i]);
+      hidden = selectedfilter(hidden, ids[i]);
+    }
+    this.setState({ selected, hidden });
   };
 
-  isNumeric = n => {
-    return !isNaN(parseFloat(n)) && isFinite(n);
+  toggleLayerView = id => {
+    var { hidden } = this.state;
+    if (hidden.includes(id)) {
+      hidden = hidden.filter(selectid => selectid !== id);
+    } else {
+      hidden.push(id);
+    }
+    this.setState({ hidden });
+  };
+
+  updateMapLayers = maplayers => {
+    this.setState({ maplayers });
+  };
+
+  updateParameters = parameters => {
+    this.setState({ parameters });
   };
 
   hoverFunc = (target, type) => {
     if (type === "over") {
       document.getElementById("color-table").style.display = "block";
       document.getElementById("hoverValue").innerHTML =
-        Math.round(parseFloat(target.options.title) * 100) / 100 + "°C";
+        Math.round(parseFloat(target.options.title) * 100) / 100 +
+        this.state.unit;
       document.getElementById("hoverLat").innerHTML =
         Math.round(parseFloat(target._latlngs[0][0].lat) * 1000) / 1000;
       document.getElementById("hoverLon").innerHTML =
@@ -193,104 +111,164 @@ class Predictions extends Component {
     }
   };
 
-  setMinTemp = event => {
-    const MinTemp = parseFloat(event.target.value);
-    if (this.isNumeric(MinTemp) && MinTemp > -5) {
-      this.setState({ MinTemp });
-    }
+  downloadFile = async (id, maplayers) => {
+    var index = maplayers.findIndex(x => x.id === id);
+    var { data } = await axios.get(maplayers[index].api);
+    maplayers[index].data = data;
+    return maplayers;
   };
 
-  setTemp = Temp => {
-    ReactDOM.findDOMNode(this.refs.hoverTemp).style.display = "block";
-    ReactDOM.findDOMNode(this.refs.hoverTemp).innerHTML =
-      Math.round(parseFloat(Temp) * 100) / 100 + "°C";
+  meteoSwissMarkersMinMax = layer => {
+    var array = layer.data.features;
+    array = array.map(x => x.properties.value);
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { min: min, max: max };
   };
 
-  setMaxTemp = event => {
-    const MaxTemp = parseFloat(event.target.value);
-    if (this.isNumeric(MaxTemp) && MaxTemp < 40) {
-      this.setState({ MaxTemp });
-    }
+  simstratMinMax = layer => {
+    var array = layer.data;
+    array = array.map(x => x.value);
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { min: min, max: max };
   };
 
-  setMap = map => {
-    this.setState({ map: map });
+  remoteSensingMinMax = layer => {
+    var array = layer.data;
+    array = array.v;
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { min: min, max: max };
   };
 
-  panTo = (latlon, bounds) => {
-    var zoom = this.state.map.getBoundsZoom(bounds);
-    this.state.map.flyTo(latlon, zoom);
+  meteolakesScalarMinMax = layer => {
+    //var array = layer.data;
+
+    return { min: 0, max: 10 };
   };
 
-  searchDatasets = event => {
-    this.setState({ search: event.target.value });
-  };
-
-  propertiesPopup = prop => {
-    var model = "";
-    if (prop.datalakes !== "") {
-      model =
-        model +
-        '<br><a href="' +
-        prop.datalakes +
-        '">Five Day Forecast (Datalakes)</a>';
-    }
-    if (prop.meteolakes !== "") {
-      model =
-        model +
-        '<br><a href="' +
-        prop.meteolakes +
-        '">Three Day Forecast (Meteolakes)</a>';
-    }
-    if (prop.simstrat !== "") {
-      model =
-        model +
-        '<br><a href="' +
-        prop.simstrat +
-        '">1D Lake Simulation (Simstrat)</a>';
-    }
-    return (
-      "<div> <b>" +
-      prop.name +
-      "</b><br> Elevation: " +
-      prop.elevation +
-      "m <br> Depth: " +
-      prop.depth +
-      "m <br> Surface Temperature: " +
-      prop.surfacetemperature +
-      "°C <b>" +
-      model +
-      "</b>"
+  updateMinMax = (id, maplayers, parameters) => {
+    var index = maplayers.findIndex(x => x.id === id);
+    var layer = JSON.parse(JSON.stringify(maplayers[index]));
+    var parameterIndex = parameters.findIndex(
+      x => x.id === layer.parameters_id
     );
-  };
+    var plotFunction = layer.plotFunction;
+    var min, max;
 
-  keyPress = (e, data) => {
-    if (e.keyCode === 13) {
-      var dataset = data.properties;
-      if (dataset.datalakes !== "") {
-        window.location.href = dataset.datalakes;
-      } else if (dataset.meteolakes !== "") {
-        window.location.href = dataset.meteolakes;
-      } else if (dataset.simstrat !== "") {
-        window.location.href = dataset.simstrat;
-      }
+    if (plotFunction === "meteoSwissMarkers") {
+      ({ min, max } = this.meteoSwissMarkersMinMax(layer));
     }
+    if (plotFunction === "simstrat") {
+      ({ min, max } = this.simstratMinMax(layer));
+    }
+    if (plotFunction === "remoteSensing") {
+      ({ min, max } = this.remoteSensingMinMax(layer));
+    }
+    if (plotFunction === "meteolakesScalar") {
+      ({ min, max } = this.meteolakesScalarMinMax(layer));
+    }
+
+    if (parameters[parameterIndex].min) {
+      parameters[parameterIndex].min = Math.min(
+        parameters[parameterIndex].min,
+        min
+      );
+    } else {
+      parameters[parameterIndex].min = min;
+    }
+    if (parameters[parameterIndex].max) {
+      parameters[parameterIndex].max = Math.max(
+        parameters[parameterIndex].max,
+        max
+      );
+    } else {
+      parameters[parameterIndex].max = max;
+    }
+    return parameters;
   };
 
-  updateParentColors = colors => {
-    this.setState({ colors });
+  getMax = arr => {
+    let len = arr.length;
+    let max = -Infinity;
+
+    while (len--) {
+      max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
   };
 
-  render() {
-    document.title = "Predictions - Datalakes";
-    var { MaxTemp, MinTemp, colors } = this.state;
+  getMin = arr => {
+    let len = arr.length;
+    let min = Infinity;
 
-    // Filter lakes
-    var lowercasedSearch = this.state.search.toLowerCase();
-    var filteredData = this.state.geojson.filter(item => {
-      return item.properties.name.toLowerCase().includes(lowercasedSearch);
+    while (len--) {
+      min = arr[len] < min ? arr[len] : min;
+    }
+    return min;
+  };
+
+  async componentDidMount() {
+    // Get parameter details
+    var { data: parameters } = await axios.get(
+      apiUrl + "/selectiontables/parameters"
+    );
+
+    // Add default display settings for parameters
+    parameters.map(x => {
+      if (!("plot" in x)) x.plot = "group";
+      if (!("colors" in x)) {
+        x.colors = [
+          { color: "#0000ff", point: 0 },
+          { color: "#ff0000", point: 1 }
+        ];
+      }
+      if (!("markerLabel" in x)) x.markerLabel = true;
+      if (!("legend" in x)) x.legend = true;
+      if (!("markerSymbol" in x)) x.markerSymbol = "circle";
+      if (!("markerFixedSize" in x)) x.markerFixedSize = true;
+      if (!("markerSize" in x)) x.markerSize = 10;
+      if (!("field" in x)) x.field = "vector";
+      return x;
     });
 
+    // Get maplayers
+    var { data: maplayers } = await axios.get(apiUrl + "/maplayers");
+
+    // Add default color settings for maplayers if non already
+    maplayers.map(x => {
+      if (!("colors" in x)) {
+        x.colors = [
+          { color: "#0000ff", point: 0 },
+          { color: "#ff0000", point: 1 }
+        ];
+      }
+      if (!("markerLabel" in x)) x.markerLabel = false;
+      if (!("legend" in x)) x.legend = true;
+      if (!("markerSymbol" in x)) x.markerSymbol = "circle";
+      if (!("markerFixedSize" in x)) x.markerFixedSize = true;
+      if (!("markerSize" in x)) x.markerSize = 10;
+      if (!("field" in x)) x.field = "vector";
+      return x;
+    });
+
+    // Download default layers
+    var { selected } = this.state;
+    for (var i = 0; i < selected.length; i++) {
+      maplayers = await this.downloadFile(selected[i], maplayers);
+      parameters = this.updateMinMax(selected[i], maplayers, parameters);
+    }
+
+    this.setState({
+      parameters,
+      maplayers
+    });
+  }
+
+  render() {
+    document.title = "Prediction - Datalakes";
+    var { maplayers, parameters, selected, hidden } = this.state;
     return (
       <React.Fragment>
         <h1>Model Predictions</h1>
@@ -298,54 +276,45 @@ class Predictions extends Component {
           sidebartitle="Plot Controls"
           left={
             <React.Fragment>
-              <PredictionMap
-                geojson={this.state.geojson}
-                popupfunction={this.propertiesPopup}
-                colors={colors}
-                min={MinTemp}
-                max={MaxTemp}
-                setMap={this.setMap}
-                setTemp={this.setTemp}
-                threeD={this.state.meteolakes}
+              <GISMap
+                maplayers={maplayers}
+                parameters={parameters}
+                selected={selected}
+                hidden={hidden}
                 hoverFunc={this.hoverFunc}
-                legend={
-                  <ColorBar
-                    min={MinTemp}
-                    max={MaxTemp}
-                    colors={colors}
-                    unit="°C"
-                    text="Lake surface temperature"
-                  />
-                }
+                legend={<div className="legend"></div>}
+                selector={<div className="live-dataselector"></div>}
               />
             </React.Fragment>
           }
           rightNoScroll={
             <React.Fragment>
               <FilterBox
-                title="Lake Models"
+                title="Map Layers"
                 preopen="true"
                 content={
-                  <React.Fragment>
-                    <input
-                      onChange={this.searchDatasets}
-                      onKeyDown={e => this.keyPress(e, filteredData[0])}
-                      type="search"
-                      placeholder="Search"
-                      className="modelSearch"
-                    ></input>
-                    <ModelList
-                      geojson={filteredData}
-                      panTo={this.panTo}
-                      onSearch={this.searchDatasets}
-                    />
-                  </React.Fragment>
+                  <MapLayers
+                    maplayers={maplayers}
+                    parameters={parameters}
+                    selected={selected}
+                    hidden={hidden}
+                    setSelected={this.setSelected}
+                    removeSelected={this.removeSelected}
+                    toggleLayerView={this.toggleLayerView}
+                    updateMapLayers={this.updateMapLayers}
+                    updateParameters={this.updateParameters}
+                  />
                 }
               />
               <FilterBox
-                title="Color Ramp"
-                preopen="true"
-                content={<ColorRamp colors={colors} onChange={this.updateParentColors} />}
+                title="Add Layers"
+                content={
+                  <AddLayers
+                    maplayers={maplayers}
+                    parameters={parameters}
+                    addSelected={this.addSelected}
+                  />
+                }
               />
             </React.Fragment>
           }
@@ -355,4 +324,4 @@ class Predictions extends Component {
   }
 }
 
-export default Predictions;
+export default Prediction;

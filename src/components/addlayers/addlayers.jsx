@@ -12,7 +12,7 @@ class AddLayersInnerInner extends Component {
   render() {
     var { open } = this.state;
     var { layer, layers, addSelected } = this.props;
-    var layers = layers.filter(lay => lay.parameters_id === layer.id);
+    layers = layers.filter(lay => lay.parameters_id === layer.id);
     return (
       <div key={layer.id} className="addlayers-layer">
         <div className="addlayers-titlebar">

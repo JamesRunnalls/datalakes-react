@@ -7,13 +7,6 @@ class ColorRamp extends Component {
     selected: 0,
     gradients: [
       {
-        name: "Solid Green",
-        data: [
-          { color: "#009933", point: 0 },
-          { color: "#009933", point: 1 }
-        ]
-      },
-      {
         name: "Rainbow",
         data: [
           { color: "#000080", point: 0 },

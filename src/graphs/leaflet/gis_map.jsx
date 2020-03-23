@@ -4,7 +4,7 @@ import React, { Component } from "react";
 import L from "leaflet";
 import { getColor } from "../../components/gradients/gradients";
 
-class LiveMap extends Component {
+class GISMap extends Component {
   state = {
     help: false,
     fullsize: false
@@ -367,4 +367,4 @@ class LiveMap extends Component {
   }
 }
 
-export default LiveMap;
+export default GISMap;

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 //import { Link } from "react-router-dom";
-import LiveMap from "../../graphs/leaflet/live_map";
+import GISMap from "../../graphs/leaflet/gis_map";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
@@ -41,7 +41,7 @@ class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [9,8],
+    selected: [1,0],
     hidden: []
   };
 
@@ -220,14 +220,14 @@ class Live extends Component {
       if (!("plot" in x)) x.plot = "group";
       if (!("colors" in x)) {
         x.colors = [
-          { color: "#000080", point: 0 },
-          { color: "#3366FF", point: 0.142857142857143 },
-          { color: "#00B0DC", point: 0.285714285714286 },
-          { color: "#009933", point: 0.428571428571429 },
-          { color: "#FFFF5B", point: 0.571428571428571 },
-          { color: "#E63300", point: 0.714285714285714 },
-          { color: "#CC0000", point: 0.857142857142857 },
-          { color: "#800000", point: 1 }
+          { color: "#000080", point: 0.0 },
+          { color: "#3366ff", point: 0.0033388981636060114 },
+          { color: "#00b0dc", point: 0.015025041736227053 },
+          { color: "#009933", point: 0.04006677796327214 },
+          { color: "#ffff5b", point: 0.0818030050083473 },
+          { color: "#e63300", point: 0.16527545909849758 },
+          { color: "#cc0000", point: 0.4156928213689484 },
+          { color: "#800000", point: 1.0 }
         ];
       }
       if (!("markerLabel" in x)) x.markerLabel = true;
@@ -246,14 +246,14 @@ class Live extends Component {
     maplayers.map(x => {
       if (!("colors" in x)) {
         x.colors = [
-          { color: "#000080", point: 0 },
-          { color: "#3366FF", point: 0.142857142857143 },
-          { color: "#00B0DC", point: 0.285714285714286 },
-          { color: "#009933", point: 0.428571428571429 },
-          { color: "#FFFF5B", point: 0.571428571428571 },
-          { color: "#E63300", point: 0.714285714285714 },
-          { color: "#CC0000", point: 0.857142857142857 },
-          { color: "#800000", point: 1 }
+          { color: "#000080", point: 0.0 },
+          { color: "#3366ff", point: 0.0033388981636060114 },
+          { color: "#00b0dc", point: 0.015025041736227053 },
+          { color: "#009933", point: 0.04006677796327214 },
+          { color: "#ffff5b", point: 0.0818030050083473 },
+          { color: "#e63300", point: 0.16527545909849758 },
+          { color: "#cc0000", point: 0.4156928213689484 },
+          { color: "#800000", point: 1.0 }
         ];
       }
       if (!("markerLabel" in x)) x.markerLabel = false;
@@ -288,7 +288,7 @@ class Live extends Component {
           sidebartitle="Plot Controls"
           left={
             <React.Fragment>
-              <LiveMap
+              <GISMap
                 maplayers={maplayers}
                 parameters={parameters}
                 selected={selected}
