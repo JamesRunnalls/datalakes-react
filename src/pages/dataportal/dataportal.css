@@ -188,6 +188,7 @@ input.SearchBar {
 
 table.sortbar-table {
   display: inline-block;
+  cursor: pointer;
 }
 
 table.sortbar-table td {

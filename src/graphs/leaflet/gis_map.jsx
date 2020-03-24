@@ -2,12 +2,15 @@ import "./custommap.css";
 import "./leaflet.css";
 import React, { Component } from "react";
 import L from "leaflet";
+import "leaflet-canvas-layer";
 import { getColor } from "../../components/gradients/gradients";
+import Loading from "../../components/loading/loading";
 
 class GISMap extends Component {
   state = {
     help: false,
-    fullsize: false
+    fullsize: false,
+    loading: false
   };
 
   toggleHelp = () => {
@@ -70,7 +73,7 @@ class GISMap extends Component {
       marker = new L.marker(latlng, {
         icon: L.divIcon({
           className: "map-marker",
-          html: `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;"></div> `
+          html: `<div style="padding:10px;transform:translate(-4px, -4px)"><div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;"></div></div> `
         })
       })
         .bindTooltip(valuestring, {
@@ -104,10 +107,25 @@ class GISMap extends Component {
           fillColor: pixelcolor,
           fillOpacity: 1,
           title: data.v[i]
-        }).bindTooltip(valuestring, {
-          permanent: false,
-          direction: "top"
         })
+          .bindPopup(
+            "<table><tbody>" +
+              '<tr><td colSpan="2"><strong>' +
+              layer.name +
+              "</strong></td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Satellite</strong></td><td>Sentinal 3</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              "<tr><td><strong>Value at point:</strong></td><td>" +
+              valuestring +
+              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+              "" +
+              '">More information</a></td></tr>' +
+              "</tbody></table>"
+          )
+          .bindTooltip(valuestring, {
+            permanent: false,
+            direction: "top"
+          })
       );
     }
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
@@ -190,12 +208,15 @@ class GISMap extends Component {
               })
                 .bindPopup(
                   "<table><tbody>" +
+                    '<tr><td colSpan="2"><strong>' +
+                    layer.name +
+                    "</strong></td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
                     data[k].name +
                     "</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                    "<tr><td><strong>Surface water temperature:</strong></td><td>" +
+                    "<tr><td><strong>Value at point:</strong></td><td>" +
                     row[j][2] +
                     data[k].unit +
                     '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
@@ -212,6 +233,93 @@ class GISMap extends Component {
         }
       }
       this.raster.push(L.layerGroup(polygons).addTo(this.map));
+    }
+  };
+
+  meteolakesVector = async (layer, min, max) => {
+    var {
+      data,
+      vectorArrows,
+      vectorMagnitude,
+      vectorFlow,
+      vectorColor
+    } = layer;
+
+    if (vectorMagnitude) {
+      var matrix, polygons;
+      for (var k = 0; k < data.length; k++) {
+        polygons = [];
+        matrix = data[k].data;
+        for (var i = 0; i < matrix.length - 1; i++) {
+          var row = matrix[i];
+          var nextRow = matrix[i + 1];
+          for (var j = 0; j < row.length - 1; j++) {
+            if (
+              row[j] === null ||
+              nextRow[j] === null ||
+              row[j + 1] === null ||
+              nextRow[j + 1] === null
+            ) {
+            } else {
+              var coords = [
+                this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
+                this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
+                this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
+                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]])
+              ];
+              var magnitude = Math.abs(
+                Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
+              );
+              var valuestring =
+                String(Math.round(magnitude * 1000) / 1000) + data[k].unit;
+              var pixelcolor = getColor(magnitude, min, max, layer.colors);
+              polygons.push(
+                L.polygon(coords, {
+                  color: pixelcolor,
+                  fillColor: pixelcolor,
+                  fillOpacity: 1,
+                  title: magnitude
+                })
+                  .bindPopup(
+                    "<table><tbody>" +
+                      '<tr><td colSpan="2"><strong>' +
+                      layer.name +
+                      "</strong></td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+                      data[k].name +
+                      "</td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                      "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
+                      row[j][2] +
+                      data[k].unit +
+                      "<tr><td><strong>Eastern Water Velocity:</strong></td><td>" +
+                      row[j][3] +
+                      data[k].unit +
+                      "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
+                      valuestring +
+                      '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+                      data[k].link +
+                      '">More information</a></td></tr>' +
+                      "</tbody></table>"
+                  )
+                  .bindTooltip(valuestring, {
+                    permanent: false,
+                    direction: "top"
+                  })
+              );
+            }
+          }
+        }
+        this.raster.push(L.layerGroup(polygons).addTo(this.map));
+      }
+    }
+
+    if (vectorArrows) {
+      
+    }
+
+    if (vectorFlow) {
     }
   };
 
@@ -294,7 +402,7 @@ class GISMap extends Component {
     this.raster = [];
   }
 
-  updatePlot = async () => {
+  updatePlot = () => {
     var { selected, maplayers, parameters, hidden } = this.props;
     //var { selected: prevSelected } = prevProps;
 
@@ -326,14 +434,16 @@ class GISMap extends Component {
         plotFunction === "simstrat" && this.simstrat(layer, min, max);
         plotFunction === "meteolakesScalar" &&
           this.meteolakesScalar(layer, min, max);
+        plotFunction === "meteolakesVector" &&
+          this.meteolakesVector(layer, min, max);
       }
     }
-
-    this.map.invalidateSize();
   };
 
   componentDidUpdate(prevProps, prevState) {
     this.updatePlot();
+    this.map.invalidateSize();
+    document.getElementById("gisloading").style.display = "none";
   }
 
   render() {
@@ -343,6 +453,10 @@ class GISMap extends Component {
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
           <div id="map">
+            <div id="gisloading" className="map-loader">
+              <Loading />
+              Downloading and plotting data
+            </div>
             {help && (
               <div className="help-container show">
                 <div

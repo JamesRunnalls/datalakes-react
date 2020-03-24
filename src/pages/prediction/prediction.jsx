@@ -41,7 +41,7 @@ class Prediction extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [9,8],
+    selected: [9, 8],
     hidden: []
   };
 
@@ -60,7 +60,7 @@ class Prediction extends Component {
           maplayers = await this.downloadFile(ids[i], maplayers);
           parameters = this.updateMinMax(ids[i], maplayers, parameters);
         }
-        selected.push(ids[i]);
+        selected.unshift(ids[i]);
       }
     }
     this.setState({ selected, maplayers, parameters });
@@ -143,9 +143,35 @@ class Prediction extends Component {
   };
 
   meteolakesScalarMinMax = layer => {
-    //var array = layer.data;
+    var array = layer.data;
+    var min = Infinity;
+    var max = -Infinity;
+    var flat;
+    for (var i = 0; i < array.length; i++) {
+      flat = array[i].data.flat();
+      flat = flat.filter(item => item !== null);
+      flat = flat.map(item => item[2]);
+      min = Math.min(min, this.getMin(flat));
+      max = Math.max(max, this.getMax(flat));
+    }
+    return { min: min, max: max };
+  };
 
-    return { min: 0, max: 10 };
+  meteolakesVectorMinMax = layer => {
+    var array = layer.data;
+    var min = Infinity;
+    var max = -Infinity;
+    var flat;
+    for (var i = 0; i < array.length; i++) {
+      flat = array[i].data.flat();
+      flat = flat.filter(item => item !== null);
+      flat = flat.map(item =>
+        Math.abs(Math.sqrt(Math.pow(item[2], 2) + Math.pow(item[3], 2)))
+      );
+      min = Math.min(min, this.getMin(flat));
+      max = Math.max(max, this.getMax(flat));
+    }
+    return { min: min, max: max };
   };
 
   updateMinMax = (id, maplayers, parameters) => {
@@ -168,6 +194,9 @@ class Prediction extends Component {
     }
     if (plotFunction === "meteolakesScalar") {
       ({ min, max } = this.meteolakesScalarMinMax(layer));
+    }
+    if (plotFunction === "meteolakesVector") {
+      ({ min, max } = this.meteolakesVectorMinMax(layer));
     }
 
     if (parameters[parameterIndex].min) {
@@ -230,6 +259,10 @@ class Prediction extends Component {
       if (!("markerFixedSize" in x)) x.markerFixedSize = true;
       if (!("markerSize" in x)) x.markerSize = 10;
       if (!("field" in x)) x.field = "vector";
+      if (!("vectorMagnitude" in x)) x.vectorMagnitude = true;
+      if (!("vectorArrows" in x)) x.vectorArrows = true;
+      if (!("vectorFlow" in x)) x.vectorFlow = false;
+      if (!("vectorColor" in x)) x.vectorColor = false;
       return x;
     });
 
@@ -250,6 +283,10 @@ class Prediction extends Component {
       if (!("markerFixedSize" in x)) x.markerFixedSize = true;
       if (!("markerSize" in x)) x.markerSize = 10;
       if (!("field" in x)) x.field = "vector";
+      if (!("vectorMagnitude" in x)) x.vectorMagnitude = true;
+      if (!("vectorArrows" in x)) x.vectorArrows = true;
+      if (!("vectorFlow" in x)) x.vectorFlow = false;
+      if (!("vectorColor" in x)) x.vectorColor = false;
       return x;
     });
 

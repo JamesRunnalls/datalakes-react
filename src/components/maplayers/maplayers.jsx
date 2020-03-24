@@ -1,10 +1,7 @@
 import React, { Component } from "react";
 import "./maplayers.css";
-import {
-  SortableContainer,
-  SortableElement,
-  arrayMove
-} from "react-sortable-hoc";
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import arrayMove from "array-move";
 import ColorManipulation from "../colormanipulation/colormanipulation";
 
 class DropDown extends Component {
@@ -491,7 +488,7 @@ const SortableItem = SortableElement(({ layer, props }) => {
     removeSelected,
     hidden,
     updateMapLayers,
-    toggleLayerView,
+    toggleLayerView
   } = props;
   return (
     <li tabIndex={0}>
@@ -555,7 +552,13 @@ class MapLayers extends Component {
     setSelected(selected);
   };
   render() {
-    return <SortableList props={this.props} onSortEnd={this.onSortEnd} distance={1}/>;
+    return (
+      <SortableList
+        props={this.props}
+        onSortEnd={this.onSortEnd}
+        distance={1}
+      />
+    );
   }
 }
 
