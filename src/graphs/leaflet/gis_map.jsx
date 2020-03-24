@@ -51,13 +51,12 @@ class GISMap extends Component {
     return [lat, lng];
   };
 
-  meteoSwissMarkers = async (layer, min, max) => {
+  meteoSwissMarkers = async layer => {
     var minSize = 5;
     var maxSize = 30;
     var layerData = JSON.parse(JSON.stringify(layer.data.features));
     var markerGroup = L.layerGroup().addTo(this.map);
-    var showlabel = layer.markerLabel;
-
+    var { markerLabel, min, max } = layer;
     var marker, value, color, shape, size, latlng, valuestring;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
@@ -77,7 +76,7 @@ class GISMap extends Component {
         })
       })
         .bindTooltip(valuestring, {
-          permanent: showlabel,
+          permanent: markerLabel,
           direction: "top"
         })
         .addTo(markerGroup);
@@ -86,8 +85,8 @@ class GISMap extends Component {
     this.marker.push(markerGroup);
   };
 
-  remoteSensing = async (layer, min, max) => {
-    var data = layer.data;
+  remoteSensing = async layer => {
+    var { min, max, data } = layer;
     var polygons = [];
     var coords;
     var x = data.lonres / 2;
@@ -131,8 +130,9 @@ class GISMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  simstrat = async (layer, min, max) => {
+  simstrat = async layer => {
     var layerData = JSON.parse(JSON.stringify(layer.data));
+    var { min, max } = layer;
     var polygons = [];
     for (var i = 0; i < layerData.length; i++) {
       var pixelcolor = getColor(layerData[i].value, min, max, layer.colors);
@@ -174,8 +174,8 @@ class GISMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  meteolakesScalar = async (layer, min, max) => {
-    var data = layer.data;
+  meteolakesScalar = async layer => {
+    var { data, min, max } = layer;
     var matrix, polygons;
     for (var k = 0; k < data.length; k++) {
       polygons = [];
@@ -236,14 +236,8 @@ class GISMap extends Component {
     }
   };
 
-  meteolakesVector = async (layer, min, max) => {
-    var {
-      data,
-      vectorArrows,
-      vectorMagnitude,
-      vectorFlow,
-      vectorColor
-    } = layer;
+  meteolakesVector = async layer => {
+    var { data, vectorArrows, vectorMagnitude, vectorFlow, min, max } = layer;
 
     if (vectorMagnitude) {
       var matrix, polygons;
@@ -316,7 +310,6 @@ class GISMap extends Component {
     }
 
     if (vectorArrows) {
-      
     }
 
     if (vectorFlow) {
@@ -403,8 +396,7 @@ class GISMap extends Component {
   }
 
   updatePlot = () => {
-    var { selected, maplayers, parameters, hidden } = this.props;
-    //var { selected: prevSelected } = prevProps;
+    var { maplayers, hidden } = this.props;
 
     // Remove old layers
     this.marker.forEach(layer => {
@@ -414,28 +406,16 @@ class GISMap extends Component {
       this.map.removeLayer(layer);
     });
 
-    function findlayer(maplayers, id) {
-      return maplayers.find(x => x.id === id);
-    }
-    function findparameter(parameters, id) {
-      return parameters.find(x => x.id === id);
-    }
-
     // Add new layers
-    for (var i = selected.length - 1; i > -1; i--) {
-      if (!hidden.includes(selected[i])) {
-        var layer = findlayer(maplayers, selected[i]);
-        var { plotFunction, parameters_id } = layer;
-        var parameter = findparameter(parameters, parameters_id);
-        var { min, max } = parameter;
-        plotFunction === "meteoSwissMarkers" &&
-          this.meteoSwissMarkers(layer, min, max);
-        plotFunction === "remoteSensing" && this.remoteSensing(layer, min, max);
-        plotFunction === "simstrat" && this.simstrat(layer, min, max);
-        plotFunction === "meteolakesScalar" &&
-          this.meteolakesScalar(layer, min, max);
-        plotFunction === "meteolakesVector" &&
-          this.meteolakesVector(layer, min, max);
+    for (var i = maplayers.length - 1; i > -1; i--) {
+      if (!hidden.includes(maplayers[i].id)) {
+        var layer = maplayers[i];
+        var { plotFunction } = layer;
+        plotFunction === "meteoSwissMarkers" && this.meteoSwissMarkers(layer);
+        plotFunction === "remoteSensing" && this.remoteSensing(layer);
+        plotFunction === "simstrat" && this.simstrat(layer);
+        plotFunction === "meteolakesScalar" && this.meteolakesScalar(layer);
+        plotFunction === "meteolakesVector" && this.meteolakesVector(layer);
       }
     }
   };

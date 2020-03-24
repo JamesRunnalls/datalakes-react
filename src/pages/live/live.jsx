@@ -8,40 +8,13 @@ import FilterBox from "../../components/filterbox/filterbox";
 import "./live.css";
 import MapLayers from "../../components/maplayers/maplayers";
 import AddLayers from "../../components/addlayers/addlayers";
-
-/*class LakeStations extends Component {
-  render() {
-    if (this.props.datalist) {
-      return (
-        <React.Fragment>
-          {this.props.datalist.map(data => (
-            <div className="lakestation" title="See live data" key={data.name}>
-              <Link to={"/live/" + String(data.link)}>
-                {data.name}
-                <div className="description">{data.description}</div>
-              </Link>
-            </div>
-          ))}
-        </React.Fragment>
-      );
-    } else {
-      return <div></div>;
-    }
-  }
-}*/
-
-/*class MapLegend extends Component {
-  state = {};
-  render() {
-    return <div className="leaflet-legend"></div>;
-  }
-}*/
+import Legend from "../../components/legend/legend";
 
 class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [10],
+    selected: [0,1],
     hidden: []
   };
 
@@ -58,7 +31,11 @@ class Live extends Component {
       if (!selected.includes(ids[i])) {
         if (!("data" in maplayersfind(maplayers, ids[i]))) {
           maplayers = await this.downloadFile(ids[i], maplayers);
-          parameters = this.updateMinMax(ids[i], maplayers, parameters);
+          ({ maplayers, parameters } = this.updateMinMax(
+            ids[i],
+            maplayers,
+            parameters
+          ));
         }
         selected.unshift(ids[i]);
       }
@@ -96,21 +73,6 @@ class Live extends Component {
     this.setState({ parameters });
   };
 
-  hoverFunc = (target, type) => {
-    if (type === "over") {
-      document.getElementById("color-table").style.display = "block";
-      document.getElementById("hoverValue").innerHTML =
-        Math.round(parseFloat(target.options.title) * 100) / 100 +
-        this.state.unit;
-      document.getElementById("hoverLat").innerHTML =
-        Math.round(parseFloat(target._latlngs[0][0].lat) * 1000) / 1000;
-      document.getElementById("hoverLon").innerHTML =
-        Math.round(parseFloat(target._latlngs[0][0].lng) * 1000) / 1000;
-    } else {
-      document.getElementById("color-table").style.display = "none";
-    }
-  };
-
   downloadFile = async (id, maplayers) => {
     var index = maplayers.findIndex(x => x.id === id);
     var { data } = await axios.get(maplayers[index].api);
@@ -121,9 +83,10 @@ class Live extends Component {
   meteoSwissMarkersMinMax = layer => {
     var array = layer.data.features;
     array = array.map(x => x.properties.value);
+    array = array.filter(x => x !== 9999);
     var max = this.getMax(array);
     var min = this.getMin(array);
-    return { min: min, max: max };
+    return { min: min, max: max, array: array };
   };
 
   simstratMinMax = layer => {
@@ -131,7 +94,7 @@ class Live extends Component {
     array = array.map(x => x.value);
     var max = this.getMax(array);
     var min = this.getMin(array);
-    return { min: min, max: max };
+    return { min: min, max: max, array: array };
   };
 
   remoteSensingMinMax = layer => {
@@ -139,39 +102,43 @@ class Live extends Component {
     array = array.v;
     var max = this.getMax(array);
     var min = this.getMin(array);
-    return { min: min, max: max };
+    return { min: min, max: max, array: array };
   };
 
   meteolakesScalarMinMax = layer => {
-    var array = layer.data;
+    var inarray = layer.data;
     var min = Infinity;
     var max = -Infinity;
     var flat;
-    for (var i = 0; i < array.length; i++) {
-      flat = array[i].data.flat();
+    var array = [];
+    for (var i = 0; i < inarray.length; i++) {
+      flat = inarray[i].data.flat();
       flat = flat.filter(item => item !== null);
       flat = flat.map(item => item[2]);
       min = Math.min(min, this.getMin(flat));
       max = Math.max(max, this.getMax(flat));
+      array = array.concat(flat);
     }
-    return { min: min, max: max };
+    return { min: min, max: max, array: array };
   };
 
   meteolakesVectorMinMax = layer => {
-    var array = layer.data;
+    var inarray = layer.data;
     var min = Infinity;
     var max = -Infinity;
     var flat;
-    for (var i = 0; i < array.length; i++) {
-      flat = array[i].data.flat();
+    var array = [];
+    for (var i = 0; i < inarray.length; i++) {
+      flat = inarray[i].data.flat();
       flat = flat.filter(item => item !== null);
       flat = flat.map(item =>
         Math.abs(Math.sqrt(Math.pow(item[2], 2) + Math.pow(item[3], 2)))
       );
       min = Math.min(min, this.getMin(flat));
       max = Math.max(max, this.getMax(flat));
+      array = array.concat(flat);
     }
-    return { min: min, max: max };
+    return { min: min, max: max, array: array };
   };
 
   updateMinMax = (id, maplayers, parameters) => {
@@ -181,23 +148,25 @@ class Live extends Component {
       x => x.id === layer.parameters_id
     );
     var plotFunction = layer.plotFunction;
-    var min, max;
+    var min, max, array;
 
     if (plotFunction === "meteoSwissMarkers") {
-      ({ min, max } = this.meteoSwissMarkersMinMax(layer));
+      ({ min, max, array } = this.meteoSwissMarkersMinMax(layer));
     }
     if (plotFunction === "simstrat") {
-      ({ min, max } = this.simstratMinMax(layer));
+      ({ min, max, array } = this.simstratMinMax(layer));
     }
     if (plotFunction === "remoteSensing") {
-      ({ min, max } = this.remoteSensingMinMax(layer));
+      ({ min, max, array } = this.remoteSensingMinMax(layer));
     }
     if (plotFunction === "meteolakesScalar") {
-      ({ min, max } = this.meteolakesScalarMinMax(layer));
+      ({ min, max, array } = this.meteolakesScalarMinMax(layer));
     }
     if (plotFunction === "meteolakesVector") {
-      ({ min, max } = this.meteolakesVectorMinMax(layer));
+      ({ min, max, array } = this.meteolakesVectorMinMax(layer));
     }
+
+    maplayers[index].array = array;
 
     if (parameters[parameterIndex].min) {
       parameters[parameterIndex].min = Math.min(
@@ -215,7 +184,7 @@ class Live extends Component {
     } else {
       parameters[parameterIndex].max = max;
     }
-    return parameters;
+    return { maplayers: maplayers, parameters: parameters };
   };
 
   getMax = arr => {
@@ -264,11 +233,11 @@ class Live extends Component {
       if (!("markerSymbol" in x)) x.markerSymbol = "circle";
       if (!("markerFixedSize" in x)) x.markerFixedSize = true;
       if (!("markerSize" in x)) x.markerSize = 10;
-      if (!("field" in x)) x.field = "vector";
       if (!("vectorMagnitude" in x)) x.vectorMagnitude = true;
-      if (!("vectorArrows" in x)) x.vectorArrows = true;
+      if (!("vectorArrows" in x)) x.vectorArrows = false;
       if (!("vectorFlow" in x)) x.vectorFlow = false;
-      if (!("vectorColor" in x)) x.vectorColor = false;
+      if (!("vectorArrowColor" in x)) x.vectorArrowColor = false;
+      if (!("vectorFlowColor" in x)) x.vectorFlowColor = false;
       return x;
     });
 
@@ -294,11 +263,11 @@ class Live extends Component {
       if (!("markerSymbol" in x)) x.markerSymbol = "circle";
       if (!("markerFixedSize" in x)) x.markerFixedSize = true;
       if (!("markerSize" in x)) x.markerSize = 10;
-      if (!("field" in x)) x.field = "vector";
       if (!("vectorMagnitude" in x)) x.vectorMagnitude = true;
-      if (!("vectorArrows" in x)) x.vectorArrows = true;
+      if (!("vectorArrows" in x)) x.vectorArrows = false;
       if (!("vectorFlow" in x)) x.vectorFlow = false;
-      if (!("vectorColor" in x)) x.vectorColor = false;
+      if (!("vectorArrowColor" in x)) x.vectorArrowColor = false;
+      if (!("vectorFlowColor" in x)) x.vectorFlowColor = false;
       return x;
     });
 
@@ -306,7 +275,11 @@ class Live extends Component {
     var { selected } = this.state;
     for (var i = 0; i < selected.length; i++) {
       maplayers = await this.downloadFile(selected[i], maplayers);
-      parameters = this.updateMinMax(selected[i], maplayers, parameters);
+      ({ maplayers, parameters } = this.updateMinMax(
+        selected[i],
+        maplayers,
+        parameters
+      ));
     }
 
     this.setState({
@@ -318,6 +291,19 @@ class Live extends Component {
   render() {
     document.title = "Live - Datalakes";
     var { maplayers, parameters, selected, hidden } = this.state;
+    maplayers = maplayers.map(layer => {
+      var parameter = parameters.find(
+        parameter => parameter.id === layer.parameters_id
+      );
+      layer.min = parameter.min;
+      layer.max = parameter.max;
+      layer.unit = parameter.unit;
+      return layer;
+    });
+    if (maplayers.length < 1) selected = [];
+    var selectlayers = selected.map(id =>
+      maplayers.find(layer => layer.id === id)
+    );
     return (
       <React.Fragment>
         <h1>Live Conditions</h1>
@@ -326,12 +312,9 @@ class Live extends Component {
           left={
             <React.Fragment>
               <GISMap
-                maplayers={maplayers}
-                parameters={parameters}
-                selected={selected}
+                maplayers={selectlayers}
                 hidden={hidden}
-                hoverFunc={this.hoverFunc}
-                legend={<div className="legend"></div>}
+                legend={<Legend maplayers={selectlayers} />}
                 selector={<div className="live-dataselector"></div>}
               />
             </React.Fragment>
@@ -344,7 +327,6 @@ class Live extends Component {
                 content={
                   <MapLayers
                     maplayers={maplayers}
-                    parameters={parameters}
                     selected={selected}
                     hidden={hidden}
                     setSelected={this.setSelected}

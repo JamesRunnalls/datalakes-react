@@ -47,34 +47,6 @@ li {
   display: none;
 }
 
-.markerdisplay-symbol {
-  line-height: 22px;
-  text-align: center;
-}
-
-.rasterdisplay-colorbar {
-  width: 20px;
-  height: 100%;
-}
-
-.rasterdisplay-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
-.rasterdisplay-table tr {
-  height: 22px;
-}
-
-.rasterdisplay-table .rasterdisplay-innerlabel {
-  font-size: 11px;
-}
-
-.rasterdisplay-table .rasterdisplay-bar {
-  padding: 0;
-  font-size: 8px;
-}
-
 .editsettings {
   background-color: rgb(240, 240, 240);
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);

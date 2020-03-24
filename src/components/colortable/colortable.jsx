@@ -43,6 +43,7 @@ class ColorTable extends Component {
         }
       }
       onChange(colors);
+      document.getElementById("colortable").reset();
     }
   };
 
@@ -117,7 +118,7 @@ class ColorTable extends Component {
               );
             })}
             <tr>
-              <td>
+              <td colSpan="2">
                 <button
                   type="button"
                   title="Optimise point distribution"

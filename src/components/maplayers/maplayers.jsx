@@ -3,6 +3,8 @@ import "./maplayers.css";
 import { SortableContainer, SortableElement } from "react-sortable-hoc";
 import arrayMove from "array-move";
 import ColorManipulation from "../colormanipulation/colormanipulation";
+import RasterLegendItem from '../legend/rasterlegenditem';
+import MarkerLegendItem from '../legend/markerlegenditem';
 
 class DropDown extends Component {
   state = {
@@ -97,217 +99,39 @@ class DropDown extends Component {
 class GroupDisplay extends Component {
   state = {};
   render() {
-    var { display, min, max, unit } = this.props;
-    if (display.plot === "marker") {
-      return (
-        <MarkerDisplay min={min} max={max} unit={unit} display={display} />
-      );
-    } else if (display.plot === "raster") {
-      return (
-        <RasterDisplay min={min} max={max} unit={unit} display={display} />
-      );
-    } else if (display.plot === "field") {
-      return <FieldDisplay min={min} max={max} unit={unit} display={display} />;
-    } else {
-      return <div></div>;
-    }
-  }
-}
-
-class MarkerDisplay extends Component {
-  render() {
-    var { min, max, unit, display } = this.props;
+    var { display } = this.props;
     var {
+      plot,
+      min,
+      max,
+      unit,
+      sourcelink,
+      sourcetext,
+      description,
       colors,
       markerFixedSize,
-      markerSymbol,
-      description,
-      sourcetext,
-      sourcelink
+      markerSymbol
     } = display;
-    var minSize = 10,
-      maxSize = 40,
-      inner = [],
-      color,
-      fontSize,
-      symbolDiv;
-
-    if (markerSymbol === "circle") symbolDiv = <div>&#9679;</div>;
-    if (markerSymbol === "square") symbolDiv = <div>&#9724;</div>;
-    if (markerSymbol === "triangle") symbolDiv = <div>&#9650;</div>;
-
-    var fixedColor = false;
-    if (colors.length === 2 && colors[0].color === colors[1].color) {
-      fixedColor = true;
-    }
-
-    if (markerFixedSize && fixedColor) {
-      inner.push(
-        <tr>
-          <td
-            className="markerdisplay-symbol"
-            style={{ fontSize: maxSize, color: colors[0].color }}
-          >
-            {symbolDiv}
-          </td>
-          <td>Fixed size and color</td>
-        </tr>
+    var inner = <div></div>;
+    if (plot === "marker")
+      inner = (
+        <MarkerLegendItem
+          min={min}
+          max={max}
+          unit={unit}
+          colors={colors}
+          markerFixedSize={markerFixedSize}
+          markerSymbol={markerSymbol}
+        />
       );
-    } else {
-      for (var i = 0; i < colors.length; i++) {
-        var value =
-          Math.round((min + (max - min) * colors[i].point) * 100) / 100;
-        if (markerFixedSize) {
-          fontSize = (maxSize + minSize) / 2;
-        } else {
-          fontSize = minSize + (maxSize - minSize) * (i / colors.length);
-        }
-        if (fixedColor) {
-          color = colors[0].color;
-        } else {
-          // Check possibility of color bars
-          if (i < colors.length - 1) {
-            var color1 = colors[i].color;
-            var color2 = colors[i + 1].color;
-            if (color1 === color2) {
-              value =
-                value +
-                " - " +
-                Math.round((min + (max - min) * colors[i + 1].point) * 100) /
-                  100;
-              i++;
-            }
-          }
-          color = colors[i].color;
-        }
-        // Check possibility of tiny change
-        if (i === 0) {
-          if (colors[1].point < 0.0001) {
-            continue;
-          }
-        }
-        if (i === colors.length - 1) {
-          if (1 - colors[colors.length - 2].point < 0.0001) {
-            continue;
-          }
-        }
-        inner.push(
-          <tr key={i}>
-            <td
-              className="markerdisplay-symbol"
-              style={{ fontSize: fontSize, color: color }}
-            >
-              {symbolDiv}
-            </td>
-            <td>{value}</td>
-            <td>{i === 0 && unit}</td>
-          </tr>
-        );
-      }
-    }
+    if (plot === "raster")
+      inner = <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />;
+    if (plot === "field")
+      inner = <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />;
     return (
       <div>
         <div>{description}</div>
-        <table>
-          <tbody>{inner}</tbody>
-        </table>
-        Source:{" "}
-        <a href={sourcelink} target="_blank">
-          {sourcetext}
-        </a>
-      </div>
-    );
-  }
-}
-
-class RasterDisplay extends Component {
-  linearGradient = colors => {
-    if (colors) {
-      var lineargradient = [];
-      for (var i = 0; i < colors.length; i++) {
-        lineargradient.push(`${colors[i].color} ${colors[i].point * 100}%`);
-      }
-      return `linear-gradient(180deg,${lineargradient.join(",")})`;
-    }
-  };
-  render() {
-    var { min, max, unit, display } = this.props;
-    var { colors, description, sourcelink, sourcetext } = display;
-    var inner = [];
-    var fixedColor = false;
-    var selectStyle;
-    if (colors.length === 2 && colors[0].color === colors[1].color) {
-      fixedColor = true;
-    }
-    if (fixedColor) {
-      selectStyle = {
-        background: colors[0].color
-      };
-      inner.push(
-        <tr key={0}>
-          <td className="rasterdisplay-colorbar" style={selectStyle}></td>
-          <td>Fixed color</td>
-        </tr>
-      );
-    } else {
-      selectStyle = {
-        background: this.linearGradient(colors),
-        border: "1px solid black",
-        borderTop: "22px solid white",
-        borderBottom: "22px solid white"
-      };
-      inner.push(
-        <tr key={0}>
-          <td
-            className="rasterdisplay-colorbar"
-            style={selectStyle}
-            rowSpan={6}
-          ></td>
-          <td className="rasterdisplay-bar">&#9472;</td>
-          <td>{min}</td>
-          <td>{unit}</td>
-        </tr>
-      );
-      inner.push(
-        <tr
-          key={1}
-          style={{
-            height: "60px"
-          }}
-        >
-          <td className="rasterdisplay-bar">&#9472;</td>
-          <td className="rasterdisplay-innerlabel">{(max + min) / 2}</td>
-        </tr>
-      );
-      inner.push(
-        <tr key={2}>
-          <td className="rasterdisplay-bar">&#9472;</td>
-          <td>{max}</td>
-        </tr>
-      );
-    }
-    return (
-      <div>
-        <div>{description}</div>
-        <table className="rasterdisplay-table">
-          <tbody>{inner}</tbody>
-        </table>
-        Source:{" "}
-        <a href={sourcelink} target="_blank">
-          {sourcetext}
-        </a>
-      </div>
-    );
-  }
-}
-
-class FieldDisplay extends Component {
-  render() {
-    var { display } = this.props;
-    var { description, sourcelink, sourcetext } = display;
-    return (
-      <div>
-        <div>{description}</div>
+        {inner}
         Source:{" "}
         <a href={sourcelink} target="_blank">
           {sourcetext}
@@ -355,9 +179,33 @@ class EditSettings extends Component {
     display.markerSize = event.target.value;
     this.setState({ display });
   };
-  localFieldChange = () => {
+  localVectorArrowColorChange = () => {
     var { display } = this.state;
-    display.field = event.target.value;
+    var vectorArrowColor = false;
+    if (event.target.value === "true") vectorArrowColor = true;
+    display.vectorArrowColor = vectorArrowColor;
+    this.setState({ display });
+  };
+  localVectorFlowColorChange = () => {
+    var { display } = this.state;
+    var vectorFlowColor = false;
+    if (event.target.value === "true") vectorFlowColor = true;
+    display.vectorFlowColor = vectorFlowColor;
+    this.setState({ display });
+  };
+  localVectorArrowsChange = () => {
+    var { display } = this.state;
+    display.vectorArrows = !display.vectorArrows;
+    this.setState({ display });
+  };
+  localVectorFlowChange = () => {
+    var { display } = this.state;
+    display.vectorFlow = !display.vectorFlow;
+    this.setState({ display });
+  };
+  localVectorMagnitudeChange = () => {
+    var { display } = this.state;
+    display.vectorMagnitude = !display.vectorMagnitude;
     this.setState({ display });
   };
   updateDisplay = () => {
@@ -376,12 +224,18 @@ class EditSettings extends Component {
       markerSymbol,
       markerFixedSize,
       markerSize,
-      field
+      array,
+      plot,
+      vectorMagnitude,
+      vectorArrows,
+      vectorFlow,
+      vectorArrowColor,
+      vectorFlowColor
     } = display;
     var { removeSelected, id } = this.props;
     return (
       <div className="editsettings">
-        {["marker", "group"].includes(display.plot) && (
+        {["marker", "group"].includes(plot) && (
           <div className="editsettings-markeroptions">
             <div className="editsettings-title">Marker Options</div>
             <table className="editsettings-table">
@@ -434,17 +288,60 @@ class EditSettings extends Component {
             </table>
           </div>
         )}
-        {["field", "group"].includes(display.plot) && (
+        {["field", "group"].includes(plot) && (
           <div className="editsettings-fieldoptions">
             <div className="editsettings-title">Field Options</div>
             <table>
               <tbody>
                 <tr>
-                  <td>Display</td>
                   <td>
-                    <select value={field} onChange={this.localFieldChange}>
-                      <option value="vector">Animated Vector Field</option>
-                      <option value="scalar">Static Scalar Field</option>
+                    <input
+                      type="checkbox"
+                      checked={vectorMagnitude}
+                      onChange={this.localVectorMagnitudeChange}
+                    ></input>
+                  </td>
+                  <td>Magnitude Raster</td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={vectorArrows}
+                      onChange={this.localVectorArrowsChange}
+                      disabled
+                    ></input>
+                  </td>
+                  <td>Directional Arrows</td>
+                  <td>
+                    <select
+                      value={vectorArrowColor}
+                      onChange={this.localVectorArrowColorChange}
+                      disabled
+                    >
+                      <option value="true">Color Ramp</option>
+                      <option value="false">Fixed Color</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={vectorFlow}
+                      onChange={this.localVectorFlowChange}
+                      disabled
+                    ></input>
+                  </td>
+                  <td>Flow Path</td>
+                  <td>
+                    <select
+                      value={vectorFlowColor}
+                      onChange={this.localVectorFlowColorChange}
+                      disabled
+                    >
+                      <option value="true">Color Ramp</option>
+                      <option value="false">Fixed Color</option>
                     </select>
                   </td>
                 </tr>
@@ -453,7 +350,11 @@ class EditSettings extends Component {
           </div>
         )}
         <div className="editsettings-title">Color Options</div>
-        <ColorManipulation colors={colors} onChange={this.localColorChange} />
+        <ColorManipulation
+          colors={colors}
+          array={array}
+          onChange={this.localColorChange}
+        />
         Show in Legend{" "}
         <input
           type="checkbox"
@@ -482,7 +383,7 @@ class EditSettings extends Component {
 }
 
 const SortableItem = SortableElement(({ layer, props }) => {
-  var { id, name, min, max, unit } = layer;
+  var { id, name } = layer;
   var {
     maplayers,
     removeSelected,
@@ -503,34 +404,18 @@ const SortableItem = SortableElement(({ layer, props }) => {
         hidden={hidden}
         onUpdate={updateMapLayers}
         toggleLayerView={toggleLayerView}
-        content={
-          <GroupDisplay
-            key={id}
-            min={min}
-            max={max}
-            unit={unit}
-            display={layer}
-          />
-        }
+        content={<GroupDisplay key={id} display={layer} />}
       />
     </li>
   );
 });
 
 const SortableList = SortableContainer(({ props }) => {
-  var { selected, maplayers, parameters } = props;
+  var { maplayers, selected } = props;
   if (maplayers.length < 1) selected = [];
-  var selectlayers = selected.map(id =>
-    maplayers.find(layer => layer.id === id)
-  );
-  selectlayers = selectlayers.map(layer => {
-    var parameter = parameters.find(
-      parameter => parameter.id === layer.parameters_id
+    var selectlayers = selected.map(id =>
+      maplayers.find(layer => layer.id === id)
     );
-    layer.min = parameter.min;
-    layer.max = parameter.max;
-    return layer;
-  });
   return (
     <ul className="maplayers-list">
       {selectlayers.map((layer, index) => (
