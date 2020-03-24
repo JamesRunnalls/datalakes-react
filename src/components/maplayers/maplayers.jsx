@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import "./maplayers.css";
-import { SortableContainer, SortableElement } from "react-sortable-hoc";
-import arrayMove from "array-move";
+import { SortableContainer, SortableElement, arrayMove } from "react-sortable-hoc";
 import ColorManipulation from "../colormanipulation/colormanipulation";
 import RasterLegendItem from '../legend/rasterlegenditem';
 import MarkerLegendItem from '../legend/markerlegenditem';
