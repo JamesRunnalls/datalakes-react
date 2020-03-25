@@ -70,10 +70,9 @@ class Legend extends Component {
       }
     }
     return (
-      <div className="legend">
+      <div className={open ? "legend" : "legend hide"}>
         {inner.length > 0 && (
-          <div className="legend-title" onClick={this.toggle}>
-            <div className="legend-title-symbol">{open ? "▿" : "▹"}</div>
+          <div className="legend-title" onClick={this.toggle} title={open ? "Hide legend" : "Show legend"}>
             <div className="legend-title-text">Legend</div>
           </div>
         )}

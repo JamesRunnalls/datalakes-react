@@ -345,24 +345,25 @@ class GISMap extends Component {
           "https://maps.heigit.org/openmapsurfer/tiles/asterh/webmercator/{z}/{x}/{y}.png",
           {
             attribution:
-              'Imagery from <a href="http://giscience.uni-hd.de/">GIScience Research Group @ University of Heidelberg</a> | Map data  <a href="https://lpdaac.usgs.gov/products/aster_policies">ASTER GDEM</a>, <a href="http://srtm.csi.cgiar.org/">SRTM</a>'
+              '| <a href="http://giscience.uni-hd.de/" target="_blank">University of Heidelberg</a> | <a href="https://lpdaac.usgs.gov/products/aster_policies" target="_blank">ASTER GDEM</a>, <a href="http://srtm.csi.cgiar.org/">SRTM</a>'
           }
         )
       ]
     });
 
-    L.control.attribution({ position: "bottomleft" }).addTo(this.map);
+    L.control.attribution({ position: "bottomright" }).addTo(this.map);
 
     // Add attribution
     this.map.attributionControl.setPrefix(
-      'datalakes © | <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
+      'datalakes | <a href="https://leafletjs.com" target="_blank" title="A JS library for interactive maps">Leaflet</a>'
     );
 
     // Full screen
     L.control
       .custom({
         position: "topleft",
-        content: '<div class="customcontrol" title="Full screen">&#10529</div>',
+        content:
+          '<div class="customcontrol" title="Full screen" id="fullsize">&#8689;</div>',
         classes: "leaflet-bar",
         events: {
           click: function(data) {
@@ -421,22 +422,27 @@ class GISMap extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    this.updatePlot();
+    if (prevProps.loading && !this.props.loading) {
+      this.updatePlot();
+    }
     this.map.invalidateSize();
-    document.getElementById("gisloading").style.display = "none";
   }
 
   render() {
     var { help, fullsize } = this.state;
-    var { legend, selector } = this.props;
+    var { legend, selector, loading } = this.props;
+    if (!loading) document.getElementById("fullsize").innerHTML = fullsize ? "&#8690;" : "&#8689;";
+    if (!loading) document.getElementById("fullsize").title = fullsize ? "Shrink map" : "Fullscreen";
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
           <div id="map">
-            <div id="gisloading" className="map-loader">
-              <Loading />
-              Downloading and plotting data
-            </div>
+            {loading && (
+              <div className="map-loader">
+                <Loading />
+                Downloading and plotting data
+              </div>
+            )}
             {help && (
               <div className="help-container show">
                 <div

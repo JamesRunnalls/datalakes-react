@@ -14,55 +14,64 @@ class Live extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: [0,1],
-    hidden: []
+    selected: [0, 1],
+    hidden: [],
+    loading: true
   };
 
   setSelected = selected => {
-    this.setState({ selected });
+    this.setState({ loading: true }, () => {
+      this.setState({ selected, loading: false });
+    });
   };
 
   addSelected = async ids => {
     function maplayersfind(maplayers, id) {
       return maplayers.find(x => x.id === id);
     }
-    var { selected, maplayers, parameters } = this.state;
-    for (var i = 0; i < ids.length; i++) {
-      if (!selected.includes(ids[i])) {
-        if (!("data" in maplayersfind(maplayers, ids[i]))) {
-          maplayers = await this.downloadFile(ids[i], maplayers);
-          ({ maplayers, parameters } = this.updateMinMax(
-            ids[i],
-            maplayers,
-            parameters
-          ));
+    this.setState({ loading: true }, async () => {
+      var { selected, maplayers, parameters } = this.state;
+      for (var i = 0; i < ids.length; i++) {
+        if (!selected.includes(ids[i])) {
+          if (!("data" in maplayersfind(maplayers, ids[i]))) {
+            maplayers = await this.downloadFile(ids[i], maplayers);
+            ({ maplayers, parameters } = this.updateMinMax(
+              ids[i],
+              maplayers,
+              parameters
+            ));
+          }
+          selected.unshift(ids[i]);
         }
-        selected.unshift(ids[i]);
       }
-    }
-    this.setState({ selected, maplayers, parameters });
+      this.setState({ selected, maplayers, parameters, loading: false });
+    });
   };
 
   removeSelected = ids => {
     function selectedfilter(selected, id) {
       return selected.filter(selectid => selectid !== id);
     }
-    var { selected, hidden } = this.state;
-    for (var i = 0; i < ids.length; i++) {
-      selected = selectedfilter(selected, ids[i]);
-      hidden = selectedfilter(hidden, ids[i]);
-    }
-    this.setState({ selected, hidden });
+    this.setState({ loading: true }, () => {
+      var { selected, hidden } = this.state;
+      for (var i = 0; i < ids.length; i++) {
+        selected = selectedfilter(selected, ids[i]);
+        hidden = selectedfilter(hidden, ids[i]);
+      }
+      this.setState({ selected, hidden, loading: false });
+    });
   };
 
   toggleLayerView = id => {
-    var { hidden } = this.state;
-    if (hidden.includes(id)) {
-      hidden = hidden.filter(selectid => selectid !== id);
-    } else {
-      hidden.push(id);
-    }
-    this.setState({ hidden });
+    this.setState({ loading: true }, () => {
+      var { hidden } = this.state;
+      if (hidden.includes(id)) {
+        hidden = hidden.filter(selectid => selectid !== id);
+      } else {
+        hidden.push(id);
+      }
+      this.setState({ hidden, loading: false });
+    });
   };
 
   updateMapLayers = maplayers => {
@@ -284,13 +293,14 @@ class Live extends Component {
 
     this.setState({
       parameters,
-      maplayers
+      maplayers,
+      loading: false
     });
   }
 
   render() {
     document.title = "Live - Datalakes";
-    var { maplayers, parameters, selected, hidden } = this.state;
+    var { maplayers, parameters, selected, hidden, loading } = this.state;
     maplayers = maplayers.map(layer => {
       var parameter = parameters.find(
         parameter => parameter.id === layer.parameters_id
@@ -316,6 +326,7 @@ class Live extends Component {
                 hidden={hidden}
                 legend={<Legend maplayers={selectlayers} />}
                 selector={<div className="live-dataselector"></div>}
+                loading={loading}
               />
             </React.Fragment>
           }
