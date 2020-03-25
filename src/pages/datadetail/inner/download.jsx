@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import SliderDouble from "../../../components/sliders/sliderdouble";
+import { password } from "../../../../config.json";
 import axios from "axios";
 import "../datadetail.css";
 
@@ -40,28 +41,31 @@ class Download extends Component {
   };
 
   downloadFiles = (filetype, apiUrl, id, arr, title) => {
-    var url = `${apiUrl}/download/${filetype}/${id}`;
-    var name =
-      title.replace(/\s/g, "").toLowerCase() + "_datalakesdownload.zip";
-    axios({
-      method: "post",
-      url: url,
-      responseType: "blob",
-      data: { data: arr }
-    })
-      .then(({ data }) => {
-        const downloadUrl = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement("a");
-        link.href = downloadUrl;
-        link.setAttribute("download", name);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+    var userpassword = prompt("Please enter the password to download data");
+    if (password === userpassword) {
+      var url = `${apiUrl}/download/${filetype}/${id}`;
+      var name =
+        title.replace(/\s/g, "").toLowerCase() + "_datalakesdownload.zip";
+      axios({
+        method: "post",
+        url: url,
+        responseType: "blob",
+        data: { data: arr }
       })
-      .catch(error => {
-        console.error(error);
-        alert("Failed to download files");
-      });
+        .then(({ data }) => {
+          const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement("a");
+          link.href = downloadUrl;
+          link.setAttribute("download", name);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        })
+        .catch(error => {
+          console.error(error);
+          alert("Failed to download files");
+        });
+    }
   };
 
   render() {

@@ -172,9 +172,16 @@ header {
   display: inline-block;
 }
 
+.links-midscreen {
+  display: none;
+}
+
 @media screen and (max-width: 670px) {
   .links-widescreen {
     display: none;
+  }
+  .links-midscreen {
+    display: block;
   }
 }
 

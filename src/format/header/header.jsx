@@ -50,6 +50,12 @@ class Header extends Component {
                         <NavLink activeClassName="active" onClick={this.closeMenu} to="/remotesensing">Remote Sensing</NavLink>
                         <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
                         <NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink>
+                        <div className="links-midscreen">
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/live">Live</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/predictions">Predictions</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/dataportal">Data Portal</NavLink>
+                        </div>
+                        
                     </div>
                     
                     <div className="mobile">

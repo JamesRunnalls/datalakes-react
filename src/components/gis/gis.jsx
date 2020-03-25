@@ -15,6 +15,8 @@ class SidebarGIS extends Component {
       parameters,
       selected,
       hidden,
+      sidebarextratop,
+      sidebarextrabottom,
       setSelected,
       removeSelected,
       toggleLayerView,
@@ -23,6 +25,7 @@ class SidebarGIS extends Component {
     } = this.props;
     return (
       <React.Fragment>
+        {sidebarextratop}
         <FilterBox
           title="Map Layers"
           preopen="true"
@@ -48,6 +51,7 @@ class SidebarGIS extends Component {
             />
           }
         />
+        {sidebarextrabottom}
       </React.Fragment>
     );
   }
@@ -262,19 +266,17 @@ class GIS extends Component {
     );
 
     // Add default display settings for parameters
+    var colors = [
+      { color: "#0000ff", point: 0 },
+      { color: "#ff0000", point: 1 }
+    ];
+    if ("colors" in this.props) {
+      colors = this.props.colors;
+    }
     parameters.map(x => {
       if (!("plot" in x)) x.plot = "group";
       if (!("colors" in x)) {
-        x.colors = [
-          { color: "#000080", point: 0.0 },
-          { color: "#3366ff", point: 0.0033388981636060114 },
-          { color: "#00b0dc", point: 0.015025041736227053 },
-          { color: "#009933", point: 0.04006677796327214 },
-          { color: "#ffff5b", point: 0.0818030050083473 },
-          { color: "#e63300", point: 0.16527545909849758 },
-          { color: "#cc0000", point: 0.4156928213689484 },
-          { color: "#800000", point: 1.0 }
-        ];
+        x.colors = colors;
       }
       if (!("markerLabel" in x)) x.markerLabel = true;
       if (!("legend" in x)) x.legend = true;
@@ -295,16 +297,7 @@ class GIS extends Component {
     // Add default color settings for maplayers if non already
     maplayers.map(x => {
       if (!("colors" in x)) {
-        x.colors = [
-          { color: "#000080", point: 0.0 },
-          { color: "#3366ff", point: 0.0033388981636060114 },
-          { color: "#00b0dc", point: 0.015025041736227053 },
-          { color: "#009933", point: 0.04006677796327214 },
-          { color: "#ffff5b", point: 0.0818030050083473 },
-          { color: "#e63300", point: 0.16527545909849758 },
-          { color: "#cc0000", point: 0.4156928213689484 },
-          { color: "#800000", point: 1.0 }
-        ];
+        x.colors = colors;
       }
       if (!("markerLabel" in x)) x.markerLabel = false;
       if (!("legend" in x)) x.legend = true;
@@ -339,7 +332,12 @@ class GIS extends Component {
 
   render() {
     var { maplayers, parameters, selected, hidden, loading } = this.state;
-    var { documentTitle, title } = this.props;
+    var {
+      documentTitle,
+      title,
+      sidebarextratop,
+      sidebarextrabottom
+    } = this.props;
     document.title = documentTitle;
 
     maplayers = maplayers.map(layer => {
@@ -370,6 +368,8 @@ class GIS extends Component {
               parameters={parameters}
               selected={selected}
               hidden={hidden}
+              sidebarextratop={sidebarextratop}
+              sidebarextrabottom={sidebarextrabottom}
               setSelected={this.setSelected}
               removeSelected={this.removeSelected}
               toggleLayerView={this.toggleLayerView}

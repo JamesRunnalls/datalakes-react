@@ -32,7 +32,7 @@ class Preview extends Component {
       </tr>
     ];
     var len = data.y ? data.y.length : data.x.length;
-    for (var l = 0; l < Math.min(200, len); l++) {
+    for (var l = 0; l < Math.min(50, len); l++) {
       inner.push(
         <tr key={"h" + l}>
           <th>{l + 2}</th>

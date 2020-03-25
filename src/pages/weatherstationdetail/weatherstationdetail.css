@@ -55,12 +55,19 @@
 }
 
 .weatherstation-graph {
-    height: 350px;
+  height: 350px;
+}
+
+.weatherstation-right {
+  margin-bottom: 100px;
 }
 
 @media screen and (max-width: 500px) {
   .live-parameter-container {
-    margin-top: 30px;
+    margin-top: 50px;
+    margin-bottom: 120px;
+  }
+  .weatherstation-graph {
+    height: auto;
   }
 }
-

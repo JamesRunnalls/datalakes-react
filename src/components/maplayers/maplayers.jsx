@@ -440,7 +440,7 @@ class MapLayers extends Component {
       <SortableList
         props={this.props}
         onSortEnd={this.onSortEnd}
-        distance={1}
+        distance={10}
       />
     );
   }
