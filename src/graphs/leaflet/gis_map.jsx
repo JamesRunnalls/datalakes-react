@@ -91,7 +91,7 @@ class GISMap extends Component {
   };
 
   remoteSensing = async layer => {
-    var { min, max, data } = layer;
+    var { min, max, data, unit } = layer;
     var polygons = [];
     var coords;
     var x = data.lonres / 2;
@@ -103,14 +103,14 @@ class GISMap extends Component {
         [data.lat[i] + y, data.lon[i] + x],
         [data.lat[i] - y, data.lon[i] + x]
       ];
-      var valuestring = String(Math.round(data.v[i] * 1000) / 1000);
+      var valuestring = String(Math.round(data.v[i] * 1000) / 1000) + unit;
       var pixelcolor = getColor(data.v[i], min, max, layer.colors);
       polygons.push(
         L.polygon(coords, {
           color: pixelcolor,
           fillColor: pixelcolor,
           fillOpacity: 1,
-          title: data.v[i]
+          title: valuestring
         })
           .bindPopup(
             "<table><tbody>" +
