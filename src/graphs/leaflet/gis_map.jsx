@@ -10,7 +10,8 @@ class GISMap extends Component {
   state = {
     help: false,
     fullsize: false,
-    loading: false
+    loading: false,
+    menu: window.innerWidth > 500
   };
 
   toggleHelp = () => {
@@ -19,6 +20,10 @@ class GISMap extends Component {
 
   toggleFullsize = () => {
     this.setState({ fullsize: !this.state.fullsize });
+  };
+
+  toggleMenu = () => {
+    this.setState({ menu: !this.state.menu });
   };
 
   hoverOver = e => {
@@ -328,6 +333,7 @@ class GISMap extends Component {
 
     var toggleHelp = this.toggleHelp;
     var toggleFullsize = this.toggleFullsize;
+    var toggleMenu = this.toggleMenu;
 
     this.map = L.map("map", {
       preferCanvas: true,
@@ -353,10 +359,20 @@ class GISMap extends Component {
 
     L.control.attribution({ position: "bottomright" }).addTo(this.map);
 
-    // Add attribution
-    this.map.attributionControl.setPrefix(
-      'datalakes | <a href="https://leafletjs.com" target="_blank" title="A JS library for interactive maps">Leaflet</a>'
-    );
+    // Menu
+    L.control
+      .custom({
+        position: "topleft",
+        content:
+          '<div class="customcontrol" title="Menu" id="sidebar">\u2630</div>',
+        classes: "leaflet-bar",
+        events: {
+          click: function(data) {
+            toggleMenu();
+          }
+        }
+      })
+      .addTo(this.map);
 
     // Full screen
     L.control
@@ -382,6 +398,21 @@ class GISMap extends Component {
         events: {
           click: function(data) {
             toggleHelp();
+          }
+        }
+      })
+      .addTo(this.map);
+
+    // Menu
+    L.control
+      .custom({
+        position: "bottomright",
+        content:
+          '<img src="img/logo.svg">',
+        classes: "gis-datalakes-logo",
+        events: {
+          click: function(data) {
+            toggleMenu();
           }
         }
       })
@@ -429,10 +460,16 @@ class GISMap extends Component {
   }
 
   render() {
-    var { help, fullsize } = this.state;
-    var { legend, selector, loading } = this.props;
-    if (!loading) document.getElementById("fullsize").innerHTML = fullsize ? "&#8690;" : "&#8689;";
-    if (!loading) document.getElementById("fullsize").title = fullsize ? "Shrink map" : "Fullscreen";
+    var { help, fullsize, menu } = this.state;
+    var { legend, selector, loading, sidebar } = this.props;
+    if (!loading)
+      document.getElementById("fullsize").innerHTML = fullsize
+        ? "&#8690;"
+        : "&#8689;";
+    if (!loading)
+      document.getElementById("fullsize").title = fullsize
+        ? "Shrink map"
+        : "Fullscreen";
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
@@ -458,6 +495,17 @@ class GISMap extends Component {
                 <div className="help-content">{help}</div>
               </div>
             )}
+          </div>
+          <div className={menu ? "sidebar-gis" : "sidebar-gis hide"}>
+            <div
+              className="sidebar-title"
+              onClick={this.toggleMenu}
+              title="Hide plot controls"
+            >
+              Plot Controls
+              <div className="sidebar-symbol">{"\u2715"}</div>
+            </div>
+            <div className="sidebar-content">{sidebar}</div>
           </div>
           {legend}
           {selector}

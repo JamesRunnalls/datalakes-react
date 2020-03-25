@@ -71,6 +71,11 @@
   font-size: 8px;
 }
 
+.markerdisplay-symbol {
+  line-height: 16px;
+  text-align: center;
+}
+
 @media screen and (max-width: 500px) {
   .legend {
     width: calc(100% - 20px);

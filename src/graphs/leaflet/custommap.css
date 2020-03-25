@@ -8,9 +8,11 @@
 }
 
 .map {
-  height: 500px;
+  height: calc(100% - 350px);
   z-index: 99999;
-  position: relative;
+  width: 100vw;
+  position: absolute;
+  left: 0;
 }
 
 .map.full {
@@ -19,14 +21,14 @@
   position: fixed;
   top: 0;
   left: 0;
-  margin:0!important;
+  margin: 0 !important;
   z-index: 999999999;
 }
 
 .leaflet-container .leaflet-control-attribution {
   width: 500px;
   text-align: center;
-	}
+}
 
 @media screen and (max-width: 500px) {
   .map {
@@ -36,10 +38,8 @@
   .leaflet-container .leaflet-control-attribution {
     width: 100%;
     text-align: center;
-    }
+  }
 }
-
-
 
 .help {
   z-index: 999;
@@ -94,7 +94,7 @@
 }
 
 .help-container {
-  z-index: 9999;
+  z-index: 99999;
   position: absolute;
   top: 0;
   left: 0;
@@ -102,6 +102,8 @@
   height: 100%;
   background-color: rgba(255, 255, 255, 0.95);
   display: none;
+  padding: 30px;
+  box-sizing: border-box;
 }
 
 .help-container.show {
@@ -167,6 +169,59 @@
   font-size: 20px;
   background-color: white;
   cursor: pointer;
+}
+
+.sidebar-gis {
+  display: block;
+  background-color: white;
+  position: absolute;
+  left: 50px;
+  top: 10px;
+  z-index: 9999;
+  max-width: 100%;
+  width: 300px;
+  border-radius: 4px;
+  height: calc(100% - 60px);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  box-sizing: border-box;
+}
+
+.sidebar-gis .sidebar-title {
+  cursor: pointer;
+  font-size: 15px;
+  border-bottom: 1px solid rgb(169,169,169);
+  padding: 10px 20px;
+}
+
+.sidebar-gis .sidebar-title .sidebar-symbol {
+  float: right;
+}
+
+.sidebar-gis .sidebar-content {
+  overflow-y: auto;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.sidebar-gis.hide {
+  display: none;
+}
+
+.gis-datalakes-logo img {
+  width: 150px;
+  opacity: 70%;
+}
+
+@media screen and (max-width: 500px) {
+  .help-container {
+    padding: 10px;
+  }
+  .sidebar-gis {
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 /* Tocuhscreen changes */
