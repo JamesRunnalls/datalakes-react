@@ -62,8 +62,8 @@ class GIS extends Component {
   state = {
     parameters: [],
     maplayers: [],
-    selected: this.props.selected,
-    hidden: [],
+    selected: this.props.selected ? this.props.selected : [],
+    hidden: this.props.hidden ? this.props.hidden : [],
     loading: true
   };
 

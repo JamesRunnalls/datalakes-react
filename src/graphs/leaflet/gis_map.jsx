@@ -75,13 +75,13 @@ class GISMap extends Component {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
       if ("wind_direction" in layerData[j].properties)
-        rotation = layerData[j].properties.wind_direction;
+        rotation = layerData[j].properties.wind_direction + 180;
       latlng = this.CHtoWGSlatlng(layerData[j].geometry.coordinates);
       marker = new L.marker(latlng, {
         icon: L.divIcon({
           className: "map-marker",
           html:
-            `<div style="padding:10px;transform:translate(-4px, -4px)">` +
+            `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
             `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}deg)">` +
             `</div></div> `
         })
