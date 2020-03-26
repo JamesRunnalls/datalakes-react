@@ -8,7 +8,6 @@ import Home from './pages/home/home';
 import Predictions from './pages/prediction/prediction';
 import NotFound from './pages/notfound/notfound';
 import DataPortal from './pages/dataportal/dataportal';
-import HydrodynamicModel from './pages/hydrodynamicmodel/hydrodynamicmodel';
 import WeatherStationDetail from './pages/weatherstationdetail/weatherstationdetail';
 import About from './pages/about/about';
 import API from './pages/api/api';
@@ -29,7 +28,6 @@ class App extends Component {
                 <Route path='/remotesensing' exact component={RemoteSensing} />
 
                 <Route path='/predictions' exact component={Predictions} />
-                <Route path='/predictions' component={HydrodynamicModel} />
 
                 <Route path='/dataportal' component={DataPortal} />
                 <Route path='/datadetail' component={DataDetail} />

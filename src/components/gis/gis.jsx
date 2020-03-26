@@ -8,6 +8,7 @@ import AddLayers from "../../components/addlayers/addlayers";
 import Legend from "../../components/legend/legend";
 import colorlist from "../colorramp/colors";
 import "./gis.css";
+import TimeSelector from "../sliders/timeselector";
 
 class SidebarGIS extends Component {
   render() {
@@ -354,7 +355,7 @@ class GIS extends Component {
           maplayers={selectlayers}
           hidden={hidden}
           legend={<Legend maplayers={selectlayers} />}
-          selector={<div className="live-dataselector"></div>}
+          timeselector={<TimeSelector selectlayers={selectlayers} />}
           loading={loading}
           sidebar={
             <SidebarGIS

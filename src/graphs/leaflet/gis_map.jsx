@@ -1,10 +1,11 @@
-import "./custommap.css";
-import "./leaflet.css";
 import React, { Component } from "react";
 import L from "leaflet";
 import "leaflet-canvas-layer";
+import "./customcontrol";
 import { getColor } from "../../components/gradients/gradients";
 import Loading from "../../components/loading/loading";
+import "./css/gis_map.css";
+import "./css/leaflet.css";
 
 class GISMap extends Component {
   state = {
@@ -466,7 +467,7 @@ class GISMap extends Component {
 
   render() {
     var { help, fullsize, menu } = this.state;
-    var { legend, selector, loading, sidebar } = this.props;
+    var { legend, timeselector, loading, sidebar } = this.props;
     if (!loading)
       document.getElementById("fullsize").innerHTML = fullsize
         ? "&#8690;"
@@ -485,35 +486,37 @@ class GISMap extends Component {
                 Downloading and plotting data
               </div>
             )}
-            {help && (
-              <div className="help-container show">
-                <div
-                  onClick={this.toggleHelp}
-                  className="help-top"
-                  title="Click to hide user guide"
-                >
-                  <h3>
-                    <div className="help-title">User Guide</div>
-                    <span> &#215; </span>
-                  </h3>
-                </div>
-                <div className="help-content">{help}</div>
-              </div>
-            )}
           </div>
-          <div className={menu ? "sidebar-gis" : "sidebar-gis hide"}>
+          <div className="sidebar-gis">
             <div
-              className="sidebar-title"
-              onClick={this.toggleMenu}
-              title="Hide plot controls"
+              className={menu ? "sidebar-gis-inner" : "sidebar-gis-inner hide"}
             >
-              Plot Controls
-              <div className="sidebar-symbol">{"\u2715"}</div>
+              <div
+                className="sidebar-title"
+                onClick={this.toggleMenu}
+                title="Hide plot controls"
+              >
+                Plot Controls
+                <div className="sidebar-symbol">{"\u2715"}</div>
+              </div>
+              <div className="sidebar-content">{sidebar}</div>
             </div>
-            <div className="sidebar-content">{sidebar}</div>
+            <div
+              className={help ? "sidebar-gis-inner" : "sidebar-gis-inner hide"}
+            >
+              <div
+                className="sidebar-title"
+                onClick={this.toggleHelp}
+                title="Hide help"
+              >
+                Help
+                <div className="sidebar-symbol">{"\u2715"}</div>
+              </div>
+              <div className="sidebar-content">{help}</div>
+            </div>
           </div>
+          <div className="timeselector-gis">{timeselector}</div>
           {legend}
-          {selector}
         </div>
       </React.Fragment>
     );

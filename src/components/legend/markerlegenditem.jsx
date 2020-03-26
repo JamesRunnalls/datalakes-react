@@ -8,13 +8,7 @@ class MarkerLegendItem extends Component {
       maxSize = 40,
       inner = [],
       color,
-      fontSize,
-      symbolDiv;
-
-    if (markerSymbol === "circle") symbolDiv = <div>&#9679;</div>;
-    if (markerSymbol === "square") symbolDiv = <div>&#9724;</div>;
-    if (markerSymbol === "triangle") symbolDiv = <div>&#9650;</div>;
-    if (markerSymbol === "arrow") symbolDiv = <div className="arrow"></div>;
+      fontSize;
 
     var fixedColor = false;
     if (colors.length === 2 && colors[0].color === colors[1].color) {

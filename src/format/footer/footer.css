@@ -8,17 +8,9 @@ footer {
   background-color: white;
 }
 
-@media screen and (max-height: 850px) {
-  footer {
-    position: relative;
-    margin-top: 40px;
-  }
-}
-
 @media screen and (max-width: 960px) {
   footer {
     position: relative;
-    margin-top: 40px;
   }
 }
 

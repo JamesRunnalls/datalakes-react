@@ -3,12 +3,11 @@ import L from "leaflet";
 import "./customcontrol";
 import "leaflet.markercluster";
 import "leaflet-draw";
-import "./custommap.css";
-import "./leaflet.css";
-import "./markercluster.css";
-import "./markerclusterdefault.css";
-import "./marker.css";
-import "./mapselect.css";
+import "./css/leaflet.css";
+import "./css/markercluster.css";
+import "./css/markerclusterdefault.css";
+import "./css/marker.css";
+import "./css/mapselect.css";
 
 class MapSelect extends Component {
   rectEnable = e => {
@@ -22,7 +21,7 @@ class MapSelect extends Component {
     var center = [46.85, 7.55];
     var zoom = 8;
 
-    this.map = L.map("map", {
+    this.map = L.map("mapselect", {
       center: center,
       zoom: zoom,
       minZoom: 2,
@@ -127,8 +126,8 @@ class MapSelect extends Component {
   render() {
     return (
       <React.Fragment>
-        <div className="map">
-          <div id="map"></div>
+        <div className="mapselect">
+          <div id="mapselect"></div>
         </div>
       </React.Fragment>
     );

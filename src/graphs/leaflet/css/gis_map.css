@@ -171,19 +171,40 @@
   cursor: pointer;
 }
 
-.sidebar-gis {
-  display: block;
+.timeselector-gis {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 9998;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  box-sizing: border-box;
   background-color: white;
+}
+
+.sidebar-gis {  
   position: absolute;
   left: 50px;
   top: 10px;
   z-index: 9999;
+  height: calc(100% - 60px);
+}
+
+.sidebar-gis-inner {
+  display: inline-block;
   max-width: 100%;
   width: 300px;
   border-radius: 4px;
-  height: calc(100% - 60px);
+  height: 100%;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
   box-sizing: border-box;
+  background-color: white;
+  margin-right: 20px;
+
+}
+
+.sidebar-gis-inner.hide {
+  display: none;
 }
 
 .sidebar-gis .sidebar-title {
@@ -203,10 +224,6 @@
   padding: 0 20px;
   box-sizing: border-box;
   height: calc(100% - 38px);
-}
-
-.sidebar-gis.hide {
-  display: none;
 }
 
 .gis-datalakes-logo img {
