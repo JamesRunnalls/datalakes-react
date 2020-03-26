@@ -63,6 +63,7 @@ class GISMap extends Component {
     var markerGroup = L.layerGroup().addTo(this.map);
     var { markerLabel, min, max } = layer;
     var marker, value, color, shape, size, latlng, valuestring;
+    var rotation = 0;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
       valuestring = String(value) + String(layerData[j].properties.unit);
@@ -73,11 +74,16 @@ class GISMap extends Component {
       } else {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
+      if ("wind_direction" in layerData[j].properties)
+        rotation = layerData[j].properties.wind_direction;
       latlng = this.CHtoWGSlatlng(layerData[j].geometry.coordinates);
       marker = new L.marker(latlng, {
         icon: L.divIcon({
           className: "map-marker",
-          html: `<div style="padding:10px;transform:translate(-4px, -4px)"><div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;"></div></div> `
+          html:
+            `<div style="padding:10px;transform:translate(-4px, -4px)">` +
+            `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}deg)">` +
+            `</div></div> `
         })
       })
         .bindTooltip(valuestring, {
@@ -407,8 +413,7 @@ class GISMap extends Component {
     L.control
       .custom({
         position: "bottomright",
-        content:
-          '<img src="img/logo.svg">',
+        content: '<img src="img/logo.svg">',
         classes: "gis-datalakes-logo",
         events: {
           click: function(data) {
@@ -419,10 +424,10 @@ class GISMap extends Component {
       .addTo(this.map);
 
     // set bounds
-    var southWest = L.latLng(44.4, 3.95);
-    var northEast = L.latLng(48.55, 13.06);
-    var bounds = L.latLngBounds(southWest, northEast);
-    this.map.setMaxBounds(bounds);
+    //var southWest = L.latLng(44.4, 3.95);
+    //var northEast = L.latLng(48.55, 13.06);
+    //var bounds = L.latLngBounds(southWest, northEast);
+    //this.map.setMaxBounds(bounds);
     this.marker = [];
     this.raster = [];
   }

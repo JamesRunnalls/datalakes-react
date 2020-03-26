@@ -154,6 +154,18 @@ button:hover {
   transform: translate(-50%, -50%);
 }
 
+.arrow {
+  height: 12px;
+  width: 12px;
+  -webkit-clip-path: polygon(50% 0, 100% 100%, 50% 75%, 0 100%);
+  clip-path: polygon(50% 0, 100% 100%, 50% 75%, 0 100%);
+  background-color: black;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .trapezoid {
   height: 12px;
   width: 12px;

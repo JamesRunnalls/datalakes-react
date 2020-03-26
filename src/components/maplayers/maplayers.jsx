@@ -249,6 +249,7 @@ class EditSettings extends Component {
                       <option value="circle">&#9679; Circle</option>
                       <option value="square">&#9632; Square</option>
                       <option value="triangle">&#9650; Triangle</option>
+                      <option value="arrow">Arrow</option>
                     </select>
                   </td>
                 </tr>

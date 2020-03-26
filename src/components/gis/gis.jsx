@@ -6,6 +6,7 @@ import FilterBox from "../../components/filterbox/filterbox";
 import MapLayers from "../../components/maplayers/maplayers";
 import AddLayers from "../../components/addlayers/addlayers";
 import Legend from "../../components/legend/legend";
+import colorlist from "../colorramp/colors";
 import "./gis.css";
 
 class SidebarGIS extends Component {
@@ -122,7 +123,9 @@ class GIS extends Component {
   };
 
   updateMapLayers = maplayers => {
-    this.setState({ maplayers });
+    this.setState({ loading: true }, () => {
+      this.setState({ maplayers, loading: false });
+    });
   };
 
   downloadFile = async (id, maplayers) => {
@@ -259,56 +262,47 @@ class GIS extends Component {
     return min;
   };
 
+  parseColor = colorname => {
+    var defaultColors = [
+      { color: "#0000ff", point: 0 },
+      { color: "#ff0000", point: 1 }
+    ];
+    var colorparse = colorlist.find(c => c.name === colorname);
+    if (colorparse) {
+      return colorparse.data;
+    } else {
+      return defaultColors;
+    }
+  };
+
+  parseBoolean = bool => {
+    if (bool === "true") {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   async componentDidMount() {
     // Get parameter details
     var { data: parameters } = await axios.get(
       apiUrl + "/selectiontables/parameters"
     );
 
-    // Add default display settings for parameters
-    var colors = [
-      { color: "#0000ff", point: 0 },
-      { color: "#ff0000", point: 1 }
-    ];
-    if ("colors" in this.props) {
-      colors = this.props.colors;
-    }
-    parameters.map(x => {
-      if (!("plot" in x)) x.plot = "group";
-      if (!("colors" in x)) {
-        x.colors = colors;
-      }
-      if (!("markerLabel" in x)) x.markerLabel = true;
-      if (!("legend" in x)) x.legend = true;
-      if (!("markerSymbol" in x)) x.markerSymbol = "circle";
-      if (!("markerFixedSize" in x)) x.markerFixedSize = true;
-      if (!("markerSize" in x)) x.markerSize = 10;
-      if (!("vectorMagnitude" in x)) x.vectorMagnitude = true;
-      if (!("vectorArrows" in x)) x.vectorArrows = false;
-      if (!("vectorFlow" in x)) x.vectorFlow = false;
-      if (!("vectorArrowColor" in x)) x.vectorArrowColor = false;
-      if (!("vectorFlowColor" in x)) x.vectorFlowColor = false;
-      return x;
-    });
-
     // Get maplayers
     var { data: maplayers } = await axios.get(apiUrl + "/maplayers");
 
-    // Add default color settings for maplayers if non already
+    // Parse default settings from table
     maplayers.map(x => {
-      if (!("colors" in x)) {
-        x.colors = colors;
-      }
-      if (!("markerLabel" in x)) x.markerLabel = false;
-      if (!("legend" in x)) x.legend = true;
-      if (!("markerSymbol" in x)) x.markerSymbol = "circle";
-      if (!("markerFixedSize" in x)) x.markerFixedSize = true;
-      if (!("markerSize" in x)) x.markerSize = 10;
-      if (!("vectorMagnitude" in x)) x.vectorMagnitude = true;
-      if (!("vectorArrows" in x)) x.vectorArrows = false;
-      if (!("vectorFlow" in x)) x.vectorFlow = false;
-      if (!("vectorArrowColor" in x)) x.vectorArrowColor = false;
-      if (!("vectorFlowColor" in x)) x.vectorFlowColor = false;
+      x.colors = this.parseColor(x.colors);
+      x.markerLabel = this.parseBoolean(x.markerLabel);
+      x.markerFixedSize = this.parseBoolean(x.markerFixedSize);
+      x.vectorMagnitude = this.parseBoolean(x.vectorMagnitude);
+      x.vectorArrows = this.parseBoolean(x.vectorArrows);
+      x.vectorFlow = this.parseBoolean(x.vectorFlow);
+      x.vectorArrowColor = this.parseBoolean(x.vectorArrowColor);
+      x.vectorFlowColor = this.parseBoolean(x.vectorFlowColor);
+      x.legend = this.parseBoolean(x.legend);
       return x;
     });
 
