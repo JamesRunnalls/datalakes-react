@@ -36,7 +36,7 @@ class Live extends Component {
       <GIS
         title="Live Conditions"
         documentTitle="Live - Datalakes"
-        selected={[10]}
+        selected={[3,0]}
         sidebarextratop={
           <FilterBox
             title="Lake Stations"

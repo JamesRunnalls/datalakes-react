@@ -8,7 +8,7 @@
 }
 
 .map {
-  height: calc(100% - 350px);
+  height: calc(100% - 290px);
   z-index: 99999;
   width: 100vw;
   position: absolute;
@@ -200,7 +200,7 @@
   box-sizing: border-box;
   background-color: white;
   margin-right: 20px;
-
+  vertical-align: top;
 }
 
 .sidebar-gis-inner.hide {
