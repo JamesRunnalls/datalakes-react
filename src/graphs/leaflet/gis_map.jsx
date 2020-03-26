@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import L from "leaflet";
-import "leaflet-canvas-layer";
+import "./leaflet_vectorField";
 import "./customcontrol";
 import { getColor } from "../../components/gradients/gradients";
 import Loading from "../../components/loading/loading";
@@ -321,8 +321,41 @@ class GISMap extends Component {
       }
     }
 
-    if (vectorArrows) {
-    }
+    //if (vectorArrows) {
+    var heat = L.vectorField(
+      [
+        [46.5, 6.6, 0.5],
+        [46.6, 6.61, 0.5],
+        [46.6, 6.62, 0.5],
+        [46.6, 6.61, 0.5],
+        [46.6, 6.62, 0.5],
+        [46.6, 6.61, 0.5],
+        [46.6, 6.61, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5],
+        [46.6, 6.6, 0.5]
+      ],
+      { radius: 25 }
+    ).addTo(this.map);
+    this.raster.push(heat);
+    //}
 
     if (vectorFlow) {
     }
@@ -415,20 +448,10 @@ class GISMap extends Component {
       .custom({
         position: "bottomright",
         content: '<img src="img/logo.svg">',
-        classes: "gis-datalakes-logo",
-        events: {
-          click: function(data) {
-            toggleMenu();
-          }
-        }
+        classes: "gis-datalakes-logo"
       })
       .addTo(this.map);
 
-    // set bounds
-    //var southWest = L.latLng(44.4, 3.95);
-    //var northEast = L.latLng(48.55, 13.06);
-    //var bounds = L.latLngBounds(southWest, northEast);
-    //this.map.setMaxBounds(bounds);
     this.marker = [];
     this.raster = [];
   }
