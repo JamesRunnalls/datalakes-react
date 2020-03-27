@@ -309,7 +309,6 @@ class EditSettings extends Component {
                       type="checkbox"
                       checked={vectorArrows}
                       onChange={this.localVectorArrowsChange}
-                      disabled
                     ></input>
                   </td>
                   <td>Directional Arrows</td>
@@ -317,7 +316,6 @@ class EditSettings extends Component {
                     <select
                       value={vectorArrowColor}
                       onChange={this.localVectorArrowColorChange}
-                      disabled
                     >
                       <option value="true">Color Ramp</option>
                       <option value="false">Fixed Color</option>

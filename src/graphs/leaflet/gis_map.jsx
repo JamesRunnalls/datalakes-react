@@ -249,7 +249,17 @@ class GISMap extends Component {
   };
 
   meteolakesVector = async layer => {
-    var { data, vectorArrows, vectorMagnitude, vectorFlow, min, max } = layer;
+    var {
+      data,
+      vectorArrows,
+      vectorMagnitude,
+      vectorFlow,
+      vectorArrowColor,
+      vectorFlowColor,
+      min,
+      max,
+      colors
+    } = layer;
 
     if (vectorMagnitude) {
       var matrix, polygons;
@@ -320,24 +330,14 @@ class GISMap extends Component {
         this.raster.push(L.layerGroup(polygons).addTo(this.map));
       }
     }
-    console.log(data[0].data)
+
     if (vectorArrows) {
-      var arrows = L.vectorField(
-        [
-          [46.6, 6.61, -0.5, 0.1],
-          [46.6, 6.62, 0.4, -0.1],
-          [46.6, 6.63, -0.2, 0.2],
-          [46.6, 6.64, 0.8, 0.6],
-          [46.6, 6.65, -0.5, -1],
-          [46.6, 6.66, 0.1, 0.2],
-          [46.6, 6.67, 0.8, 0.1],
-          [46.6, 6.68, -0.6, 0.5],
-          [46.6, 6.69, 0.7, 0.1],
-          [46.6, 6.7, -0.3, 0.7],
-          [46.6, 6.71, -0.1, 0.1]
-        ],
-        { radius: 25 }
-      ).addTo(this.map);
+      var arrows = L.vectorField(data[0].data, {
+        vectorArrowColor: vectorArrowColor,
+        colors: colors,
+        min: min,
+        max: max
+      }).addTo(this.map);
       this.raster.push(arrows);
     }
 

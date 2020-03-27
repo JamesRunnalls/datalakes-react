@@ -1,109 +1,5 @@
 import L from "leaflet";
 
-function arrows(canvas) {
-  if (!(this instanceof arrows)) return new arrows(canvas);
-
-  this._canvas = canvas =
-    typeof canvas === "string" ? document.getElementById(canvas) : canvas;
-
-  this._ctx = canvas.getContext("2d");
-  this._width = canvas.width;
-  this._height = canvas.height;
-
-  this._max = 1;
-  this._data = [];
-}
-
-arrows.prototype = {
-  data: function(data) {
-    this._data = data;
-    return this;
-  },
-
-  max: function(max) {
-    this._max = max;
-    return this;
-  },
-
-  add: function(point) {
-    this._data.push(point);
-    return this;
-  },
-
-  clear: function() {
-    this._data = [];
-    return this;
-  },
-
-  radius: function(r, blur) {
-    blur = blur === undefined ? 15 : blur;
-    var circle = (this._circle = this._createCanvas()),
-      ctx = circle.getContext("2d"),
-      r2 = (this._r = r + blur);
-    return this;
-  },
-
-  resize: function() {
-    this._width = this._canvas.width;
-    this._height = this._canvas.height;
-  },
-
-  draw: function() {
-    var ctx = this._ctx;
-    ctx.clearRect(0, 0, this._width, this._height);
-
-    for (var i = 0, len = this._data.length, p; i < len; i++) {
-      p = this._data[i];
-      var cell = { x: p[0], y: p[1], value: p[2], rotation: Math.PI };
-      this._drawArrow(cell, ctx);
-    }
-
-    return this;
-  },
-
-  _drawArrow: function(cell, ctx) {
-    // Arrow Size
-    const size = 20;
-
-    // Arrow Center
-    ctx.save();
-    ctx.translate(cell.x, cell.y);
-
-    // Arrow Color
-    var color = "#000000";
-    //if (typeof color === "function") {
-    //  ctx.strokeStyle = color(value);
-    ctx.strokeStyle = color;
-
-    // Arrow Rotation
-    ctx.rotate(cell.rotation); // Rotation in rads
-
-    // Set other properties
-    ctx.globalAlpha = 1;
-    ctx.lineWidth = 1;
-
-    // Draw Path
-    ctx.beginPath();
-    ctx.moveTo(-size / 2, 0);
-    ctx.lineTo(+size / 2, 0);
-    ctx.moveTo(size * 0.25, -size * 0.25);
-    ctx.lineTo(+size / 2, 0);
-    ctx.lineTo(size * 0.25, size * 0.25);
-    ctx.stroke();
-    ctx.restore();
-  },
-
-  _createCanvas: function() {
-    if (typeof document !== "undefined") {
-      return document.createElement("canvas");
-    } else {
-      // create a new canvas instance in node.js
-      // the canvas class needs to have a default constructor without any parameter
-      return new this._canvas.constructor();
-    }
-  }
-};
-
 L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
   initialize: function(inputdata, options) {
     this._inputdata = inputdata;
@@ -122,14 +18,11 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
 
   setOptions: function(options) {
     L.setOptions(this, options);
-    if (this._arrows) {
-      this._updateOptions();
-    }
     return this.redraw();
   },
 
   redraw: function() {
-    if (this._arrows && !this._frame && this._map && !this._map._animating) {
+    if (!this._frame && this._map && !this._map._animating) {
       this._frame = L.Util.requestAnimFrame(this._redraw, this);
     }
     return this;
@@ -199,126 +92,159 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
       "leaflet-zoom-" + (animated ? "animated" : "hide")
     );
 
-    this._arrows = arrows(canvas);
-    this._updateOptions();
-  },
-
-  _updateOptions: function() {
-    this._arrows.radius(
-      this.options.radius || this._arrows.defaultRadius,
-      this.options.blur
-    );
-
-    if (this.options.gradient) {
-      this._arrows.gradient(this.options.gradient);
-    }
-    if (this.options.max) {
-      this._arrows.max(this.options.max);
-    }
+    this._canvas = canvas;
+    this._ctx = canvas.getContext("2d");
+    this._width = canvas.width;
+    this._height = canvas.height;
   },
 
   _reset: function() {
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this._canvas, topLeft);
-
-    var size = this._map.getSize();
-
-    if (this._arrows._width !== size.x) {
-      this._canvas.width = this._arrows._width = size.x;
-    }
-    if (this._arrows._height !== size.y) {
-      this._canvas.height = this._arrows._height = size.y;
-    }
-
     this._redraw();
+  },
+
+  _CHtolatlng: function(yx) {
+    var y_aux = (yx[0] - 600000) / 1000000;
+    var x_aux = (yx[1] - 200000) / 1000000;
+    var lat =
+      16.9023892 +
+      3.238272 * x_aux -
+      0.270978 * Math.pow(y_aux, 2) -
+      0.002528 * Math.pow(x_aux, 2) -
+      0.0447 * Math.pow(y_aux, 2) * x_aux -
+      0.014 * Math.pow(x_aux, 3);
+    var lng =
+      2.6779094 +
+      4.728982 * y_aux +
+      0.791484 * y_aux * x_aux +
+      0.1306 * y_aux * Math.pow(x_aux, 2) -
+      0.0436 * Math.pow(y_aux, 3);
+    lat = (lat * 100) / 36;
+    lng = (lng * 100) / 36;
+
+    return [lat, lng];
+  },
+
+  _drawArrow: function(cell, ctx) {
+    var { min, max, vectorArrowColor, colors } = this.options;
+    var { center, value, rotation } = cell;
+
+    // Arrow Size
+    const size = 20;
+
+    // Arrow Center
+    ctx.save();
+    ctx.translate(center.x, center.y);
+
+    // Arrow Color
+    var color = "#000000";
+    if (vectorArrowColor) {
+      color = this._getColor(value, min, max, colors);
+    }
+    ctx.strokeStyle = color;
+
+    // Arrow Rotation
+    ctx.rotate(rotation); // Rotation in rads
+
+    // Set other properties
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
+
+    // Draw Path
+    ctx.beginPath();
+    ctx.moveTo(-size / 2, 0);
+    ctx.lineTo(+size / 2, 0);
+    ctx.moveTo(size * 0.25, -size * 0.25);
+    ctx.lineTo(+size / 2, 0);
+    ctx.lineTo(size * 0.25, size * 0.25);
+    ctx.stroke();
+    ctx.restore();
+  },
+
+  _drawArrows: function() {
+    console.log(this.options);
+    var ctx = this._ctx;
+    ctx.clearRect(0, 0, this._width, this._height);
+
+    var i, j, row, latlng, p, value, rotation, cell;
+
+    for (i = 0; i < this._inputdata.length; i++) {
+      row = this._inputdata[i];
+      for (j = 0; j < row.length; j++) {
+        if (row[j] !== null) {
+          latlng = this._CHtolatlng([row[j][0], row[j][1]]);
+          p = this._map.latLngToContainerPoint(latlng);
+
+          value = Math.abs(
+            Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
+          );
+
+          rotation = Math.atan2(row[j][2], row[j][3]) + Math.PI / 2;
+
+          cell = { center: p, value: value, rotation: rotation };
+          this._drawArrow(cell, ctx);
+        }
+      }
+    }
+  },
+
+  _hex: function(c) {
+    var s = "0123456789abcdef";
+    var i = parseInt(c, 10);
+    if (i === 0 || isNaN(c)) return "00";
+    i = Math.round(Math.min(Math.max(0, i), 255));
+    return s.charAt((i - (i % 16)) / 16) + s.charAt(i % 16);
+  },
+
+  _trim: function trim(s) {
+    return s.charAt(0) === "#" ? s.substring(1, 7) : s;
+  },
+
+  _convertToRGB: function convertToRGB(hex) {
+    var color = [];
+    color[0] = parseInt(this._trim(hex).substring(0, 2), 16);
+    color[1] = parseInt(this._trim(hex).substring(2, 4), 16);
+    color[2] = parseInt(this._trim(hex).substring(4, 6), 16);
+    return color;
+  },
+
+  _convertToHex: function convertToHex(rgb) {
+    return this._hex(rgb[0]) + this._hex(rgb[1]) + this._hex(rgb[2]);
+  },
+
+  _getColor: function(value, min, max, colors) {
+    var loc = (value - min) / (max - min);
+    if (loc < 0 || loc > 1) {
+      return "#fff";
+    } else {
+      var index = 0;
+      for (var i = 0; i < colors.length - 1; i++) {
+        if (loc >= colors[i].point && loc <= colors[i + 1].point) {
+          index = i;
+        }
+      }
+      var color1 = this._convertToRGB(colors[index].color);
+      var color2 = this._convertToRGB(colors[index + 1].color);
+
+      var f =
+        (loc - colors[index].point) /
+        (colors[index + 1].point - colors[index].point);
+      var rgb = [
+        color1[0] + (color2[0] - color1[0]) * f,
+        color1[1] + (color2[1] - color1[1]) * f,
+        color1[2] + (color2[2] - color1[2]) * f
+      ];
+
+      return `#${this._convertToHex(rgb)}`;
+    }
   },
 
   _redraw: function() {
     if (!this._map) {
       return;
     }
-    console.log(this._inputdata)
-    var data = [],
-      r = this._arrows._r,
-      size = this._map.getSize(),
-      bounds = new L.Bounds(L.point([-r, -r]), size.add([r, r])),
-      max = this.options.max === undefined ? 1 : this.options.max,
-      maxZoom =
-        this.options.maxZoom === undefined
-          ? this._map.getMaxZoom()
-          : this.options.maxZoom,
-      vv =
-        1 /
-        Math.pow(2, Math.max(0, Math.min(maxZoom - this._map.getZoom(), 12))),
-      cellSize = r / 2,
-      grid = [],
-      panePos = this._map._getMapPanePos(),
-      offsetX = panePos.x % cellSize,
-      offsetY = panePos.y % cellSize,
-      i,
-      len,
-      p,
-      cell,
-      x,
-      y,
-      j,
-      len2,
-      k,
-      lat,
-      lng,
-      u,
-      v;
-
-    for (i = 0, len = this._inputdata.length; i < len; i++) {
-      lat = this._inputdata[i][0];
-      lng = this._inputdata[i][1];
-      u = this._inputdata[i][2];
-      v = this._inputdata[i][3];
-      p = this._map.latLngToContainerPoint([lat, lng]);
-      if (bounds.contains(p)) {
-        x = Math.floor((p.x - offsetX) / cellSize) + 2;
-        y = Math.floor((p.y - offsetY) / cellSize) + 2;
-
-        var alt =
-          this._inputdata[i].alt !== undefined
-            ? this._inputdata[i].alt
-            : this._inputdata[i][2] !== undefined
-            ? +this._inputdata[i][2]
-            : 1;
-        k = alt * vv;
-
-        grid[y] = grid[y] || [];
-        cell = grid[y][x];
-
-        if (!cell) {
-          grid[y][x] = [p.x, p.y, k];
-        } else {
-          cell[0] = (cell[0] * cell[2] + p.x * k) / (cell[2] + k); // x
-          cell[1] = (cell[1] * cell[2] + p.y * k) / (cell[2] + k); // y
-          cell[2] += k; // cumulated intensity value
-        }
-      }
-    }
-
-    for (i = 0, len = grid.length; i < len; i++) {
-      if (grid[i]) {
-        for (j = 0, len2 = grid[i].length; j < len2; j++) {
-          cell = grid[i][j];
-          if (cell) {
-            data.push([
-              Math.round(cell[0]),
-              Math.round(cell[1]),
-              Math.min(cell[2], max)
-            ]);
-          }
-        }
-      }
-    }
-
-    console.log(data)
-
-    this._arrows.data(data).draw();
-    this._frame = null;
+    this._drawArrows();
   },
 
   _animateZoom: function(e) {
