@@ -1,11 +1,12 @@
 import L from "leaflet";
 
-function simpleheat(canvas) {
-  if (!(this instanceof simpleheat)) return new simpleheat(canvas);
+function arrows(canvas) {
+  if (!(this instanceof arrows)) return new arrows(canvas);
 
-  this._canvas = canvas = typeof canvas === 'string' ? document.getElementById(canvas) : canvas;
+  this._canvas = canvas =
+    typeof canvas === "string" ? document.getElementById(canvas) : canvas;
 
-  this._ctx = canvas.getContext('2d');
+  this._ctx = canvas.getContext("2d");
   this._width = canvas.width;
   this._height = canvas.height;
 
@@ -13,166 +14,122 @@ function simpleheat(canvas) {
   this._data = [];
 }
 
-simpleheat.prototype = {
-
-  defaultRadius: 25,
-
-  defaultGradient: {
-      0.4: 'blue',
-      0.6: 'cyan',
-      0.7: 'lime',
-      0.8: 'yellow',
-      1.0: 'red'
+arrows.prototype = {
+  data: function(data) {
+    this._data = data;
+    return this;
   },
 
-  data: function (data) {
-      this._data = data;
-      return this;
+  max: function(max) {
+    this._max = max;
+    return this;
   },
 
-  max: function (max) {
-      this._max = max;
-      return this;
+  add: function(point) {
+    this._data.push(point);
+    return this;
   },
 
-  add: function (point) {
-      this._data.push(point);
-      return this;
+  clear: function() {
+    this._data = [];
+    return this;
   },
 
-  clear: function () {
-      this._data = [];
-      return this;
+  radius: function(r, blur) {
+    blur = blur === undefined ? 15 : blur;
+    var circle = (this._circle = this._createCanvas()),
+      ctx = circle.getContext("2d"),
+      r2 = (this._r = r + blur);
+    return this;
   },
 
-  radius: function (r, blur) {
-      blur = blur === undefined ? 15 : blur;
-
-      // create a grayscale blurred circle image that we'll use for drawing points
-      var circle = this._circle = this._createCanvas(),
-          ctx = circle.getContext('2d'),
-          r2 = this._r = r + blur;
-
-      circle.width = circle.height = r2 * 2;
-
-      ctx.shadowOffsetX = ctx.shadowOffsetY = r2 * 2;
-      ctx.shadowBlur = blur;
-      ctx.shadowColor = 'black';
-
-      ctx.beginPath();
-      ctx.arc(-r2, -r2, r, 0, Math.PI * 2, true);
-      ctx.closePath();
-      ctx.fill();
-
-      return this;
+  resize: function() {
+    this._width = this._canvas.width;
+    this._height = this._canvas.height;
   },
 
-  resize: function () {
-      this._width = this._canvas.width;
-      this._height = this._canvas.height;
+  draw: function() {
+    var ctx = this._ctx;
+    ctx.clearRect(0, 0, this._width, this._height);
+
+    for (var i = 0, len = this._data.length, p; i < len; i++) {
+      p = this._data[i];
+      var cell = { x: p[0], y: p[1], value: p[2], rotation: Math.PI };
+      this._drawArrow(cell, ctx);
+    }
+
+    return this;
   },
 
-  gradient: function (grad) {
-      // create a 256x1 gradient that we'll use to turn a grayscale heatmap into a colored one
-      var canvas = this._createCanvas(),
-          ctx = canvas.getContext('2d'),
-          gradient = ctx.createLinearGradient(0, 0, 0, 256);
+  _drawArrow: function(cell, ctx) {
+    // Arrow Size
+    const size = 20;
 
-      canvas.width = 1;
-      canvas.height = 256;
+    // Arrow Center
+    ctx.save();
+    ctx.translate(cell.x, cell.y);
 
-      for (var i in grad) {
-          gradient.addColorStop(+i, grad[i]);
-      }
+    // Arrow Color
+    var color = "#000000";
+    //if (typeof color === "function") {
+    //  ctx.strokeStyle = color(value);
+    ctx.strokeStyle = color;
 
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 1, 256);
+    // Arrow Rotation
+    ctx.rotate(cell.rotation); // Rotation in rads
 
-      this._grad = ctx.getImageData(0, 0, 1, 256).data;
+    // Set other properties
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
 
-      return this;
+    // Draw Path
+    ctx.beginPath();
+    ctx.moveTo(-size / 2, 0);
+    ctx.lineTo(+size / 2, 0);
+    ctx.moveTo(size * 0.25, -size * 0.25);
+    ctx.lineTo(+size / 2, 0);
+    ctx.lineTo(size * 0.25, size * 0.25);
+    ctx.stroke();
+    ctx.restore();
   },
 
-  draw: function (minOpacity) {
-      if (!this._circle) this.radius(this.defaultRadius);
-      if (!this._grad) this.gradient(this.defaultGradient);
-
-      var ctx = this._ctx;
-
-      ctx.clearRect(0, 0, this._width, this._height);
-
-      // draw a grayscale heatmap by putting a blurred circle at each data point
-      for (var i = 0, len = this._data.length, p; i < len; i++) {
-          p = this._data[i];
-          ctx.globalAlpha = Math.min(Math.max(p[2] / this._max, minOpacity === undefined ? 0.05 : minOpacity), 1);
-          ctx.drawImage(this._circle, p[0] - this._r, p[1] - this._r);
-      }
-
-      // colorize the heatmap, using opacity value of each pixel to get the right color from our gradient
-      var colored = ctx.getImageData(0, 0, this._width, this._height);
-      this._colorize(colored.data, this._grad);
-      ctx.putImageData(colored, 0, 0);
-
-      return this;
-  },
-
-  _colorize: function (pixels, gradient) {
-      for (var i = 0, len = pixels.length, j; i < len; i += 4) {
-          j = pixels[i + 3] * 4; // get gradient color from opacity value
-
-          if (j) {
-              pixels[i] = gradient[j];
-              pixels[i + 1] = gradient[j + 1];
-              pixels[i + 2] = gradient[j + 2];
-          }
-      }
-  },
-
-  _createCanvas: function () {
-      if (typeof document !== 'undefined') {
-          return document.createElement('canvas');
-      } else {
-          // create a new canvas instance in node.js
-          // the canvas class needs to have a default constructor without any parameter
-          return new this._canvas.constructor();
-      }
+  _createCanvas: function() {
+    if (typeof document !== "undefined") {
+      return document.createElement("canvas");
+    } else {
+      // create a new canvas instance in node.js
+      // the canvas class needs to have a default constructor without any parameter
+      return new this._canvas.constructor();
+    }
   }
 };
 
 L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
-  // options: {
-  //     minOpacity: 0.05,
-  //     maxZoom: 18,
-  //     radius: 25,
-  //     blur: 15,
-  //     max: 1.0
-  // },
-
-  initialize: function(latlngs, options) {
-    this._latlngs = latlngs;
+  initialize: function(inputdata, options) {
+    this._inputdata = inputdata;
     L.setOptions(this, options);
   },
 
-  setLatLngs: function(latlngs) {
-    this._latlngs = latlngs;
+  setInputData: function(inputdata) {
+    this._inputdata = inputdata;
     return this.redraw();
   },
 
-  addLatLng: function(latlng) {
-    this._latlngs.push(latlng);
+  addInputData: function(inputdata) {
+    this._inputdata.push(inputdata);
     return this.redraw();
   },
 
   setOptions: function(options) {
     L.setOptions(this, options);
-    if (this._heat) {
+    if (this._arrows) {
       this._updateOptions();
     }
     return this.redraw();
   },
 
   redraw: function() {
-    if (this._heat && !this._frame && this._map && !this._map._animating) {
+    if (this._arrows && !this._frame && this._map && !this._map._animating) {
       this._frame = L.Util.requestAnimFrame(this._redraw, this);
     }
     return this;
@@ -222,7 +179,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
   _initCanvas: function() {
     var canvas = (this._canvas = L.DomUtil.create(
       "canvas",
-      "leaflet-heatmap-layer leaflet-layer"
+      "leaflet-vectorfield-layer leaflet-layer"
     ));
 
     var originProp = L.DomUtil.testProp([
@@ -242,21 +199,21 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
       "leaflet-zoom-" + (animated ? "animated" : "hide")
     );
 
-    this._heat = simpleheat(canvas);
+    this._arrows = arrows(canvas);
     this._updateOptions();
   },
 
   _updateOptions: function() {
-    this._heat.radius(
-      this.options.radius || this._heat.defaultRadius,
+    this._arrows.radius(
+      this.options.radius || this._arrows.defaultRadius,
       this.options.blur
     );
 
     if (this.options.gradient) {
-      this._heat.gradient(this.options.gradient);
+      this._arrows.gradient(this.options.gradient);
     }
     if (this.options.max) {
-      this._heat.max(this.options.max);
+      this._arrows.max(this.options.max);
     }
   },
 
@@ -266,11 +223,11 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
 
     var size = this._map.getSize();
 
-    if (this._heat._width !== size.x) {
-      this._canvas.width = this._heat._width = size.x;
+    if (this._arrows._width !== size.x) {
+      this._canvas.width = this._arrows._width = size.x;
     }
-    if (this._heat._height !== size.y) {
-      this._canvas.height = this._heat._height = size.y;
+    if (this._arrows._height !== size.y) {
+      this._canvas.height = this._arrows._height = size.y;
     }
 
     this._redraw();
@@ -280,8 +237,9 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     if (!this._map) {
       return;
     }
+    console.log(this._inputdata)
     var data = [],
-      r = this._heat._r,
+      r = this._arrows._r,
       size = this._map.getSize(),
       bounds = new L.Bounds(L.point([-r, -r]), size.add([r, r])),
       max = this.options.max === undefined ? 1 : this.options.max,
@@ -289,7 +247,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
         this.options.maxZoom === undefined
           ? this._map.getMaxZoom()
           : this.options.maxZoom,
-      v =
+      vv =
         1 /
         Math.pow(2, Math.max(0, Math.min(maxZoom - this._map.getZoom(), 12))),
       cellSize = r / 2,
@@ -305,22 +263,29 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
       y,
       j,
       len2,
-      k;
+      k,
+      lat,
+      lng,
+      u,
+      v;
 
-    // console.time('process');
-    for (i = 0, len = this._latlngs.length; i < len; i++) {
-      p = this._map.latLngToContainerPoint(this._latlngs[i]);
+    for (i = 0, len = this._inputdata.length; i < len; i++) {
+      lat = this._inputdata[i][0];
+      lng = this._inputdata[i][1];
+      u = this._inputdata[i][2];
+      v = this._inputdata[i][3];
+      p = this._map.latLngToContainerPoint([lat, lng]);
       if (bounds.contains(p)) {
         x = Math.floor((p.x - offsetX) / cellSize) + 2;
         y = Math.floor((p.y - offsetY) / cellSize) + 2;
 
         var alt =
-          this._latlngs[i].alt !== undefined
-            ? this._latlngs[i].alt
-            : this._latlngs[i][2] !== undefined
-            ? +this._latlngs[i][2]
+          this._inputdata[i].alt !== undefined
+            ? this._inputdata[i].alt
+            : this._inputdata[i][2] !== undefined
+            ? +this._inputdata[i][2]
             : 1;
-        k = alt * v;
+        k = alt * vv;
 
         grid[y] = grid[y] || [];
         cell = grid[y][x];
@@ -349,12 +314,10 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
         }
       }
     }
-    // console.timeEnd('process');
 
-    // console.time('draw ' + data.length);
-    this._heat.data(data).draw(this.options.minOpacity);
-    // console.timeEnd('draw ' + data.length);
+    console.log(data)
 
+    this._arrows.data(data).draw();
     this._frame = null;
   },
 
@@ -374,6 +337,6 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
   }
 });
 
-L.vectorField = function(latlngs, options) {
-  return new L.VectorField(latlngs, options);
+L.vectorField = function(inputdata, options) {
+  return new L.VectorField(inputdata, options);
 };
