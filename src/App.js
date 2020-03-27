@@ -20,7 +20,7 @@ class App extends Component {
     return (
       <BrowserRouter>
           <Header />
-          <main className="container">
+          <main>
               <Switch>
                 <Route path='/live' exact component={Live} />
                 <Route path='/live' component={WeatherStationDetail} />

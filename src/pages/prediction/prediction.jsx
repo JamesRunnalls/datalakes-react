@@ -8,7 +8,7 @@ class Prediction extends Component {
       <GIS
         title="Lake Predictions"
         documentTitle="Predictions - Datalakes"
-        selected={[9, 8]}
+        selected={[10, 9, 8]}
       />
     );
   }

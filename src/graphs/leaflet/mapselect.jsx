@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import L from "leaflet";
-import "./customcontrol";
+import "./leaflet_customcontrol";
 import "leaflet.markercluster";
 import "leaflet-draw";
 import "./css/leaflet.css";
@@ -25,7 +25,7 @@ class MapSelect extends Component {
       center: center,
       zoom: zoom,
       minZoom: 2,
-      maxZoom: 16,
+      maxZoom: 14,
       layers: [
         //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'})
         L.tileLayer(

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import L from "leaflet";
 import "./leaflet_vectorField";
-import "./customcontrol";
+import "./leaflet_customcontrol";
 import { getColor } from "../../components/gradients/gradients";
 import Loading from "../../components/loading/loading";
 import "./css/gis_map.css";
@@ -255,7 +255,6 @@ class GISMap extends Component {
       vectorMagnitude,
       vectorFlow,
       vectorArrowColor,
-      vectorFlowColor,
       min,
       max,
       colors
@@ -332,14 +331,16 @@ class GISMap extends Component {
     }
 
     if (vectorArrows) {
-      var arrows = L.vectorField(data[0].data, {
-        vectorArrowColor: vectorArrowColor,
-        colors: colors,
-        min: min,
-        max: max,
-        size: 15
-      }).addTo(this.map);
-      this.raster.push(arrows);
+      for (var k = 0; k < data.length; k++) {
+        var arrows = L.vectorField(data[k].data, {
+          vectorArrowColor: vectorArrowColor,
+          colors: colors,
+          min: min,
+          max: max,
+          size: 15
+        }).addTo(this.map);
+        this.raster.push(arrows);
+      }
     }
 
     if (vectorFlow) {

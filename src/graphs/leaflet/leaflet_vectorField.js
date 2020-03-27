@@ -131,16 +131,18 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     var nRows = d.length;
     var nCols = d[0].length;
     var i, j;
+    var abort = false;
 
-    outer: for (i = 0; i < nRows - 1; i++) {
-      for (j = 0; j < nCols - 1; j++) {
+    for (i = 0; i < nRows - 1 && !abort; i++) {
+      for (j = 0; j < nCols - 1 && !abort; j++) {
         if (
           d[i][j] !== null &&
           d[i + 1][j] !== null &&
           d[i][j + 1] !== null &&
           d[i + 1][j + 1] !== null
         ) {
-          break outer;
+          abort = true;
+          break;
         }
       }
     }
@@ -220,8 +222,8 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     var maxRow = (Math.floor(nRows / stride) - 1) * stride + 1;
     var maxCol = (Math.floor(nCols / stride) - 1) * stride + 1;
 
-    for (i = 0; i < maxRow; i = i + stride) {
-      for (j = 0; j < maxCol; j = j + stride) {
+    for (i = 0; i < maxRow;i += stride) {
+      for (j = 0; j < maxCol; j += stride) {
         alat = [];
         alng = [];
         avx = [];

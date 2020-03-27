@@ -5,10 +5,10 @@
 
 .home-inner {
   width: 50%;
-  display: inline-block;
   min-height: 600px;
   height: 100%;
   vertical-align: top;
+  float: left;
 }
 
 .home-button {

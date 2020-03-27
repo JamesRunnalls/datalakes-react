@@ -29,7 +29,7 @@ class Header extends Component {
         var symbol = ">";
         if (this.state.showMenu){mainNav = "MainNav Show";symbol="<"};
          return ( 
-            <header className="container">
+            <header>
             <div id="logo" className="logo">
                 <Link to="/">
                     <img alt="Datalakes logo" src={logo} />

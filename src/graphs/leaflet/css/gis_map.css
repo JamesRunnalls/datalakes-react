@@ -8,7 +8,7 @@
 }
 
 .map {
-  height: calc(100% - 290px);
+  height: calc(100% - 235px);
   z-index: 99999;
   width: 100vw;
   position: absolute;
@@ -32,8 +32,7 @@
 
 @media screen and (max-width: 500px) {
   .map {
-    margin-top: 30px;
-    height: calc(100vh - 195px);
+    height: calc(100% - 105px);
   }
   .leaflet-container .leaflet-control-attribution {
     width: 100%;
@@ -237,6 +236,9 @@
 @media screen and (max-width: 500px) {
   .help-container {
     padding: 10px;
+  }
+  .sidebar-gis {
+    left: 10px;
   }
 }
 

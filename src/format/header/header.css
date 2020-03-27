@@ -1,23 +1,20 @@
 /* -------------- Header -------------------------  */
 
 header {
-  height: 120px;
   padding-left: 10px;
   padding-right: 10px;
   position: relative;
+  width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 40px;
+  max-width: 100%;
 }
 
 /* Logo */
 
 .logo {
-  position: absolute;
-  z-index: 0;
-  width: auto;
-  float: left;
-  top: 70px;
-  left: 10px;
-  margin: 0 50px 0 0;
-  padding: inherit;
+  display: inline-block;
 }
 
 .logo a {
@@ -101,11 +98,7 @@ header {
 }
 
 .MainNav {
-  position: absolute;
-  right: 0;
-  top: 79px;
-  text-align: right;
-  z-index: 999999999;
+  float: right;
 }
 
 .MainNav label {
@@ -117,8 +110,6 @@ header {
 
 .MainNav .header-dropdown {
   display: none;
-  position: relative;
-  background-color: white;
   padding: 10px;
   box-sizing: border-box;
   text-align: left;
@@ -128,6 +119,8 @@ header {
   padding: 0;
   max-width: 100%;
   text-align: right;
+  position: absolute;
+  right: 0;
 }
 
 .MainNav.Show .header-dropdown img {
@@ -207,7 +200,7 @@ header {
   }
 
   header {
-    height: 40px;
+    margin-top: 10px;
   }
 
   .footer-nav {
@@ -225,6 +218,8 @@ header {
     left: 0;
     width: 100%;
     border-top: 1px solid #d8d6d3;
+    z-index: 99999999;
+    background-color: white;
   }
 
   .MainNav.Show .header-dropdown a {
