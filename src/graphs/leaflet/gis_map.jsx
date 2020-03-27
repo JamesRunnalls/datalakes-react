@@ -336,7 +336,8 @@ class GISMap extends Component {
         vectorArrowColor: vectorArrowColor,
         colors: colors,
         min: min,
-        max: max
+        max: max,
+        size: 15
       }).addTo(this.map);
       this.raster.push(arrows);
     }
@@ -364,6 +365,7 @@ class GISMap extends Component {
       center: center,
       zoom: zoom,
       minZoom: 7,
+      maxZoom: 16,
       attributionControl: false,
       layers: [
         //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'}),
@@ -374,6 +376,7 @@ class GISMap extends Component {
         L.tileLayer(
           "https://maps.heigit.org/openmapsurfer/tiles/asterh/webmercator/{z}/{x}/{y}.png",
           {
+            maxZoom: 10,
             attribution:
               '| <a href="http://giscience.uni-hd.de/" target="_blank">University of Heidelberg</a> | <a href="https://lpdaac.usgs.gov/products/aster_policies" target="_blank">ASTER GDEM</a>, <a href="http://srtm.csi.cgiar.org/">SRTM</a>'
           }

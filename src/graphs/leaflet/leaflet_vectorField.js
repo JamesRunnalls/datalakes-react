@@ -126,12 +126,48 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     return [lat, lng];
   },
 
-  _drawArrow: function(cell, ctx) {
+  _pixelSize: function() {
+    var d = this._inputdata;
+    var nRows = d.length;
+    var nCols = d[0].length;
+    var i, j;
+
+    outer: for (i = 0; i < nRows - 1; i++) {
+      for (j = 0; j < nCols - 1; j++) {
+        if (
+          d[i][j] !== null &&
+          d[i + 1][j] !== null &&
+          d[i][j + 1] !== null &&
+          d[i + 1][j + 1] !== null
+        ) {
+          break outer;
+        }
+      }
+    }
+    var i0j0 = this._map.latLngToContainerPoint(
+      this._CHtolatlng([d[i][j][0], d[i][j][1]])
+    );
+    var i1j0 = this._map.latLngToContainerPoint(
+      this._CHtolatlng([d[i + 1][j][0], d[i + 1][j][1]])
+    );
+    var i0j1 = this._map.latLngToContainerPoint(
+      this._CHtolatlng([d[i][j + 1][0], d[i][j + 1][1]])
+    );
+    var i1j1 = this._map.latLngToContainerPoint(
+      this._CHtolatlng([d[i + 1][j + 1][0], d[i + 1][j + 1][1]])
+    );
+    var apixelx = [i0j0.x, i1j0.x, i0j1.x, i1j1.x];
+    var apixely = [i0j0.x, i1j0.x, i0j1.x, i1j1.x];
+
+    var pixelx = Math.max(...apixelx) - Math.min(...apixelx);
+    var pixely = Math.max(...apixely) - Math.min(...apixely);
+
+    return Math.max(pixelx, pixely);
+  },
+
+  _drawArrow: function(cell, ctx, size) {
     var { min, max, vectorArrowColor, colors } = this.options;
     var { center, value, rotation } = cell;
-
-    // Arrow Size
-    const size = 20;
 
     // Arrow Center
     ctx.save();
@@ -163,30 +199,67 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   _drawArrows: function() {
-    console.log(this.options);
     var ctx = this._ctx;
     ctx.clearRect(0, 0, this._width, this._height);
 
-    var i, j, row, latlng, p, value, rotation, cell;
+    var i, j, k, l, latlng, p, value, rotation, cell;
+    var lat, lng, vx, vy, alat, alng, avx, avy;
 
-    for (i = 0; i < this._inputdata.length; i++) {
-      row = this._inputdata[i];
-      for (j = 0; j < row.length; j++) {
-        if (row[j] !== null) {
-          latlng = this._CHtolatlng([row[j][0], row[j][1]]);
+    var nRows = this._inputdata.length;
+    var nCols = this._inputdata[0].length;
+    var size = this.options.size;
+
+    var pixelSize = this._pixelSize();
+
+    var stride = Math.max(1, Math.floor((1.2 * size) / pixelSize));
+
+    if (stride === 1) {
+      size = pixelSize * 0.9;
+    }
+
+    var maxRow = (Math.floor(nRows / stride) - 1) * stride + 1;
+    var maxCol = (Math.floor(nCols / stride) - 1) * stride + 1;
+
+    for (i = 0; i < maxRow; i = i + stride) {
+      for (j = 0; j < maxCol; j = j + stride) {
+        alat = [];
+        alng = [];
+        avx = [];
+        avy = [];
+        for (k = 0; k < stride; k++) {
+          for (l = 0; l < stride; l++) {
+            if (this._inputdata[i + k][j + l] !== null) {
+              alat.push(this._inputdata[i + k][j + l][0]);
+              alng.push(this._inputdata[i + k][j + l][1]);
+              avx.push(this._inputdata[i + k][j + l][2]);
+              avy.push(this._inputdata[i + k][j + l][3]);
+            }
+          }
+        }
+
+        if (alat.length > 0) {
+          lat = this._getAve(alat);
+          lng = this._getAve(alng);
+          vx = this._getAve(avx);
+          vy = this._getAve(avy);
+
+          latlng = this._CHtolatlng([lat, lng]);
           p = this._map.latLngToContainerPoint(latlng);
 
-          value = Math.abs(
-            Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
-          );
+          value = Math.abs(Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2)));
 
-          rotation = Math.atan2(row[j][2], row[j][3]) + Math.PI / 2;
+          rotation = Math.atan2(vx, vy) + Math.PI / 2;
 
           cell = { center: p, value: value, rotation: rotation };
-          this._drawArrow(cell, ctx);
+          this._drawArrow(cell, ctx, size);
         }
       }
     }
+  },
+
+  _getAve: function(arr) {
+    const sum = arr.reduce((a, b) => a + b, 0);
+    return sum / arr.length || 0;
   },
 
   _hex: function(c) {
@@ -197,11 +270,11 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     return s.charAt((i - (i % 16)) / 16) + s.charAt(i % 16);
   },
 
-  _trim: function trim(s) {
+  _trim: function(s) {
     return s.charAt(0) === "#" ? s.substring(1, 7) : s;
   },
 
-  _convertToRGB: function convertToRGB(hex) {
+  _convertToRGB: function(hex) {
     var color = [];
     color[0] = parseInt(this._trim(hex).substring(0, 2), 16);
     color[1] = parseInt(this._trim(hex).substring(2, 4), 16);
@@ -209,7 +282,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     return color;
   },
 
-  _convertToHex: function convertToHex(rgb) {
+  _convertToHex: function(rgb) {
     return this._hex(rgb[0]) + this._hex(rgb[1]) + this._hex(rgb[2]);
   },
 
