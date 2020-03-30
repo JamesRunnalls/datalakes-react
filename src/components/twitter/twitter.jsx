@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import axios from 'axios';
 import { format } from "date-fns";
-import { apiUrl } from '../../../config.json';
+import { apiUrl } from '../../../src/config.json';
 import twitterImg from './img/twitter.svg';
 import "./twitter.css";
 

@@ -19,6 +19,7 @@ class Pipeline extends Component {
             <div className="diagram">
               <a
                 target="_blank"
+                rel="noopener noreferrer"
                 href={
                   dataset.pre_file.includes("http")
                     ? dataset.pre_file
@@ -35,6 +36,7 @@ class Pipeline extends Component {
               <div className="separator half"></div>
               <a
                 target="_blank"
+                rel="noopener noreferrer"
                 href={
                   dataset.pre_script.includes("http")
                     ? dataset.pre_script
@@ -49,10 +51,10 @@ class Pipeline extends Component {
                 <div className="">Processing Script</div>
               </a>
               <div className="separator half"></div>
-              <a>
+              <div >
                 <img src={Database} alt="Database" />
                 <div className="">This dataset</div>
-              </a>
+              </div>
             </div>
           </div>
         </div>

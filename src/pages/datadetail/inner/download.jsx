@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import SliderDouble from "../../../components/sliders/sliderdouble";
-import { password } from "../../../../config.json";
+import { password } from "../../../../src/config.json";
 import axios from "axios";
 import "../datadetail.css";
 

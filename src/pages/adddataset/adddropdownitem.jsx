@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import Modal from "../../components/modal/modal";
-import { apiUrl } from "../../../config.json";
+import { apiUrl } from "../../../src/config.json";
 
 class SelectCustom extends Component {
   render() {

@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 import "./maplayers.css";
-import { SortableContainer, SortableElement, arrayMove } from "react-sortable-hoc";
+import {
+  SortableContainer,
+  SortableElement,
+  arrayMove
+} from "react-sortable-hoc";
 import ColorManipulation from "../colormanipulation/colormanipulation";
-import RasterLegendItem from '../legend/rasterlegenditem';
-import MarkerLegendItem from '../legend/markerlegenditem';
+import RasterLegendItem from "../legend/rasterlegenditem";
+import MarkerLegendItem from "../legend/markerlegenditem";
 
 class DropDown extends Component {
   state = {
@@ -124,15 +128,19 @@ class GroupDisplay extends Component {
         />
       );
     if (plot === "raster")
-      inner = <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />;
+      inner = (
+        <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />
+      );
     if (plot === "field")
-      inner = <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />;
+      inner = (
+        <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />
+      );
     return (
       <div>
         <div>{description}</div>
         {inner}
         Source:{" "}
-        <a href={sourcelink} target="_blank">
+        <a href={sourcelink} target="_blank" rel="noopener noreferrer">
           {sourcetext}
         </a>
       </div>
@@ -161,31 +169,31 @@ class EditSettings extends Component {
     display.legend = !display.legend;
     this.setState({ display });
   };
-  localMarkerSymbolChange = () => {
+  localMarkerSymbolChange = event => {
     var { display } = this.state;
     display.markerSymbol = event.target.value;
     this.setState({ display });
   };
-  localMarkerFixedSizeChange = () => {
+  localMarkerFixedSizeChange = event => {
     var { display } = this.state;
     var markerFixedSize = false;
     if (event.target.value === "true") markerFixedSize = true;
     display.markerFixedSize = markerFixedSize;
     this.setState({ display });
   };
-  localMarkerSizeChange = () => {
+  localMarkerSizeChange = event => {
     var { display } = this.state;
     display.markerSize = event.target.value;
     this.setState({ display });
   };
-  localVectorArrowColorChange = () => {
+  localVectorArrowColorChange = event => {
     var { display } = this.state;
     var vectorArrowColor = false;
     if (event.target.value === "true") vectorArrowColor = true;
     display.vectorArrowColor = vectorArrowColor;
     this.setState({ display });
   };
-  localVectorFlowColorChange = () => {
+  localVectorFlowColorChange = event => {
     var { display } = this.state;
     var vectorFlowColor = false;
     if (event.target.value === "true") vectorFlowColor = true;
@@ -411,9 +419,9 @@ const SortableItem = SortableElement(({ layer, props }) => {
 const SortableList = SortableContainer(({ props }) => {
   var { maplayers, selected } = props;
   if (maplayers.length < 1) selected = [];
-    var selectlayers = selected.map(id =>
-      maplayers.find(layer => layer.id === id)
-    );
+  var selectlayers = selected.map(id =>
+    maplayers.find(layer => layer.id === id)
+  );
   return (
     <ul className="maplayers-list">
       {selectlayers.map((layer, index) => (

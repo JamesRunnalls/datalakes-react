@@ -331,7 +331,7 @@ class GISMap extends Component {
     }
 
     if (vectorArrows) {
-      for (var k = 0; k < data.length; k++) {
+      for (k = 0; k < data.length; k++) {
         var arrows = L.vectorField(data[k].data, {
           vectorArrowColor: vectorArrowColor,
           colors: colors,

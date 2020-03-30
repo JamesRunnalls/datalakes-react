@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import GISMap from "../../graphs/leaflet/gis_map";
 import axios from "axios";
-import { apiUrl } from "../../../config.json";
+import { apiUrl } from "../../../src/config.json";
 import FilterBox from "../../components/filterbox/filterbox";
 import MapLayers from "../../components/maplayers/maplayers";
 import AddLayers from "../../components/addlayers/addlayers";
@@ -70,6 +70,8 @@ class GIS extends Component {
 
   setSelected = selected => {
     this.setState({ loading: true }, () => {
+      var { hidden } = this.state;
+      this.props.setQueryParams(selected, hidden);
       this.setState({ selected, loading: false });
     });
   };
@@ -79,7 +81,7 @@ class GIS extends Component {
       return maplayers.find(x => x.id === id);
     }
     this.setState({ loading: true }, async () => {
-      var { selected, maplayers, parameters } = this.state;
+      var { selected, hidden, maplayers, parameters } = this.state;
       for (var i = 0; i < ids.length; i++) {
         if (!selected.includes(ids[i])) {
           if (!("data" in maplayersfind(maplayers, ids[i]))) {
@@ -93,6 +95,7 @@ class GIS extends Component {
           selected.unshift(ids[i]);
         }
       }
+      this.props.setQueryParams(selected, hidden);
       this.setState({ selected, maplayers, parameters, loading: false });
     });
   };
@@ -107,18 +110,20 @@ class GIS extends Component {
         selected = selectedfilter(selected, ids[i]);
         hidden = selectedfilter(hidden, ids[i]);
       }
+      this.props.setQueryParams(selected, hidden);
       this.setState({ selected, hidden, loading: false });
     });
   };
 
   toggleLayerView = id => {
     this.setState({ loading: true }, () => {
-      var { hidden } = this.state;
+      var { selected, hidden } = this.state;
       if (hidden.includes(id)) {
         hidden = hidden.filter(selectid => selectid !== id);
       } else {
         hidden.push(id);
       }
+      this.props.setQueryParams(selected, hidden);
       this.setState({ hidden, loading: false });
     });
   };
@@ -285,6 +290,9 @@ class GIS extends Component {
   };
 
   async componentDidMount() {
+    var { selected, hidden } = this.state;
+    ({ selected, hidden } = this.props.getQueryParams(selected, hidden));
+
     // Get parameter details
     var { data: parameters } = await axios.get(
       apiUrl + "/selectiontables/parameters"
@@ -308,7 +316,6 @@ class GIS extends Component {
     });
 
     // Download default layers
-    var { selected } = this.state;
     for (var i = 0; i < selected.length; i++) {
       maplayers = await this.downloadFile(selected[i], maplayers);
       ({ maplayers, parameters } = this.updateMinMax(
@@ -318,7 +325,11 @@ class GIS extends Component {
       ));
     }
 
+    // Query String
+
     this.setState({
+      selected,
+      hidden,
       parameters,
       maplayers,
       loading: false

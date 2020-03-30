@@ -38,12 +38,12 @@ class DataSelect extends Component {
           noOptionsMessage={
             this.props.showModal
               ? () => (
-                  <a
+                  <div
                     style={{ cursor: "pointer" }}
                     onClick={() => this.addNew(this.props.table)}
                   >
                     Add new
-                  </a>
+                  </div>
                 )
               : () => <div>No options</div>
           }

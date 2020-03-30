@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./colorsolid.css";
 
 class ColorSolid extends Component {
-  updateColors = () => {
+  updateColors = event => {
     var { onChange } = this.props;
     var colors = [
       { color: event.target.value, point: 0 },

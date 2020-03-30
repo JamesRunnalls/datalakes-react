@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { apiUrl } from "../../../config.json";
+import { apiUrl } from "../../../src/config.json";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import FilterBox from "../../components/filterbox/filterbox";
 import MapSelect from "../../graphs/leaflet/mapselect.jsx";
@@ -625,7 +625,7 @@ class DataPortal extends Component {
                         <td>
                           <input
                             type="date"
-                            onChange={() => this.startTimeAddFilter(event)}
+                            onChange={() => this.startTimeAddFilter()}
                           />
                         </td>
                       </tr>
@@ -634,7 +634,7 @@ class DataPortal extends Component {
                         <td>
                           <input
                             type="date"
-                            onChange={() => this.endTimeAddFilter(event)}
+                            onChange={() => this.endTimeAddFilter()}
                           />
                         </td>
                       </tr>

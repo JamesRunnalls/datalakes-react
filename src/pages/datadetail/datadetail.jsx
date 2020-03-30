@@ -11,7 +11,7 @@ import Pipeline from "./inner/pipeline";
 import Preview from "./inner/preview";
 import DataSubMenu from "./datasubmenu";
 import Loading from "../../components/loading/loading";
-import { apiUrl } from "../../../config.json";
+import { apiUrl } from "../../../src/config.json";
 import "./datadetail.css";
 
 class DataDetail extends Component {

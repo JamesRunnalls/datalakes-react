@@ -77,6 +77,7 @@ class Home extends Component {
                   className="home-partner-logo"
                   href="https://www.eawag.ch/en/department/siam/projects/datalakes/"
                   target="_blank"
+                  rel="noopener noreferrer"
                   title="Visit the Eawag project page for datalakes"
                 >
                   <img alt="Eawag Logo" src={eawag} />
@@ -85,6 +86,7 @@ class Home extends Component {
                   className="home-partner-logo"
                   href="https://datascience.ch/project/data-platform-and-bayesian-forecasting-of-swiss-lakes-datalakes/"
                   target="_blank"
+                  rel="noopener noreferrer"
                   title="Visit the SDSC project page for datalakes"
                 >
                   <img alt="SDSC Logo" src={sdsc} />
@@ -93,6 +95,7 @@ class Home extends Component {
                   className="home-partner-logo"
                   href="https://www.epfl.ch/research/domains/limnc/projects/lexplore/"
                   target="_blank"
+                  rel="noopener noreferrer"
                   title="Visit the EPFL project page for the L'EXPLORE platform"
                 >
                   <img alt="EPFL Logo" src={epfl} />
@@ -101,6 +104,7 @@ class Home extends Component {
                   className="home-partner-logo"
                   href="https://wp.unil.ch/lexplore/"
                   target="_blank"
+                  rel="noopener noreferrer"
                   title="Visit the UNIL project page for the L'EXPLORE platform"
                 >
                   <img alt="UNIL Logo" src={unil} />
@@ -109,6 +113,7 @@ class Home extends Component {
                   className="home-partner-logo"
                   href="https://www.unige.ch/sciences/terre/en/highlights/lexplore-floating-laboratory-study-lake-geneva/"
                   target="_blank"
+                  rel="noopener noreferrer"
                   title="Visit the UNIGE news page for the L'EXPLORE platform"
                 >
                   <img
@@ -121,6 +126,7 @@ class Home extends Component {
                   className="home-partner-logo"
                   href="https://www6.dijon.inra.fr/thonon/Actualites-du-CARRTEL/La-plateforme-experimentale-LeXPLORE-Exploration-du-Leman-baptisee"
                   target="_blank"
+                  rel="noopener noreferrer"
                   title="Visit the CARRTEL news page for the L'EXPLORE platform"
                 >
                   <img alt="Carrtel Logo" src={carrtel} />

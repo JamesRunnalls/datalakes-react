@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./adddataset.css";
 import axios from "axios";
 import Fuse from "fuse.js";
-import { apiUrl } from "../../../config.json";
+import { apiUrl } from "../../../src/config.json";
 import AddData from "./steps/adddata";
 import ReviewData from "./steps/reviewdata";
 import ReviewLineage from "./steps/reviewlineage";

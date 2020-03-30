@@ -14,13 +14,13 @@ class ColorTable extends Component {
     onChange(colors);
   };
 
-  updateColors = row => {
+  updateColors = row => event => {
     var { colors, onChange } = this.props;
     colors[row].color = event.target.value;
     onChange(colors);
   };
 
-  updatePoint = (row, min, max) => {
+  updatePoint = (row, min, max) => event => {
     var { colors, onChange } = this.props;
     colors[row].point = (event.target.value - min) / (max - min);
     onChange(colors);

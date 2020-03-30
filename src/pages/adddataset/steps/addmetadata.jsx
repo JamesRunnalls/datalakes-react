@@ -52,7 +52,7 @@ class AddMetadata extends Component {
               <tr>
                 <th>
                   Start Time
-                  <a href="https://www.unixtimestamp.com/" target="_blank">
+                  <a href="https://www.unixtimestamp.com/" rel="noopener noreferrer" target="_blank">
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}
@@ -73,7 +73,7 @@ class AddMetadata extends Component {
               <tr>
                 <th>
                   End Time
-                  <a href="https://www.unixtimestamp.com/" target="_blank">
+                  <a href="https://www.unixtimestamp.com/" rel="noopener noreferrer" target="_blank">
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}
@@ -196,7 +196,7 @@ class AddMetadata extends Component {
               <tr>
                 <th>
                   License
-                  <a href="https://choosealicense.com/licenses/" target="_blank">
+                  <a href="https://choosealicense.com/licenses/" rel="noopener noreferrer" target="_blank">
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}

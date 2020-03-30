@@ -18,6 +18,7 @@ class Information extends Component {
             <a
               href={getLabel("sensors", row.sensors_id, "link")}
               target="_blank"
+              rel="noopener noreferrer"
               title={getLabel("sensors", row.sensors_id, "manufacturer")}
             >
               {getLabel("sensors", row.sensors_id, "name")}
@@ -50,7 +51,7 @@ class Information extends Component {
               <tr>
                 <th>Git</th>
                 <td>
-                  <a href={dataset.git} target="_blank">
+                  <a href={dataset.git} target="_blank" rel="noopener noreferrer">
                     Link to Git Repository
                   </a>
                 </td>
@@ -120,6 +121,7 @@ class Information extends Component {
                   <a
                     href={getLabel("licenses", dataset.licenses_id, "link")}
                     target="_blank"
+                    rel="noopener noreferrer"
                     title={getLabel(
                       "licenses",
                       dataset.licenses_id,
