@@ -28,6 +28,8 @@ header {
   height: auto;
 }
 
+/* Footer Nav Bar (Mobile) */
+
 .footer-nav {
   display: none;
   position: fixed;
@@ -58,32 +60,14 @@ header {
   border-bottom: 1px black solid;
 }
 
-/* Languages */
-
-.langs {
-  position: relative;
-  margin: 2px 15px 0 0;
-  float: right;
+.footer-nav .more {
+  cursor: pointer;
 }
 
-.langs a {
-  color: rgb(56, 54, 54);
-  text-decoration: none;
-}
-
-.langs a.current {
-  color: rgb(0, 0, 0);
-}
-
-.langs a:hover {
-  color: rgb(0, 0, 0);
-}
 
 /* Navigation Menu */
 
-.header-more {
-  cursor: pointer;
-}
+
 
 .hamburger {
   margin-right: 25px;
@@ -97,18 +81,18 @@ header {
   display: inline-block;
 }
 
-.MainNav {
+.header .nav-bar {
   float: right;
 }
 
-.MainNav label {
+.header .nav-bar label {
   display: inline-block;
   font-size: 24px;
   margin-right: 25px;
   cursor: pointer;
 }
 
-.MainNav .header-dropdown {
+.header .nav-bar .header-dropdown {
   display: none;
   padding: 10px;
   box-sizing: border-box;
@@ -123,28 +107,28 @@ header {
   right: 0;
 }
 
-.MainNav.Show .header-dropdown img {
+.header .nav-bar.Show .header-dropdown img {
   width: 80px;
   margin: 0 5px;
 }
 
-.MainNav.Show .header-dropdown .imgactive img {
+.header .nav-bar.Show .header-dropdown .imgactive img {
   border-bottom: 1px black solid;
 }
 
-.MainNav.Show .header-dropdown img:hover {
+.header .nav-bar.Show .header-dropdown img:hover {
   border-bottom: 1px black solid;
 }
 
-.MainNav .header-dropdown .mobile {
+.header .nav-bar .header-dropdown .mobile {
   display: none;
 }
 
-.MainNav .header-dropdown .desktop {
+.header .nav-bar .header-dropdown .desktop {
   display: inline-block;
 }
 
-.MainNav.Show .header-dropdown {
+.header .nav-bar.Show .header-dropdown {
   display: block;
 }
 
@@ -195,7 +179,7 @@ header {
   .logo a {
     width: 140px;
   }
-  .MainNav {
+  .header .nav-bar {
     top: 5px !important;
   }
 
@@ -212,7 +196,7 @@ header {
     display: none;
   }
 
-  .MainNav.Show .header-dropdown {
+  .header .nav-bar.Show .header-dropdown {
     position: fixed;
     bottom: 60px;
     left: 0;
@@ -222,20 +206,20 @@ header {
     background-color: white;
   }
 
-  .MainNav.Show .header-dropdown a {
+  .header .nav-bar.Show .header-dropdown a {
     padding: 0 5px;
   }
 
-  .MainNav.Show .header-dropdown .desktop {
+  .header .nav-bar.Show .header-dropdown .desktop {
     display: none;
   }
 
-  .MainNav.Show .header-dropdown .mobile {
+  .header .nav-bar.Show .header-dropdown .mobile {
     justify-content: space-between;
     display: flex;
   }
 
-  .MainNav.Show .header-dropdown img {
+  .header .nav-bar.Show .header-dropdown img {
     width: 60px;
     margin: 5px 2px;
   }

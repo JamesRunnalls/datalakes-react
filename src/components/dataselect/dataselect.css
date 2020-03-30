@@ -1,16 +1,16 @@
-.inner__value-container {
+.dataselect__value-container {
   position: static !important;
 }
 
-.inner__indicator-separator {
+.dataselect__indicator-separator {
   display: none !important;
 }
 
-.inner__single-value {
+.dataselect__single-value {
   color: black !important;  
 }
 
-.inner__dropdown-indicator {
+.dataselect__dropdown-indicator {
   padding: 0 !important;
   padding-right: 8px !important;
 }
@@ -20,25 +20,25 @@
   min-width: 100%!important;
 }
 
-.inner__single-value {
+.dataselect__single-value {
   max-width: calc(100% - 30px)!important;
 }
 
-.inner__control {
+.dataselect__control {
   border-color: rgb(169,169,169) !important;
   border-radius: 0 !important;
   cursor: text !important;
 }
 
-.inner__control:hover {
+.dataselect__control:hover {
   box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
 }
 
-.inner__indicator.inner__dropdown-indicator {
+.dataselect__indicator.dataselect__dropdown-indicator {
   color: rgb(169,169,169) !important;
 }
 
-.inner__indicator.inner__clear-indicator {
+.dataselect__indicator.dataselect__clear-indicator {
   cursor: pointer;
 }
 

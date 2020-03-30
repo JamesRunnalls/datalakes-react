@@ -15,8 +15,6 @@ footer .container {
   max-width: 100%;
 }
 
-
-
 footer .container .partners {
   padding: 15px 0 10px 0;
   text-align: center;
@@ -27,83 +25,65 @@ footer .container .partners img {
   margin: 5px 3%;
 }
 
+footer .container .partners .partner-logo .black {
+  display: inline-block;
+}
+
+footer .container .partners .partner-logo .color {
+  display: none;
+}
+
+footer .container .partners .partner-logo:hover .black {
+  display: none;
+}
+
+footer .container .partners .partner-logo:hover .color {
+  display: inline-block;
+}
+
 footer .container .copyright {
-  text-align: right;
-}
-
-footer a {
-  text-decoration: none;
-  color: black;
-}
-
-footer .copyright {
   width: 100%;
   text-align: right;
   box-sizing: border-box;
   padding: 0 50px 10px 0;
 }
 
-.partner-logo .black {
-  display: inline-block;
-}
-
-.partner-logo .color {
-  display: none;
-}
-
-.partner-logo:hover .black {
-  display: none;
-}
-
-.partner-logo:hover .color {
-  display: inline-block;
-}
-
-.copyright .contact {
+footer .container .copyright .contact {
   float: left;
   padding-left: 50px;
 }
 
-.copyright .contact img {
+footer .container .copyright .contact img {
   height: 20px;
   margin-top: -4px;
   padding-right: 20px;
 }
 
-.copyright .contact a {
-  text-decoration: none;
-  color: black;
-}
-
-.copyright .contact a:hover {
-  color: rgb(70, 70, 70);
-}
-
-.copyright .contact .contact-inner .black {
+footer .container .copyright .contact .contact-inner .black {
   display: inline-block;
 }
 
-.copyright .contact .contact-inner .color {
+footer .container .copyright .contact .contact-inner .color {
   display: none;
 }
 
-.copyright .contact .contact-inner:hover .black {
+footer .container .copyright .contact .contact-inner:hover .black {
   display: none;
 }
 
-.copyright .contact .contact-inner:hover .color {
+footer .container .copyright .contact .contact-inner:hover .color {
   display: inline-block;
-}
-
-@media screen and (max-width: 960px) {
-  footer .container .partners img {
-    width:10%;
-    height: auto;
-  }
 }
 
 @media screen and (max-width: 500px) {
   footer {
     display: none;
+  }
+}
+
+@media screen and (max-width: 960px) {
+  footer .container .partners img {
+    width: 10%;
+    height: auto;
   }
 }

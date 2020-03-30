@@ -32,7 +32,7 @@ class DataSelect extends Component {
           options={list}
           value={dValue}
           className="multi-select"
-          classNamePrefix="inner"
+          classNamePrefix="dataselect"
           onChange={this.props.onChange}
           styles={customStyles}
           noOptionsMessage={

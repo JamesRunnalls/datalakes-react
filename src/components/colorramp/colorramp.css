@@ -59,7 +59,6 @@
   display: none;
 }
 
-/* Hide scrollbar for IE and Edge */
 .colorramp-dropdown {
   -ms-overflow-style: none;
 }

@@ -38,12 +38,6 @@ h1 {
   text-size-adjust: 100%;
 }
 
-@media screen and (max-width: 500px) {
-  h1 {
-    display: none;
-  }
-}
-
 h3 {
   font-size: 15px;
   font-weight: 500;
@@ -53,6 +47,12 @@ h4 {
   margin: 5px 0;
   font-size: 18px;
   font-weight: 500;
+}
+
+@media screen and (max-width: 500px) {
+  h1 {
+    display: none;
+  }
 }
 
 .inline {

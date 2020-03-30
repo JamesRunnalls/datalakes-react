@@ -1,8 +1,8 @@
-.contact-group {
+.contactfrom-group {
     padding: 0;
 }
 
-.contact-group .form-control {
+.contactform-group .form-control {
     border: solid 1px black;
     width: 100%;
     box-sizing: border-box;
@@ -11,12 +11,6 @@
     font-size: 14px;
 }
 
-.contact-button {
-    border: solid 1px black;
-    background-color: white;
-    margin: 5px 0;
-    cursor: pointer;
-    padding: 4px 8px;
+button.contactform-button {
     width: 100%;
-    box-sizing: border-box;
 }
