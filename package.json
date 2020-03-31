@@ -25,6 +25,7 @@
     "react-select": "^3.0.8",
     "react-sortable-hoc": "^1.11.0"
   },
+  "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
   "devDependencies": {},
   "scripts": {
     "start": "react-scripts start",

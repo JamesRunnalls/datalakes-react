@@ -3,11 +3,15 @@ import "./sidebarlayout.css";
 
 class SidebarLayout extends Component {
   state = {
-    open: window.innerWidth > 960
+    open: window.innerWidth > 960,
+    resize: true
   };
 
   toggle = () => {
-    window.dispatchEvent(new Event("resize"));
+    this.setState({ resize: false }, () => {
+      window.dispatchEvent(new Event("resize"));
+      this.setState({ resize: true });
+    });
     this.setState({ open: !this.state.open });
   };
 
