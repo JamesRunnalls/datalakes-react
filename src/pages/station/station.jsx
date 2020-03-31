@@ -3,8 +3,8 @@ import { Redirect } from "react-router-dom";
 import axios from "axios";
 import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import { apiUrl } from "../../../src/config.json";
-import "./weatherstationdetail.css";
 import D3LineGraph from "../../graphs/d3/linegraph/linegraph";
+import "./station.css";
 
 class LiveParameterSummary extends Component {
   render() {
@@ -119,7 +119,7 @@ class WeatherStationRight extends Component {
   }
 }
 
-class WeatherStationDetail extends Component {
+class Station extends Component {
   state = {
     dataset: [],
     datainfo: [],
@@ -178,4 +178,4 @@ class WeatherStationDetail extends Component {
   }
 }
 
-export default WeatherStationDetail;
+export default Station;

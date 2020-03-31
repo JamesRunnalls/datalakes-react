@@ -8,7 +8,7 @@ import Home from './pages/home/home';
 import Predictions from './pages/prediction/prediction';
 import NotFound from './pages/notfound/notfound';
 import DataPortal from './pages/dataportal/dataportal';
-import WeatherStationDetail from './pages/weatherstationdetail/weatherstationdetail';
+import Station from './pages/station/station';
 import About from './pages/about/about';
 import API from './pages/api/api';
 import DataDetail from './pages/datadetail/datadetail';
@@ -23,7 +23,7 @@ class App extends Component {
           <main>
               <Switch>
                 <Route path='/live' exact component={Live} />
-                <Route path='/live' component={WeatherStationDetail} />
+                <Route path='/live' component={Station} />
 
                 <Route path='/remotesensing' exact component={RemoteSensing} />
 

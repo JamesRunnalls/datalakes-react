@@ -3,52 +3,26 @@ import "./sidebarlayout.css";
 
 class SidebarLayout extends Component {
   state = {
-    addClass: window.innerWidth < 960,
-    toggle: true
+    open: window.innerWidth > 960
   };
 
   toggle = () => {
-    this.setState({ toggle: false }, () => {
-      window.dispatchEvent(new Event("resize"));
-      this.setState({ toggle: true });
-    });
-    this.setState({ addClass: !this.state.addClass });
+    window.dispatchEvent(new Event("resize"));
+    this.setState({ open: !this.state.open });
   };
-
-  hideOnResize = () => {
-    if (this.state.toggle) {
-      if (document.body.clientWidth < 960) {
-        this.setState({ addClass: true });
-      }
-    }
-  };
-
-  componentDidMount() {
-    if (this.props.open === "False") {
-      this.setState({ addClass: true });
-    }
-  }
 
   render() {
-    let rightClass = ["rightcontainer"];
-    let leftClass = ["leftcontainer"];
-    if (this.state.addClass) {
-      rightClass.push("hide");
-      leftClass.push("full");
-    }
+    const { open } = this.state;
     return (
-      <React.Fragment>
-        <div className={rightClass.join(" ")} id="rightcontainer">
+      <div className="sidebarlayout">
+        <div className={open ? "rightcontainer" : "rightcontainer hide"}>
           <div
-            className="righthead side"
-            id="side"
-            title="Click to hide sidebar"
+            className="righthead"
+            title={open ? "Close sidebar" : "Open sidebar"}
             onClick={() => this.toggle()}
           >
-            <h3>
-              <div className="sidebartitle">{this.props.sidebartitle}</div>{" "}
-              <span id="closeside"> > </span>
-            </h3>
+            <div className="sidebartitle">{this.props.sidebartitle}</div>{" "}
+            <span> > </span>
           </div>
           <div className="rightcontent">
             {"rightNoScroll" in this.props && this.props.rightNoScroll}
@@ -57,10 +31,10 @@ class SidebarLayout extends Component {
             )}
           </div>
         </div>
-        <div className={leftClass.join(" ")} id="leftcontainer">
+        <div className={open ? "leftcontainer" : "leftcontainer full"}>
           {this.props.left}
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }

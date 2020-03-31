@@ -41,7 +41,7 @@ class Header extends Component {
                             <NavLink activeClassName="active" onClick={this.closeMenu} to="/predictions">Predictions</NavLink>
                             <NavLink activeClassName="active" onClick={this.closeMenu} to="/dataportal">Data Portal</NavLink>
                         </div>
-                        <div className="menu-icon" onClick={this.toggle}><h3>More <div className="symbol">{showMenu ? ">":"<"}</div></h3></div>
+                        <div className="menu-icon" onClick={this.toggle}><h3>More <div className="symbol">{showMenu ? "<":">"}</div></h3></div>
                     </div>
                     <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
                         <NavLink activeClassName="home" onClick={this.closeMenu} to="/">Home</NavLink>
@@ -57,17 +57,21 @@ class Header extends Component {
                 </div>
           
                 <div className="mobile-nav">
-                    <div className="mobile-navbar">
-                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/live"><img alt="Live Data" src={live} /></NavLink>
-                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/predictions"><img alt="Predictions" src={predictions} /></NavLink>
-                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/dataportal"><img alt="Data Portal" src={data} /></NavLink>
-                        <div onClick={this.toggle} className="more"><img alt="More" src={more} /></div>
-                    </div>
                     <div className={showMenu ? "mobile-menu show" : "mobile-menu"}>
-                        <NavLink onClick={this.closeMenu} to="/"><img alt="Home" src={home} /></NavLink>
-                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/remotesensing"><img alt="Remote Sensing" src={rs} /></NavLink>
-                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/api"><img alt="API" src={api} /></NavLink>
-                        <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/about"><img alt="Contact" src={contact} /></NavLink>
+                        <div className="mobile-flex">
+                            <NavLink onClick={this.closeMenu} to="/"><img alt="Home" src={home} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/remotesensing"><img alt="Remote Sensing" src={rs} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/api"><img alt="API" src={api} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/about"><img alt="Contact" src={contact} /></NavLink>
+                        </div>
+                    </div>
+                    <div className="mobile-navbar">
+                        <div className="mobile-flex">
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/live"><img alt="Live Data" src={live} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/predictions"><img alt="Predictions" src={predictions} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/dataportal"><img alt="Data Portal" src={data} /></NavLink>
+                            <div onClick={this.toggle} className="more"><img alt="More" src={more} /></div>
+                        </div>
                     </div>
                 </div>
             </header>
