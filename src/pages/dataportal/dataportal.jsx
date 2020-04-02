@@ -100,13 +100,12 @@ class Dataset extends Component {
             </div>
             <div>
               {getLabel("lakes", dataset.lakes_id)} |{" "}
-              {this.parseDate(dataset.start_time)} to{" "}
-              {this.parseDate(dataset.end_time)}
+              {this.parseDate(dataset.mindatetime)} to{" "}
+              {this.parseDate(dataset.maxdatetime)}
             </div>
             <div>
               License: {getLabel("licenses", dataset.licenses_id)} | Downloads:{" "}
-              {dataset.downloads} | Last Modified:{" "}
-              {this.parseDate(dataset.lastmodified)}
+              {dataset.downloads}
             </div>
           </div>
         </Link>

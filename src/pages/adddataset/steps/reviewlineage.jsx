@@ -58,8 +58,8 @@ class ReviewLineage extends Component {
             <input
               id="scriptLineage"
               type="text"
-              onChange={this.props.handleChange("pre_script")}
-              defaultValue={dataset["pre_script"]}
+              onChange={this.props.handleChange("prescript")}
+              defaultValue={dataset["prescript"]}
             />
           </div>
           <div className="form-group">
@@ -67,8 +67,8 @@ class ReviewLineage extends Component {
             <input
               id="fileLineage"
               type="text"
-              onChange={this.props.handleChange("pre_file")}
-              defaultValue={dataset["pre_file"]}
+              onChange={this.props.handleChange("prefile")}
+              defaultValue={dataset["prefile"]}
             />
           </div>
         </div>

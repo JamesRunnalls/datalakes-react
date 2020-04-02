@@ -76,7 +76,7 @@ class Live extends Component {
       <GIS
         title="Live Conditions"
         documentTitle="Live - Datalakes"
-        selected={[3, 0]}
+        selected={[]}
         hidden={[]}
         setQueryParams={this.setQueryParams}
         getQueryParams={this.getQueryParams}

@@ -93,15 +93,15 @@ class Publish extends Component {
           <tbody>
             <tr>
               <th>Link to Git Repo</th>
-              <td>{dataset["git"]}</td>
+              <td>{dataset["datasourcelink"]}</td>
             </tr>
             <tr>
-              <th>Start Time</th>
-              <td>{dataset["start_time"]}</td>
+              <th>Min Datetime</th>
+              <td>{new Date(dataset["mindatetime"]).toString()}</td>
             </tr>
             <tr>
-              <th>End Time</th>
-              <td>{dataset["end_time"]}</td>
+              <th>Max Datetime</th>
+              <td>{new Date(dataset["maxdatetime"]).toString()}</td>
             </tr>
             <tr>
               <th>Location</th>
@@ -110,8 +110,12 @@ class Publish extends Component {
               </td>
             </tr>
             <tr>
-              <th>Depth</th>
-              <td>{dataset["depth"]}m</td>
+              <th>Minimum Depth</th>
+              <td>{dataset["mindepth"]}m</td>
+            </tr>
+            <tr>
+              <th>Maximum Depth</th>
+              <td>{dataset["maxdepth"]}m</td>
             </tr>
             <tr>
               <th>Lake</th>
@@ -119,6 +123,10 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Title</th>
+              <td>{dataset["title"]}</td>
+            </tr>
+            <tr>
+              <th>Description</th>
               <td>{dataset["title"]}</td>
             </tr>
             <tr>
@@ -157,11 +165,11 @@ class Publish extends Component {
             </tr>
             <tr>
               <th>Pre file</th>
-              <td>{dataset["pre_file"]}</td>
+              <td>{dataset["prefile"]}</td>
             </tr>
             <tr>
               <th>Pre Script</th>
-              <td>{dataset["pre_script"]}</td>
+              <td>{dataset["prescript"]}</td>
             </tr>
             <tr>
               <th>Live Connection</th>

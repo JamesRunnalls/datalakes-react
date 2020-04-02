@@ -21,9 +21,9 @@ class AddMetadata extends Component {
   nextStep = e => {
     e.preventDefault();
     this.props.nextStep().catch(error => {
-      console.error(error.message)
+      console.error(error.message);
       this.setState({
-        message: error.message,
+        message: error.message
       });
     });
   };
@@ -34,7 +34,14 @@ class AddMetadata extends Component {
   };
 
   render() {
-    const { dropdown, getDropdowns, dataset, handleChange, handleSelect } = this.props;
+    const {
+      dropdown,
+      getDropdowns,
+      dataset,
+      handleChange,
+      handleSelect,
+      datasetparameters
+    } = this.props;
     const { lakes, persons, projects, organisations, licenses } = dropdown;
     const modalInfo = {
       persons: persons,
@@ -51,8 +58,12 @@ class AddMetadata extends Component {
             <tbody>
               <tr>
                 <th>
-                  Start Time
-                  <a href="https://www.unixtimestamp.com/" rel="noopener noreferrer" target="_blank">
+                  Minimum Datetime
+                  <a
+                    href="https://www.unixtimestamp.com/"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}
@@ -61,19 +72,27 @@ class AddMetadata extends Component {
                   </a>
                 </th>
                 <td>
-                  <input
-                    type="number"
-                    name="starttime"
-                    defaultValue={dataset["start_time"]}
-                    placeholder="Seconds since 1970-01-01 00:00:00"
-                    onChange={handleChange("start_time")}
-                  />
+                  {datasetparameters.filter(dp => dp.parameters_id === 1)
+                    .length > 0 ? (
+                    <div>{new Date(dataset["mindatetime"]).toString()}</div>
+                  ) : (
+                    <input
+                      type="number"
+                      name="mindatetime"
+                      placeholder="Seconds since 1970-01-01 00:00:00"
+                      onChange={handleChange("mindatetime")}
+                    />
+                  )}
                 </td>
               </tr>
               <tr>
                 <th>
-                  End Time
-                  <a href="https://www.unixtimestamp.com/" rel="noopener noreferrer" target="_blank">
+                  Maximum Datetime
+                  <a
+                    href="https://www.unixtimestamp.com/"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}
@@ -82,46 +101,78 @@ class AddMetadata extends Component {
                   </a>
                 </th>
                 <td>
-                  <input
-                    type="number"
-                    name="endtime"
-                    defaultValue={dataset["end_time"]}
-                    placeholder="Seconds since 1970-01-01 00:00:00"
-                    onChange={handleChange("end_time")}
-                  />
+                  {datasetparameters.filter(dp => dp.parameters_id === 1)
+                    .length > 0 ? (
+                    <div>{new Date(dataset["maxdatetime"]).toString()}</div>
+                  ) : (
+                    <input
+                      type="number"
+                      name="maxdatetime"
+                      placeholder="Seconds since 1970-01-01 00:00:00"
+                      onChange={handleChange("maxdatetime")}
+                    />
+                  )}
                 </td>
               </tr>
               <tr>
                 <th>Location</th>
                 <td>
+                {datasetparameters.filter(dp => dp.parameters_id === 3)
+                    .length > 0 ? (
+                    <div>{dataset["latitude"]}</div>
+                  ) : (
                   <input
                     type="number"
                     name="latitude"
-                    defaultValue={dataset["latitude"]}
                     style={{ width: "calc(50% - 3px)", marginRight: "3px" }}
                     placeholder="Latitude"
                     onChange={handleChange("latitude")}
                   />
+                  )}
+                  {datasetparameters.filter(dp => dp.parameters_id === 4)
+                    .length > 0 ? (
+                    <div>{dataset["longitude"]}</div>
+                  ) : (
                   <input
                     type="number"
                     name="longitude"
-                    defaultValue={dataset["longitude"]}
                     style={{ width: "calc(50% - 3px)", marginLeft: "3px" }}
                     placeholder="Longitude"
                     onChange={handleChange("longitude")}
                   />
+                  )}
                 </td>
               </tr>
               <tr>
-                <th>Depth (m)</th>
+                <th>Minimum Depth (m)</th>
                 <td>
+                {datasetparameters.filter(dp => dp.parameters_id === 2)
+                    .length > 0 ? (
+                    <div>{dataset["mindepth"]}</div>
+                  ) : (
                   <input
                     type="number"
-                    name="depth"
-                    defaultValue={dataset["depth"]}
+                    name="mindepth"
                     placeholder="Meters below lake surface"
-                    onChange={handleChange("depth")}
+                    onChange={handleChange("mindepth")}
                   />
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <th>Maximum Depth (m)</th>
+                <td>
+                {datasetparameters.filter(dp => dp.parameters_id === 2)
+                    .length > 0 ? (
+                    <div>{dataset["maxdepth"]}</div>
+                  ) : (
+                  <input
+                    type="number"
+                    name="maxdepth"
+                    placeholder="Meters below lake surface"
+                    onChange={handleChange("maxdepth")}
+                  />
+                  )}
                 </td>
               </tr>
               <tr>
@@ -147,6 +198,18 @@ class AddMetadata extends Component {
                     defaultValue={dataset["title"]}
                     placeholder="Use a descriptive title to help others"
                     onChange={handleChange("title")}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td>
+                  <input
+                    type="text"
+                    name="description"
+                    defaultValue={dataset["description"]}
+                    placeholder="Add a description to help others"
+                    onChange={handleChange("description")}
                   />
                 </td>
               </tr>
@@ -196,7 +259,11 @@ class AddMetadata extends Component {
               <tr>
                 <th>
                   License
-                  <a href="https://choosealicense.com/licenses/" rel="noopener noreferrer" target="_blank">
+                  <a
+                    href="https://choosealicense.com/licenses/"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
                     <img
                       src={qm}
                       style={{ paddingLeft: "6px", height: "14px" }}

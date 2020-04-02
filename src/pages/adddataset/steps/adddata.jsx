@@ -52,8 +52,8 @@ class AddData extends Component {
               id="git"
               type="text"
               ref="git"
-              onChange={this.props.handleChange("git")}
-              defaultValue={dataset.git}
+              onChange={this.props.handleChange("datasourcelink")}
+              defaultValue={dataset.datasourcelink}
             />
           </div>
           <div className="error-message">{userMessage}</div>

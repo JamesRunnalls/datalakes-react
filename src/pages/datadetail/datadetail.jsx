@@ -20,8 +20,10 @@ class DataDetail extends Component {
     dataset: [],
     parameters: [],
     error: false,
-    min: "",
-    max: "",
+    mindatetime: "",
+    maxdatetime: "",
+    mindepth: "",
+    maxdepth: "",
     lower: "",
     upper: "",
     files: [],
@@ -89,7 +91,9 @@ class DataDetail extends Component {
     files = this.addAverageTime(files);
 
     // Get min and max
-    var { min, max } = this.fileBounds(files);
+    var { mindatetime, maxdatetime, mindepth, maxdepth } = dataset;
+    mindatetime = new Date(mindatetime).getTime() / 1000;
+    maxdatetime = new Date(maxdatetime).getTime() / 1000;
 
     // Download first file
     var dataArray = new Array(files.length).fill(0);
@@ -107,8 +111,10 @@ class DataDetail extends Component {
       parameters,
       files,
       data: dataArray,
-      min,
-      max,
+      mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
       lower,
       upper,
       dropdown,
@@ -348,10 +354,10 @@ class DataDetail extends Component {
 
   addAverageTime = array => {
     for (var i = 0; i < array.length; i++) {
-      array[i].ave = (parseFloat(array[i].min) + parseFloat(array[i].max)) / 2
+      array[i].ave = (parseFloat(array[i].min) + parseFloat(array[i].max)) / 2;
     }
-    return array
-  }
+    return array;
+  };
 
   fileBounds = array => {
     var min = Math.min.apply(
@@ -419,8 +425,8 @@ class DataDetail extends Component {
       dataset,
       parameters,
       data,
-      min,
-      max,
+      mindatetime,
+      maxdatetime,
       lower,
       upper,
       step,
@@ -430,7 +436,11 @@ class DataDetail extends Component {
       innerLoading,
       combined
     } = this.state;
-    document.title = dataset.title ? dataset.title + " - Datalakes" : "Datalakes";
+    document.title = dataset.title
+      ? dataset.title + " - Datalakes"
+      : "Datalakes";
+
+    console.log(mindatetime, maxdatetime);
 
     switch (step) {
       default:
@@ -463,8 +473,8 @@ class DataDetail extends Component {
               data={data}
               lower={lower}
               upper={upper}
-              max={max}
-              min={min}
+              max={maxdatetime}
+              min={mindatetime}
             />
           </React.Fragment>
         );
@@ -489,8 +499,8 @@ class DataDetail extends Component {
               data={data}
               lower={lower}
               upper={upper}
-              max={max}
-              min={min}
+              max={maxdatetime}
+              min={mindatetime}
               files={files}
               file={file}
               downloadData={this.downloadData}
@@ -529,8 +539,8 @@ class DataDetail extends Component {
               files={files}
               selectedFiles={this.selectedFiles}
               getLabel={this.getLabel}
-              max={max}
-              min={min}
+              max={maxdatetime}
+              min={mindatetime}
               apiUrl={apiUrl}
             />
           </React.Fragment>

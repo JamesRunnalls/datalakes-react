@@ -299,21 +299,23 @@ class GIS extends Component {
     );
 
     // Get maplayers
-    var { data: maplayers } = await axios.get(apiUrl + "/maplayers");
+    var { data: datasets } = await axios.get(apiUrl + "/datasets");
 
     // Parse default settings from table
-    maplayers.map(x => {
-      x.colors = this.parseColor(x.colors);
-      x.markerLabel = this.parseBoolean(x.markerLabel);
-      x.markerFixedSize = this.parseBoolean(x.markerFixedSize);
-      x.vectorMagnitude = this.parseBoolean(x.vectorMagnitude);
-      x.vectorArrows = this.parseBoolean(x.vectorArrows);
-      x.vectorFlow = this.parseBoolean(x.vectorFlow);
-      x.vectorArrowColor = this.parseBoolean(x.vectorArrowColor);
-      x.vectorFlowColor = this.parseBoolean(x.vectorFlowColor);
-      x.legend = this.parseBoolean(x.legend);
+    datasets.map(x => {
+      x.colors = this.parseColor(x.plotproperties.colors);
+      x.markerLabel = this.parseBoolean(x.plotproperties.markerLabel);
+      x.markerFixedSize = this.parseBoolean(x.plotproperties.markerFixedSize);
+      x.vectorMagnitude = this.parseBoolean(x.plotproperties.vectorMagnitude);
+      x.vectorArrows = this.parseBoolean(x.plotproperties.vectorArrows);
+      x.vectorFlow = this.parseBoolean(x.plotproperties.vectorFlow);
+      x.vectorArrowColor = this.parseBoolean(x.plotproperties.vectorArrowColor);
+      x.vectorFlowColor = this.parseBoolean(x.plotproperties.vectorFlowColor);
+      x.legend = this.parseBoolean(x.plotproperties.legend);
       return x;
     });
+
+    console.log(datasets)
 
     // Download default layers
     for (var i = 0; i < selected.length; i++) {

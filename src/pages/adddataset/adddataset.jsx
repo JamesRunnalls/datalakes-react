@@ -19,32 +19,50 @@ class AddDataset extends Component {
     dropdown: {},
     dataset: {
       id: "",
-      git: "",
-      start_time: "",
-      end_time: "",
+      title: "",
+      description: "",
+      origin: "measurement",
+      mapplot: "marker",
+      mapplotfunction: "gitPlot",
+      datasource: "internal",
+      datasourcelink: "",
+      plotproperties: {
+        colors: "Rainbow",
+        markerLabel: false,
+        markerSymbol: "circle",
+        markerFixedSize: true,
+        markerSize: 10,
+        vectorMagnitude: false,
+        vectorArrows: false,
+        vectorFlow: false,
+        vectorArrowColor: false,
+        vectorFlowColor: false,
+        legend: false
+      },
+      citation: "",
+      downloads: 0,
+      fileconnect: "false",
+      liveconnect: "no",
+      renku: "",
+      prefile: "",
+      prescript: "",
+      mindatetime: "",
+      maxdatetime: "",
       latitude: "",
       longitude: "",
-      depth: "",
+      licenses_id: "",
+      organisations_id: "",
+      repositories_id: "",
       lakes_id: "",
       persons_id: "",
-      projects_id: "",
-      organisations_id: "",
-      title: "",
-      renku: "",
-      pre_file: "",
-      pre_script: "",
-      licenses_id: "",
-      citation: "",
-      liveconnect: "false",
-      fileconnect: "no",
-      repositories_id: "",
-      folder: "",
-      downloads: 0
+      projects_id: ""
     },
     datasetparameters: [],
     files_list: [],
     file: {}
   };
+
+  // 0) Get dropdowns
 
   getDropdowns = async () => {
     const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
@@ -71,11 +89,10 @@ class AddDataset extends Component {
       });
 
     // Clone git repo and add files to files table
-    var reqObj = this.parseUrl(dataset.git);
-    console.log(reqObj);
+    var reqObj = this.parseUrl(dataset.datasourcelink);
     reqObj["id"] = data1.id;
     var { data: data2 } = await axios
-      .post(apiUrl + "/sparsegitclone", reqObj)
+      .post(apiUrl + "/gitclone", reqObj)
       .catch(error => {
         console.error(error.message);
         this.setState({ allowedStep: [1, 0, 0, 0, 0] });
@@ -102,7 +119,6 @@ class AddDataset extends Component {
     }
     dataset["id"] = reqObj.id;
     dataset["repositories_id"] = repo_id;
-    dataset["folder"] = reqObj.dir;
 
     // Set initial dataset parameters
     var datasetparameters = this.setDatasetParameters(
@@ -185,11 +201,12 @@ class AddDataset extends Component {
         datasetparameters,
         dataset.fileconnect
       );
-      var { start_time, end_time, depth, longitude, latitude } = data;
+      var { mindatetime, maxdatetime, mindepth, maxdepth, longitude, latitude } = data;
     } else {
-      var arr_start_time = [];
-      var arr_end_time = [];
-      var arr_depth = [];
+      var arr_mindatetime = [];
+      var arr_maxdatetime = [];
+      var arr_mindepth = [];
+      var arr_maxdepth = [];
       var arr_longitude = [];
       var arr_latitude = [];
       for (var k = 0; k < files_list.length; k++) {
@@ -199,23 +216,26 @@ class AddDataset extends Component {
           datasetparameters,
           dataset.fileconnect
         );
-        arr_start_time.push(data.start_time);
-        arr_end_time.push(data.end_time);
-        arr_depth.push(data.depth);
+        arr_mindatetime.push(data.mindatetime);
+        arr_maxdatetime.push(data.maxdatetime);
+        if (data.mindepth < -2) arr_mindepth.push(data.mindepth);
+        if (data.mindepth > 200) arr_maxdepth.push(data.maxdepth);
         arr_longitude.push(data.longitude);
         arr_latitude.push(data.latitude);
       }
-      start_time = this.getMin(arr_start_time);
-      end_time = this.getMax(arr_end_time);
-      depth = this.allEqual() ? arr_depth[0] : this.getAve(arr_depth);
+      mindatetime = this.getMin(arr_mindatetime);
+      maxdatetime = this.getMax(arr_maxdatetime);
+      mindepth = this.getMin(arr_mindepth);
+      maxdepth = this.getMax(arr_maxdepth);
       longitude = this.getAve(arr_longitude);
       latitude = this.getAve(arr_latitude);
     }
 
     // Logic for continuing to next step
-    dataset["start_time"] = start_time;
-    dataset["end_time"] = end_time;
-    dataset["depth"] = depth;
+    dataset["mindatetime"] = mindatetime;
+    dataset["maxdatetime"] = maxdatetime;
+    dataset["mindepth"] = mindepth;
+    dataset["maxdepth"] = maxdepth;
     dataset["longitude"] = longitude;
     dataset["latitude"] = latitude;
     this.setState({
@@ -596,6 +616,7 @@ class AddDataset extends Component {
             <AddMetadata
               dataset={dataset}
               dropdown={dropdown}
+              datasetparameters={datasetparameters}
               nextStep={this.validateMetadata}
               prevStep={this.prevStep}
               handleChange={this.handleDataset}
