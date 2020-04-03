@@ -16,7 +16,6 @@ class SidebarGIS extends Component {
       selectedlayers,
       datasets,
       parameters,
-      selected,
       sidebarextratop,
       sidebarextrabottom,
       setSelected,
@@ -44,11 +43,11 @@ class SidebarGIS extends Component {
         <FilterBox
           title="Add Layers"
           content={
-            /*<AddLayers
-              maplayers={maplayers}
+            <AddLayers
+              datasets={datasets}
               parameters={parameters}
               addSelected={addSelected}
-            />*/ <div></div>
+            />
           }
         />
         {sidebarextrabottom}
@@ -318,7 +317,6 @@ class GIS extends Component {
       }
       array.push({ fileid, timedistance, depthdistance });
     }
-    console.log(array)
     array.sort((a, b) => {
       if (a.timedistance > b.timedistance) {
         return 1;
@@ -332,7 +330,6 @@ class GIS extends Component {
         return -1;
       }
     });
-    console.log(array)
     return array[0].fileid;
   };
 

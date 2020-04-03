@@ -55,10 +55,10 @@ class AddLayersInnerInner extends Component {
 
 class AddLayersInner extends Component {
   render() {
-    var { maplayers, parameters, addSelected, type } = this.props;
-    var cmaplayers = JSON.parse(JSON.stringify(maplayers));
+    var { datasets, parameters, addSelected, type } = this.props;
+    var cdatasets = JSON.parse(JSON.stringify(datasets));
     var cparameters = JSON.parse(JSON.stringify(parameters));
-    var mlayers = cmaplayers.filter(layer => layer.type === type);
+    var mlayers = cdatasets.filter(layer => layer.origin === type);
     var layers = mlayers.map(layer => layer.parameters_id);
     layers = [...new Set(layers)];
     var availableparameters = cparameters.filter(p => layers.includes(p.id));
@@ -81,10 +81,11 @@ class AddLayersInner extends Component {
     );
   }
 }
+
 class AddLayers extends Component {
   state = {};
   render() {
-    var { maplayers, parameters, addSelected } = this.props;
+    var { datasets, parameters, addSelected } = this.props;
     return (
       <React.Fragment>
         <FilterBox
@@ -92,7 +93,7 @@ class AddLayers extends Component {
           inner="true"
           content={
             <AddLayersInner
-              maplayers={maplayers}
+              datasets={datasets}
               parameters={parameters}
               addSelected={addSelected}
               type="measurement"
@@ -104,7 +105,7 @@ class AddLayers extends Component {
           inner="true"
           content={
             <AddLayersInner
-              maplayers={maplayers}
+              datasets={datasets}
               parameters={parameters}
               addSelected={addSelected}
               type="satellite"
@@ -116,7 +117,7 @@ class AddLayers extends Component {
           inner="true"
           content={
             <AddLayersInner
-              maplayers={maplayers}
+              datasets={datasets}
               parameters={parameters}
               addSelected={addSelected}
               type="model"

@@ -187,7 +187,7 @@ class GISMap extends Component {
   };
 
   meteolakesScalar = async (layer, data) => {
-    var { data, min, max } = layer;
+    var { min, max, colors } = layer;
     var matrix, polygons;
     for (var k = 0; k < data.length; k++) {
       polygons = [];
@@ -210,7 +210,7 @@ class GISMap extends Component {
               this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]])
             ];
             var valuestring = String(row[j][2]) + data[k].unit;
-            var pixelcolor = getColor(row[j][2], min, max, layer.colors);
+            var pixelcolor = getColor(row[j][2], min, max, colors);
             polygons.push(
               L.polygon(coords, {
                 color: pixelcolor,
@@ -330,7 +330,6 @@ class GISMap extends Component {
     }
 
     if (vectorArrows) {
-      console.log(layer, data);
       for (k = 0; k < data.length; k++) {
         var arrows = L.vectorField(data[k].data, {
           vectorArrowColor,
@@ -372,7 +371,6 @@ class GISMap extends Component {
       // Profiler e.g Thetis
       var index = this.indexClosest(depth, data.y);
       var value = data[datasetparameter.axis][index];
-      console.log(index, data.y[index], value);
       var minSize = 5;
       var maxSize = 30;
       var markerGroup = L.layerGroup().addTo(this.map);
