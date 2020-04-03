@@ -86,7 +86,7 @@ class EditSettings extends Component {
       markerFixedSize,
       markerSize,
       array,
-      plot,
+      mapplot,
       vectorMagnitude,
       vectorArrows,
       vectorFlow,
@@ -96,7 +96,7 @@ class EditSettings extends Component {
     var { removeSelected, id } = this.props;
     return (
       <div className="editsettings">
-        {["marker", "group"].includes(plot) && (
+        {["marker", "group"].includes(mapplot) && (
           <div className="editsettings-markeroptions">
             <div className="editsettings-title">Marker Options</div>
             <table className="editsettings-table">
@@ -150,7 +150,7 @@ class EditSettings extends Component {
             </table>
           </div>
         )}
-        {["field", "group"].includes(plot) && (
+        {["field", "group"].includes(mapplot) && (
           <div className="editsettings-fieldoptions">
             <div className="editsettings-title">Field Options</div>
             <table>
@@ -224,7 +224,7 @@ class EditSettings extends Component {
         <div className="editsettings-button">
           <button
             type="button"
-            title="Update plot settings"
+            title="Update mapplot settings"
             onClick={this.updateDisplay}
           >
             Update Plot
@@ -232,7 +232,7 @@ class EditSettings extends Component {
           <button
             type="button"
             title="Delete layer"
-            onClick={() => removeSelected([id])}
+            onClick={() => removeSelected(id)}
           >
             Delete Layer
           </button>

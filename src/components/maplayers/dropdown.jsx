@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import EditSettings from "./editsettings";
+import { sortableHandle } from "react-sortable-hoc";
 import "./maplayers.css";
+
+const DragHandle = sortableHandle(({ inner }) => <div title="Drag to re-order layers">{inner}</div>);
 
 class DropDown extends Component {
   state = {
@@ -16,15 +19,14 @@ class DropDown extends Component {
   render() {
     var { open, settings } = this.state;
     var {
-      name,
+      id,
+      title,
       content,
       allowSettings,
       display,
-      removeSelected,
-      id,
-      hidden,
-      onUpdate,
       displayGroup,
+      removeSelected,
+      onUpdate,
       toggleLayerView
     } = this.props;
     return (
@@ -36,6 +38,7 @@ class DropDown extends Component {
                 className="maplayers-symbol"
                 onClick={this.toggleOpen}
                 style={{ width: "10px" }}
+                title={open ? "Hide layer legend" : "Show layer legend"}
               >
                 {open ? "▿" : "▹"}
               </td>
@@ -44,18 +47,20 @@ class DropDown extends Component {
                 <input
                   className="maplayers-checkbox"
                   type="checkbox"
+                  title={display.visible ? "Hide layer" : "Show layer"}
                   onChange={() => toggleLayerView(id)}
-                  checked={!hidden.includes(id)}
+                  checked={display.visible}
                 />
               </td>
               <td style={{ width: "100%" }} onClick={this.toggleOpen}>
-                {name}
+                <DragHandle inner={title} />
               </td>
               {allowSettings && (
                 <td
                   onClick={this.toggleSettings}
                   style={{ width: "10px" }}
                   className="maplayers-settings"
+                  title="Layer display settings"
                 >
                   &#9881;
                 </td>
@@ -71,11 +76,11 @@ class DropDown extends Component {
           }
         >
           <EditSettings
-            display={display}
-            removeSelected={removeSelected}
             id={id}
-            onUpdate={onUpdate}
+            display={display}
             displayGroup={displayGroup}
+            removeSelected={removeSelected}
+            onUpdate={onUpdate}
           />
         </div>
         <div

@@ -14,19 +14,22 @@ class GroupDisplay extends Component {
   render() {
     var { display } = this.props;
     var {
-      plot,
+      mapplot,
       min,
       max,
-      unit,
-      sourcelink,
-      sourcetext,
+      datasetparameters,
+      datasourcelink,
+      datasource,
       description,
       colors,
       markerFixedSize,
-      markerSymbol
+      markerSymbol,
+      parameters_id
     } = display;
+    var datasetparameter = datasetparameters.find(dp => dp.parameters_id === parameters_id);
+    var { unit } = datasetparameter;
     var inner = <div></div>;
-    if (plot === "marker")
+    if (mapplot === "marker")
       inner = (
         <MarkerLegendItem
           min={min}
@@ -37,11 +40,11 @@ class GroupDisplay extends Component {
           markerSymbol={markerSymbol}
         />
       );
-    if (plot === "raster")
+    if (mapplot === "raster")
       inner = (
         <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />
       );
-    if (plot === "field")
+    if (mapplot === "field")
       inner = (
         <RasterLegendItem min={min} max={max} unit={unit} colors={colors} />
       );
@@ -50,8 +53,8 @@ class GroupDisplay extends Component {
         <div>{description}</div>
         {inner}
         Source:{" "}
-        <a href={sourcelink} target="_blank" rel="noopener noreferrer">
-          {sourcetext}
+        <a href={datasourcelink} target="_blank" rel="noopener noreferrer">
+          {datasource}
         </a>
       </div>
     );
@@ -59,25 +62,23 @@ class GroupDisplay extends Component {
 }
 
 const SortableItem = SortableElement(({ layer, props }) => {
-  var { id, name } = layer;
+  var { id, title } = layer;
   var {
-    maplayers,
+    selectedlayers,
     removeSelected,
-    hidden,
     updateMapLayers,
     toggleLayerView
   } = props;
   return (
     <li tabIndex={0}>
       <DropDown
+        id={id}
         key={id}
-        name={name}
+        title={title}
         allowSettings={true}
         display={layer}
-        displayGroup={maplayers}
+        displayGroup={selectedlayers}
         removeSelected={removeSelected}
-        id={id}
-        hidden={hidden}
         onUpdate={updateMapLayers}
         toggleLayerView={toggleLayerView}
         content={<GroupDisplay key={id} display={layer} />}
@@ -87,14 +88,10 @@ const SortableItem = SortableElement(({ layer, props }) => {
 });
 
 const SortableList = SortableContainer(({ props }) => {
-  var { maplayers, selected } = props;
-  if (maplayers.length < 1) selected = [];
-  var selectlayers = selected.map(id =>
-    maplayers.find(layer => layer.id === id)
-  );
+  var { selectedlayers } = props;
   return (
     <ul className="maplayers-list">
-      {selectlayers.map((layer, index) => (
+      {selectedlayers.map((layer, index) => (
         <SortableItem
           key={`item-${index}`}
           index={index}
@@ -108,16 +105,17 @@ const SortableList = SortableContainer(({ props }) => {
 
 class MapLayers extends Component {
   onSortEnd = ({ oldIndex, newIndex }) => {
-    var { selected, setSelected } = this.props;
-    selected = arrayMove(selected, oldIndex, newIndex);
-    setSelected(selected);
+    var { selectedlayers, setSelected } = this.props;
+    selectedlayers = arrayMove(selectedlayers, oldIndex, newIndex);
+    setSelected(selectedlayers);
   };
   render() {
     return (
       <SortableList
         props={this.props}
         onSortEnd={this.onSortEnd}
-        distance={40}
+        distance={10}
+        useDragHandle
       />
     );
   }

@@ -35,7 +35,7 @@ class MarkerLegendItem extends Component {
     } else {
       for (var i = 0; i < colors.length; i++) {
         var value =
-          Math.round((min + (max - min) * colors[i].point) * 100) / 100;
+          Math.round((min + (max - min) * colors[i].point) * 100000) / 100000;
         if (markerFixedSize) {
           fontSize = minSize
         } else {
@@ -52,8 +52,8 @@ class MarkerLegendItem extends Component {
               value =
                 value +
                 " - " +
-                Math.round((min + (max - min) * colors[i + 1].point) * 100) /
-                  100;
+                Math.round((min + (max - min) * colors[i + 1].point) * 100000) /
+                  100000;
               i++;
             }
           }

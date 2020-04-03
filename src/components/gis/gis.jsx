@@ -13,10 +13,10 @@ import TimeSelector from "../sliders/timeselector";
 class SidebarGIS extends Component {
   render() {
     var {
-      maplayers,
+      selectedlayers,
+      datasets,
       parameters,
       selected,
-      hidden,
       sidebarextratop,
       sidebarextrabottom,
       setSelected,
@@ -33,9 +33,7 @@ class SidebarGIS extends Component {
           preopen="true"
           content={
             <MapLayers
-              maplayers={maplayers}
-              selected={selected}
-              hidden={hidden}
+              selectedlayers={selectedlayers}
               setSelected={setSelected}
               removeSelected={removeSelected}
               toggleLayerView={toggleLayerView}
@@ -46,11 +44,11 @@ class SidebarGIS extends Component {
         <FilterBox
           title="Add Layers"
           content={
-            <AddLayers
+            /*<AddLayers
               maplayers={maplayers}
               parameters={parameters}
               addSelected={addSelected}
-            />
+            />*/ <div></div>
           }
         />
         {sidebarextrabottom}
@@ -61,18 +59,20 @@ class SidebarGIS extends Component {
 
 class GIS extends Component {
   state = {
+    selectedlayers: [],
     parameters: [],
-    maplayers: [],
+    datasets: [],
     selected: this.props.selected ? this.props.selected : [],
     hidden: this.props.hidden ? this.props.hidden : [],
-    loading: true
+    loading: true,
+    datetime: new Date(1539860087772),
+    depth: 18
   };
 
-  setSelected = selected => {
+  setSelected = selectedlayers => {
     this.setState({ loading: true }, () => {
-      var { hidden } = this.state;
-      this.props.setQueryParams(selected, hidden);
-      this.setState({ selected, loading: false });
+      //this.props.setQueryParams(selected, hidden);
+      this.setState({ selectedlayers, loading: false });
     });
   };
 
@@ -100,74 +100,68 @@ class GIS extends Component {
     });
   };
 
-  removeSelected = ids => {
-    function selectedfilter(selected, id) {
-      return selected.filter(selectid => selectid !== id);
-    }
+  removeSelected = id => {
     this.setState({ loading: true }, () => {
-      var { selected, hidden } = this.state;
-      for (var i = 0; i < ids.length; i++) {
-        selected = selectedfilter(selected, ids[i]);
-        hidden = selectedfilter(hidden, ids[i]);
-      }
-      this.props.setQueryParams(selected, hidden);
-      this.setState({ selected, hidden, loading: false });
+      var { selectedlayers } = this.state;
+      selectedlayers = selectedlayers.filter(x => x.id !== id);
+      //this.props.setQueryParams(selected, hidden);
+      this.setState({ selectedlayers, loading: false });
     });
   };
 
   toggleLayerView = id => {
     this.setState({ loading: true }, () => {
-      var { selected, hidden } = this.state;
-      if (hidden.includes(id)) {
-        hidden = hidden.filter(selectid => selectid !== id);
-      } else {
-        hidden.push(id);
-      }
-      this.props.setQueryParams(selected, hidden);
-      this.setState({ hidden, loading: false });
+      var { selectedlayers } = this.state;
+      var index = selectedlayers.findIndex(x => x.id === id);
+      selectedlayers[index].visible = !selectedlayers[index].visible;
+      //this.props.setQueryParams(selected, hidden);
+      this.setState({ selectedlayers, loading: false });
     });
   };
 
-  updateMapLayers = maplayers => {
+  updateMapLayers = selectedlayers => {
     this.setState({ loading: true }, () => {
-      this.setState({ maplayers, loading: false });
+      this.setState({ selectedlayers, loading: false });
     });
   };
 
-  downloadFile = async (id, maplayers) => {
-    var index = maplayers.findIndex(x => x.id === id);
-    var { data } = await axios.get(maplayers[index].api);
-    maplayers[index].data = data;
-    return maplayers;
+  downloadFile = async (fileid, files, dataset) => {
+    var index = files.findIndex(x => x.id === fileid);
+    if (dataset.datasource === "internal") {
+      var { data } = await axios.get(
+        apiUrl + "/files/" + files[index].id + "?get=raw"
+      );
+    } else {
+      var { data } = await axios.get(files[index].filelink);
+    }
+    files[index].data = data;
+    return files;
   };
 
   meteoSwissMarkersMinMax = layer => {
-    var array = layer.data.features;
+    var array = layer.features;
     array = array.map(x => x.properties.value);
     array = array.filter(x => x !== 9999);
     var max = this.getMax(array);
     var min = this.getMin(array);
-    return { min: min, max: max, array: array };
+    return { filemin: min, filemax: max, filearray: array };
   };
 
-  simstratMinMax = layer => {
-    var array = layer.data;
+  simstratMinMax = array => {
     array = array.map(x => x.value);
     var max = this.getMax(array);
     var min = this.getMin(array);
-    return { min: min, max: max, array: array };
+    return { filemin: min, filemax: max, filearray: array };
   };
 
-  remoteSensingMinMax = layer => {
-    var array = layer.data;
+  remoteSensingMinMax = array => {
     array = array.v;
     var max = this.getMax(array);
     var min = this.getMin(array);
-    return { min: min, max: max, array: array };
+    return { filemin: min, filemax: max, filearray: array };
   };
 
-  meteolakesScalarMinMax = layer => {
-    var inarray = layer.data;
+  meteolakesScalarMinMax = inarray => {
     var min = Infinity;
     var max = -Infinity;
     var flat;
@@ -180,11 +174,10 @@ class GIS extends Component {
       max = Math.max(max, this.getMax(flat));
       array = array.concat(flat);
     }
-    return { min: min, max: max, array: array };
+    return { filemin: min, filemax: max, filearray: array };
   };
 
-  meteolakesVectorMinMax = layer => {
-    var inarray = layer.data;
+  meteolakesVectorMinMax = inarray => {
     var min = Infinity;
     var max = -Infinity;
     var flat;
@@ -199,53 +192,60 @@ class GIS extends Component {
       max = Math.max(max, this.getMax(flat));
       array = array.concat(flat);
     }
-    return { min: min, max: max, array: array };
+    return { filemin: min, filemax: max, filearray: array };
   };
 
-  updateMinMax = (id, maplayers, parameters) => {
-    var index = maplayers.findIndex(x => x.id === id);
-    var layer = JSON.parse(JSON.stringify(maplayers[index]));
-    var parameterIndex = parameters.findIndex(
-      x => x.id === layer.parameters_id
+  gitPlotMinMax = (data, parameters_id, datasetparameters) => {
+    var datasetparameter = datasetparameters.find(
+      dp => dp.parameters_id === parameters_id
     );
-    var plotFunction = layer.plotFunction;
-    var min, max, array;
+    var array = data[datasetparameter.axis].flat();
+    var min = this.getMin(array);
+    var max = this.getMax(array);
+    return { filemin: min, filemax: max, filearray: array };
+  };
 
-    if (plotFunction === "meteoSwissMarkers") {
-      ({ min, max, array } = this.meteoSwissMarkersMinMax(layer));
-    }
-    if (plotFunction === "simstrat") {
-      ({ min, max, array } = this.simstratMinMax(layer));
-    }
-    if (plotFunction === "remoteSensing") {
-      ({ min, max, array } = this.remoteSensingMinMax(layer));
-    }
-    if (plotFunction === "meteolakesScalar") {
-      ({ min, max, array } = this.meteolakesScalarMinMax(layer));
-    }
-    if (plotFunction === "meteolakesVector") {
-      ({ min, max, array } = this.meteolakesVectorMinMax(layer));
-    }
+  getMinMax = (files, parameters_id, datasetparameters, mapplotfunction) => {
+    var min = Infinity;
+    var max = -Infinity;
+    var array = [];
 
-    maplayers[index].array = array;
+    for (var i = 0; i < files.length; i++) {
+      if (files[i].data) {
+        var filemin, filemax;
+        var filearray = [];
+        var data = files[i].data;
+        if (mapplotfunction === "gitPlot") {
+          ({ filemin, filemax, filearray } = this.gitPlotMinMax(
+            data,
+            parameters_id,
+            datasetparameters
+          ));
+        }
+        if (mapplotfunction === "meteoSwissMarkers") {
+          ({ filemin, filemax, filearray } = this.meteoSwissMarkersMinMax(
+            data
+          ));
+        }
+        if (mapplotfunction === "simstrat") {
+          ({ filemin, filemax, filearray } = this.simstratMinMax(data));
+        }
+        if (mapplotfunction === "remoteSensing") {
+          ({ filemin, filemax, filearray } = this.remoteSensingMinMax(data));
+        }
+        if (mapplotfunction === "meteolakesScalar") {
+          ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(data));
+        }
+        if (mapplotfunction === "meteolakesVector") {
+          ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(data));
+        }
 
-    if (parameters[parameterIndex].min) {
-      parameters[parameterIndex].min = Math.min(
-        parameters[parameterIndex].min,
-        min
-      );
-    } else {
-      parameters[parameterIndex].min = min;
+        if (filemin < min) min = filemin;
+        if (filemax > max) max = filemax;
+        array = array.concat(filearray);
+      }
     }
-    if (parameters[parameterIndex].max) {
-      parameters[parameterIndex].max = Math.max(
-        parameters[parameterIndex].max,
-        max
-      );
-    } else {
-      parameters[parameterIndex].max = max;
-    }
-    return { maplayers: maplayers, parameters: parameters };
+    return { min, max, array };
   };
 
   getMax = arr => {
@@ -289,57 +289,149 @@ class GIS extends Component {
     }
   };
 
-  async componentDidMount() {
-    var { selected, hidden } = this.state;
-    ({ selected, hidden } = this.props.getQueryParams(selected, hidden));
+  closestFile = (datetime, depth, files) => {
+    var time = new Date(datetime).getTime() / 1000;
+    var array = [];
+    for (var i = 0; i < files.length; i++) {
+      var fileid = files[i].id;
+      var mintime = new Date(files[i].mindatetime).getTime() / 1000;
+      var maxtime = new Date(files[i].maxdatetime).getTime() / 1000;
+      var mindepth = files[i].mindepth;
+      var maxdepth = files[i].maxdepth;
+      var timedistance;
+      if (time > mintime && time < maxtime) {
+        timedistance = 0;
+      } else {
+        timedistance = Math.min(
+          Math.abs(mintime - time),
+          Math.abs(maxtime - time)
+        );
+      }
+      var depthdistance;
+      if (depth > mindepth && depth < maxdepth) {
+        depthdistance = 0;
+      } else {
+        depthdistance = Math.min(
+          Math.abs(mindepth - depth),
+          Math.abs(maxdepth - depth)
+        );
+      }
+      array.push({ fileid, timedistance, depthdistance });
+    }
+    console.log(array)
+    array.sort((a, b) => {
+      if (a.timedistance > b.timedistance) {
+        return 1;
+      } else if (a.timedistance === b.timedistance) {
+        if (a.depthdistance > b.depthdistance) {
+          return 1;
+        } else {
+          return -1;
+        }
+      } else {
+        return -1;
+      }
+    });
+    console.log(array)
+    return array[0].fileid;
+  };
 
-    // Get parameter details
+  layervisible = (datasets_id, parameters_id, hidden) => {
+    var visible = true;
+    for (var i = 0; i < hidden.length; i++) {
+      if (datasets_id === hidden[i][0] && parameters_id === hidden[i][1]) {
+        visible = false;
+      }
+    }
+    return visible;
+  };
+
+  async componentDidMount() {
+    var { selected, hidden, datetime, depth } = this.state;
+    //({ selected, hidden } = this.props.getQueryParams(selected, hidden));
+
+    // Get parameters
     var { data: parameters } = await axios.get(
       apiUrl + "/selectiontables/parameters"
     );
 
-    // Get maplayers
+    // Get datasets
     var { data: datasets } = await axios.get(apiUrl + "/datasets");
 
-    // Parse default settings from table
-    datasets.map(x => {
-      x.colors = this.parseColor(x.plotproperties.colors);
-      x.markerLabel = this.parseBoolean(x.plotproperties.markerLabel);
-      x.markerFixedSize = this.parseBoolean(x.plotproperties.markerFixedSize);
-      x.vectorMagnitude = this.parseBoolean(x.plotproperties.vectorMagnitude);
-      x.vectorArrows = this.parseBoolean(x.plotproperties.vectorArrows);
-      x.vectorFlow = this.parseBoolean(x.plotproperties.vectorFlow);
-      x.vectorArrowColor = this.parseBoolean(x.plotproperties.vectorArrowColor);
-      x.vectorFlowColor = this.parseBoolean(x.plotproperties.vectorFlowColor);
-      x.legend = this.parseBoolean(x.plotproperties.legend);
-      return x;
-    });
-
-    console.log(datasets)
-
-    // Download default layers
+    // Build selected layers object
+    var selectedlayers = [];
     for (var i = 0; i < selected.length; i++) {
-      maplayers = await this.downloadFile(selected[i], maplayers);
-      ({ maplayers, parameters } = this.updateMinMax(
-        selected[i],
-        maplayers,
-        parameters
-      ));
+      var datasets_id = selected[i][0];
+      var parameters_id = selected[i][1];
+
+      // Find index of datasets and parameters
+      var dataset_index = datasets.findIndex(x => x.id === datasets_id);
+      var parameter_index = parameters.findIndex(x => x.id === parameters_id);
+      var dataset = datasets[dataset_index];
+
+      // Get file list for dataset
+      var { data: files } = await axios.get(
+        apiUrl + "/files?datasets_id=" + datasets_id
+      );
+
+      // Find closest file to datetime and depth
+      var fileid = this.closestFile(datetime, depth, files);
+
+      // Add data from file closes to datetime and depth
+      files = await this.downloadFile(fileid, files, dataset);
+      dataset.files = files;
+
+      // Get the dataset parameter
+      var { data: datasetparameters } = await axios.get(
+        apiUrl + "/datasetparameters?datasets_id=" + datasets_id
+      );
+
+      // Update the min and max value
+      var { min, max, array } = this.getMinMax(
+        files,
+        parameters_id,
+        datasetparameters,
+        dataset.mapplotfunction
+      );
+
+      // Plot properties
+      var layer = dataset.plotproperties;
+
+      layer["title"] = dataset.title;
+      layer["mapplot"] = dataset.mapplot;
+      layer["latitude"] = dataset.latitude;
+      layer["longitude"] = dataset.longitude;
+      layer["datasource"] = dataset.datasource;
+      layer["description"] = dataset.description;
+      layer["datasourcelink"] = dataset.datasourcelink;
+
+      layer["min"] = min;
+      layer["max"] = max;
+      layer["array"] = array;
+      layer["fileid"] = fileid;
+      layer["datasets_id"] = datasets_id;
+      layer["parameters_id"] = parameters_id;
+      layer["dataset_index"] = dataset_index;
+      layer["parameter_index"] = parameter_index;
+      layer["datasetparameters"] = datasetparameters;
+      layer.colors = this.parseColor(layer.colors);
+      layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
+      layer["visible"] = this.layervisible(datasets_id, parameters_id, hidden);
+      selectedlayers.push(layer);
     }
 
-    // Query String
-
     this.setState({
+      selectedlayers,
       selected,
       hidden,
       parameters,
-      maplayers,
+      datasets,
       loading: false
     });
   }
 
   render() {
-    var { maplayers, parameters, selected, hidden, loading } = this.state;
+    var { selectedlayers, datasets, parameters, loading, datetime, depth } = this.state;
     var {
       documentTitle,
       title,
@@ -347,35 +439,22 @@ class GIS extends Component {
       sidebarextrabottom
     } = this.props;
     document.title = documentTitle;
-
-    maplayers = maplayers.map(layer => {
-      var parameter = parameters.find(
-        parameter => parameter.id === layer.parameters_id
-      );
-      layer.min = parameter.min;
-      layer.max = parameter.max;
-      layer.unit = parameter.unit;
-      return layer;
-    });
-    if (maplayers.length < 1) selected = [];
-    var selectlayers = selected.map(id =>
-      maplayers.find(layer => layer.id === id)
-    );
     return (
       <React.Fragment>
         <h1>{title}</h1>
         <GISMap
-          maplayers={selectlayers}
-          hidden={hidden}
-          legend={<Legend maplayers={selectlayers} />}
-          timeselector={<TimeSelector selectlayers={selectlayers} />}
+          datetime={datetime}
+          depth={depth}
+          selectedlayers={selectedlayers}
+          datasets={datasets}
+          legend={/*<Legend selectedlayers />*/ <div></div>}
+          timeselector={<TimeSelector selectedlayers />}
           loading={loading}
           sidebar={
             <SidebarGIS
-              maplayers={maplayers}
+              selectedlayers={selectedlayers}
+              datasets={datasets}
               parameters={parameters}
-              selected={selected}
-              hidden={hidden}
               sidebarextratop={sidebarextratop}
               sidebarextrabottom={sidebarextrabottom}
               setSelected={this.setSelected}

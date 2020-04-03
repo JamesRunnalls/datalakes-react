@@ -53,6 +53,7 @@
   color: black;
   height: 20px;
   font-family: "The Serif Bold", Arial, sans-serif;
+  pointer-events: none;
 }
 
 .colorramp-dropdown::-webkit-scrollbar {

@@ -57,7 +57,7 @@ class GISMap extends Component {
     return [lat, lng];
   };
 
-  meteoSwissMarkers = async layer => {
+  meteoSwissMarkers = async (layer, data) => {
     var minSize = 5;
     var maxSize = 30;
     var layerData = JSON.parse(JSON.stringify(layer.data.features));
@@ -97,7 +97,7 @@ class GISMap extends Component {
     this.marker.push(markerGroup);
   };
 
-  remoteSensing = async layer => {
+  remoteSensing = async (layer, data) => {
     var { min, max, data, unit } = layer;
     var polygons = [];
     var coords;
@@ -142,7 +142,7 @@ class GISMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  simstrat = async layer => {
+  simstrat = async (layer, data) => {
     var layerData = JSON.parse(JSON.stringify(layer.data));
     var { min, max } = layer;
     var polygons = [];
@@ -186,7 +186,7 @@ class GISMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  meteolakesScalar = async layer => {
+  meteolakesScalar = async (layer, data) => {
     var { data, min, max } = layer;
     var matrix, polygons;
     for (var k = 0; k < data.length; k++) {
@@ -248,9 +248,8 @@ class GISMap extends Component {
     }
   };
 
-  meteolakesVector = async layer => {
+  meteolakesVector = async (layer, data) => {
     var {
-      data,
       vectorArrows,
       vectorMagnitude,
       vectorFlow,
@@ -331,12 +330,13 @@ class GISMap extends Component {
     }
 
     if (vectorArrows) {
+      console.log(layer, data);
       for (k = 0; k < data.length; k++) {
         var arrows = L.vectorField(data[k].data, {
-          vectorArrowColor: vectorArrowColor,
-          colors: colors,
-          min: min,
-          max: max,
+          vectorArrowColor,
+          colors,
+          min,
+          max,
           size: 15
         }).addTo(this.map);
         this.raster.push(arrows);
@@ -345,6 +345,79 @@ class GISMap extends Component {
 
     if (vectorFlow) {
     }
+  };
+
+  gitPlot = async (layer, file) => {
+    var {
+      datasetparameters,
+      parameters_id,
+      markerLabel,
+      min,
+      max,
+      colors,
+      markerSymbol,
+      markerFixedSize,
+      markerSize,
+      description,
+      latitude,
+      longitude
+    } = layer;
+    var datasetparameter = datasetparameters.find(
+      dp => dp.parameters_id === parameters_id
+    );
+    var { datetime, depth } = this.props;
+    var data = file.data;
+    var type = datasetparameters.map(dp => dp.axis + "&" + dp.parameters_id);
+    if (type.includes("M&1") && type.includes("y&2")) {
+      // Profiler e.g Thetis
+      var index = this.indexClosest(depth, data.y);
+      var value = data[datasetparameter.axis][index];
+      console.log(index, data.y[index], value);
+      var minSize = 5;
+      var maxSize = 30;
+      var markerGroup = L.layerGroup().addTo(this.map);
+      var valuestring = String(value) + String(datasetparameter.unit);
+      var color = getColor(value, min, max, colors);
+      var shape = markerSymbol;
+      var size;
+      if (markerFixedSize) {
+        size = markerSize;
+      } else {
+        size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
+      }
+      var marker = new L.marker([latitude,longitude], {
+        icon: L.divIcon({
+          className: "map-marker",
+          html:
+            `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
+            `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
+            `</div></div> `
+        })
+      })
+        .bindTooltip(valuestring, {
+          permanent: markerLabel,
+          direction: "top"
+        })
+        .addTo(markerGroup);
+      marker.bindPopup(description);
+
+      this.marker.push(markerGroup);
+    } else {
+      alert("No plotting function defined");
+    }
+  };
+
+  indexClosest = (num, arr) => {
+    var curr = arr[0];
+    var diff = Math.abs(num - curr);
+    for (var val = 0; val < arr.length; val++) {
+      var newdiff = Math.abs(num - arr[val]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        curr = val;
+      }
+    }
+    return curr;
   };
 
   componentDidMount() {
@@ -445,7 +518,7 @@ class GISMap extends Component {
   }
 
   updatePlot = () => {
-    var { maplayers, hidden } = this.props;
+    var { selectedlayers, datasets } = this.props;
 
     // Remove old layers
     this.marker.forEach(layer => {
@@ -456,22 +529,34 @@ class GISMap extends Component {
     });
 
     // Add new layers
-    for (var i = maplayers.length - 1; i > -1; i--) {
-      if (!hidden.includes(maplayers[i].id)) {
-        var layer = maplayers[i];
-        var { plotFunction } = layer;
-        plotFunction === "meteoSwissMarkers" && this.meteoSwissMarkers(layer);
-        plotFunction === "remoteSensing" && this.remoteSensing(layer);
-        plotFunction === "simstrat" && this.simstrat(layer);
-        plotFunction === "meteolakesScalar" && this.meteolakesScalar(layer);
-        plotFunction === "meteolakesVector" && this.meteolakesVector(layer);
+    for (var i = selectedlayers.length - 1; i > -1; i--) {
+      var layer = selectedlayers[i];
+      if (layer.visible) {
+        var dataset = datasets[layer.dataset_index];
+        var { fileid } = layer;
+        var { mapplotfunction } = dataset;
+        var file = dataset.files.find(x => x.id === fileid);
+        var data = file.data;
+
+        mapplotfunction === "gitPlot" && this.gitPlot(layer, file);
+        mapplotfunction === "meteoSwissMarkers" &&
+          this.meteoSwissMarkers(layer, data);
+        mapplotfunction === "remoteSensing" && this.remoteSensing(layer, data);
+        mapplotfunction === "simstrat" && this.simstrat(layer, data);
+        mapplotfunction === "meteolakesScalar" &&
+          this.meteolakesScalar(layer, data);
+        mapplotfunction === "meteolakesVector" &&
+          this.meteolakesVector(layer, data);
       }
     }
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.loading && !this.props.loading) {
-      this.updatePlot();
+      var updatePlot = this.updatePlot;
+      window.setTimeout(() => {
+        updatePlot();
+      }, 0);
     }
     this.map.invalidateSize();
   }
