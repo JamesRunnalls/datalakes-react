@@ -78,7 +78,9 @@ render() {
             height: 20,
             border: 0,   
             backgroundColor: disabled ? '#666' : '#000',
-            zIndex: 0
+            zIndex: 0,
+            pointerEvents: 'none'
+
         }}
         />
     </Fragment>

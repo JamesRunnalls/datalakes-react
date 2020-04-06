@@ -12,7 +12,7 @@ class GISMap extends Component {
     help: false,
     fullsize: false,
     loading: false,
-    menu: window.innerWidth > 500
+    menu: window.innerWidth > 500,
   };
 
   toggleHelp = () => {
@@ -27,15 +27,15 @@ class GISMap extends Component {
     this.setState({ menu: !this.state.menu });
   };
 
-  hoverOver = e => {
+  hoverOver = (e) => {
     this.props.hoverFunc(e.target, "over");
   };
 
-  hoverOut = e => {
+  hoverOut = (e) => {
     this.props.hoverFunc(e.target, "out");
   };
 
-  CHtoWGSlatlng = yx => {
+  CHtoWGSlatlng = (yx) => {
     var y_aux = (yx[0] - 600000) / 1000000;
     var x_aux = (yx[1] - 200000) / 1000000;
     var lat =
@@ -84,12 +84,12 @@ class GISMap extends Component {
           html:
             `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
             `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}deg)">` +
-            `</div></div> `
-        })
+            `</div></div> `,
+        }),
       })
         .bindTooltip(valuestring, {
           permanent: markerLabel,
-          direction: "top"
+          direction: "top",
         })
         .addTo(markerGroup);
       marker.bindPopup(layerData[j].properties.description);
@@ -98,7 +98,7 @@ class GISMap extends Component {
   };
 
   remoteSensing = async (layer, data) => {
-    var { min, max, data, unit } = layer;
+    var { min, max, unit } = layer;
     var polygons = [];
     var coords;
     var x = data.lonres / 2;
@@ -108,7 +108,7 @@ class GISMap extends Component {
         [data.lat[i] - y, data.lon[i] - x],
         [data.lat[i] + y, data.lon[i] - x],
         [data.lat[i] + y, data.lon[i] + x],
-        [data.lat[i] - y, data.lon[i] + x]
+        [data.lat[i] - y, data.lon[i] + x],
       ];
       var valuestring = String(Math.round(data.v[i] * 1000) / 1000) + unit;
       var pixelcolor = getColor(data.v[i], min, max, layer.colors);
@@ -117,7 +117,7 @@ class GISMap extends Component {
           color: pixelcolor,
           fillColor: pixelcolor,
           fillOpacity: 1,
-          title: valuestring
+          title: valuestring,
         })
           .bindPopup(
             "<table><tbody>" +
@@ -135,7 +135,7 @@ class GISMap extends Component {
           )
           .bindTooltip(valuestring, {
             permanent: false,
-            direction: "top"
+            direction: "top",
           })
       );
     }
@@ -154,7 +154,7 @@ class GISMap extends Component {
           color: pixelcolor,
           fillColor: pixelcolor,
           fillOpacity: 1,
-          title: layerData[i].value
+          title: layerData[i].value,
         })
           .bindPopup(
             "<table><tbody>" +
@@ -179,7 +179,7 @@ class GISMap extends Component {
           )
           .bindTooltip(valuestring, {
             permanent: false,
-            direction: "top"
+            direction: "top",
           })
       );
     }
@@ -207,7 +207,7 @@ class GISMap extends Component {
               this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
               this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
               this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-              this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]])
+              this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
             ];
             var valuestring = String(row[j][2]) + data[k].unit;
             var pixelcolor = getColor(row[j][2], min, max, colors);
@@ -216,7 +216,7 @@ class GISMap extends Component {
                 color: pixelcolor,
                 fillColor: pixelcolor,
                 fillOpacity: 1,
-                title: row[j][2]
+                title: row[j][2],
               })
                 .bindPopup(
                   "<table><tbody>" +
@@ -238,7 +238,7 @@ class GISMap extends Component {
                 )
                 .bindTooltip(valuestring, {
                   permanent: false,
-                  direction: "top"
+                  direction: "top",
                 })
             );
           }
@@ -256,7 +256,7 @@ class GISMap extends Component {
       vectorArrowColor,
       min,
       max,
-      colors
+      colors,
     } = layer;
 
     if (vectorMagnitude) {
@@ -279,7 +279,7 @@ class GISMap extends Component {
                 this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
                 this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
                 this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]])
+                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
               ];
               var magnitude = Math.abs(
                 Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
@@ -292,7 +292,7 @@ class GISMap extends Component {
                   color: pixelcolor,
                   fillColor: pixelcolor,
                   fillOpacity: 1,
-                  title: magnitude
+                  title: magnitude,
                 })
                   .bindPopup(
                     "<table><tbody>" +
@@ -319,7 +319,7 @@ class GISMap extends Component {
                   )
                   .bindTooltip(valuestring, {
                     permanent: false,
-                    direction: "top"
+                    direction: "top",
                   })
               );
             }
@@ -336,7 +336,7 @@ class GISMap extends Component {
           colors,
           min,
           max,
-          size: 15
+          size: 15,
         }).addTo(this.map);
         this.raster.push(arrows);
       }
@@ -359,14 +359,14 @@ class GISMap extends Component {
       markerSize,
       description,
       latitude,
-      longitude
+      longitude,
     } = layer;
     var datasetparameter = datasetparameters.find(
-      dp => dp.parameters_id === parameters_id
+      (dp) => dp.parameters_id === parameters_id
     );
     var { datetime, depth } = this.props;
     var data = file.data;
-    var type = datasetparameters.map(dp => dp.axis + "&" + dp.parameters_id);
+    var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler e.g Thetis
       var index = this.indexClosest(depth, data.y);
@@ -383,18 +383,18 @@ class GISMap extends Component {
       } else {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
-      var marker = new L.marker([latitude,longitude], {
+      var marker = new L.marker([latitude, longitude], {
         icon: L.divIcon({
           className: "map-marker",
           html:
             `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
             `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
-            `</div></div> `
-        })
+            `</div></div> `,
+        }),
       })
         .bindTooltip(valuestring, {
           permanent: markerLabel,
-          direction: "top"
+          direction: "top",
         })
         .addTo(markerGroup);
       marker.bindPopup(description);
@@ -450,10 +450,10 @@ class GISMap extends Component {
           {
             maxZoom: 10,
             attribution:
-              '| <a href="http://giscience.uni-hd.de/" target="_blank">University of Heidelberg</a> | <a href="https://lpdaac.usgs.gov/products/aster_policies" target="_blank">ASTER GDEM</a>, <a href="http://srtm.csi.cgiar.org/">SRTM</a>'
+              '| <a href="http://giscience.uni-hd.de/" target="_blank">University of Heidelberg</a> | <a href="https://lpdaac.usgs.gov/products/aster_policies" target="_blank">ASTER GDEM</a>, <a href="http://srtm.csi.cgiar.org/">SRTM</a>',
           }
-        )
-      ]
+        ),
+      ],
     });
 
     L.control.attribution({ position: "bottomright" }).addTo(this.map);
@@ -466,10 +466,10 @@ class GISMap extends Component {
           '<div class="customcontrol" title="Menu" id="sidebar">\u2630</div>',
         classes: "leaflet-bar",
         events: {
-          click: function(data) {
+          click: function (data) {
             toggleMenu();
-          }
-        }
+          },
+        },
       })
       .addTo(this.map);
 
@@ -481,10 +481,10 @@ class GISMap extends Component {
           '<div class="customcontrol" title="Full screen" id="fullsize">&#8689;</div>',
         classes: "leaflet-bar",
         events: {
-          click: function(data) {
+          click: function (data) {
             toggleFullsize();
-          }
-        }
+          },
+        },
       })
       .addTo(this.map);
 
@@ -495,10 +495,10 @@ class GISMap extends Component {
         content: '<div class="customcontrol" title="Help">?</div>',
         classes: "leaflet-bar",
         events: {
-          click: function(data) {
+          click: function (data) {
             toggleHelp();
-          }
-        }
+          },
+        },
       })
       .addTo(this.map);
 
@@ -507,7 +507,7 @@ class GISMap extends Component {
       .custom({
         position: "bottomright",
         content: '<img src="img/logo.svg">',
-        classes: "gis-datalakes-logo"
+        classes: "gis-datalakes-logo",
       })
       .addTo(this.map);
 
@@ -519,12 +519,16 @@ class GISMap extends Component {
     var { selectedlayers, datasets } = this.props;
 
     // Remove old layers
-    this.marker.forEach(layer => {
+    this.marker.forEach((layer) => {
       this.map.removeLayer(layer);
     });
-    this.raster.forEach(layer => {
+    this.raster.forEach((layer) => {
       this.map.removeLayer(layer);
     });
+
+    function finddataset(fileid, files) {
+      return files.find((x) => x.id === fileid);
+    }
 
     // Add new layers
     for (var i = selectedlayers.length - 1; i > -1; i--) {
@@ -533,7 +537,7 @@ class GISMap extends Component {
         var dataset = datasets[layer.dataset_index];
         var { fileid } = layer;
         var { mapplotfunction } = dataset;
-        var file = dataset.files.find(x => x.id === fileid);
+        var file = finddataset(fileid, dataset.files);
         var data = file.data;
 
         mapplotfunction === "gitPlot" && this.gitPlot(layer, file);

@@ -11,17 +11,17 @@ class Legend extends Component {
     this.setState({ open: !this.state.open });
   };
   render() {
-    var { maplayers } = this.props;
     var { open } = this.state;
-    var legendmaplayers = maplayers.filter(layer => layer.legend);
+    var { selectedlayers } = this.props;
+    var legendmaplayers = selectedlayers.filter(layer => layer.legend);
     var inner = [];
     var l;
     for (var i = 0; i < legendmaplayers.length; i++) {
       l = legendmaplayers[i];
-      if (l.plot === "marker") {
+      if (l.mapplot === "marker") {
         inner.push(
           <div key={i} className="legend-inner">
-            {l.name}
+            {l.title}
             <MarkerLegendItem
               min={l.min}
               max={l.max}
@@ -30,40 +30,40 @@ class Legend extends Component {
               markerFixedSize={l.markerFixedSize}
               markerSymbol={l.markerSymbol}
             />
-            <a href={l.sourcelink} title="Data source">
-              {l.sourcetext}
+            <a href={l.datasourcelink} title="Data source">
+              {l.datasource}
             </a>
           </div>
         );
       }
-      if (l.plot === "raster") {
+      if (l.mapplot === "raster") {
         inner.push(
           <div key={i} className="legend-inner">
-            {l.name}
+            {l.title}
             <RasterLegendItem
               min={l.min}
               max={l.max}
               unit={l.unit}
               colors={l.colors}
             />
-            <a href={l.sourcelink} title="Data source">
-              {l.sourcetext}
+            <a href={l.datasourcelink} title="Data source">
+              {l.datasource}
             </a>
           </div>
         );
       }
-      if (l.plot === "field") {
+      if (l.mapplot === "field") {
         inner.push(
           <div key={i} className="legend-inner">
-            {l.name}
+            {l.title}
             <RasterLegendItem
               min={l.min}
               max={l.max}
               unit={l.unit}
               colors={l.colors}
             />
-            <a href={l.sourcelink} title="Data source">
-              {l.sourcetext}
+            <a href={l.datasourcelink} title="Data source">
+              {l.datasource}
             </a>
           </div>
         );

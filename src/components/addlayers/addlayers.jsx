@@ -4,24 +4,36 @@ import FilterBox from "../filterbox/filterbox";
 
 class AddLayersInnerInner extends Component {
   state = {
-    open: false
+    open: false,
   };
   toggle = () => {
     this.setState({ open: !this.state.open });
   };
   render() {
     var { open } = this.state;
-    var { layer, layers, addSelected } = this.props;
-    layers = layers.filter(lay => lay.parameters_id === layer.id);
+    var {
+      parameters_id,
+      parameters,
+      datasets_ids,
+      datasets,
+      addSelected,
+    } = this.props;
+    var parameter = parameters.find((p) => p.id === parameters_id);
+    var subdatasets = datasets.filter((d) => datasets_ids.includes(d.id));
+    var datasetslink = subdatasets.map((s) => ({
+      datasets_id: s.id,
+      parameters_id,
+    }));
+
     return (
-      <div key={layer.id} className="addlayers-layer">
+      <div key={parameters_id} className="addlayers-layer">
         <div className="addlayers-titlebar">
           <div
             className="addlayers-title"
-            onClick={() => addSelected(layer.layerids)}
+            onClick={() => addSelected(datasetslink)}
             title="Add layer group"
           >
-            {layer.name}
+            {parameter.name}
           </div>
           <div
             className="addlayers-symbol"
@@ -34,15 +46,17 @@ class AddLayersInnerInner extends Component {
 
         {open && (
           <div className="addlayers-content">
-            {layers.map(lay => {
+            {subdatasets.map((sd) => {
               return (
                 <div
-                  onClick={() => addSelected([lay.id])}
+                  onClick={() =>
+                    addSelected([{ datasets_id: sd.id, parameters_id }])
+                  }
                   className="addlayers-detail"
-                  key={lay.id}
+                  key={sd.id}
                   title="Add layer"
                 >
-                  {lay.name}
+                  {sd.title}
                 </div>
               );
             })}
@@ -55,26 +69,49 @@ class AddLayersInnerInner extends Component {
 
 class AddLayersInner extends Component {
   render() {
-    var { datasets, parameters, addSelected, type } = this.props;
-    var cdatasets = JSON.parse(JSON.stringify(datasets));
-    var cparameters = JSON.parse(JSON.stringify(parameters));
-    var mlayers = cdatasets.filter(layer => layer.origin === type);
-    var layers = mlayers.map(layer => layer.parameters_id);
-    layers = [...new Set(layers)];
-    var availableparameters = cparameters.filter(p => layers.includes(p.id));
-    availableparameters = availableparameters.map(x => {
-      x.layerids = mlayers.filter(y => y.parameters_id === x.id).map(z => z.id);
-      return x;
-    });
+    var {
+      datasets,
+      parameters,
+      datasetparameters,
+      addSelected,
+      type,
+    } = this.props;
+
+    var subdatasets = datasets.filter((d) => d.origin === type);
+    var ids = subdatasets.map((s) => s.id);
+
+    var subparameters = datasetparameters.filter(
+      (p) =>
+        ids.includes(p.datasets_id) && ![1, 2, 3, 4].includes(p.parameters_id)
+    );
+
+    function filterparam(pid, params) {
+      return params.filter((p) => p.parameters_id === pid);
+    }
+
+    var paramd = [];
+    for (var i = 0; i < subparameters.length; i++) {
+      var pd = filterparam(subparameters[i].parameters_id, paramd);
+      if (pd.length === 0) {
+        paramd.push({
+          parameters_id: subparameters[i].parameters_id,
+          datasets: [subparameters[i].datasets_id],
+        });
+      } else {
+        paramd.datasets.push(subparameters[i].datasets_id);
+      }
+    }
 
     return (
       <div className="addlayers-box">
-        {availableparameters.map(layer => (
+        {paramd.map((param) => (
           <AddLayersInnerInner
-            layer={layer}
-            key={layer.id}
+            key={param.parameters_id}
+            parameters_id={param.parameters_id}
+            datasets_ids={param.datasets}
+            parameters={parameters}
+            datasets={datasets}
             addSelected={addSelected}
-            layers={mlayers}
           />
         ))}
       </div>
@@ -85,7 +122,7 @@ class AddLayersInner extends Component {
 class AddLayers extends Component {
   state = {};
   render() {
-    var { datasets, parameters, addSelected } = this.props;
+    var { datasets, parameters, datasetparameters, addSelected } = this.props;
     return (
       <React.Fragment>
         <FilterBox
@@ -95,6 +132,7 @@ class AddLayers extends Component {
             <AddLayersInner
               datasets={datasets}
               parameters={parameters}
+              datasetparameters={datasetparameters}
               addSelected={addSelected}
               type="measurement"
             />
@@ -107,6 +145,7 @@ class AddLayers extends Component {
             <AddLayersInner
               datasets={datasets}
               parameters={parameters}
+              datasetparameters={datasetparameters}
               addSelected={addSelected}
               type="satellite"
             />
@@ -119,6 +158,7 @@ class AddLayers extends Component {
             <AddLayersInner
               datasets={datasets}
               parameters={parameters}
+              datasetparameters={datasetparameters}
               addSelected={addSelected}
               type="model"
             />

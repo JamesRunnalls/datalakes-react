@@ -13,6 +13,10 @@ _/ __ \ \__  \  \ \/ \/ /\__  \    /  ___/
   src: url("./font/theserifbold.woff") format("woff");
 }
 
+iframe {
+  display: none;
+}
+
 body {
   color: rgb(0, 0, 0);
   font-family: Arial, sans-serif;

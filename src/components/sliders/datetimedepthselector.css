@@ -1,0 +1,67 @@
+.ddselector .videocontrols {
+  display: inline-block;
+  width: 100px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.ddselector .datetime {
+  display: inline-block;
+  width: calc(100vw - 160px);
+  text-align: right;
+}
+
+.ddselector .datetime .maintimeslider {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+}
+
+.ddselector .datetime .maintime {
+  background-color: rgba(255, 255, 255, 1);
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  border: 0;
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: top;
+  padding: 0 5px;
+  width: 130px;
+}
+
+.ddselector .datetime .maintime input {
+  height: 20px;
+}
+
+.ddselector .depth {
+  position: absolute;
+  right: 0;
+  top: 30px;
+}
+
+.ddselector .datetime .horizontalslider {
+  width: calc(100% - 200px);
+  display: inline-block;
+  margin-right: 20px;
+}
+
+.ddselector .depth .maindepth input {
+  width: 100px;
+  background-color: rgba(255, 255, 255, 1);
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  border: 0;
+  height: 20px;
+}
+
+.ddselector .depth .maindepth span {
+  position: absolute;
+  right: 30px;
+  top: 2px;
+}
+
+.react-datetime-picker__wrapper {
+    border: 0!important;
+}

@@ -26,9 +26,8 @@ class AvailbilityBar extends Component {
       this.setState({ plotted: true });
       var { min, max, files } = this.props;
       var array = files.map(x => ({
-        min: this.formatDate(x.min),
-        max: this.formatDate(x.max),
-        ave: this.formatDate(x.ave)
+        min: x.mindatetime,
+        max: x.maxdatetime,
       }));
 
       var svg = d3
