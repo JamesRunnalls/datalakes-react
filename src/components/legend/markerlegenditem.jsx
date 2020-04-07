@@ -25,7 +25,7 @@ class MarkerLegendItem extends Component {
                 height: minSize,
                 width: minSize,
                 backgroundColor: colors[0].color,
-                margin: "auto"
+                margin: "auto",
               }}
             ></div>
           </td>
@@ -34,10 +34,9 @@ class MarkerLegendItem extends Component {
       );
     } else {
       for (var i = 0; i < colors.length; i++) {
-        var value =
-          Math.round((min + (max - min) * colors[i].point) * 100000) / 100000;
+        var value = (min + (max - min) * colors[i].point).toExponential(3);
         if (markerFixedSize) {
-          fontSize = minSize
+          fontSize = minSize;
         } else {
           fontSize = minSize + (maxSize - minSize) * (i / colors.length);
         }
@@ -52,8 +51,7 @@ class MarkerLegendItem extends Component {
               value =
                 value +
                 " - " +
-                Math.round((min + (max - min) * colors[i + 1].point) * 100000) /
-                  100000;
+                (min + (max - min) * colors[i + 1].point).toExponential(3);
               i++;
             }
           }
@@ -79,7 +77,7 @@ class MarkerLegendItem extends Component {
                   height: fontSize,
                   width: fontSize,
                   backgroundColor: color,
-                  margin: "auto"
+                  margin: "auto",
                 }}
               ></div>
             </td>

@@ -1,62 +1,51 @@
 import React, { Component } from "react";
 import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
-import { SliderRail, Handle, Track, Tick } from "./components";
+import { SliderRail, Handle, Track, Tick } from "./componentsvertical";
 import { scaleLinear, scaleTime } from "d3";
-import DateTimePicker from "react-datetime-picker";
-import { format } from "date-fns";
 import AvailbilityBar from "./availabilitybar";
 import "./slider.css";
 
-class SliderSingleHorizontal extends Component {
+class SliderSingleVertical extends Component {
   state = {
     dt: this.props.value,
   };
   formatTick = (ms) => {
-    const { min, max } = this.props;
-    const diff = max.getTime() / 1000 - min.getTime() / 1000;
-    if (diff < 172800) {
-      // 3 Days
-      return format(ms, "hh:mm:ss");
-    } else if (diff < 31556952) {
-      // 1 Year
-      return format(ms, "dd MMM");
-    } else if (diff < 157784760) {
-      // 5 Years
-      return format(ms, "MMM yy");
-    } else {
-      return format(ms, "yyyy");
-    }
+    return ms;
   };
 
   onUpdate = (event) => {
-    this.setState({ dt: new Date(event[0]) });
+    this.setState({ dt: event[0] });
   };
 
   render() {
     const sliderStyle = {
       position: "relative",
       width: "100%",
-      height: 42,
+      height: "100%",
       margin: "auto",
       marginTop: 10,
       boxSizing: "border-box",
     };
-    var { value, onChange, type, min, max, files } = this.props;
+    var { value, onChange, min, max, files } = this.props;
     var { dt } = this.state;
 
-    var dateTicks = scaleTime()
+    var dateTicks = scaleLinear()
       .domain([min, max])
-      .ticks(10)
+      .ticks(8)
       .map((d) => +d);
 
     return (
       <React.Fragment>
-        {" "}
+        <div className="maindepth" title="Map reference depth">
+          <input value={dt} type="number" onChange={onChange} />
+          <span className="unit">m</span>
+        </div>
         <div
-          className="horizontalslider"
+          className="verticalslider"
           title="Hint: use arrow keys to move between timesteps"
         >
           <Slider
+            vertical
             mode={1}
             step={1}
             domain={[+min, +max]}
@@ -114,20 +103,9 @@ class SliderSingleHorizontal extends Component {
             </Ticks>
           </Slider>
         </div>
-        <div className="maintime" title="Map reference time">
-          <DateTimePicker
-            value={dt}
-            clearIcon={null}
-            calendarIcon={null}
-            maxDate={max}
-            minDate={min}
-            disableClock={true}
-            onChange={onChange}
-          />
-        </div>
       </React.Fragment>
     );
   }
 }
 
-export default SliderSingleHorizontal;
+export default SliderSingleVertical;

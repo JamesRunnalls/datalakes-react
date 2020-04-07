@@ -4,6 +4,7 @@ import "./leaflet_vectorField";
 import "./leaflet_customcontrol";
 import { getColor } from "../../components/gradients/gradients";
 import Loading from "../../components/loading/loading";
+import { format } from "date-fns";
 import "./css/gis_map.css";
 import "./css/leaflet.css";
 
@@ -369,12 +370,28 @@ class GISMap extends Component {
     var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler e.g Thetis
+      var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
+      var dp3 = datasetparameters.find((dp) => dp.parameters_id === 2);
       var index = this.indexClosest(depth, data.y);
-      var value = data[datasetparameter.axis][index];
+      var value = data[datasetparameter.axis][index].toExponential(3);
       var minSize = 5;
       var maxSize = 30;
       var markerGroup = L.layerGroup().addTo(this.map);
-      var valuestring = String(value) + String(datasetparameter.unit);
+      var timediff = -Math.round(
+        (datetime.getTime() / 1000 - data[dp2.axis][index]) / 3600
+      );
+      var depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
+      var valuestring =
+        String(value) +
+        String(datasetparameter.unit) +
+        '<br><div class="tooltipdiff">Diff: ' +
+        (timediff > 0 ? "+" : "") +
+        String(timediff) +
+        "hrs " +
+        (depthdiff > 0 ? " +" : " ") +
+        String(depthdiff) +
+        "m</div>";
+
       var color = getColor(value, min, max, colors);
       var shape = markerSymbol;
       var size;
@@ -406,16 +423,16 @@ class GISMap extends Component {
   };
 
   indexClosest = (num, arr) => {
-    var curr = arr[0];
-    var diff = Math.abs(num - curr);
+    var index = 0
+    var diff = Math.abs(num -  arr[0]);
     for (var val = 0; val < arr.length; val++) {
       var newdiff = Math.abs(num - arr[val]);
       if (newdiff < diff) {
         diff = newdiff;
-        curr = val;
+        index = val;
       }
     }
-    return curr;
+    return index;
   };
 
   componentDidMount() {

@@ -156,7 +156,7 @@ return (
         marginTop: 17,
         width: 1,
         height: 5,
-        backgroundColor: 'rgb(200,200,200)',
+        backgroundColor: 'rgb(0,0,0)',
         left: `${tick.percent}%`,
         }}
     />
