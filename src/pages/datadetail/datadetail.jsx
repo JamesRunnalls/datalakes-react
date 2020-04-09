@@ -32,7 +32,7 @@ class DataDetail extends Component {
     allowedStep: ["preview", "download", "pipeline", "information"],
     file: 0,
     innerLoading: false,
-    combined: []
+    combined: [],
   };
 
   async componentDidMount() {
@@ -43,8 +43,8 @@ class DataDetail extends Component {
       axios.get(apiUrl + "/datasets/" + dataset_id),
       axios.get(apiUrl + "/files?datasets_id=" + dataset_id),
       axios.get(apiUrl + "/datasetparameters?datasets_id=" + dataset_id),
-      axios.get(apiUrl + "/selectiontables")
-    ]).catch(error => {
+      axios.get(apiUrl + "/selectiontables"),
+    ]).catch((error) => {
       this.setState({ step: "error" });
     });
 
@@ -53,75 +53,87 @@ class DataDetail extends Component {
     var parameters = server[2].data;
     var dropdown = server[3].data;
 
-    // Add parameter details
-    var details;
-    for (var p in parameters) {
-      try {
-        details = this.parameterDetails(dropdown, parameters, p);
-        parameters[p]["name"] = details.name;
-        parameters[p]["characteristic"] = details.characteristic;
-      } catch (err) {
-        parameters[p]["name"] = null;
-        parameters[p]["characteristic"] = null;
+    // Internal vs External Data source
+    if (dataset.datasource === "internal") {
+      // Add parameter details
+      var details;
+      for (var p in parameters) {
+        try {
+          details = this.parameterDetails(dropdown, parameters, p);
+          parameters[p]["name"] = details.name;
+          parameters[p]["characteristic"] = details.characteristic;
+        } catch (err) {
+          parameters[p]["name"] = null;
+          parameters[p]["characteristic"] = null;
+        }
       }
-    }
 
-    // Logic for graphs
-    var x = parameters.filter(param => param.axis === "x").length > 0;
-    var y = parameters.filter(param => param.axis === "y").length > 0;
-    var z = parameters.filter(param => param.axis === "z").length > 0;
+      // Logic for graphs
+      var x = parameters.filter((param) => param.axis === "x").length > 0;
+      var y = parameters.filter((param) => param.axis === "y").length > 0;
+      var z = parameters.filter((param) => param.axis === "z").length > 0;
 
-    if (x && y && z) {
-      allowedStep.push("heatmap");
-      step = "heatmap";
-    } else if (x && y) {
-      allowedStep.push("linegraph");
-      step = "linegraph";
-    } else {
-      step = "preview";
-    }
+      if (x && y && z) {
+        allowedStep.push("heatmap");
+        step = "heatmap";
+      } else if (x && y) {
+        allowedStep.push("linegraph");
+        step = "linegraph";
+      } else {
+        step = "preview";
+      }
 
-    // Filter for only json files
-    files = files.filter(file => file.filetype === "json");
+      // Filter for only json files
+      files = files.filter((file) => file.filetype === "json");
 
-    // Sort by value (descending)
-    files.sort(this.numDescending);
+      // Sort by value (descending)
+      files.sort(this.numDescending);
 
-    // Get convertion array
-    files = this.addAverageTime(files);
+      // Get convertion array
+      files = this.addAverageTime(files);
 
-    // Get min and max
-    var { mindatetime, maxdatetime, mindepth, maxdepth } = dataset;
-    mindatetime = new Date(mindatetime).getTime() / 1000;
-    maxdatetime = new Date(maxdatetime).getTime() / 1000;
+      // Get min and max
+      var { mindatetime, maxdatetime, mindepth, maxdepth } = dataset;
+      mindatetime = new Date(mindatetime).getTime() / 1000;
+      maxdatetime = new Date(maxdatetime).getTime() / 1000;
 
-    // Download first file
-    var dataArray = new Array(files.length).fill(0);
-    var { data } = await axios
-      .get(apiUrl + "/files/" + files[0].id + "?get=raw")
-      .catch(error => {
-        this.setState({ step: "error" });
+      // Download first file
+      var dataArray = new Array(files.length).fill(0);
+      var { data } = await axios
+        .get(apiUrl + "/files/" + files[0].id + "?get=raw")
+        .catch((error) => {
+          this.setState({ step: "error" });
+        });
+      dataArray[0] = data;
+      var combined = data;
+      var { lower, upper } = this.dataBounds(dataArray);
+
+      this.setState({
+        dataset,
+        parameters,
+        files,
+        data: dataArray,
+        mindatetime,
+        maxdatetime,
+        mindepth,
+        maxdepth,
+        lower,
+        upper,
+        dropdown,
+        step,
+        allowedStep,
+        combined,
       });
-    dataArray[0] = data;
-    var combined = data;
-    var { lower, upper } = this.dataBounds(dataArray);
-
-    this.setState({
-      dataset,
-      parameters,
-      files,
-      data: dataArray,
-      mindatetime,
-      maxdatetime,
-      mindepth,
-      maxdepth,
-      lower,
-      upper,
-      dropdown,
-      step,
-      allowedStep,
-      combined
-    });
+    } else {
+      this.setState({
+        dataset,
+        parameters,
+        dropdown,
+        files,
+        step: "information",
+        allowedStep: ["information"]
+      })
+    }
   }
 
   componentWillUnmount() {
@@ -136,7 +148,7 @@ class DataDetail extends Component {
       if (dataArray[j] === 0) {
         var { data } = await axios
           .get(apiUrl + "/files/" + files[j].id + "?get=raw")
-          .catch(error => {
+          .catch((error) => {
             this.setState({ error: true });
           });
         dataArray[j] = data;
@@ -146,7 +158,7 @@ class DataDetail extends Component {
         if (this._isMounted) {
           this.setState({
             data: dataArray,
-            combined
+            combined,
           });
         } else {
           return false;
@@ -155,31 +167,31 @@ class DataDetail extends Component {
     }
   };
 
-  downloadFile = async index => {
+  downloadFile = async (index) => {
     var { data: dataArray, files } = this.state;
     var { data } = await axios
       .get(apiUrl + "/files/" + files[index].id + "?get=raw")
-      .catch(error => {
+      .catch((error) => {
         this.setState({ error: true });
       });
     dataArray[index] = data;
     if (this._isMounted) {
       this.setState({
         data: dataArray,
-        innerLoading: false
+        innerLoading: false,
       });
     } else {
       return false;
     }
   };
 
-  downloadMultipleFiles = async arr => {
+  downloadMultipleFiles = async (arr) => {
     var { data: dataArray, files, combined } = this.state;
     for (var j = 0; j < arr.length; j++) {
       if (dataArray[arr[j]] === 0) {
         var { data } = await axios
           .get(apiUrl + "/files/" + files[arr[j]].id + "?get=raw")
-          .catch(error => {
+          .catch((error) => {
             this.setState({ error: true });
           });
         dataArray[arr[j]] = data;
@@ -192,7 +204,7 @@ class DataDetail extends Component {
       this.setState({
         data: dataArray,
         innerLoading: false,
-        combined
+        combined,
       });
     } else {
       return false;
@@ -200,11 +212,11 @@ class DataDetail extends Component {
   };
   // Update state based on actions
 
-  updateSelectedState = step => {
+  updateSelectedState = (step) => {
     this.setState({ step });
   };
 
-  onChangeFileInt = values => {
+  onChangeFileInt = (values) => {
     var { file: oldFile, data } = this.state;
     var file = values;
     if (file !== oldFile && this.isInt(file)) {
@@ -219,9 +231,9 @@ class DataDetail extends Component {
     }
   };
 
-  onChangeFile = values => {
+  onChangeFile = (values) => {
     var { files, file: oldFile, data } = this.state;
-    let filedict = files.map(a => a.ave);
+    let filedict = files.map((a) => a.ave);
     var file = this.closest(values[0] / 1000, filedict);
     if (file !== oldFile && this.isInt(values[0])) {
       if (data[file] === 0) {
@@ -246,7 +258,7 @@ class DataDetail extends Component {
     return fileList;
   };
 
-  onChangeTime = values => {
+  onChangeTime = (values) => {
     var { files, data } = this.state;
     const lower = values[0] / 1000;
     const upper = values[1] / 1000;
@@ -263,7 +275,7 @@ class DataDetail extends Component {
     }
   };
 
-  onChangeUpper = value => {
+  onChangeUpper = (value) => {
     var { files, data, lower } = this.state;
     var upper = value.getTime() / 1000;
     var toDownload = this.selectedFiles(upper, lower, files, data);
@@ -274,7 +286,7 @@ class DataDetail extends Component {
     this.setState({ upper });
   };
 
-  onChangeLower = value => {
+  onChangeLower = (value) => {
     var { files, data, upper } = this.state;
     var lower = value.getTime() / 1000;
     var toDownload = this.selectedFiles(upper, lower, files, data);
@@ -290,14 +302,14 @@ class DataDetail extends Component {
   getDropdowns = async () => {
     const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
     this.setState({
-      dropdown
+      dropdown,
     });
   };
 
   getLabel = (input, id, prop) => {
     const { dropdown } = this.state;
     try {
-      return dropdown[input].find(x => x.id === id)[prop];
+      return dropdown[input].find((x) => x.id === id)[prop];
     } catch (e) {
       console.error(input, id, e);
       return "NA";
@@ -306,7 +318,7 @@ class DataDetail extends Component {
 
   parameterDetails = (dropdown, parameters, x) => {
     return dropdown.parameters.find(
-      item => item.id === parameters[x].parameters_id
+      (item) => item.id === parameters[x].parameters_id
     );
   };
 
@@ -325,7 +337,7 @@ class DataDetail extends Component {
     return index;
   };
 
-  isInt = value => {
+  isInt = (value) => {
     if (/^[-+]?(\d+|Infinity)$/.test(value)) {
       return true;
     } else {
@@ -345,42 +357,42 @@ class DataDetail extends Component {
     return compare;
   };
 
-  dataBounds = dataArray => {
+  dataBounds = (dataArray) => {
     var xe = d3.extent(dataArray[0].x);
     var lower = xe[0],
       upper = xe[1];
     return { upper: upper, lower: lower };
   };
 
-  addAverageTime = array => {
+  addAverageTime = (array) => {
     for (var i = 0; i < array.length; i++) {
       array[i].ave = (parseFloat(array[i].min) + parseFloat(array[i].max)) / 2;
     }
     return array;
   };
 
-  fileBounds = array => {
+  fileBounds = (array) => {
     var min = Math.min.apply(
       Math,
-      array.map(function(o) {
+      array.map(function (o) {
         return o.min;
       })
     );
     var max = Math.max.apply(
       Math,
-      array.map(function(o) {
+      array.map(function (o) {
         return o.max;
       })
     );
     return { min: min, max: max };
   };
 
-  getAve = arr => {
+  getAve = (arr) => {
     const sum = arr.reduce((a, b) => a + b, 0);
     return sum / arr.length || 0;
   };
 
-  getMax = arr => {
+  getMax = (arr) => {
     let len = arr.length;
     let max = -Infinity;
 
@@ -390,7 +402,7 @@ class DataDetail extends Component {
     return max;
   };
 
-  getMin = arr => {
+  getMin = (arr) => {
     let len = arr.length;
     let min = Infinity;
 
@@ -400,9 +412,9 @@ class DataDetail extends Component {
     return min;
   };
 
-  combineTimeseries = arr => {
+  combineTimeseries = (arr) => {
     var arrCopy = Object.values(Object.assign({}, arr));
-    arrCopy = arrCopy.filter(function(value) {
+    arrCopy = arrCopy.filter(function (value) {
       return value !== 0;
     });
     arrCopy.sort((a, b) => {
@@ -434,7 +446,7 @@ class DataDetail extends Component {
       files,
       file,
       innerLoading,
-      combined
+      combined,
     } = this.state;
     document.title = dataset.title
       ? dataset.title + " - Datalakes"

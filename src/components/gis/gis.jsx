@@ -166,7 +166,11 @@ class GIS extends Component {
         apiUrl + "/files/" + datafile.id + "?get=raw"
       ));
     } else {
-      ({ data } = await axios.get(datafile.filelink));
+      ({ data } = await axios.get(datafile.filelink).catch((error) => {
+        console.error(error);
+        alert("Failed to add layer")
+        this.setState({ loading: false })
+      }));
     }
     return data;
   };
@@ -179,6 +183,15 @@ class GIS extends Component {
     var min = this.getMin(array);
     return { filemin: min, filemax: max, filearray: array };
   };
+
+  foenMarkersMinMax = (layer) => {
+    var array = layer.features;
+    array = array.map((x) => x.properties.value);
+    array = array.filter((x) => x !== 9999);
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { filemin: min, filemax: max, filearray: array };
+  }
 
   simstratMinMax = (array) => {
     array = array.map((x) => x.value);
@@ -271,6 +284,9 @@ class GIS extends Component {
         }
         if (mapplotfunction === "meteolakesVector") {
           ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(data));
+        }
+        if (mapplotfunction === "foenMarkers") {
+          ({ filemin, filemax, filearray } = this.foenMarkersMinMax(data));
         }
 
         if (filemin < min) min = filemin;

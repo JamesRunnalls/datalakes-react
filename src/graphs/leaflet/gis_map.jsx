@@ -58,21 +58,47 @@ class GISMap extends Component {
     return [lat, lng];
   };
 
-  meteoSwissMarkers = async (layer, data) => {
+  meteoSwissMarkers = async (layer, file) => {
+    var { maxdatetime, mindatetime, maxdepth, mindepth } = file;
+    var { features } = file.data;
+    var { datetime, depth } = this.props;
+    var {
+      markerLabel,
+      markerSymbol,
+      markerFixedSize,
+      markerSize,
+      min,
+      max,
+      unit,
+      colors
+    } = layer;
     var minSize = 5;
     var maxSize = 30;
-    var layerData = JSON.parse(JSON.stringify(layer.data.features));
+    var layerData = JSON.parse(JSON.stringify(features));
     var markerGroup = L.layerGroup().addTo(this.map);
-    var { markerLabel, min, max } = layer;
-    var marker, value, color, shape, size, latlng, valuestring;
+
+    var marker, value, color, size, latlng, valuestring;
     var rotation = 0;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
-      valuestring = String(value) + String(layerData[j].properties.unit);
-      color = getColor(value, min, max, layer.colors);
-      shape = layer.markerSymbol;
-      if (layer.markerFixedSize) {
-        size = layer.markerSize;
+      var timediff = -Math.round(
+        (datetime.getTime() / 1000 - new Date(maxdatetime).getTime() / 1000) /
+          3600
+      );
+      var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
+      var valuestring =
+        String(value) +
+        String(unit) +
+        '<br><div class="tooltipdiff">Diff: ' +
+        (timediff > 0 ? "+" : "") +
+        String(timediff) +
+        "hrs " +
+        (depthdiff > 0 ? " +" : " ") +
+        String(depthdiff) +
+        "m</div>";
+      color = getColor(value, min, max, colors);
+      if (markerFixedSize) {
+        size = markerSize;
       } else {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
@@ -84,7 +110,7 @@ class GISMap extends Component {
           className: "map-marker",
           html:
             `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
-            `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}deg)">` +
+            `<div class="${markerSymbol}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}deg)">` +
             `</div></div> `,
         }),
       })
@@ -94,6 +120,70 @@ class GISMap extends Component {
         })
         .addTo(markerGroup);
       marker.bindPopup(layerData[j].properties.description);
+    }
+    this.marker.push(markerGroup);
+  };
+
+  foenMarkers = async (layer, file) => {
+    var { maxdatetime, mindatetime, maxdepth, mindepth } = file;
+    var { features } = file.data;
+    var { datetime, depth } = this.props;
+    var {
+      markerLabel,
+      markerSymbol,
+      markerFixedSize,
+      markerSize,
+      min,
+      max,
+      unit,
+      colors,
+    } = layer;
+    var minSize = 5;
+    var maxSize = 30;
+    var layerData = JSON.parse(JSON.stringify(features));
+    var markerGroup = L.layerGroup().addTo(this.map);
+
+    var marker, value, color, size, latlng, valuestring;
+    var rotation = 0;
+    for (var j = 0; j < layerData.length; j++) {
+      value = layerData[j].properties.value;
+      var timediff = -Math.round(
+        (datetime.getTime() / 1000 - new Date(maxdatetime).getTime() / 1000) /
+          3600
+      );
+      var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
+      var valuestring =
+        String(value) +
+        String(unit) +
+        '<br><div class="tooltipdiff">Diff: ' +
+        (timediff > 0 ? "+" : "") +
+        String(timediff) +
+        "hrs " +
+        (depthdiff > 0 ? " +" : " ") +
+        String(depthdiff) +
+        "m</div>";
+      color = getColor(value, min, max, colors);
+      if (markerFixedSize) {
+        size = markerSize;
+      } else {
+        size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
+      }
+      latlng = this.CHtoWGSlatlng(layerData[j].geometry.coordinates);
+      marker = new L.marker(latlng, {
+        icon: L.divIcon({
+          className: "map-marker",
+          html:
+            `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
+            `<div class="${markerSymbol}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}deg)">` +
+            `</div></div> `,
+        }),
+      })
+        .bindTooltip(valuestring, {
+          permanent: markerLabel,
+          direction: "top",
+        })
+        .addTo(markerGroup);
+      marker.bindPopup("Hike");
     }
     this.marker.push(markerGroup);
   };
@@ -423,8 +513,8 @@ class GISMap extends Component {
   };
 
   indexClosest = (num, arr) => {
-    var index = 0
-    var diff = Math.abs(num -  arr[0]);
+    var index = 0;
+    var diff = Math.abs(num - arr[0]);
     for (var val = 0; val < arr.length; val++) {
       var newdiff = Math.abs(num - arr[val]);
       if (newdiff < diff) {
@@ -558,8 +648,9 @@ class GISMap extends Component {
         var data = file.data;
 
         mapplotfunction === "gitPlot" && this.gitPlot(layer, file);
+        mapplotfunction === "foenMarkers" && this.foenMarkers(layer, file);
         mapplotfunction === "meteoSwissMarkers" &&
-          this.meteoSwissMarkers(layer, data);
+          this.meteoSwissMarkers(layer, file);
         mapplotfunction === "remoteSensing" && this.remoteSensing(layer, data);
         mapplotfunction === "simstrat" && this.simstrat(layer, data);
         mapplotfunction === "meteolakesScalar" &&

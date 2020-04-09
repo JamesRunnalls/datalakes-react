@@ -21,9 +21,9 @@ class Pipeline extends Component {
                 target="_blank"
                 rel="noopener noreferrer"
                 href={
-                  dataset.pre_file.includes("http")
-                    ? dataset.pre_file
-                    : `http://${dataset.pre_file}`
+                  dataset.prefile.includes("http")
+                    ? dataset.prefile
+                    : `http://${dataset.prefile}`
                 }
               >
                 <img
@@ -38,9 +38,9 @@ class Pipeline extends Component {
                 target="_blank"
                 rel="noopener noreferrer"
                 href={
-                  dataset.pre_script.includes("http")
-                    ? dataset.pre_script
-                    : `http://${dataset.pre_script}`
+                  dataset.prescript.includes("http")
+                    ? dataset.prescript
+                    : `http://${dataset.prescript}`
                 }
               >
                 <img

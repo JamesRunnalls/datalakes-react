@@ -187,7 +187,7 @@ export function Tick({ tick, format }) {
           marginRight: 10,
           height: 1,
           width: 6,
-          backgroundColor: 'rgb(200,200,200)',
+          backgroundColor: 'rgb(0,0,0)',
           top: `${tick.percent}%`,
           right: "52px",
         }}
