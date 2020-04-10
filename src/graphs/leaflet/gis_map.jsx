@@ -70,7 +70,7 @@ class GISMap extends Component {
       min,
       max,
       unit,
-      colors
+      colors,
     } = layer;
     var minSize = 5;
     var maxSize = 30;
@@ -451,6 +451,7 @@ class GISMap extends Component {
       description,
       latitude,
       longitude,
+      maxdepth
     } = layer;
     var datasetparameter = datasetparameters.find(
       (dp) => dp.parameters_id === parameters_id
@@ -507,6 +508,53 @@ class GISMap extends Component {
       marker.bindPopup(description);
 
       this.marker.push(markerGroup);
+    } else if (type.includes("x&1")) {
+      var index = this.indexClosest(datetime.getTime()/1000, data["x"]);
+      var value = data[datasetparameter.axis][index]
+      var minSize = 5;
+      var maxSize = 30;
+      var markerGroup = L.layerGroup().addTo(this.map);
+      var timediff = -Math.round(
+        (datetime.getTime() / 1000 - data["x"][index]) / 3600
+      );
+      var depthdiff = maxdepth - depth;
+      var valuestring =
+        String(value) +
+        String(datasetparameter.unit) +
+        '<br><div class="tooltipdiff">Diff: ' +
+        (timediff > 0 ? "+" : "") +
+        String(timediff) +
+        "hrs " +
+        (depthdiff > 0 ? " +" : " ") +
+        String(depthdiff) +
+        "m</div>";
+
+      var color = getColor(value, min, max, colors);
+      var shape = markerSymbol;
+      var size;
+      if (markerFixedSize) {
+        size = markerSize;
+      } else {
+        size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
+      }
+      var marker = new L.marker([latitude, longitude], {
+        icon: L.divIcon({
+          className: "map-marker",
+          html:
+            `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
+            `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
+            `</div></div> `,
+        }),
+      })
+        .bindTooltip(valuestring, {
+          permanent: markerLabel,
+          direction: "top",
+        })
+        .addTo(markerGroup);
+      marker.bindPopup(description);
+
+      this.marker.push(markerGroup);
+      console.log(datasetparameter, data, type);
     } else {
       alert("No plotting function defined");
     }

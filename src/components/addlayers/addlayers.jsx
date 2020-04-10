@@ -89,6 +89,10 @@ class AddLayersInner extends Component {
       return params.filter((p) => p.parameters_id === pid);
     }
 
+    function paramIndex(pid, params) {
+      return params.findIndex((p) => p.parameters_id === pid);
+    }
+
     var paramd = [];
     for (var i = 0; i < subparameters.length; i++) {
       var pd = filterparam(subparameters[i].parameters_id, paramd);
@@ -98,7 +102,8 @@ class AddLayersInner extends Component {
           datasets: [subparameters[i].datasets_id],
         });
       } else {
-        paramd.datasets.push(subparameters[i].datasets_id);
+        var index = paramIndex(subparameters[i].parameters_id, paramd);
+        paramd[index].datasets.push(subparameters[i].datasets_id);
       }
     }
 

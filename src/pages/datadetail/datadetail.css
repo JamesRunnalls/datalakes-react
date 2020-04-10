@@ -88,6 +88,11 @@
   padding-top: 100px;
 }
 
+.networkgraph-outer {
+  width: 100%;
+  height: 400px;
+}
+
 .detaillinegraph {
   height: 500px;
 }

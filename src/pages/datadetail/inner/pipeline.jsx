@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Database from "../img/data.svg";
 import Python from "../img/python.svg";
 import "../datadetail.css";
+import NetworkGraph from "../../../graphs/d3/networkgraph/networkgraph";
 
 class Pipeline extends Component {
   render() {
@@ -60,8 +61,24 @@ class Pipeline extends Component {
         </div>
       );
     } else {
-      console.log(renku)
-      return <div>See lineage in Renku</div>;
+      return (
+        <div className="networkgraph-outer">
+          <h3>File Connectivity</h3>
+          <div>
+            Lineage information for this dataset has been provided by the Renku
+            knowledge graph. Learn more about Renku{" "}
+            <a href="https://renkulab.io/" target="_blank">
+              here.
+            </a>
+          </div>
+          <div>
+            Warning: Some links are to files in private git repositories - this
+            means access will be declined. Get in touch with the data owner for
+            access to these datasets.
+          </div>
+          <NetworkGraph data={renku} dataset={dataset} />
+        </div>
+      );
     }
   }
 }
