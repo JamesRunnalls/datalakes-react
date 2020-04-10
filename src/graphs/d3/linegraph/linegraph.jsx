@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import "./linegraph.css";
 
 class D3LineGraph extends Component {
-  getMax = arr => {
+  getMax = (arr) => {
     let len = arr.length;
     let max = -Infinity;
 
@@ -15,7 +15,7 @@ class D3LineGraph extends Component {
     return max;
   };
 
-  getMin = arr => {
+  getMin = (arr) => {
     let len = arr.length;
     let min = Infinity;
 
@@ -25,11 +25,11 @@ class D3LineGraph extends Component {
     return min;
   };
 
-  formatDate = raw => {
+  formatDate = (raw) => {
     return new Date(raw * 1000);
   };
 
-  removeErrorWarning = x => {
+  removeErrorWarning = (x) => {
     return;
   };
 
@@ -51,20 +51,14 @@ class D3LineGraph extends Component {
           lcolor,
           lweight,
           title,
-          setDownloadGraph
+          setDownloadGraph,
         } = this.props;
 
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
-          viswidth = d3
-            .select("#vis")
-            .node()
-            .getBoundingClientRect().width,
+          viswidth = d3.select("#vis").node().getBoundingClientRect().width,
           visheight =
-            d3
-              .select("#vis")
-              .node()
-              .getBoundingClientRect().height - 5,
+            d3.select("#vis").node().getBoundingClientRect().height - 5,
           width = viswidth - margin.left - margin.right,
           height = visheight - margin.top - margin.bottom;
 
@@ -231,17 +225,17 @@ class D3LineGraph extends Component {
           for (var i = 0; i < data.x.length; i++) {
             xy.push({
               x: data.x[i],
-              y: data.y[i]
+              y: data.y[i],
             });
           }
 
           // Define the line
           var valueline = d3
             .line()
-            .x(function(d) {
+            .x(function (d) {
               return x(d.x);
             })
-            .y(function(d) {
+            .y(function (d) {
               return y(d.y);
             });
 
@@ -263,28 +257,12 @@ class D3LineGraph extends Component {
             )
             .attr("d", valueline(xy));
 
-          // Add Focus
-          var focus = svg
-            .append("g")
-            .append("circle")
-            .style("fill", "red")
-            .attr("stroke", "red")
-            .attr("r", 4)
-            .style("opacity", 0);
-
-          // Add cursor catcher
-          svg
-            .select(".overlay")
-            .on("mouseover", mouseover)
-            .on("mousemove", mousemove)
-            .on("mouseout", mouseout);
-
           // Zooming and Panning
           var zoom = d3
             .zoom()
             .extent([
               [0, 0],
-              [width, height]
+              [width, height],
             ])
             .on("zoom", normalzoom);
 
@@ -310,16 +288,34 @@ class D3LineGraph extends Component {
               .brush()
               .extent([
                 [0, 0],
-                [width, height]
+                [width, height],
               ])
               .on("end", brushended),
             idleTimeout,
             idleDelay = 350;
 
-          line
+          line.append("g").attr("class", "brush").call(brush);
+
+          // Add Focus
+          var focus = svg
             .append("g")
-            .attr("class", "brush")
-            .call(brush);
+            .append("circle")
+            .style("fill", "red")
+            .attr("stroke", "red")
+            .attr("r", 4)
+            .style("opacity", 0);
+
+          // Add cursor catcher
+          svg
+            .select(".overlay")
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseout);
+          svg
+            .select("#zoombox")
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove)
+            .on("mouseout", mouseout);
 
           function brushended() {
             mouseout();
@@ -328,12 +324,12 @@ class D3LineGraph extends Component {
               if (!idleTimeout)
                 return (idleTimeout = setTimeout(idled, idleDelay));
               x.domain(
-                d3.extent(xy, function(d) {
+                d3.extent(xy, function (d) {
                   return d.x;
                 })
               );
               y.domain(
-                d3.extent(xy, function(d) {
+                d3.extent(xy, function (d) {
                   d.y = parseFloat(d.y);
                   return d.y;
                 })
@@ -347,7 +343,7 @@ class D3LineGraph extends Component {
             zoombox = zoombox.style("pointer-events", "all");
           }
 
-          d3.select(window).on("keydown", function() {
+          d3.select(window).on("keydown", function () {
             if (d3.event.ctrlKey || d3.event.metaKey) {
               zoombox = zoombox.style("pointer-events", "none");
             } else if (d3.event.keyCode === 27) {
@@ -417,12 +413,12 @@ class D3LineGraph extends Component {
             canvas.height = visheight;
 
             var image = new Image();
-            image.onerror = function() {
+            image.onerror = function () {
               alert(
                 "Appologies .png download failed. Pleaseawait  download as .svg."
               );
             };
-            image.onload = function() {
+            image.onload = function () {
               context.drawImage(image, 0, 0);
               var a = document.createElement("a");
               a.download = "downloadgraph.png";

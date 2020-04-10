@@ -51,18 +51,18 @@ class Information extends Component {
               <tr>
                 <th>Git</th>
                 <td>
-                  <a href={dataset.git} target="_blank" rel="noopener noreferrer">
+                  <a href={dataset.datasourcelink} target="_blank" rel="noopener noreferrer">
                     Link to Git Repository
                   </a>
                 </td>
               </tr>
               <tr>
                 <th>Start</th>
-                <td>{new Date(dataset.start_time).toString()}</td>
+                <td>{new Date(dataset.mindatetime).toString()}</td>
               </tr>
               <tr>
                 <th>End</th>
-                <td>{new Date(dataset.end_time).toString()}</td>
+                <td>{new Date(dataset.maxdatetime).toString()}</td>
               </tr>
               <tr>
                 <th>Latitude</th>
@@ -73,9 +73,15 @@ class Information extends Component {
                 <td>{dataset.longitude}</td>
               </tr>
               <tr>
-                <th>Depth (m)</th>
+                <th>Min Depth (m)</th>
                 <td>
-                  {dataset.depth === "-9999" ? "Variable" : dataset.depth}
+                  {dataset.mindepth === "-9999" ? "Variable" : dataset.mindepth}
+                </td>
+              </tr>
+              <tr>
+                <th>Max Depth (m)</th>
+                <td>
+                  {dataset.maxdepth === "-9999" ? "Variable" : dataset.maxdepth}
                 </td>
               </tr>
               <tr>
@@ -85,10 +91,6 @@ class Information extends Component {
               <tr>
                 <th>Downloads</th>
                 <td>{dataset.downloads}</td>
-              </tr>
-              <tr>
-                <th>Last Modified</th>
-                <td>{new Date(dataset.lastmodified).toString()}</td>
               </tr>
             </tbody>
           </table>

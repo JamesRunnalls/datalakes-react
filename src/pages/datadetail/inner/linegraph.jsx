@@ -9,7 +9,7 @@ import Loading from "../../../components/loading/loading";
 import "../datadetail.css";
 
 class LoadDataSets extends Component {
-  downloadProgress = data => {
+  downloadProgress = (data) => {
     var len = data.length;
     var count = 0;
     for (var i = 0; i < len; i++) {
@@ -45,17 +45,17 @@ class LineGraph extends Component {
     bcolor: "#ffffff",
     xaxis: "x",
     yaxis: "y",
-    title: "NoPlot",
+    title: "",
     xlabel: "None",
     ylabel: "None",
     xscale: "Linear",
     yscale: "Linear",
     xunits: "None",
     yunits: "None",
-    download: false
+    download: false,
   };
 
-  formatDate = raw => {
+  formatDate = (raw) => {
     return new Date(raw * 1000);
   };
 
@@ -73,11 +73,10 @@ class LineGraph extends Component {
     this.setDefault();
   };
 
-  handleAxisSelect = axis => event => {
+  handleAxisSelect = (axis) => (event) => {
     var { parameters } = this.props;
     var { xlabel, ylabel, xunits, yunits } = this.state;
-    var parameter = parameters.find(x => x.axis === event.value);
-    console.log(parameter);
+    var parameter = parameters.find((x) => x.axis === event.value);
     if (axis === "yaxis") {
       ylabel = parameter.name;
       yunits = parameter.unit;
@@ -110,11 +109,11 @@ class LineGraph extends Component {
 
   downloadGraph = () => {};
 
-  setDownloadGraph = newFunc => {
+  setDownloadGraph = (newFunc) => {
     this.downloadGraph = newFunc;
   };
 
-  handleKeyDown = event => {
+  handleKeyDown = (event) => {
     var { file, onChangeFileInt } = this.props;
     if (event.keyCode === 37) {
       // Left
@@ -130,8 +129,8 @@ class LineGraph extends Component {
     var { xaxis, yaxis } = this.state;
 
     // Get axis labels and units
-    const xparam = parameters.find(x => x.axis === xaxis);
-    const yparam = parameters.find(y => y.axis === yaxis);
+    const xparam = parameters.find((x) => x.axis === xaxis);
+    const yparam = parameters.find((y) => y.axis === yaxis);
     var xlabel = getLabel("parameters", xparam.parameters_id, "name");
     var ylabel = getLabel("parameters", yparam.parameters_id, "name");
     var xunits = xparam.unit;
@@ -154,7 +153,7 @@ class LineGraph extends Component {
       xscale,
       lcolor: "#000000",
       lweight: "0.5",
-      bcolor: "#ffffff"
+      bcolor: "#ffffff",
     });
   };
 
@@ -185,7 +184,7 @@ class LineGraph extends Component {
       file,
       downloadData,
       loading,
-      combined
+      combined,
     } = this.props;
     const {
       lweight,
@@ -199,11 +198,11 @@ class LineGraph extends Component {
       xscale,
       yscale,
       xunits,
-      yunits
+      yunits,
     } = this.state;
 
     // Show time slider or multiple files
-    var time = parameters.filter(p => p.parameters_id === 1);
+    var time = parameters.filter((p) => p.parameters_id === 1);
     var timeSlider = false;
     var fileSlider = false;
     if (files.length > 1) {
@@ -223,12 +222,12 @@ class LineGraph extends Component {
       if (parameters[j]["axis"].includes("x")) {
         xoptions.push({
           value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"], "name")
+          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
         });
       } else if (parameters[j]["axis"].includes("y")) {
         yoptions.push({
           value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"], "name")
+          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
         });
       }
     }
@@ -250,15 +249,15 @@ class LineGraph extends Component {
 
       // Format data
       var { x, y } = plotdata;
-      if (xlabel === "Time") x = x.map(i => this.formatDate(i));
-      if (ylabel === "Time") y = y.map(i => this.formatDate(i));
-      if (xlabel === "Depth") x = x.map(i => -i);
-      if (ylabel === "Depth") y = y.map(i => -i);
+      if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+      if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+      if (xlabel === "Depth") x = x.map((i) => -i);
+      if (ylabel === "Depth") y = y.map((i) => -i);
       plotdata = { x: x, y: y };
-
-      // Value
-      var value = this.formatDate(files[file].ave);
     }
+
+    // Value
+    var value = new Date(files[file].ave);
 
     return (
       <React.Fragment>

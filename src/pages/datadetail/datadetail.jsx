@@ -86,11 +86,11 @@ class DataDetail extends Component {
       // Filter for only json files
       files = files.filter((file) => file.filetype === "json");
 
+      // Get add average time
+      files = this.addAverageTime(files);
+
       // Sort by value (descending)
       files.sort(this.numDescending);
-
-      // Get convertion array
-      files = this.addAverageTime(files);
 
       // Get min and max
       var { mindatetime, maxdatetime, mindepth, maxdepth } = dataset;
@@ -108,7 +108,18 @@ class DataDetail extends Component {
       var combined = data;
       var { lower, upper } = this.dataBounds(dataArray);
 
+      // Get Renku Data
+      var renku = false;
+      if (dataset.renku === 0){
+        var { data: renku } = await axios
+        .post(apiUrl + "/renku",{url:dataset.datasourcelink})
+        .catch((error) => {
+          renku = false
+        });
+      }
+
       this.setState({
+        renku,
         dataset,
         parameters,
         files,
@@ -130,9 +141,9 @@ class DataDetail extends Component {
         parameters,
         dropdown,
         files,
-        step: "information",
-        allowedStep: ["information"]
-      })
+        step: "external",
+        allowedStep: ["external"],
+      });
     }
   }
 
@@ -141,6 +152,7 @@ class DataDetail extends Component {
   }
 
   // Download data
+
   downloadData = async () => {
     this.downloadData = () => {}; // Only possible to fire once.
     var { data: dataArray, files, combined } = this.state;
@@ -233,8 +245,8 @@ class DataDetail extends Component {
 
   onChangeFile = (values) => {
     var { files, file: oldFile, data } = this.state;
-    let filedict = files.map((a) => a.ave);
-    var file = this.closest(values[0] / 1000, filedict);
+    let filedict = files.map((a) => a.ave.getTime());
+    var file = this.closest(values[0], filedict);
     if (file !== oldFile && this.isInt(values[0])) {
       if (data[file] === 0) {
         this.setState({ file, innerLoading: true });
@@ -251,7 +263,7 @@ class DataDetail extends Component {
     }
     var fileList = [];
     for (var i = 0; i < files.length; i++) {
-      if (files[i].min < upper && files[i].max > lower && data[i] === 0) {
+      if ((new Date(files[i].mindatetime).getTime() / 1000) < upper && (new Date(files[i].maxdatetime).getTime() / 1000) > lower && data[i] === 0) {
         fileList.push(i);
       }
     }
@@ -346,8 +358,8 @@ class DataDetail extends Component {
   };
 
   numDescending = (a, b) => {
-    var numA = (parseFloat(a.min) + parseFloat(a.max)) / 2;
-    var numB = (parseFloat(b.min) + parseFloat(b.max)) / 2;
+    var numA = a.ave.getTime();
+    var numB = b.ave.getTime();
     var compare = 0;
     if (numA > numB) {
       compare = -1;
@@ -366,7 +378,11 @@ class DataDetail extends Component {
 
   addAverageTime = (array) => {
     for (var i = 0; i < array.length; i++) {
-      array[i].ave = (parseFloat(array[i].min) + parseFloat(array[i].max)) / 2;
+      array[i].ave = new Date(
+        (parseFloat(new Date(array[i].mindatetime).getTime()) +
+          parseFloat(new Date(array[i].maxdatetime).getTime())) /
+          2
+      );
     }
     return array;
   };
@@ -434,6 +450,7 @@ class DataDetail extends Component {
 
   render() {
     const {
+      renku,
       dataset,
       parameters,
       data,
@@ -451,8 +468,6 @@ class DataDetail extends Component {
     document.title = dataset.title
       ? dataset.title + " - Datalakes"
       : "Datalakes";
-
-    console.log(mindatetime, maxdatetime);
 
     switch (step) {
       default:
@@ -566,7 +581,7 @@ class DataDetail extends Component {
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
             />
-            <Pipeline dataset={dataset} />
+            <Pipeline dataset={dataset} renku={renku} />
           </React.Fragment>
         );
       case "information":
@@ -583,6 +598,23 @@ class DataDetail extends Component {
               parameters={parameters}
               getLabel={this.getLabel}
             />
+          </React.Fragment>
+        );
+      case "external":
+        return (
+          <React.Fragment>
+            <table className="loading-table">
+              <tbody>
+                <tr>
+                  <td>
+                    <h3>External Data Source.</h3>
+                    <Link to="/dataportal">
+                      <h2>Head back to the data portal</h2>
+                    </Link>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </React.Fragment>
         );
       case "error":

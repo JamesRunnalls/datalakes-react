@@ -35,7 +35,7 @@ class Download extends Component {
     var { files } = this.props;
     var out = [];
     for (var i = 0; i < arr.length; i++) {
-      out.push(files[arr[i]].lineage);
+      out.push(files[arr[i]].filelineage);
     }
     return out;
   };

@@ -5,7 +5,7 @@ import "../datadetail.css";
 
 class Pipeline extends Component {
   render() {
-    const { dataset } = this.props;
+    const { dataset, renku } = this.props;
     if (dataset.renku === 1) {
       return (
         <div className="datadetail-padding">
@@ -51,7 +51,7 @@ class Pipeline extends Component {
                 <div className="">Processing Script</div>
               </a>
               <div className="separator half"></div>
-              <div >
+              <div className="pipeline-icon">
                 <img src={Database} alt="Database" />
                 <div className="">This dataset</div>
               </div>
@@ -60,6 +60,7 @@ class Pipeline extends Component {
         </div>
       );
     } else {
+      console.log(renku)
       return <div>See lineage in Renku</div>;
     }
   }
