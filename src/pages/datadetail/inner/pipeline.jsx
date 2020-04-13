@@ -67,7 +67,11 @@ class Pipeline extends Component {
           <div>
             Lineage information for this dataset has been provided by the Renku
             knowledge graph. Learn more about Renku{" "}
-            <a href="https://renkulab.io/" target="_blank">
+            <a
+              href="https://renkulab.io/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               here.
             </a>
           </div>
@@ -76,7 +80,9 @@ class Pipeline extends Component {
             means access will be declined. Get in touch with the data owner for
             access to these datasets.
           </div>
-          <NetworkGraph data={renku} dataset={dataset} />
+          <div className="networkgraph-inner">
+            <NetworkGraph data={renku} dataset={dataset} />
+          </div>
         </div>
       );
     }

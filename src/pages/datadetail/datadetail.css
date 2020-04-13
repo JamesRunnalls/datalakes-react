@@ -90,6 +90,11 @@
 
 .networkgraph-outer {
   width: 100%;
+}
+
+.networkgraph-inner {
+  width: 100%;
+  max-width: 500px;
   height: 400px;
 }
 
@@ -349,4 +354,9 @@
   padding: 0 20px 80px 20px;
   box-sizing: border-box;
   overflow: auto;
+}
+
+.datadetail-header {
+  margin-top: 20px;
+  margin-bottom: 20px;
 }

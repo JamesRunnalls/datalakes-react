@@ -4,7 +4,6 @@ import "./leaflet_vectorField";
 import "./leaflet_customcontrol";
 import { getColor } from "../../components/gradients/gradients";
 import Loading from "../../components/loading/loading";
-import { format } from "date-fns";
 import "./css/gis_map.css";
 import "./css/leaflet.css";
 
@@ -59,7 +58,7 @@ class GISMap extends Component {
   };
 
   meteoSwissMarkers = async (layer, file) => {
-    var { maxdatetime, mindatetime, maxdepth, mindepth } = file;
+    var { maxdatetime, maxdepth } = file;
     var { features } = file.data;
     var { datetime, depth } = this.props;
     var {
@@ -86,7 +85,7 @@ class GISMap extends Component {
           3600
       );
       var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-      var valuestring =
+      valuestring =
         String(value) +
         String(unit) +
         '<br><div class="tooltipdiff">Diff: ' +
@@ -125,7 +124,7 @@ class GISMap extends Component {
   };
 
   foenMarkers = async (layer, file) => {
-    var { maxdatetime, mindatetime, maxdepth, mindepth } = file;
+    var { maxdatetime, maxdepth } = file;
     var { features } = file.data;
     var { datetime, depth } = this.props;
     var {
@@ -152,7 +151,7 @@ class GISMap extends Component {
           3600
       );
       var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-      var valuestring =
+      valuestring =
         String(value) +
         String(unit) +
         '<br><div class="tooltipdiff">Diff: ' +
@@ -451,7 +450,7 @@ class GISMap extends Component {
       description,
       latitude,
       longitude,
-      maxdepth
+      maxdepth,
     } = layer;
     var datasetparameter = datasetparameters.find(
       (dp) => dp.parameters_id === parameters_id
@@ -459,20 +458,22 @@ class GISMap extends Component {
     var { datetime, depth } = this.props;
     var data = file.data;
     var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
+    var index, value, minSize, maxSize, markerGroup, timediff, depthdiff;
+    var valuestring, color, shape, size, marker;
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler e.g Thetis
       var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
       var dp3 = datasetparameters.find((dp) => dp.parameters_id === 2);
-      var index = this.indexClosest(depth, data.y);
-      var value = data[datasetparameter.axis][index].toExponential(3);
-      var minSize = 5;
-      var maxSize = 30;
-      var markerGroup = L.layerGroup().addTo(this.map);
-      var timediff = -Math.round(
+      index = this.indexClosest(depth, data.y);
+      value = data[datasetparameter.axis][index].toExponential(3);
+      minSize = 5;
+      maxSize = 30;
+      markerGroup = L.layerGroup().addTo(this.map);
+      timediff = -Math.round(
         (datetime.getTime() / 1000 - data[dp2.axis][index]) / 3600
       );
-      var depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
-      var valuestring =
+      depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
+      valuestring =
         String(value) +
         String(datasetparameter.unit) +
         '<br><div class="tooltipdiff">Diff: ' +
@@ -483,15 +484,14 @@ class GISMap extends Component {
         String(depthdiff) +
         "m</div>";
 
-      var color = getColor(value, min, max, colors);
-      var shape = markerSymbol;
-      var size;
+      color = getColor(value, min, max, colors);
+      shape = markerSymbol;
       if (markerFixedSize) {
         size = markerSize;
       } else {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
-      var marker = new L.marker([latitude, longitude], {
+      marker = new L.marker([latitude, longitude], {
         icon: L.divIcon({
           className: "map-marker",
           html:
@@ -509,16 +509,16 @@ class GISMap extends Component {
 
       this.marker.push(markerGroup);
     } else if (type.includes("x&1")) {
-      var index = this.indexClosest(datetime.getTime()/1000, data["x"]);
-      var value = data[datasetparameter.axis][index]
-      var minSize = 5;
-      var maxSize = 30;
-      var markerGroup = L.layerGroup().addTo(this.map);
-      var timediff = -Math.round(
+      index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      value = data[datasetparameter.axis][index];
+      minSize = 5;
+      maxSize = 30;
+      markerGroup = L.layerGroup().addTo(this.map);
+      timediff = -Math.round(
         (datetime.getTime() / 1000 - data["x"][index]) / 3600
       );
-      var depthdiff = maxdepth - depth;
-      var valuestring =
+      depthdiff = maxdepth - depth;
+      valuestring =
         String(value) +
         String(datasetparameter.unit) +
         '<br><div class="tooltipdiff">Diff: ' +
@@ -529,15 +529,14 @@ class GISMap extends Component {
         String(depthdiff) +
         "m</div>";
 
-      var color = getColor(value, min, max, colors);
-      var shape = markerSymbol;
-      var size;
+      color = getColor(value, min, max, colors);
+      shape = markerSymbol;
       if (markerFixedSize) {
         size = markerSize;
       } else {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
-      var marker = new L.marker([latitude, longitude], {
+      marker = new L.marker([latitude, longitude], {
         icon: L.divIcon({
           className: "map-marker",
           html:

@@ -10,7 +10,7 @@
 .dataset .text {
   display: inline-block;
   margin-left: 10px;
-  max-width: calc(100% - 50px);
+  width: calc(100% - 50px);
   cursor: pointer;
   text-decoration: none;
   color: black;
@@ -19,6 +19,12 @@
 .dataset .text .text-title {
   font-weight: bold;
   padding-bottom: 5px;
+  display: inline-block;
+}
+
+.dataset .text .text-external {
+  float: right;
+  font-size: 10px;
 }
 
 input.SearchBar {

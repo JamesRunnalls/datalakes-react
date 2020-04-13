@@ -8,6 +8,7 @@ import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
 import Information from "./inner/information";
 import Pipeline from "./inner/pipeline";
+import External from './inner/external';
 import Preview from "./inner/preview";
 import DataSubMenu from "./datasubmenu";
 import Loading from "../../components/loading/loading";
@@ -111,11 +112,11 @@ class DataDetail extends Component {
       // Get Renku Data
       var renku = false;
       if (dataset.renku === 0){
-        var { data: renku } = await axios
+        ({ data: renku } = await axios
         .post(apiUrl + "/renku",{url:dataset.datasourcelink})
         .catch((error) => {
           renku = false
-        });
+        }));
       }
 
       this.setState({
@@ -603,18 +604,12 @@ class DataDetail extends Component {
       case "external":
         return (
           <React.Fragment>
-            <table className="loading-table">
-              <tbody>
-                <tr>
-                  <td>
-                    <h3>External Data Source.</h3>
-                    <Link to="/dataportal">
-                      <h2>Head back to the data portal</h2>
-                    </Link>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <h1>{dataset.title}</h1>
+            <External
+              dataset={dataset}
+              parameters={parameters}
+              getLabel={this.getLabel}
+            />
           </React.Fragment>
         );
       case "error":

@@ -168,8 +168,8 @@ class GIS extends Component {
     } else {
       ({ data } = await axios.get(datafile.filelink).catch((error) => {
         console.error(error);
-        alert("Failed to add layer")
-        this.setState({ loading: false })
+        alert("Failed to add layer");
+        this.setState({ loading: false });
       }));
     }
     return data;
@@ -191,7 +191,7 @@ class GIS extends Component {
     var max = this.getMax(array);
     var min = this.getMin(array);
     return { filemin: min, filemax: max, filearray: array };
-  }
+  };
 
   simstratMinMax = (array) => {
     array = array.map((x) => x.value);
@@ -484,26 +484,33 @@ class GIS extends Component {
   };
 
   updateVariable = async (datetime, depth) => {
+    function findFileId(files, fileid) {
+      return files.find((f) => f.id === fileid);
+    }
+    function filterParameters(dp, id) {
+      dp.filter((d) => d.datasets_id === id);
+    }
     this.setState({ loading: true }, async () => {
       var { selectedlayers, datasets, datasetparameters } = this.state;
 
       for (var i = 0; i < selectedlayers.length; i++) {
         var dataset = datasets[selectedlayers[i].dataset_index];
-  
+
         // Find closest file to datetime and depth
         var fileid = this.closestFile(datetime, depth, dataset.files);
-        var datafile = dataset.files.find((f) => f.id === fileid);
-  
+        var datafile = findFileId(dataset.files, fileid);
+
         // Add data from file closes to datetime and depth
         if (!datafile.data) {
           datafile.data = await this.downloadFile(datafile, dataset.datasource);
         }
-  
+
         // Get the dataset parameter
-        var dp = datasetparameters.filter(
-          (d) => d.datasets_id === selectedlayers[i].datasets_id
+        var dp = filterParameters(
+          datasetparameters,
+          selectedlayers[i].datasets_id
         );
-  
+
         // Update the min and max value
         var { min, max, array } = this.getMinMax(
           dataset.files,
@@ -511,14 +518,20 @@ class GIS extends Component {
           dp,
           dataset.mapplotfunction
         );
-  
+
         selectedlayers[i].min = min;
         selectedlayers[i].max = max;
         selectedlayers[i].array = array;
         selectedlayers[i].fileid = fileid;
       }
-  
-      this.setState({ datetime, depth, selectedlayers, datasets, loading: false });
+
+      this.setState({
+        datetime,
+        depth,
+        selectedlayers,
+        datasets,
+        loading: false,
+      });
     });
   };
 

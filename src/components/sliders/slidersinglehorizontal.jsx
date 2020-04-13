@@ -1,10 +1,9 @@
 import React, { Component } from "react";
 import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./components";
-import { scaleLinear, scaleTime } from "d3";
+import { scaleTime } from "d3";
 import DateTimePicker from "react-datetime-picker";
 import { format } from "date-fns";
-import AvailbilityBar from "./availabilitybar";
 import "./slider.css";
 
 class SliderSingleHorizontal extends Component {
@@ -41,7 +40,7 @@ class SliderSingleHorizontal extends Component {
       marginTop: 10,
       boxSizing: "border-box",
     };
-    var { value, onChange, type, min, max, files } = this.props;
+    var { value, onChange, min, max } = this.props;
     var { dt } = this.state;
 
     var dateTicks = scaleTime()

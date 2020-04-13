@@ -25,9 +25,7 @@ class NetworkGraph extends Component {
           .forceSimulation(data.nodes)
           .force(
             "link",
-            d3
-              .forceLink(data.edges)
-              .id((d) => d.id)
+            d3.forceLink(data.edges).id((d) => d.id)
           )
           .force("charge", d3.forceManyBody().strength(-400))
           .force("x", d3.forceX())
@@ -72,7 +70,7 @@ class NetworkGraph extends Component {
           .enter()
           .append("g");
 
-        var circles = node
+        node
           .append("circle")
           .attr("r", function (d) {
             if (d.id.includes(".cwl")) {
@@ -92,7 +90,7 @@ class NetworkGraph extends Component {
               .on("end", dragended)
           );
 
-        var lables = node
+        node
           .append("a")
           .attr("xlink:href", function (d) {
             return rootlink + d.id;

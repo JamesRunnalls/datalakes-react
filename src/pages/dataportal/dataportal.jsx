@@ -93,7 +93,8 @@ class Dataset extends Component {
           title="Click to explore plots, lineage, downloads and metadata"
           className="text"
         >
-          <div className="text-title">{dataset.title}{dataset.datasource !== "internal" && " (EXTERNAL)"}</div>
+          <div className="text-title">{dataset.title}</div>
+          {dataset.datasource !== "internal" && <div className="text-external">EXTERNAL</div>}
           <div>
             <div>
               Parameters: {params.map(param => param.name).join(" | ")}{" "}

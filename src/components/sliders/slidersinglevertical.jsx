@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./componentsvertical";
-import { scaleLinear, scaleTime } from "d3";
-import AvailbilityBar from "./availabilitybar";
+import { scaleLinear } from "d3";
 import "./slider.css";
 
 class SliderSingleVertical extends Component {
@@ -26,7 +25,7 @@ class SliderSingleVertical extends Component {
       marginTop: 10,
       boxSizing: "border-box",
     };
-    var { value, onChange, min, max, files } = this.props;
+    var { value, onChange, min, max } = this.props;
     var { dt } = this.state;
 
     var dateTicks = scaleLinear()
