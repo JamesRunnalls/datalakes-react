@@ -18,13 +18,13 @@ class DatasetList extends Component {
       onSelectDataset,
       datalistclass,
       getLabel,
-      loading
+      loading,
     } = this.props;
     if (list.length > 0) {
       return (
         <React.Fragment>
           <div id="list" className={datalistclass}>
-            {list.map(dataset => (
+            {list.map((dataset) => (
               <Dataset
                 key={dataset.id}
                 selected={selected}
@@ -55,19 +55,19 @@ class DatasetList extends Component {
 }
 
 class Dataset extends Component {
-  getParameters = id => {
+  getParameters = (id) => {
     const { parameters } = this.props;
-    return parameters.filter(x => x.datasets_id === id);
+    return parameters.filter((x) => x.datasets_id === id);
   };
 
-  parseDate = input => {
+  parseDate = (input) => {
     var date = new Date(input);
     var mm = date.getMonth() + 1;
     var dd = date.getDate();
     return [
       (dd > 9 ? "" : "0") + dd,
       (mm > 9 ? "" : "0") + mm,
-      date.getFullYear()
+      date.getFullYear(),
     ].join("/");
   };
 
@@ -75,7 +75,7 @@ class Dataset extends Component {
     const { dataset, selected, onSelectDataset, getLabel } = this.props;
     var url = "/datadetail/" + dataset.id;
     var params = this.getParameters(dataset.id);
-    params = params.filter(x => x.name !== "Time");
+    params = params.filter((x) => x.name !== "Time");
     var check = "checkbox unchecked";
     if (selected.includes(dataset)) check = "checkbox checked";
     return (
@@ -87,17 +87,21 @@ class Dataset extends Component {
           name={dataset.id}
           value={dataset.id}
           onClick={() => onSelectDataset(dataset)}
-        />
+        >
+          <div className="checkmark"></div>
+        </div>
         <Link
           to={url}
           title="Click to explore plots, lineage, downloads and metadata"
           className="text"
         >
           <div className="text-title">{dataset.title}</div>
-          {dataset.datasource !== "internal" && <div className="text-external">EXTERNAL</div>}
+          {dataset.datasource !== "internal" && (
+            <div className="text-external">EXTERNAL</div>
+          )}
           <div>
             <div>
-              Parameters: {params.map(param => param.name).join(" | ")}{" "}
+              Parameters: {params.map((param) => param.name).join(" | ")}{" "}
             </div>
             <div>
               {getLabel("lakes", dataset.lakes_id)} |{" "}
@@ -142,7 +146,7 @@ class FilterBoxInner extends Component {
     return (
       <React.Fragment>
         <div id="filterboxinner" className="">
-          {params.map(param => (
+          {params.map((param) => (
             <div
               key={param.name}
               onClick={() => checkbox(param.id, param.name, cat, table)}
@@ -168,7 +172,7 @@ class FilterBar extends Component {
     const { filters, removeFilter } = this.props;
     return (
       <div className="filterbar">
-        {Object.keys(filters).map(filter => (
+        {Object.keys(filters).map((filter) => (
           <div
             key={filter}
             className="filterbar-item"
@@ -194,12 +198,253 @@ class DataPortal extends Component {
     sortby: "az",
     download: false,
     map: false,
-    loading: true
+    loading: true,
   };
 
   parameterDetails = (dropdown, parameters, x) => {
     return dropdown.parameters.find(
-      item => item.id === parameters[x].parameters_id
+      (item) => item.id === parameters[x].parameters_id
+    );
+  };
+
+  getLabel = (input, id) => {
+    const { dropdown } = this.state;
+    try {
+      return dropdown[input].find((x) => x.id === id).name;
+    } catch (e) {
+      console.log(e);
+      return "NA";
+    }
+  };
+
+  setSelect = (event) => {
+    this.setState({ sortby: event.target.value });
+  };
+
+  download = () => {
+    this.setState({ download: !this.state.download });
+  };
+
+  mapToggle = () => {
+    this.setState({ map: !this.state.map });
+  };
+
+  getDropdowns = async () => {
+    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
+    this.setState({
+      dropdown,
+    });
+  };
+
+  searchDatasets = (event) => {
+    this.setState({ search: event.target.value });
+  };
+
+  selectDataset = (dataset) => {
+    if (this.state.selected.includes(dataset)) {
+      const selected = this.state.selected.filter((c) => c !== dataset);
+      this.setState({ selected: selected });
+    } else {
+      const selected = this.state.selected;
+      selected.push(dataset);
+      this.setState({ selected: selected });
+    }
+  };
+
+  clearSelected = () => {
+    this.setState({ selected: [] });
+  };
+
+  removeFilter = (filter) => {
+    var { filters } = this.state;
+    if (filter in filters) {
+      delete filters[filter];
+    }
+    this.setState({ filters });
+  };
+
+  checkboxAddFilter = (id, name, cat, table) => {
+    var { filters } = this.state;
+    if (name in filters) {
+      delete filters[name];
+    } else {
+      filters[name] = { id: id, category: cat, set: table };
+    }
+    this.setState({ filters });
+  };
+
+  mapAddFilter = (latlng) => {
+    var { filters } = this.state;
+    filters.Location = { id: latlng, category: "Location", set: "Location" };
+    this.setState({ filters });
+  };
+
+  startTimeAddFilter = (e) => {
+    var { filters } = this.state;
+    var date = e.target.value;
+    var f = Object.values(filters).filter((f) => f.set === "Start Date");
+    if (f.length > 0) {
+      delete filters["After " + f[0].id];
+    }
+    if (date !== "") {
+      filters["After " + date] = {
+        id: date,
+        category: "mindatetime",
+        set: "Start Date",
+      };
+    }
+    this.setState({ filters });
+  };
+
+  endTimeAddFilter = (e) => {
+    var { filters } = this.state;
+    var date = e.target.value;
+    var f = Object.values(filters).filter((f) => f.set === "End Date");
+    if (f.length > 0) {
+      delete filters["Before " + f[0].id];
+    }
+    if (date !== "") {
+      filters["Before " + date] = {
+        id: date,
+        category: "maxdatetime",
+        set: "End Date",
+      };
+    }
+    this.setState({ filters });
+  };
+
+  count = (input, name, parameters) => {
+    return parameters.filter((x) => x[input] === name).length;
+  };
+
+  sortDownloads = (dataset) => {
+    return dataset;
+  };
+
+  filterList = (params, name, label, exclude = "") => {
+    var distinct = [];
+    var dp = [...new Set(params.map((x) => x[name]))];
+    for (var p of dp) {
+      if (p !== exclude) {
+        var namelabel = p;
+        if (name.includes("id")) namelabel = this.getLabel(label, p);
+        distinct.push({
+          id: p,
+          name: namelabel,
+          count: this.count(name, p, params),
+        });
+      }
+    }
+    distinct.sort((a, b) => {
+      return b.count - a.count;
+    });
+    return distinct;
+  };
+
+  sortDatasets = (dataset, sortby) => {
+    if (sortby === "az") {
+      dataset.sort((a, b) => {
+        return a.title - b.title;
+      });
+    } else if (sortby === "downloads") {
+      dataset.sort((a, b) => {
+        return b.downloads - a.downloads;
+      });
+    } else if (sortby === "recent") {
+      dataset.sort((a, b) => {
+        return new Date(b.maxdatetime) - new Date(a.maxdatetime);
+      });
+    }
+    return dataset;
+  };
+
+  filterDataSet = (dataset, filters, parameters, avoid = "") => {
+    const filterData = (data, filter, parameters) => {
+      if (filter.set === "datasets") {
+        return data.filter((item) => item[filter.category] === filter.id);
+      } else if (filter.set === "parameters") {
+        return data.filter(
+          (item) =>
+            parameters.filter(
+              (x) =>
+                x[filter.category] === filter.id && x.datasets_id === item.id
+            ).length > 0
+        );
+      } else if (filter.set === "Location") {
+        var latlng = filter.id;
+        var maxlat = Math.max.apply(
+          Math,
+          latlng.map(function (o) {
+            return o.lat;
+          })
+        );
+        var maxlng = Math.max.apply(
+          Math,
+          latlng.map(function (o) {
+            return o.lng;
+          })
+        );
+        var minlat = Math.min.apply(
+          Math,
+          latlng.map(function (o) {
+            return o.lat;
+          })
+        );
+        var minlng = Math.min.apply(
+          Math,
+          latlng.map(function (o) {
+            return o.lng;
+          })
+        );
+        return data.filter(
+          (item) =>
+            item["latitude"] > minlat &&
+            item["latitude"] < maxlat &&
+            item["longitude"] > minlng &&
+            item["longitude"] < maxlng
+        );
+      } else if (filter.set === "Start Date") {
+        return data.filter(
+          (item) =>
+            new Date(item["maxdatetime"]).getTime() >
+            new Date(filter.id).getTime()
+        );
+      } else if (filter.set === "End Date") {
+        return data.filter(
+          (item) =>
+            new Date(item["mindatetime"]).getTime() <
+            new Date(filter.id).getTime()
+        );
+      } else {
+        return data;
+      }
+    };
+
+    if (Object.keys(filters).length > 0) {
+      var tDatasets;
+      var category = [
+        ...new Set(Object.values(filters).map((filter) => filter.category)),
+      ].filter((cat) => cat !== avoid); // List of catagories in filters
+      for (var l of category) {
+        tDatasets = [];
+        for (var f of this.filterCategory(filters, l)) {
+          tDatasets = tDatasets.concat(filterData(dataset, f, parameters));
+        }
+        dataset = [...new Set(tDatasets)];
+      }
+    }
+    return dataset;
+  };
+
+  filterCategory = (filters, l) => {
+    return Object.values(filters).filter((filter) => filter.category === l);
+  };
+
+  filterParameters = (dataset, params) => {
+    return params.filter(
+      (param) =>
+        dataset.filter((data) => data.id === param.datasets_id).length > 0 &&
+        param.parameters_id !== 1
     );
   };
 
@@ -233,238 +478,6 @@ class DataPortal extends Component {
     this.setState({ datasets, parameters, dropdown, loading: false });
   }
 
-  getLabel = (input, id) => {
-    const { dropdown } = this.state;
-    try {
-      return dropdown[input].find(x => x.id === id).name;
-    } catch (e) {
-      console.log(e);
-      return "NA";
-    }
-  };
-
-  setSelect = event => {
-    this.setState({ sortby: event.target.value });
-  };
-
-  download = () => {
-    this.setState({ download: !this.state.download });
-  };
-
-  mapToggle = () => {
-    this.setState({ map: !this.state.map });
-  };
-
-  getDropdowns = async () => {
-    const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
-    this.setState({
-      dropdown
-    });
-  };
-
-  searchDatasets = event => {
-    this.setState({ search: event.target.value });
-  };
-
-  selectDataset = dataset => {
-    if (this.state.selected.includes(dataset)) {
-      const selected = this.state.selected.filter(c => c !== dataset);
-      this.setState({ selected: selected });
-    } else {
-      const selected = this.state.selected;
-      selected.push(dataset);
-      this.setState({ selected: selected });
-    }
-  };
-
-  clearSelected = () => {
-    this.setState({ selected: [] });
-  };
-
-  removeFilter = filter => {
-    var { filters } = this.state;
-    if (filter in filters) {
-      delete filters[filter];
-    }
-    this.setState({ filters });
-  };
-
-  checkboxAddFilter = (id, name, cat, table) => {
-    var { filters } = this.state;
-    if (name in filters) {
-      delete filters[name];
-    } else {
-      filters[name] = { id: id, category: cat, set: table };
-    }
-    this.setState({ filters });
-  };
-
-  mapAddFilter = latlng => {
-    var { filters } = this.state;
-    filters.Location = { id: latlng, category: "Location", set: "Location" };
-    this.setState({ filters });
-  };
-
-  startTimeAddFilter = e => {
-    var { filters } = this.state;
-    var date = e.target.value;
-    if (date === "" && "Start Date" in filters) {
-      delete filters["Start Date"];
-    } else {
-      filters["Start Date"] = {
-        id: date,
-        category: "Start Date",
-        set: "Start Date"
-      };
-    }
-    this.setState({ filters });
-  };
-
-  endTimeAddFilter = e => {
-    var { filters } = this.state;
-    var date = e.target.value;
-    if (date === "" && "End Date" in filters) {
-      delete filters["End Date"];
-    } else {
-      filters["End Date"] = {
-        id: date,
-        category: "End Date",
-        set: "End Date"
-      };
-    }
-    this.setState({ filters });
-  };
-
-  count = (input, name, parameters) => {
-    return parameters.filter(x => x[input] === name).length;
-  };
-
-  sortDownloads = dataset => {
-    return dataset;
-  };
-
-  filterList = (params, name, label, exclude = "") => {
-    var distinct = [];
-    var dp = [...new Set(params.map(x => x[name]))];
-    for (var p of dp) {
-      if (p !== exclude) {
-        var namelabel = p;
-        if (name.includes("id")) namelabel = this.getLabel(label, p);
-        distinct.push({
-          id: p,
-          name: namelabel,
-          count: this.count(name, p, params)
-        });
-      }
-    }
-    distinct.sort((a, b) => {
-      return b.count - a.count;
-    });
-    return distinct;
-  };
-
-  sortDatasets = (dataset, sortby) => {
-    if (sortby === "az") {
-      dataset.sort((a, b) => {
-        return a.title - b.title;
-      });
-    } else if (sortby === "downloads") {
-      dataset.sort((a, b) => {
-        return b.downloads - a.downloads;
-      });
-    } else if (sortby === "modified") {
-      dataset.sort((a, b) => {
-        return new Date(b.lastmodified) - new Date(a.lastmodified);
-      });
-    }
-    return dataset;
-  };
-
-  filterDataSet = (dataset, filters, parameters, avoid = "") => {
-    const filterData = (data, filter, parameters) => {
-      if (filter.set === "datasets") {
-        return data.filter(item => item[filter.category] === filter.id);
-      } else if (filter.set === "parameters") {
-        return data.filter(
-          item =>
-            parameters.filter(
-              x => x[filter.category] === filter.id && x.datasets_id === item.id
-            ).length > 0
-        );
-      } else if (filter.set === "Location") {
-        var latlng = filter.id;
-        var maxlat = Math.max.apply(
-          Math,
-          latlng.map(function(o) {
-            return o.lat;
-          })
-        );
-        var maxlng = Math.max.apply(
-          Math,
-          latlng.map(function(o) {
-            return o.lng;
-          })
-        );
-        var minlat = Math.min.apply(
-          Math,
-          latlng.map(function(o) {
-            return o.lat;
-          })
-        );
-        var minlng = Math.min.apply(
-          Math,
-          latlng.map(function(o) {
-            return o.lng;
-          })
-        );
-        return data.filter(
-          item =>
-            item["latitude"] > minlat &&
-            item["latitude"] < maxlat &&
-            item["longitude"] > minlng &&
-            item["longitude"] < maxlng
-        );
-      } else if (filter.set === "Start Date") {
-        return data.filter(
-          item => new Date(item["end_time"]) > new Date(filter.id)
-        );
-      } else if (filter.set === "End Date") {
-        return data.filter(
-          item => new Date(item["start_time"]) < new Date(filter.id)
-        );
-      } else {
-        return data;
-      }
-    };
-
-    if (Object.keys(filters).length > 0) {
-      var tDatasets;
-      var category = [
-        ...new Set(Object.values(filters).map(filter => filter.category))
-      ].filter(cat => cat !== avoid); // List of catagories in filters
-      for (var l of category) {
-        tDatasets = [];
-        for (var f of this.filterCategory(filters, l)) {
-          tDatasets = tDatasets.concat(filterData(dataset, f, parameters));
-        }
-        dataset = [...new Set(tDatasets)];
-      }
-    }
-    return dataset;
-  };
-
-  filterCategory = (filters, l) => {
-    return Object.values(filters).filter(filter => filter.category === l);
-  };
-
-  filterParameters = (dataset, params) => {
-    return params.filter(
-      param =>
-        dataset.filter(data => data.id === param.datasets_id).length > 0 &&
-        param.parameters_id !== 1
-    );
-  };
-
   render() {
     document.title = "Data Portal - Datalakes";
     const {
@@ -477,7 +490,7 @@ class DataPortal extends Component {
       sortby,
       download,
       map,
-      loading
+      loading,
     } = this.state;
 
     // Filter by filters
@@ -485,7 +498,7 @@ class DataPortal extends Component {
 
     // Filter by search
     var lowercasedSearch = search.toLowerCase();
-    fDatasets = fDatasets.filter(item => {
+    fDatasets = fDatasets.filter((item) => {
       return String(Object.values(item))
         .toLowerCase()
         .includes(lowercasedSearch);
@@ -502,12 +515,22 @@ class DataPortal extends Component {
       this.filterDataSet(datasets, filters, parameters, "characteristic"),
       parameters
     );
+
     var dParams = this.filterList(dataP, "parameters_id", "parameters", 1);
     var dLake = this.filterList(dataL, "lakes_id", "lakes");
     var dChar = this.filterList(dataC, "characteristic", "characterstic");
+    var dSource = this.filterList(datasets, "datasource", "NA");
 
     // Sort by
     fDatasets = this.sortDatasets(fDatasets, sortby);
+
+    // Selected link
+    var sids = selected.map(x => x.id);
+    var p = JSON.parse(JSON.stringify(parameters))
+    p = p.filter(x => sids.includes(x.datasets_id))
+    p = p.filter(x => ![1,2,3,4].includes(x.parameters_id))
+    p = p.map(x => [x.datasets_id,x.parameters_id])
+    var link = "/live?selected="+JSON.stringify(p);
 
     return (
       <React.Fragment>
@@ -547,7 +570,7 @@ class DataPortal extends Component {
                   defaultValue={sortby}
                 >
                   <option value="az">A-Z</option>
-                  <option value="modified">Modified</option>
+                  <option value="recent">Recent</option>
                   <option value="downloads">Downloads</option>
                 </select>
               </div>
@@ -555,9 +578,22 @@ class DataPortal extends Component {
 
               <div className={download ? "popup" : "hidepopup"}>
                 <div className="download-inner">
-                  <h3>Download Selected Datasets</h3>
-                  This feature is not currently available. Please download the
-                  datasets individually.
+                  <h3>Selected Datasets</h3>
+                  {selected.length > 0 ? (
+                    <div>
+                      <div className="download-selected">
+                        {selected.map((s) => {
+                          return <div key={s.title}>{"- "+s.title}</div>;
+                        })}
+                      </div>
+                      <Link to={link}>
+                        <button title="See datasets on web GIS">Preview Datasets</button>
+                      </Link>
+                      <button title="Not currently available please download individually">Download Datasets</button>
+                    </div>
+                  ) : (
+                    <div>No datasets selected</div>
+                  )}
                 </div>
               </div>
 
@@ -603,6 +639,19 @@ class DataPortal extends Component {
                 />
               </div>
               <FilterBox
+                title="Data Source"
+                content={
+                  <FilterBoxInner
+                    checkbox={this.checkboxAddFilter}
+                    cat="datasource"
+                    params={dSource}
+                    filters={filters}
+                    table="datasets"
+                  />
+                }
+                preopen="true"
+              />
+              <FilterBox
                 title="Parameters"
                 content={
                   <FilterBoxInner
@@ -621,28 +670,25 @@ class DataPortal extends Component {
                   <table>
                     <tbody>
                       <tr>
-                        <td>Start</td>
-                        <td>
-                          <input
-                            type="date"
-                            onChange={() => this.startTimeAddFilter()}
-                          />
-                        </td>
+                        <td>Show Data After</td>
+                        <td>Show Data Before</td>
                       </tr>
                       <tr>
-                        <td>End</td>
                         <td>
                           <input
                             type="date"
-                            onChange={() => this.endTimeAddFilter()}
+                            onChange={this.startTimeAddFilter}
                           />
+                        </td>
+                        <td>
+                          <input type="date" onChange={this.endTimeAddFilter} />
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 }
               />
-              <FilterBox
+              {/*<FilterBox
                 title="Depth"
                 content={
                   <table>
@@ -662,7 +708,7 @@ class DataPortal extends Component {
                     </tbody>
                   </table>
                 }
-              />
+              />*/}
               <PopupBox title="Location" fun={this.mapToggle} state={map} />
               <FilterBox
                 title="Lake"
@@ -676,7 +722,6 @@ class DataPortal extends Component {
                   />
                 }
               />
-              <FilterBox title="Other" content="Coming soon" />
             </React.Fragment>
           }
         />

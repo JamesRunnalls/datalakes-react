@@ -7,6 +7,7 @@ import NetworkGraph from "../../../graphs/d3/networkgraph/networkgraph";
 class Pipeline extends Component {
   render() {
     const { dataset, renku } = this.props;
+    console.log(renku)
     if (dataset.renku === 1) {
       return (
         <div className="datadetail-padding">

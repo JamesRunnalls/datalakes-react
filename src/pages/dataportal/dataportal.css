@@ -28,22 +28,23 @@
 }
 
 input.SearchBar {
-  font-size: 16px;
   width: 100%;
   border: solid 1px rgb(169, 169, 169);
   box-sizing: border-box;
   padding: 3px 15px 3px 10px;
   margin-bottom: 15px;
+  margin-top: 10px;
 }
 
 .checkbox {
   width: 12px;
   height: 12px;
   display: inline-block;
-  margin: 5px;
+  margin: 2px;
   cursor: pointer;
   border: solid 1px black;
   vertical-align: top;
+  position: relative;
 }
 
 .checkbox:hover {
@@ -51,8 +52,20 @@ input.SearchBar {
   box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
 }
 
-.checkbox.checked {
-  background-color: black;
+.checkmark {
+  position: absolute;
+  left: 4px;
+  top: 0px;
+  width: 3px;
+  height: 8px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  display: none;
+}
+
+.checkbox.checked .checkmark {
+  display: block;
 }
 
 .download-multiple-title {

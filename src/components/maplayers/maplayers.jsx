@@ -7,7 +7,7 @@ import {
 } from "react-sortable-hoc";
 import RasterLegendItem from "../legend/rasterlegenditem";
 import MarkerLegendItem from "../legend/markerlegenditem";
-import DropDown from "./dropdown";
+import LayerObject from "./layerobject";
 
 class GroupDisplay extends Component {
   state = {};
@@ -62,7 +62,7 @@ class GroupDisplay extends Component {
 }
 
 const SortableItem = SortableElement(({ layer, props }) => {
-  var { id, title } = layer;
+  var { id, title, parameter_name } = layer;
   var {
     selectedlayers,
     removeSelected,
@@ -71,10 +71,11 @@ const SortableItem = SortableElement(({ layer, props }) => {
   } = props;
   return (
     <li tabIndex={0}>
-      <DropDown
+      <LayerObject
         id={id}
         key={id}
         title={title}
+        parameter_name={parameter_name}
         allowSettings={true}
         display={layer}
         displayGroup={selectedlayers}

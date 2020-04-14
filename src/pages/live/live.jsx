@@ -30,45 +30,36 @@ class LakeStations extends Component {
 }
 
 class Live extends Component {
-  getQueryParams = (defaultSelected, defaultHidden) => {
+  getQueryParams = (defaultSelected) => {
     const pathname = this.props.location.pathname;
     var selected = defaultSelected;
-    var hidden = defaultHidden;
     try {
       var { search } = this.props.location;
       if (search) {
         search = search.replace("?", "").split("&");
-        var s = search[0].split("=")[1].split(",");
-        var h = search[1].split("=")[1].split(",");
-        s = s.map(x => parseInt(x, 10)).filter(x => !isNaN(x));
-        h = h.map(x => parseInt(x, 10)).filter(x => !isNaN(x));
-
+        var s = JSON.parse(search[0].split("=")[1]);
         if (s.length > 0) selected = s;
-        if (h.length > 0) hidden = h;
       } else {
         this.props.history.push({
           pathname: pathname,
-          search:
-            "?selected=" + selected.toString() + "&hidden=" + hidden.toString()
+          search: "?selected=" + JSON.stringify(selected),
         });
       }
     } catch (e) {
       console.log(e);
       this.props.history.push({
         pathname: pathname,
-        search:
-          "?selected=" + selected.toString() + "&hidden=" + hidden.toString()
+        search: "?selected=" + JSON.stringify(selected),
       });
     }
 
-    return { selected: selected, hidden: hidden };
+    return { selected: selected };
   };
-  setQueryParams = (selected, hidden) => {
+  setQueryParams = (selected) => {
     let pathname = this.props.location.pathname;
     this.props.history.push({
       pathname: pathname,
-      search:
-        "?selected=" + selected.toString() + "&hidden=" + hidden.toString()
+      search: "?selected=" + JSON.stringify(selected),
     });
   };
   render() {
@@ -76,7 +67,10 @@ class Live extends Component {
       <GIS
         title="Live Conditions"
         documentTitle="Live - Datalakes"
-        selected={[[9,7],[3,5]]}
+        selected={[
+          [9, 7],
+          [3, 5],
+        ]}
         hidden={[]}
         setQueryParams={this.setQueryParams}
         getQueryParams={this.getQueryParams}

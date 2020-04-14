@@ -5,7 +5,7 @@ import "./maplayers.css";
 
 const DragHandle = sortableHandle(({ inner }) => <div title="Drag to re-order layers">{inner}</div>);
 
-class DropDown extends Component {
+class LayerObject extends Component {
   state = {
     open: this.props.defaultOpen,
     settings: false
@@ -21,6 +21,7 @@ class DropDown extends Component {
     var {
       id,
       title,
+      parameter_name,
       content,
       allowSettings,
       display,
@@ -42,7 +43,7 @@ class DropDown extends Component {
               >
                 {open ? "▿" : "▹"}
               </td>
-              <td style={{ width: "10px" }}>
+              <td className="maplayers-check">
                 {" "}
                 <input
                   className="maplayers-checkbox"
@@ -54,6 +55,7 @@ class DropDown extends Component {
               </td>
               <td style={{ width: "100%" }} onClick={this.toggleOpen}>
                 <DragHandle inner={title} />
+                <div className="maplayers-parameter">{parameter_name}</div>
               </td>
               {allowSettings && (
                 <td
@@ -97,4 +99,4 @@ class DropDown extends Component {
   }
 }
 
-export default DropDown;
+export default LayerObject;

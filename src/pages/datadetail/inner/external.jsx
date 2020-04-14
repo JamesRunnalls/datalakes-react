@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import "../datadetail.css";
 
 class External extends Component {
@@ -28,14 +29,26 @@ class External extends Component {
       );
     }
 
+    // Link 
+    var p = JSON.parse(JSON.stringify(parameters))
+    p = p.filter(x => ![1,2,3,4].includes(x.parameters_id))
+    p = p.map(x => [dataset.id,x.parameters_id])
+    var link = "/live?selected="+JSON.stringify(p);
+
     return (
       <div className="datadetail-padding">
         <div className="datadetail-header">
           This in an external datasource. If you are intersted in previewing the
           data either view the dataset in the Web GIS or follow the link below
           to the origin dataset.
-    {/*<Link><button>Web GIS</button></Link>*/}
-          <a href=""><button>Dataset Source</button></a>
+          <div>
+            <Link to={link}>
+              <button>Web GIS</button>
+            </Link>
+            <a href={dataset.datasourcelink}>
+              <button>Dataset Source</button>
+            </a>
+          </div>
         </div>
         <div className="info-width">
           <div className="info-head">Parameters</div>
@@ -77,11 +90,11 @@ class External extends Component {
               </tr>
               <tr>
                 <th>Latitude</th>
-                <td>{dataset.latitude}</td>
+                <td>{dataset.latitude === "-9999" ? "Variable" : dataset.latitude}</td>
               </tr>
               <tr>
                 <th>Longitude</th>
-                <td>{dataset.longitude}</td>
+                <td>{dataset.longitude === "-9999" ? "Variable" : dataset.longitude}</td>
               </tr>
               <tr>
                 <th>Min Depth (m)</th>

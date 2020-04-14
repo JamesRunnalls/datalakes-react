@@ -8,7 +8,7 @@ import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
 import Information from "./inner/information";
 import Pipeline from "./inner/pipeline";
-import External from './inner/external';
+import External from "./inner/external";
 import Preview from "./inner/preview";
 import DataSubMenu from "./datasubmenu";
 import Loading from "../../components/loading/loading";
@@ -111,12 +111,15 @@ class DataDetail extends Component {
 
       // Get Renku Data
       var renku = false;
-      if (dataset.renku === 0){
-        ({ data: renku } = await axios
-        .post(apiUrl + "/renku",{url:dataset.datasourcelink})
-        .catch((error) => {
-          renku = false
-        }));
+      if (dataset.renku === 0) {
+        try {
+          ({ data: renku } = await axios.post(apiUrl + "/renku", {
+            url: dataset.datasourcelink,
+          }));
+        } catch (e) {
+          console.error(e);
+          renku = false;
+        }
       }
 
       this.setState({
@@ -264,7 +267,11 @@ class DataDetail extends Component {
     }
     var fileList = [];
     for (var i = 0; i < files.length; i++) {
-      if ((new Date(files[i].mindatetime).getTime() / 1000) < upper && (new Date(files[i].maxdatetime).getTime() / 1000) > lower && data[i] === 0) {
+      if (
+        new Date(files[i].mindatetime).getTime() / 1000 < upper &&
+        new Date(files[i].maxdatetime).getTime() / 1000 > lower &&
+        data[i] === 0
+      ) {
         fileList.push(i);
       }
     }

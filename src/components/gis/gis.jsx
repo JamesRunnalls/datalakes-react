@@ -99,8 +99,15 @@ class GIS extends Component {
 
   setSelected = (selectedlayers) => {
     this.setState({ loading: true }, () => {
-      //this.props.setQueryParams(selected, hidden);
-      this.setState({ selectedlayers, loading: false });
+      var selected = [];
+      for (var i = 0; i < selectedlayers.length; i++) {
+        selected.push([
+          selectedlayers[i].datasets_id,
+          selectedlayers[i].parameters_id,
+        ]);
+      }
+      this.props.setQueryParams(selected);
+      this.setState({ selectedlayers, selected, loading: false });
     });
   };
 
@@ -108,6 +115,7 @@ class GIS extends Component {
     this.setState({ loading: true }, async () => {
       var {
         datasets,
+        selected,
         selectedlayers,
         datasetparameters,
         parameters,
@@ -117,6 +125,7 @@ class GIS extends Component {
       } = this.state;
       for (var i = 0; i < ids.length; i++) {
         var { datasets_id, parameters_id } = ids[i];
+        selected.push([datasets_id, parameters_id]);
         ({ selectedlayers, datasets } = await this.addNewLayer(
           datasets_id,
           parameters_id,
@@ -129,17 +138,23 @@ class GIS extends Component {
           hidden
         ));
       }
-      //this.props.setQueryParams(selected, hidden);
-      this.setState({ selectedlayers, datasets, loading: false });
+      this.props.setQueryParams(selected);
+      this.setState({ selectedlayers, selected, datasets, loading: false });
     });
   };
 
   removeSelected = (id) => {
+    var dp = id.split("&");
     this.setState({ loading: true }, () => {
-      var { selectedlayers } = this.state;
+      var { selectedlayers, selected } = this.state;
       selectedlayers = selectedlayers.filter((x) => x.id !== id);
-      //this.props.setQueryParams(selected, hidden);
-      this.setState({ selectedlayers, loading: false });
+      selected = selected.filter(
+        (x) =>
+          parseInt(x[0]) !== parseInt(dp[0]) ||
+          parseInt(x[1]) !== parseInt(dp[1])
+      );
+      this.props.setQueryParams(selected);
+      this.setState({ selectedlayers, selected, loading: false });
     });
   };
 
@@ -148,7 +163,6 @@ class GIS extends Component {
       var { selectedlayers } = this.state;
       var index = selectedlayers.findIndex((x) => x.id === id);
       selectedlayers[index].visible = !selectedlayers[index].visible;
-      //this.props.setQueryParams(selected, hidden);
       this.setState({ selectedlayers, loading: false });
     });
   };
@@ -404,7 +418,7 @@ class GIS extends Component {
     depth,
     hidden
   ) => {
-    // Check layer not already loading
+    // Check layer not already loaded
     if (
       selectedlayers.filter(
         (sl) =>
@@ -414,6 +428,7 @@ class GIS extends Component {
       // Find index of datasets and parameters
       var dataset_index = datasets.findIndex((x) => x.id === datasets_id);
       var parameter_index = parameters.findIndex((x) => x.id === parameters_id);
+      var parameter_name = parameters[parameter_index].name;
       var dataset = datasets[dataset_index];
 
       // Get file list for dataset
@@ -448,7 +463,7 @@ class GIS extends Component {
       var unit = dp.find((d) => d.parameters_id === parameters_id).unit;
 
       // Plot properties
-      var layer = dataset.plotproperties;
+      let layer = JSON.parse(JSON.stringify(dataset.plotproperties));
 
       layer["mindatetime"] = dataset.mindatetime;
       layer["maxdatetime"] = dataset.maxdatetime;
@@ -470,8 +485,9 @@ class GIS extends Component {
       layer["fileid"] = fileid;
       layer["datasetparameters"] = dp;
       layer["datasets_id"] = datasets_id;
-      layer["parameters_id"] = parameters_id;
       layer["dataset_index"] = dataset_index;
+      layer["parameters_id"] = parameters_id;
+      layer["parameter_name"] = parameter_name;
       layer["parameter_index"] = parameter_index;
       layer.colors = this.parseColor(layer.colors);
       layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
@@ -537,7 +553,7 @@ class GIS extends Component {
 
   async componentDidMount() {
     var { selected, hidden, datetime, depth } = this.state;
-    //({ selected, hidden } = this.props.getQueryParams(selected, hidden));
+    ({ selected } = this.props.getQueryParams(selected));
 
     // Get parameters
     var { data: parameters } = await axios.get(

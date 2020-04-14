@@ -16,11 +16,16 @@ li {
 }
 
 .maplayers-dropdown {
-  margin: 2px 0 8px 0;
+  margin: 2px 0 5px 0;
 }
 
 .maplayers-dropdown .maplayers-dropdown-table {
   width: 100%;
+}
+
+.maplayers-dropdown .maplayers-check {
+  width: 10px;
+  vertical-align: top;
 }
 
 .maplayers-dropdown .maplayers-checkbox {
@@ -43,6 +48,11 @@ li {
 
 .maplayers-dropdown-content.hide {
   display: none;
+}
+
+.maplayers-parameter {
+  font-size: 12px;
+  font-style: italic;
 }
 
 .editsettings {

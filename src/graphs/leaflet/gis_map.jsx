@@ -553,7 +553,6 @@ class GISMap extends Component {
       marker.bindPopup(description);
 
       this.marker.push(markerGroup);
-      console.log(datasetparameter, data, type);
     } else {
       alert("No plotting function defined");
     }
