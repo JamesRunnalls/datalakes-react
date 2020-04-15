@@ -134,12 +134,12 @@ class Station extends Component {
   async componentDidMount() {
     const url = this.props.location.pathname.split("/").slice(-1)[0];
     const { data: datainfo } = await axios
-      .get(apiUrl + "/live/lakestations/" + url)
+      .get(apiUrl + "/externaldata/lakestations/" + url)
       .catch(error => {
         this.setState({ error: true });
       });
     const { data: dataset } = await axios
-      .get(apiUrl + "/live/lakestations/" + url + "?get=data")
+      .get(apiUrl + "/externaldata/lakestations/" + url + "?get=data")
       .catch(error => {
         this.setState({ error: true });
       });

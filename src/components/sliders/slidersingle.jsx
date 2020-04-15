@@ -60,7 +60,7 @@ class SliderSingle extends Component {
 
     var dateTicks, valueStr;
     if (type === "time") {
-      valueStr = new Date(update[0]).toString();
+      valueStr = new Date(update[0]).toDateString() + " " + new Date(update[0]).toLocaleTimeString();
       min = this.formatDate(min);
       max = this.formatDate(max);
       dateTicks = scaleTime()

@@ -3,6 +3,7 @@ import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./componentsvertical";
 import { scaleLinear } from "d3";
 import "./slider.css";
+import AvailbilityBarV from './availabilitybarv';
 
 class SliderSingleVertical extends Component {
   state = {
@@ -25,7 +26,7 @@ class SliderSingleVertical extends Component {
       marginTop: 10,
       boxSizing: "border-box",
     };
-    var { value, onChange, min, max } = this.props;
+    var { value, onChange, min, max, files } = this.props;
     var { dt } = this.state;
 
     var dateTicks = scaleLinear()
@@ -41,7 +42,7 @@ class SliderSingleVertical extends Component {
         </div>
         <div
           className="verticalslider"
-          title="Hint: use arrow keys to move between timesteps"
+          title="Select your desired depth"
         >
           <Slider
             vertical
@@ -53,7 +54,7 @@ class SliderSingleVertical extends Component {
             onChange={onChange}
             onUpdate={this.onUpdate}
           >
-            {/*<AvailbilityBar min={min} max={max} files={files} />*/}
+            <AvailbilityBarV min={min} max={max} files={files} />
             <Rail>
               {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
             </Rail>

@@ -12,11 +12,18 @@ class DatetimeDepthSelector extends Component {
       depth,
       onChangeDepth,
       onChangeDatetime,
+      datasets,
     } = this.props;
     var mindatetime = new Date(new Date().getTime() - 1209600000);
     var maxdatetime = new Date();
     var mindepth = 0;
     var maxdepth = 1;
+
+    function findDataset(datasets, id) {
+      return datasets.find((d) => d.id === id);
+    }
+
+    var files = [];
 
     for (var i = 0; i < selectedlayers.length; i++) {
       mindatetime = new Date(
@@ -26,6 +33,11 @@ class DatetimeDepthSelector extends Component {
         Math.max(maxdatetime, new Date(selectedlayers[i].maxdatetime))
       );
       maxdepth = Math.max(maxdepth, selectedlayers[i].maxdepth);
+
+      // File list
+      files = files.concat(
+        findDataset(datasets, selectedlayers[i].datasets_id).files
+      );
     }
 
     maxdepth = Math.min(370, maxdepth);
@@ -38,6 +50,7 @@ class DatetimeDepthSelector extends Component {
               value={datetime}
               min={mindatetime}
               max={maxdatetime}
+              files={files}
               onChange={onChangeDatetime}
             />
           </div>
@@ -49,6 +62,7 @@ class DatetimeDepthSelector extends Component {
               value={depth}
               min={mindepth}
               max={maxdepth}
+              files={files}
               onChange={onChangeDepth}
             />
           </div>

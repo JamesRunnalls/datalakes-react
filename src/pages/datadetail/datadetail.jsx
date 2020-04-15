@@ -486,7 +486,7 @@ class DataDetail extends Component {
                 <tr>
                   <td>
                     <Loading />
-                    <h3>Loading Data</h3>
+                    Loading Data
                   </td>
                 </tr>
               </tbody>

@@ -3,6 +3,7 @@ import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { scaleTime } from "d3";
 import DateTimePicker from "react-datetime-picker";
+import AvailbilityBar from './availabilitybar';
 import { format } from "date-fns";
 import "./slider.css";
 
@@ -40,7 +41,7 @@ class SliderSingleHorizontal extends Component {
       marginTop: 10,
       boxSizing: "border-box",
     };
-    var { value, onChange, min, max } = this.props;
+    var { value, onChange, min, max, files } = this.props;
     var { dt } = this.state;
 
     var dateTicks = scaleTime()
@@ -53,7 +54,7 @@ class SliderSingleHorizontal extends Component {
         {" "}
         <div
           className="horizontalslider"
-          title="Hint: use arrow keys to move between timesteps"
+          title="Select your desired datetime"
         >
           <Slider
             mode={1}
@@ -64,7 +65,7 @@ class SliderSingleHorizontal extends Component {
             onChange={onChange}
             onUpdate={this.onUpdate}
           >
-            {/*<AvailbilityBar min={min} max={max} files={files} />*/}
+            <AvailbilityBar min={min} max={max} files={files} />
             <Rail>
               {({ getRailProps }) => <SliderRail getRailProps={getRailProps} />}
             </Rail>

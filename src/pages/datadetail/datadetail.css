@@ -94,7 +94,6 @@
 
 .networkgraph-inner {
   width: 100%;
-  max-width: 500px;
   height: 400px;
 }
 
@@ -120,7 +119,7 @@
 
 .data-subnav .subnav-item {
   display: inline-block;
-  margin: 0 10px -1px 10px;
+  margin: 0 20px -1px 0;
   cursor: pointer;
   padding: 5px 10px;
   border: 1px solid white;
@@ -144,7 +143,7 @@
   font-size: 13.33px;
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
 }
 
 .data-subnav .subnav-item .subnav-text {
@@ -157,7 +156,7 @@
   vertical-align: top;
 }
 
-@media screen and (max-width: 960px) {
+@media screen and (max-width: 800px) {
   .data-subnav .subnav-item .subnav-text {
     display: none;
   }
@@ -165,7 +164,7 @@
     padding: 0 5px;
   }
   .data-subnav .subnav-item {
-    margin: 0 0 -1px 0;
+    margin: 0 15px -1px 0;
   }
   .data-subnav {
     margin: 0 0 10px 15px;
@@ -183,7 +182,7 @@
     margin: 0 0 -1px 0;
   }
   .data-subnav {
-    padding: 10px 15px 10px 15px;
+    padding: 10px 15px 10px 2px;
     margin: 0;
     width: 100%;
     box-sizing: border-box;
@@ -214,6 +213,87 @@
 
   .pipeline .diagram {
     padding-top: 30px;
+  }
+}
+
+.renku-pipeline .renku-header {
+  margin-bottom: 20px;
+}
+
+.renku-pipeline .pipeline-left {
+  width: 50%;
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: 20px;
+}
+
+.renku-pipeline .pipeline-left .datasets {
+  display: block;
+  width: fit-content;
+  border: 1px solid black;
+  padding: 10px 15px;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+.renku-pipeline .pipeline-left .script {
+  display: block;
+  width: fit-content;
+  background-color: rgb(200, 200, 200);
+  padding: 20px 30px;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: auto;
+  -webkit-clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+.renku-pipeline .pipeline-left .connector {
+  display: block;
+  width: fit-content;
+  font-size: 30px;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: auto;
+}
+
+.renku-pipeline .pipeline-right {
+  width: 50%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.renku-pipeline .pipeline-right .accessType {
+  border: 1px solid rgb(169, 169, 169);
+  box-sizing: border-box;
+  width: 100%;
+  font-size: 12px;
+  padding: 3px 3px;
+  margin-bottom: 10px;
+}
+
+.renku-pipeline .pipeline-right .accessOption {
+  padding: 10px 10px;
+  font-size: 14px;
+}
+
+.renku-pipeline .pipeline-right .accessOption a {
+  width: 100%;
+}
+
+.renku-pipeline .pipeline-right .accessOption button {
+  display: block;
+
+  margin-top: 10px;
+}
+
+@media screen and (max-width: 800px) {
+  .renku-pipeline .pipeline-right {
+    width: 100%;
+  }
+  .renku-pipeline .pipeline-left {
+    width: 100%;
   }
 }
 

@@ -434,7 +434,7 @@ class GIS extends Component {
       // Get file list for dataset
       if (dataset.files.length === 0) {
         var { data: files } = await axios.get(
-          apiUrl + "/files?datasets_id=" + datasets_id
+          apiUrl + "/files?datasets_id=" + datasets_id + "&type=json"
         );
         dataset.files = files;
       }
@@ -503,11 +503,8 @@ class GIS extends Component {
     function findFileId(files, fileid) {
       return files.find((f) => f.id === fileid);
     }
-    function filterParameters(dp, id) {
-      dp.filter((d) => d.datasets_id === id);
-    }
     this.setState({ loading: true }, async () => {
-      var { selectedlayers, datasets, datasetparameters } = this.state;
+      var { selectedlayers, datasets } = this.state;
 
       for (var i = 0; i < selectedlayers.length; i++) {
         var dataset = datasets[selectedlayers[i].dataset_index];
@@ -521,17 +518,11 @@ class GIS extends Component {
           datafile.data = await this.downloadFile(datafile, dataset.datasource);
         }
 
-        // Get the dataset parameter
-        var dp = filterParameters(
-          datasetparameters,
-          selectedlayers[i].datasets_id
-        );
-
         // Update the min and max value
         var { min, max, array } = this.getMinMax(
           dataset.files,
           selectedlayers[i].parameters_id,
-          dp,
+          selectedlayers[i].datasetparameters,
           dataset.mapplotfunction
         );
 

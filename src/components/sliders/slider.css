@@ -74,6 +74,8 @@
   display: inline-block;
   width: calc(100% - 60px);
   text-align: center;
+  vertical-align: top;
+  margin-top: 5px;
 }
 
 .slider-arrow {
@@ -91,4 +93,11 @@
 .availabilitybar {
   width: 100%;
   margin-bottom: -6px;
+}
+
+.availabilitybarv {
+  height: 100%;
+  position: absolute;
+  right: 42px;
+  width: 12px;
 }

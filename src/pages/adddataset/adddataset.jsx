@@ -141,7 +141,7 @@ class AddDataset extends Component {
   // 2) Validate data parse and get lineage from Renku
 
   validateData = async () => {
-    const { step, datasetparameters, dataset, file, files_list } = this.state;
+    var { step, datasetparameters, dataset, file, files_list } = this.state;
 
     // Clean folder
     await axios.get(apiUrl + "/files/clean/" + dataset.id).catch(error => {
@@ -158,20 +158,22 @@ class AddDataset extends Component {
 
     // Lineage from Renku
     dataset["renku"] = 1;
-    /*var { data: renkuData } = await axios
-      .get(apiUrl + "/renku/" + encodeURIComponent(dataset.git))
+    var allowedStep = [1, 2, 3, 0, 0];
+    step = step + 1;
+    var { data: renkuData } = await axios
+      .get(apiUrl + "/renku/" + encodeURIComponent(dataset.datasourcelink))
       .catch(error => {
         console.error(error.message);
       });
-    dataset["renku"] = 1;
     if ("data" in renkuData) {
       if (renkuData.data.lineage !== null) {
         dataset["renku"] = 0;
-        dataset["pre_file"] = "NA";
-        dataset["pre_script"] = "NA";
+        dataset["prefile"] = "NA";
+        dataset["prescript"] = "NA";
+        allowedStep = [1, 2, 0, 4, 0];
+        step = step + 1;
       }
     }
-    */
 
     // Set real axis values
     var axis = [];
@@ -239,11 +241,11 @@ class AddDataset extends Component {
     dataset["longitude"] = longitude;
     dataset["latitude"] = latitude;
     this.setState({
-      renkuResponse: "",
+      renkuResponse: renkuData,
       datasetparameters,
-      allowedStep: [1, 2, 3, 0, 0],
       dataset,
-      step: step + 1
+      allowedStep,
+      step
     });
     return;
   };

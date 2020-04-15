@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
-import { scaleTime } from "d3";
+import { scaleLinear } from "d3";
 import "./slider.css";
 
-class AvailbilityBar extends Component {
+class AvailbilityBarV extends Component {
   state = {
     plotted: false,
   };
@@ -14,42 +14,43 @@ class AvailbilityBar extends Component {
 
   plotBar = () => {
     try {
-      d3.select("#availabilitybarsvg").remove();
+      d3.select("#availabilitybarvsvg").remove();
     } catch (e) {}
 
-    var width = d3.select("#availabilitybar").node().getBoundingClientRect()
-      .width;
+    var height = d3.select("#availabilitybarv").node().getBoundingClientRect()
+      .height;
 
-    if (width > 0 && this.props.files.length > 0) {
+    if (this.props.files.length > 0) {
       this.setState({ plotted: true });
       var { min, max, files } = this.props;
+
       var array = files.map((x) => ({
-        min: new Date(x.mindatetime),
-        max: new Date(x.maxdatetime),
+        min: x.mindepth,
+        max: x.maxdepth,
       }));
 
       var svg = d3
-        .select("#availabilitybar")
+        .select("#availabilitybarv")
         .append("svg")
-        .attr("id", "availabilitybarsvg")
-        .attr("height", 6)
-        .attr("width", width);
-      var x = scaleTime().domain([min, max]).range([0, width]);
+        .attr("id", "availabilitybarvsvg")
+        .attr("height", height)
+        .attr("width", 6);
+      var y = scaleLinear().domain([min, max]).range([0, height]);
       svg
         .selectAll("dot")
         .data(array)
         .enter()
         .append("rect")
-        .attr("height", 6)
-        .attr("width", function (d) {
-          return Math.max(1,x(d.max) - x(d.min));
+        .attr("width", 6)
+        .attr("height", function (d) {
+          return Math.max(3,y(d.max) - y(d.min));
         })
         .attr("stroke", "deepskyblue")
         .attr("fill", "deepskyblue")
-        .attr("x", function (d) {
-          return x(d.min);
-        })
         .attr("y", function (d) {
+          return y(d.min);
+        })
+        .attr("x", function (d) {
           return 0;
         });
     }
@@ -67,8 +68,8 @@ class AvailbilityBar extends Component {
   }
 
   render() {
-    return <div id="availabilitybar" className="availabilitybar"></div>;
+    return <div id="availabilitybarv" className="availabilitybarv"></div>;
   }
 }
 
-export default AvailbilityBar;
+export default AvailbilityBarV;

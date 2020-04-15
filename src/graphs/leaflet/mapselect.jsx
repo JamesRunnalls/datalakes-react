@@ -10,7 +10,7 @@ import "./css/marker.css";
 import "./css/mapselect.css";
 
 class MapSelect extends Component {
-  rectEnable = e => {
+  rectEnable = (e) => {
     if (e.ctrlKey) {
       this.rectangle.enable();
     }
@@ -31,8 +31,8 @@ class MapSelect extends Component {
         L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
           { attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ" }
-        )
-      ]
+        ),
+      ],
     });
 
     var drawnItems = new L.FeatureGroup();
@@ -40,8 +40,8 @@ class MapSelect extends Component {
     var drawControl = new L.Control.Draw({
       edit: {
         draw: true,
-        featureGroup: drawnItems
-      }
+        featureGroup: drawnItems,
+      },
     });
     this.map.addControl(drawControl);
 
@@ -50,7 +50,7 @@ class MapSelect extends Component {
       drawControl.options.Rectangle
     );
 
-    this.map.on("draw:created", function(e) {
+    this.map.on("draw:created", function (e) {
       var layer = e.layer;
       mapAddFilter(layer._latlngs[0]);
       drawnItems.clearLayers();
@@ -68,13 +68,13 @@ class MapSelect extends Component {
         style: {
           margin: "10px",
           padding: "0px 0 0 0",
-          cursor: "pointer"
+          cursor: "pointer",
         },
         events: {
-          click: function(data) {
+          click: function (data) {
             mapToggle();
-          }
-        }
+          },
+        },
       })
       .addTo(this.map);
 
@@ -100,25 +100,33 @@ class MapSelect extends Component {
     window.removeEventListener("keydown", this.rectEnable);
   }
 
-  plotMarkers = datasets => {
+  plotMarkers = (datasets) => {
     try {
       this.map.removeLayer(this.markers);
     } catch (e) {}
+
     var shape = "pin";
     var color = "red";
     var Icon = L.divIcon({
       className: "map-marker",
-      html: `<div class="${shape}" style="background-color:${color}"></div> `
+      html: `<div class="${shape}" style="background-color:${color}"></div> `,
     });
     this.markers = L.markerClusterGroup();
     var bounds = L.latLngBounds();
     for (var dataset of datasets) {
-      bounds.extend([dataset.latitude, dataset.longitude]);
-      this.markers.addLayer(
-        new L.marker([dataset.latitude, dataset.longitude], {
-          icon: Icon
-        }).bindPopup(`<a href="datadetail/${dataset.id}">${dataset.title}</a>`)
-      );
+      var { latitude, longitude, title, id } = dataset;
+      latitude = parseFloat(latitude);
+      longitude = parseFloat(longitude);
+      if (latitude !== -9999 && longitude !== -9999) {
+        bounds.extend([latitude, longitude]);
+        this.markers.addLayer(
+          new L.marker([latitude, longitude], {
+            icon: Icon,
+          }).bindPopup(
+            `<a href="datadetail/${id}">${title}</a>`
+          )
+        );
+      }
     }
     this.map.addLayer(this.markers);
     return bounds;
