@@ -460,18 +460,20 @@ class GISMap extends Component {
     var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
     var index, value, minSize, maxSize, markerGroup, timediff, depthdiff;
     var valuestring, color, shape, size, marker;
+    console.log(type)
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler e.g Thetis
       var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
       var dp3 = datasetparameters.find((dp) => dp.parameters_id === 2);
       index = this.indexClosest(depth, data.y);
-      value = data[datasetparameter.axis][index].toExponential(3);
+      value = parseFloat(data[datasetparameter.axis][index]).toExponential(3);
       minSize = 5;
       maxSize = 30;
       markerGroup = L.layerGroup().addTo(this.map);
       timediff = -Math.round(
         (datetime.getTime() / 1000 - data[dp2.axis][index]) / 3600
       );
+      console.log(depth - data[dp3.axis][index])
       depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
       valuestring =
         String(value) +
