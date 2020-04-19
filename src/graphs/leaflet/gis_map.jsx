@@ -460,7 +460,7 @@ class GISMap extends Component {
     var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
     var index, value, minSize, maxSize, markerGroup, timediff, depthdiff;
     var valuestring, color, shape, size, marker;
-    console.log(type)
+    console.log(type);
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler e.g Thetis
       var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
@@ -473,7 +473,7 @@ class GISMap extends Component {
       timediff = -Math.round(
         (datetime.getTime() / 1000 - data[dp2.axis][index]) / 3600
       );
-      console.log(depth - data[dp3.axis][index])
+      console.log(depth - data[dp3.axis][index]);
       depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
       valuestring =
         String(value) +
@@ -592,21 +592,12 @@ class GISMap extends Component {
       center: center,
       zoom: zoom,
       minZoom: 7,
-      maxZoom: 16,
+      maxZoom: 15,
       attributionControl: false,
       layers: [
-        //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'}),
         L.tileLayer(
-          "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
-          { attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ" }
-        ),
-        L.tileLayer(
-          "https://maps.heigit.org/openmapsurfer/tiles/asterh/webmercator/{z}/{x}/{y}.png",
-          {
-            maxZoom: 10,
-            attribution:
-              '| <a href="http://giscience.uni-hd.de/" target="_blank">University of Heidelberg</a> | <a href="https://lpdaac.usgs.gov/products/aster_policies" target="_blank">ASTER GDEM</a>, <a href="http://srtm.csi.cgiar.org/">SRTM</a>',
-          }
+          "https://api.mapbox.com/styles/v1/jamesrunnalls/ck96x8fhp6h2i1ik5q9xz0iqn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
+          { attribution: '&copy; <a href="https://shop.swisstopo.admin.ch/en/products/height_models/bathy3d">swisstopo</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }
         ),
       ],
     });

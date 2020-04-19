@@ -422,18 +422,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
   margin: 0;
 }
 
-.leaflet-control-attribution {
-  font-size: 9px !important;
-}
-@media screen and (max-width: 500px) {
-  .leaflet-control-attribution {
-    max-width: 50%;
-  }
-}
-
-.leaflet-control-attribution:hover {
-  font-size: 12px !important;
-}
 .leaflet-control-attribution a {
   color: rgb(51, 51, 51) !important;
 }
