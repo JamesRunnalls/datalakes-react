@@ -180,18 +180,19 @@ class GIS extends Component {
         apiUrl + "/files/" + datafile.id + "?get=raw"
       ));
     } else {
-      ({ data } = await axios.get(datafile.filelink).catch((error) => {
-        console.error(error);
-        alert("Failed to add layer");
-        this.setState({ loading: false });
-      }));
+      ({ data } = await axios
+        .get(datafile.filelink, { timeout: 2000 })
+        .catch((error) => {
+          console.error(error);
+          alert("Failed to add layer");
+          this.setState({ loading: false });
+        }));
     }
     return data;
   };
 
   meteoSwissMarkersMinMax = (layer) => {
-    var array = layer.features;
-    array = array.map((x) => x.properties.value);
+    var array = layer.map((x) => x.v);
     array = array.filter((x) => x !== 9999);
     var max = this.getMax(array);
     var min = this.getMin(array);
@@ -199,8 +200,7 @@ class GIS extends Component {
   };
 
   foenMarkersMinMax = (layer) => {
-    var array = layer.features;
-    array = array.map((x) => x.properties.value);
+    var array = layer.map((x) => x.v);
     array = array.filter((x) => x !== 9999);
     var max = this.getMax(array);
     var min = this.getMin(array);
@@ -563,6 +563,15 @@ class GIS extends Component {
       apiUrl + "/datasetparameters"
     );
 
+    // Get templates
+    var { data: meteoswiss } = await axios.get(
+      apiUrl + "/externaldata/templates/meteoswiss"
+    );
+    var { data: foen } = await axios.get(
+      apiUrl + "/externaldata/templates/foen"
+    );
+    var templates = { meteoswiss, foen };
+
     // Build selected layers object
     var selectedlayers = [];
     for (var i = 0; i < selected.length; i++) {
@@ -577,7 +586,7 @@ class GIS extends Component {
         parameters,
         datetime,
         depth,
-        hidden
+        hidden,
       ));
     }
 
@@ -589,6 +598,7 @@ class GIS extends Component {
       datasets,
       datasetparameters,
       loading: false,
+      templates
     });
   }
 
@@ -601,6 +611,7 @@ class GIS extends Component {
       loading,
       datetime,
       depth,
+      templates,
     } = this.state;
     var {
       documentTitle,
@@ -618,6 +629,7 @@ class GIS extends Component {
           selectedlayers={selectedlayers}
           datasets={datasets}
           legend={<Legend selectedlayers={selectedlayers} />}
+          templates={templates}
           timeselector={
             <DatetimeDepthSelector
               selectedlayers={selectedlayers}

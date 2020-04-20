@@ -1,6 +1,40 @@
 import React, { Component } from "react";
-//import { Link } from "react-router-dom";
+import FilterBox from "../../components/filterbox/filterbox";
 import GIS from "../../components/gis/gis";
+import "./prediction.css";
+
+class LakeModels extends Component {
+  render() {
+    return (
+      <div className="lakestations">
+        <a
+          href="http://meteolakes.ch/"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <div
+            className="lakestations-item"
+            title="See 3D lake model predictions"
+          >
+            Meteolakes
+          </div>
+        </a>
+        <a
+          href="https://simstrat.eawag.ch/"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <div
+            className="lakestations-item"
+            title="See 1D lake model predictions"
+          >
+            Simstrat
+          </div>
+        </a>
+      </div>
+    );
+  }
+}
 
 class Prediction extends Component {
   getQueryParams = (defaultSelected) => {
@@ -40,10 +74,16 @@ class Prediction extends Component {
       <GIS
         title="Lake Predictions"
         documentTitle="Predictions - Datalakes"
-        selected={[]}
-        hidden={[]}
+        selected={[[10,5]]}
         setQueryParams={this.setQueryParams}
         getQueryParams={this.getQueryParams}
+        sidebarextratop={
+          <FilterBox
+            title="Swiss Lake Models"
+            preopen="true"
+            content={<LakeModels />}
+          />
+        }
       />
     );
   }

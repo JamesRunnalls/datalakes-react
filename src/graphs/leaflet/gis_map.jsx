@@ -58,9 +58,38 @@ class GISMap extends Component {
   };
 
   meteoSwissMarkers = async (layer, file) => {
+    function getValueFromID(id, data) {
+      var index = data.findIndex((d) => d.id === id);
+      return data[index].v;
+    }
+    function getDirFromID(id, data) {
+      var index = data.findIndex((d) => d.id === id);
+      return data[index].d;
+    }
     var { maxdatetime, maxdepth } = file;
-    var { features } = file.data;
-    var { datetime, depth } = this.props;
+    var { datetime, depth, templates } = this.props;
+    var arr = file.filelink.split("/");
+    var source = arr[arr.length - 3];
+    var parameter = arr[arr.length - 2];
+
+    // Merge template and data
+    var template = JSON.parse(JSON.stringify(templates[source][parameter]));
+    var inputData = JSON.parse(JSON.stringify(file.data));
+    var ids = inputData.map((fd) => fd.id);
+    var layerData = template.features;
+    layerData = layerData.filter((t) => ids.includes(t.id));
+    for (var i = 0; i < layerData.length; i++) {
+      layerData[i].properties.value = getValueFromID(
+        layerData[i].id,
+        inputData
+      );
+      if (parameter === "wind") {
+        layerData[i].properties.wind_direction_radian = getDirFromID(
+          layerData[i].id,
+          inputData
+        );
+      }
+    }
     var {
       markerLabel,
       markerSymbol,
@@ -73,7 +102,6 @@ class GISMap extends Component {
     } = layer;
     var minSize = 5;
     var maxSize = 30;
-    var layerData = JSON.parse(JSON.stringify(features));
     var markerGroup = L.layerGroup().addTo(this.map);
 
     var marker, value, color, size, latlng, valuestring;
@@ -102,14 +130,14 @@ class GISMap extends Component {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
       if ("wind_direction" in layerData[j].properties)
-        rotation = layerData[j].properties.wind_direction + 180;
+        rotation = layerData[j].properties.wind_direction_radian + Math.PI;
       latlng = this.CHtoWGSlatlng(layerData[j].geometry.coordinates);
       marker = new L.marker(latlng, {
         icon: L.divIcon({
           className: "map-marker",
           html:
             `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
-            `<div class="${markerSymbol}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}deg)">` +
+            `<div class="${markerSymbol}" style="background-color:${color};height:${size}px;width:${size}px;transform: rotate(${rotation}rad)">` +
             `</div></div> `,
         }),
       })
@@ -124,9 +152,28 @@ class GISMap extends Component {
   };
 
   foenMarkers = async (layer, file) => {
+    function getValueFromID(id, data) {
+      var index = data.findIndex((d) => d.id === id);
+      return data[index].v;
+    }
     var { maxdatetime, maxdepth } = file;
-    var { features } = file.data;
-    var { datetime, depth } = this.props;
+    var { datetime, depth, templates } = this.props;
+    var arr = file.filelink.split("/");
+    var source = arr[arr.length - 3];
+    var parameter = arr[arr.length - 2];
+
+    // Merge template and data
+    var template = JSON.parse(JSON.stringify(templates[source][parameter]));
+    var inputData = JSON.parse(JSON.stringify(file.data));
+    var ids = inputData.map((fd) => fd.id);
+    var layerData = template.features;
+    layerData = layerData.filter((t) => ids.includes(t.id));
+    for (var i = 0; i < layerData.length; i++) {
+      layerData[i].properties.value = getValueFromID(
+        layerData[i].id,
+        inputData
+      );
+    }
     var {
       markerLabel,
       markerSymbol,
@@ -139,7 +186,6 @@ class GISMap extends Component {
     } = layer;
     var minSize = 5;
     var maxSize = 30;
-    var layerData = JSON.parse(JSON.stringify(features));
     var markerGroup = L.layerGroup().addTo(this.map);
 
     var marker, value, color, size, latlng, valuestring;
@@ -233,7 +279,7 @@ class GISMap extends Component {
   };
 
   simstrat = async (layer, data) => {
-    var layerData = JSON.parse(JSON.stringify(layer.data));
+    var layerData = JSON.parse(JSON.stringify(data));
     var { min, max } = layer;
     var polygons = [];
     for (var i = 0; i < layerData.length; i++) {
@@ -243,7 +289,7 @@ class GISMap extends Component {
         L.polygon(layerData[i].latlng, {
           color: pixelcolor,
           fillColor: pixelcolor,
-          fillOpacity: 1,
+          fillOpacity: 0.8,
           title: layerData[i].value,
         })
           .bindPopup(
@@ -251,7 +297,7 @@ class GISMap extends Component {
               "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
               layerData[i].name +
               "</td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat 1D Model</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td><strong>Surface water temperature:</strong></td><td>" +
               layerData[i].value +
@@ -460,7 +506,6 @@ class GISMap extends Component {
     var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
     var index, value, minSize, maxSize, markerGroup, timediff, depthdiff;
     var valuestring, color, shape, size, marker;
-    console.log(type);
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler e.g Thetis
       var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
@@ -597,7 +642,10 @@ class GISMap extends Component {
       layers: [
         L.tileLayer(
           "https://api.mapbox.com/styles/v1/jamesrunnalls/ck96x8fhp6h2i1ik5q9xz0iqn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
-          { attribution: '&copy; <a href="https://shop.swisstopo.admin.ch/en/products/height_models/bathy3d">swisstopo</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' }
+          {
+            attribution:
+              '&copy; <a href="https://shop.swisstopo.admin.ch/en/products/height_models/bathy3d">swisstopo</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          }
         ),
       ],
     });

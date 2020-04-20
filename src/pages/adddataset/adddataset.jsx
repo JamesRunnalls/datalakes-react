@@ -28,7 +28,7 @@ class AddDataset extends Component {
       datasourcelink: "",
       plotproperties: {
         colors: "Rainbow",
-        markerLabel: false,
+        markerLabel: true,
         markerSymbol: "circle",
         markerFixedSize: true,
         markerSize: 10,
