@@ -129,7 +129,7 @@ class GISMap extends Component {
       } else {
         size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
       }
-      if ("wind_direction" in layerData[j].properties)
+      if ("wind_direction_radian" in layerData[j].properties)
         rotation = layerData[j].properties.wind_direction_radian + Math.PI;
       latlng = this.CHtoWGSlatlng(layerData[j].geometry.coordinates);
       marker = new L.marker(latlng, {
@@ -146,7 +146,30 @@ class GISMap extends Component {
           direction: "top",
         })
         .addTo(markerGroup);
-      marker.bindPopup(layerData[j].properties.description);
+      marker.bindPopup(
+        "<table><tbody>" +
+          '<tr><td colSpan="2"><strong>' +
+          layer.title +
+          "</strong></td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Station</strong></td><td>" +
+          layerData[j].properties.station_name +
+          "</td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Station Altitude</strong></td><td>" +
+          layerData[j].properties.altitude +
+          "</td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>MeteoSwiss</td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
+          maxdatetime.toLocaleString() +
+          "</td></tr>" +
+          "<tr><td><strong>Value at point:</strong></td><td>" +
+          String(value) +
+          String(unit) +
+          '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+          layerData[j].properties.link +
+          '">More information</a></td></tr>' +
+          "</td></tr>" +
+          "</tbody></table>"
+      );
     }
     this.marker.push(markerGroup);
   };
@@ -228,13 +251,36 @@ class GISMap extends Component {
           direction: "top",
         })
         .addTo(markerGroup);
-      marker.bindPopup("Hike");
+      marker.bindPopup(
+        "<table><tbody>" +
+          '<tr><td colSpan="2"><strong>' +
+          layer.title +
+          "</strong></td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Station</strong></td><td>" +
+          layerData[j].properties.name +
+          "</td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Station Type</strong></td><td>" +
+          layerData[j].properties["w-typ"] +
+          "</td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>FOEN</td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
+          maxdatetime.toLocaleString() +
+          "</td></tr>" +
+          "<tr><td><strong>Value at point:</strong></td><td>" +
+          String(value) +
+          String(unit) +
+          "</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td>" +
+          layerData[j].properties.description +
+          "</td></tr>" +
+          "</tbody></table>"
+      );
     }
     this.marker.push(markerGroup);
   };
 
   remoteSensing = async (layer, data) => {
-    var { min, max, unit } = layer;
+    var { min, max, unit, maxdatetime, maxdepth } = layer;
+    var { datetime, depth } = this.props;
     var polygons = [];
     var coords;
     var x = data.lonres / 2;
@@ -246,7 +292,22 @@ class GISMap extends Component {
         [data.lat[i] + y, data.lon[i] + x],
         [data.lat[i] - y, data.lon[i] + x],
       ];
-      var valuestring = String(Math.round(data.v[i] * 1000) / 1000) + unit;
+      var value = Math.round(data.v[i] * 1000) / 1000;
+      var timediff = -Math.round(
+        (datetime.getTime() / 1000 - new Date(maxdatetime).getTime() / 1000) /
+          3600
+      );
+      var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
+      var valuestring =
+        String(value) +
+        String(unit) +
+        '<br><div class="tooltipdiff">Diff: ' +
+        (timediff > 0 ? "+" : "") +
+        String(timediff) +
+        "hrs " +
+        (depthdiff > 0 ? " +" : " ") +
+        String(depthdiff) +
+        "m</div>";
       var pixelcolor = getColor(data.v[i], min, max, layer.colors);
       polygons.push(
         L.polygon(coords, {
@@ -258,14 +319,18 @@ class GISMap extends Component {
           .bindPopup(
             "<table><tbody>" +
               '<tr><td colSpan="2"><strong>' +
-              layer.name +
+              layer.title +
               "</strong></td></tr>" +
               "<tr><td class='text-nowrap'><strong>Satellite</strong></td><td>Sentinal 3</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
+              maxdatetime.toLocaleString() +
+              "</td></tr>" +
               "<tr><td><strong>Value at point:</strong></td><td>" +
-              valuestring +
+              String(value) +
+              String(unit) +
               '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-              "" +
+              layer.datasourcelink +
               '">More information</a></td></tr>' +
               "</tbody></table>"
           )
@@ -280,7 +345,7 @@ class GISMap extends Component {
 
   simstrat = async (layer, data) => {
     var layerData = JSON.parse(JSON.stringify(data));
-    var { min, max } = layer;
+    var { min, max, maxdatetime } = layer;
     var polygons = [];
     for (var i = 0; i < layerData.length; i++) {
       var pixelcolor = getColor(layerData[i].value, min, max, layer.colors);
@@ -294,12 +359,18 @@ class GISMap extends Component {
         })
           .bindPopup(
             "<table><tbody>" +
+            '<tr><td colSpan="2"><strong>' +
+              layer.title +
+              "</strong></td></tr>" +
               "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
               layerData[i].name +
               "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat 1D Model</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-              "<tr><td><strong>Surface water temperature:</strong></td><td>" +
+              "<tr><td><strong>Datetime</strong></td><td>" +
+              maxdatetime.toLocaleString() +
+              "</td></tr>" +
+              "<tr><td><strong>Surface water temperature</strong></td><td>" +
               layerData[i].value +
               "°C</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Elevation</strong></td><td>" +
@@ -486,6 +557,7 @@ class GISMap extends Component {
     var {
       datasetparameters,
       parameters_id,
+      datasets_id,
       markerLabel,
       min,
       max,
@@ -493,9 +565,9 @@ class GISMap extends Component {
       markerSymbol,
       markerFixedSize,
       markerSize,
-      description,
       latitude,
       longitude,
+      unit,
       maxdepth,
     } = layer;
     var datasetparameter = datasetparameters.find(
@@ -518,7 +590,6 @@ class GISMap extends Component {
       timediff = -Math.round(
         (datetime.getTime() / 1000 - data[dp2.axis][index]) / 3600
       );
-      console.log(depth - data[dp3.axis][index]);
       depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
       valuestring =
         String(value) +
@@ -552,7 +623,26 @@ class GISMap extends Component {
           direction: "top",
         })
         .addTo(markerGroup);
-      marker.bindPopup(description);
+      marker.bindPopup(
+        "<table><tbody>" +
+          '<tr><td colSpan="2"><strong>' +
+          layer.title +
+          "</strong></td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
+          new Date(data[dp2.axis][index] * 1000) +
+          "</td></tr>" +
+          "<tr><td><strong>Value</strong></td><td>" +
+          String(value) +
+          String(unit) +
+          "</td></tr>" +
+          "<tr><td><strong>Depth</strong></td><td>" +
+          data[dp3.axis][index] +
+          "</td></tr>" +
+          '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +
+          datasets_id +
+          '">More information</a></td></tr>' +
+          "</tbody></table>"
+      );
 
       this.marker.push(markerGroup);
     } else if (type.includes("x&1")) {
@@ -597,7 +687,26 @@ class GISMap extends Component {
           direction: "top",
         })
         .addTo(markerGroup);
-      marker.bindPopup(description);
+      marker.bindPopup(
+        "<table><tbody>" +
+          '<tr><td colSpan="2"><strong>' +
+          layer.title +
+          "</strong></td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
+          new Date(data["x"][index] * 1000) +
+          "</td></tr>" +
+          "<tr><td><strong>Value</strong></td><td>" +
+          String(value) +
+          String(unit) +
+          "</td></tr>" +
+          "<tr><td><strong>Depth</strong></td><td>" +
+          maxdepth +
+          "</td></tr>" +
+          '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +
+          datasets_id +
+          '">More information</a></td></tr>' +
+          "</tbody></table>"
+      );
 
       this.marker.push(markerGroup);
     } else {
