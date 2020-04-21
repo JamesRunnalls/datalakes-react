@@ -359,7 +359,7 @@ class GISMap extends Component {
         })
           .bindPopup(
             "<table><tbody>" +
-            '<tr><td colSpan="2"><strong>' +
+              '<tr><td colSpan="2"><strong>' +
               layer.title +
               "</strong></td></tr>" +
               "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
@@ -394,11 +394,80 @@ class GISMap extends Component {
   };
 
   meteolakesScalar = async (layer, data) => {
-    var { min, max, colors } = layer;
-    var matrix, polygons;
-    for (var k = 0; k < data.length; k++) {
-      polygons = [];
-      matrix = data[k].data;
+    var { min, max, colors, unit } = layer;
+    var polygons = [];
+    var matrix = data;
+    for (var i = 0; i < matrix.length - 1; i++) {
+      var row = matrix[i];
+      var nextRow = matrix[i + 1];
+      for (var j = 0; j < row.length - 1; j++) {
+        if (
+          row[j] === null ||
+          nextRow[j] === null ||
+          row[j + 1] === null ||
+          nextRow[j + 1] === null
+        ) {
+        } else {
+          var coords = [
+            this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
+            this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
+            this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
+            this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
+          ];
+          var valuestring = String(row[j][2]) + unit;
+          var pixelcolor = getColor(row[j][2], min, max, colors);
+          polygons.push(
+            L.polygon(coords, {
+              color: pixelcolor,
+              fillColor: pixelcolor,
+              fillOpacity: 1,
+              title: row[j][2],
+            })
+              .bindPopup(
+                "<table><tbody>" +
+                  '<tr><td colSpan="2"><strong>' +
+                  layer.title +
+                  "</strong></td></tr>" +
+                  "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+                  "</td></tr>" +
+                  "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+                  "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                  "<tr><td><strong>Value at point:</strong></td><td>" +
+                  row[j][2] +
+                  unit +
+                  '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+                  layer.datasourcelink +
+                  '">More information</a></td></tr>' +
+                  "</tbody></table>"
+              )
+              .bindTooltip(valuestring, {
+                permanent: false,
+                direction: "top",
+              })
+          );
+        }
+      }
+    }
+    this.raster.push(L.layerGroup(polygons).addTo(this.map));
+  };
+
+  meteolakesVector = async (layer, data) => {
+    var {
+      vectorArrows,
+      vectorMagnitude,
+      vectorFlow,
+      vectorArrowColor,
+      min,
+      max,
+      colors,
+      unit,
+      title,
+      datasourcelink
+    } = layer;
+
+    if (vectorMagnitude) {
+      var polygons = [];
+      var matrix = data;
       for (var i = 0; i < matrix.length - 1; i++) {
         var row = matrix[i];
         var nextRow = matrix[i + 1];
@@ -416,14 +485,18 @@ class GISMap extends Component {
               this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
               this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
             ];
-            var valuestring = String(row[j][2]) + data[k].unit;
-            var pixelcolor = getColor(row[j][2], min, max, colors);
+            var magnitude = Math.abs(
+              Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
+            );
+            var valuestring =
+              String(Math.round(magnitude * 1000) / 1000) + unit;
+            var pixelcolor = getColor(magnitude, min, max, colors);
             polygons.push(
               L.polygon(coords, {
                 color: pixelcolor,
                 fillColor: pixelcolor,
                 fillOpacity: 1,
-                title: row[j][2],
+                title: magnitude,
               })
                 .bindPopup(
                   "<table><tbody>" +
@@ -431,15 +504,20 @@ class GISMap extends Component {
                     layer.name +
                     "</strong></td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-                    data[k].name +
+                    title +
                     "</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                    "<tr><td><strong>Value at point:</strong></td><td>" +
+                    "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
                     row[j][2] +
-                    data[k].unit +
+                    unit +
+                    "<tr><td><strong>Eastern Water Velocity:</strong></td><td>" +
+                    row[j][3] +
+                    unit +
+                    "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
+                    valuestring +
                     '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-                    data[k].link +
+                    datasourcelink +
                     '">More information</a></td></tr>' +
                     "</tbody></table>"
                 )
@@ -453,100 +531,16 @@ class GISMap extends Component {
       }
       this.raster.push(L.layerGroup(polygons).addTo(this.map));
     }
-  };
-
-  meteolakesVector = async (layer, data) => {
-    var {
-      vectorArrows,
-      vectorMagnitude,
-      vectorFlow,
-      vectorArrowColor,
-      min,
-      max,
-      colors,
-    } = layer;
-
-    if (vectorMagnitude) {
-      var matrix, polygons;
-      for (var k = 0; k < data.length; k++) {
-        polygons = [];
-        matrix = data[k].data;
-        for (var i = 0; i < matrix.length - 1; i++) {
-          var row = matrix[i];
-          var nextRow = matrix[i + 1];
-          for (var j = 0; j < row.length - 1; j++) {
-            if (
-              row[j] === null ||
-              nextRow[j] === null ||
-              row[j + 1] === null ||
-              nextRow[j + 1] === null
-            ) {
-            } else {
-              var coords = [
-                this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
-                this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
-                this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
-              ];
-              var magnitude = Math.abs(
-                Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
-              );
-              var valuestring =
-                String(Math.round(magnitude * 1000) / 1000) + data[k].unit;
-              var pixelcolor = getColor(magnitude, min, max, layer.colors);
-              polygons.push(
-                L.polygon(coords, {
-                  color: pixelcolor,
-                  fillColor: pixelcolor,
-                  fillOpacity: 1,
-                  title: magnitude,
-                })
-                  .bindPopup(
-                    "<table><tbody>" +
-                      '<tr><td colSpan="2"><strong>' +
-                      layer.name +
-                      "</strong></td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-                      data[k].name +
-                      "</td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                      "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
-                      row[j][2] +
-                      data[k].unit +
-                      "<tr><td><strong>Eastern Water Velocity:</strong></td><td>" +
-                      row[j][3] +
-                      data[k].unit +
-                      "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
-                      valuestring +
-                      '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-                      data[k].link +
-                      '">More information</a></td></tr>' +
-                      "</tbody></table>"
-                  )
-                  .bindTooltip(valuestring, {
-                    permanent: false,
-                    direction: "top",
-                  })
-              );
-            }
-          }
-        }
-        this.raster.push(L.layerGroup(polygons).addTo(this.map));
-      }
-    }
 
     if (vectorArrows) {
-      for (k = 0; k < data.length; k++) {
-        var arrows = L.vectorField(data[k].data, {
-          vectorArrowColor,
-          colors,
-          min,
-          max,
-          size: 15,
-        }).addTo(this.map);
-        this.raster.push(arrows);
-      }
+      var arrows = L.vectorField(data, {
+        vectorArrowColor,
+        colors,
+        min,
+        max,
+        size: 15,
+      }).addTo(this.map);
+      this.raster.push(arrows);
     }
 
     if (vectorFlow) {

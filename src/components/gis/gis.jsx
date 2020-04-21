@@ -224,35 +224,25 @@ class GIS extends Component {
   meteolakesScalarMinMax = (inarray) => {
     var min = Infinity;
     var max = -Infinity;
-    var flat;
-    var array = [];
-    for (var i = 0; i < inarray.length; i++) {
-      flat = inarray[i].data.flat();
-      flat = flat.filter((item) => item !== null);
-      flat = flat.map((item) => item[2]);
-      min = Math.min(min, this.getMin(flat));
-      max = Math.max(max, this.getMax(flat));
-      array = array.concat(flat);
-    }
-    return { filemin: min, filemax: max, filearray: array };
+    var flat = inarray.flat();
+    flat = flat.filter((item) => item !== null);
+    flat = flat.map((item) => item[2]);
+    min = Math.min(min, this.getMin(flat));
+    max = Math.max(max, this.getMax(flat));
+    return { filemin: min, filemax: max, filearray: flat };
   };
 
   meteolakesVectorMinMax = (inarray) => {
     var min = Infinity;
     var max = -Infinity;
-    var flat;
-    var array = [];
-    for (var i = 0; i < inarray.length; i++) {
-      flat = inarray[i].data.flat();
-      flat = flat.filter((item) => item !== null);
-      flat = flat.map((item) =>
-        Math.abs(Math.sqrt(Math.pow(item[2], 2) + Math.pow(item[3], 2)))
-      );
-      min = Math.min(min, this.getMin(flat));
-      max = Math.max(max, this.getMax(flat));
-      array = array.concat(flat);
-    }
-    return { filemin: min, filemax: max, filearray: array };
+    var flat = inarray.flat();
+    flat = flat.filter((item) => item !== null);
+    flat = flat.map((item) =>
+      Math.abs(Math.sqrt(Math.pow(item[2], 2) + Math.pow(item[3], 2)))
+    );
+    min = Math.min(min, this.getMin(flat));
+    max = Math.max(max, this.getMax(flat));
+    return { filemin: min, filemax: max, filearray: flat };
   };
 
   gitPlotMinMax = (data, parameters_id, datasetparameters) => {
@@ -586,7 +576,7 @@ class GIS extends Component {
         parameters,
         datetime,
         depth,
-        hidden,
+        hidden
       ));
     }
 
@@ -598,7 +588,7 @@ class GIS extends Component {
       datasets,
       datasetparameters,
       loading: false,
-      templates
+      templates,
     });
   }
 
