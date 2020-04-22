@@ -110,15 +110,23 @@ class MapLayers extends Component {
     selectedlayers = arrayMove(selectedlayers, oldIndex, newIndex);
     setSelected(selectedlayers);
   };
+  
   render() {
-    return (
-      <SortableList
-        props={this.props}
-        onSortEnd={this.onSortEnd}
-        distance={10}
-        useDragHandle
-      />
-    );
+    if (this.props.selectedlayers.length > 0){
+      return (
+        <SortableList
+          props={this.props}
+          onSortEnd={this.onSortEnd}
+          distance={10}
+          useDragHandle
+        />
+      );
+    } else {
+      return (<div>
+        Customise your map by adding layers from the dropdown below.
+      </div>)
+    }
+    
   }
 }
 

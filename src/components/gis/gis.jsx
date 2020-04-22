@@ -24,6 +24,8 @@ class SidebarGIS extends Component {
       toggleLayerView,
       updateMapLayers,
       addSelected,
+      basemap,
+      updateBaseMap,
     } = this.props;
     return (
       <React.Fragment>
@@ -32,13 +34,23 @@ class SidebarGIS extends Component {
           title="Map Layers"
           preopen="true"
           content={
-            <MapLayers
-              selectedlayers={selectedlayers}
-              setSelected={setSelected}
-              removeSelected={removeSelected}
-              toggleLayerView={toggleLayerView}
-              updateMapLayers={updateMapLayers}
-            />
+            <React.Fragment>
+              <div className="basemap">
+                Basemap:{" "}
+                <select className="basemapselector" onChange={updateBaseMap} value={basemap}>
+                  <option value="datalakesmap">Datalakes Map</option>
+                  <option value="swisstopo">Swisstopo</option>
+                  <option value="satellite">Satellite</option>
+                </select>
+              </div>
+              <MapLayers
+                selectedlayers={selectedlayers}
+                setSelected={setSelected}
+                removeSelected={removeSelected}
+                toggleLayerView={toggleLayerView}
+                updateMapLayers={updateMapLayers}
+              />
+            </React.Fragment>
           }
         />
         <FilterBox
@@ -69,6 +81,7 @@ class GIS extends Component {
     loading: true,
     datetime: new Date(),
     depth: 0,
+    basemap: "datalakesmap",
   };
 
   onChangeDatetime = async (event) => {
@@ -171,6 +184,10 @@ class GIS extends Component {
     this.setState({ loading: true }, () => {
       this.setState({ selectedlayers, loading: false });
     });
+  };
+
+  updateBaseMap = (event) => {
+    this.setState({ basemap: event.target.value });
   };
 
   downloadFile = async (datafile, source) => {
@@ -602,6 +619,7 @@ class GIS extends Component {
       datetime,
       depth,
       templates,
+      basemap,
     } = this.state;
     var {
       documentTitle,
@@ -620,6 +638,7 @@ class GIS extends Component {
           datasets={datasets}
           legend={<Legend selectedlayers={selectedlayers} />}
           templates={templates}
+          basemap={basemap}
           timeselector={
             <DatetimeDepthSelector
               selectedlayers={selectedlayers}
@@ -639,6 +658,8 @@ class GIS extends Component {
               datasetparameters={datasetparameters}
               sidebarextratop={sidebarextratop}
               sidebarextrabottom={sidebarextrabottom}
+              basemap={basemap}
+              updateBaseMap={this.updateBaseMap}
               setSelected={this.setSelected}
               removeSelected={this.removeSelected}
               toggleLayerView={this.toggleLayerView}

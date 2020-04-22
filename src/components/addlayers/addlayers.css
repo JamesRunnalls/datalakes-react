@@ -10,6 +10,10 @@
   cursor: pointer;
 }
 
+.addlayers-title:hover {
+  font-weight: bold;
+}
+
 .addlayers-symbol {
   float: right;
   width: 50px;

@@ -462,7 +462,7 @@ class GISMap extends Component {
       colors,
       unit,
       title,
-      datasourcelink
+      datasourcelink,
     } = layer;
 
     if (vectorMagnitude) {
@@ -735,25 +735,47 @@ class GISMap extends Component {
     var toggleFullsize = this.toggleFullsize;
     var toggleMenu = this.toggleMenu;
 
+    var datalakesmap = L.tileLayer(
+      "https://api.mapbox.com/styles/v1/jamesrunnalls/ck96x8fhp6h2i1ik5q9xz0iqn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
+      {
+        attribution:
+          '&copy; <a href="https://shop.swisstopo.admin.ch/en/products/height_models/bathy3d">swisstopo</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://www.maptiler.com/">maptiler</a>',
+      }
+    );
+    var swisstopo = L.tileLayer(
+      "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg",
+      {
+        attribution:
+          '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>',
+      }
+    );
+    var satellite = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution:
+          "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+      }
+    );
+
+    this.baseMaps = {
+      datalakesmap,
+      swisstopo,
+      satellite,
+    };
+
+    this.layer = datalakesmap;
+    if ("basemap" in this.props) {
+      this.layer = this.baseMaps[this.props.basemap];
+    }
+
     this.map = L.map("map", {
       preferCanvas: true,
       center: center,
       zoom: zoom,
       minZoom: 7,
       maxZoom: 15,
-      attributionControl: false,
-      layers: [
-        L.tileLayer(
-          "https://api.mapbox.com/styles/v1/jamesrunnalls/ck96x8fhp6h2i1ik5q9xz0iqn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
-          {
-            attribution:
-              '&copy; <a href="https://shop.swisstopo.admin.ch/en/products/height_models/bathy3d">swisstopo</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-          }
-        ),
-      ],
+      layers: [this.layer],
     });
-
-    L.control.attribution({ position: "bottomright" }).addTo(this.map);
 
     // Menu
     L.control
@@ -857,6 +879,12 @@ class GISMap extends Component {
       window.setTimeout(() => {
         updatePlot();
       }, 0);
+    }
+    if (prevProps.basemap !== this.props.basemap) {
+      console.log(this.props.basemap);
+      this.map.removeLayer(this.layer);
+      this.layer = this.baseMaps[this.props.basemap];
+      this.map.addLayer(this.layer);
     }
     this.map.invalidateSize();
   }

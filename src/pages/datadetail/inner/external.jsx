@@ -5,7 +5,7 @@ import "../datadetail.css";
 class External extends Component {
   state = {};
   render() {
-    const { dataset, parameters, getLabel } = this.props;
+    const { dataset, parameters, getLabel, link } = this.props;
 
     // Parameter Table
     var rows = [];
@@ -28,12 +28,6 @@ class External extends Component {
         </tr>
       );
     }
-
-    // Link 
-    var p = JSON.parse(JSON.stringify(parameters))
-    p = p.filter(x => ![1,2,3,4].includes(x.parameters_id))
-    p = p.map(x => [dataset.id,x.parameters_id])
-    var link = "/live?selected="+JSON.stringify(p);
 
     return (
       <div className="datadetail-padding">

@@ -30,7 +30,7 @@ class DataDetail extends Component {
     files: [],
     data: "",
     step: "",
-    allowedStep: ["preview", "download", "pipeline", "information"],
+    allowedStep: ["preview", "download", "pipeline", "information", "webgis"],
     file: 0,
     innerLoading: false,
     combined: [],
@@ -477,6 +477,12 @@ class DataDetail extends Component {
       ? dataset.title + " - Datalakes"
       : "Datalakes";
 
+    // Link
+    var p = JSON.parse(JSON.stringify(parameters));
+    p = p.filter((x) => ![1, 2, 3, 4].includes(x.parameters_id));
+    p = p.map((x) => [dataset.id, x.parameters_id]);
+    var link = "/live?selected=" + JSON.stringify(p);
+
     switch (step) {
       default:
         return (
@@ -501,6 +507,7 @@ class DataDetail extends Component {
               step={step}
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
+              link={link}
             />
             <HeatMap
               onChange={this.onChangeTime}
@@ -521,6 +528,7 @@ class DataDetail extends Component {
               step={step}
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
+              link={link}
             />
             <LineGraph
               onChangeTime={this.onChangeTime}
@@ -552,6 +560,7 @@ class DataDetail extends Component {
               step={step}
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
+              link={link}
             />
             <Preview
               data={data}
@@ -568,6 +577,7 @@ class DataDetail extends Component {
               step={step}
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
+              link={link}
             />
             <Download
               dataset={dataset}
@@ -588,6 +598,7 @@ class DataDetail extends Component {
               step={step}
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
+              link={link}
             />
             <Pipeline dataset={dataset} renku={renku} />
           </React.Fragment>
@@ -600,6 +611,7 @@ class DataDetail extends Component {
               step={step}
               allowedStep={allowedStep}
               updateSelectedState={this.updateSelectedState}
+              link={link}
             />
             <Information
               dataset={dataset}
@@ -616,6 +628,7 @@ class DataDetail extends Component {
               dataset={dataset}
               parameters={parameters}
               getLabel={this.getLabel}
+              link={link}
             />
           </React.Fragment>
         );

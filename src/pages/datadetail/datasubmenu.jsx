@@ -1,10 +1,12 @@
 import React, { Component } from "react";
+import { Link } from 'react-router-dom'
 import heat from "./img/heat.svg";
 import line from "./img/line.svg";
 import preview from "./img/preview.svg";
 import download from "./img/download.svg";
 import pipe from "./img/pipe.svg";
 import info from "./img/info.svg";
+import webgis from "./img/webgis.svg";
 import "./datadetail.css";
 
 class DataSubMenu extends Component {
@@ -16,7 +18,7 @@ class DataSubMenu extends Component {
     }
 
     render() {
-      const { step, allowedStep, updateSelectedState } = this.props;
+      const { step, allowedStep, updateSelectedState, link } = this.props;
       return (
         <React.Fragment>
           <div className="data-subnav">
@@ -74,6 +76,15 @@ class DataSubMenu extends Component {
               <img src={info} className="subnav-img" alt="Information" />
               <div className="subnav-text">Information</div>
             </div>
+            <Link
+              to ={link}
+              title="See dataset in web GIS"
+              className={this.active("webgis",step) ? "subnav-item active" : "subnav-item"}
+              style={{display: this.hide("webgis",allowedStep) && 'none'}}
+            >
+              <img src={webgis} className="subnav-img" alt="webgis" />
+              <div className="subnav-text">Web GIS</div>
+            </Link>
           </div>
         </React.Fragment>
       );
