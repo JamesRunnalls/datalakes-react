@@ -4,6 +4,7 @@ import { SliderRail, Handle, Track, Tick } from "./componentsvertical";
 import { scaleLinear } from "d3";
 import "./slider.css";
 import AvailbilityBarV from './availabilitybarv';
+import BlurInput from "../blurinput/blurinput";
 
 class SliderSingleVertical extends Component {
   state = {
@@ -37,7 +38,7 @@ class SliderSingleVertical extends Component {
     return (
       <React.Fragment>
         <div className="maindepth" title="Map reference depth">
-          <input value={dt} type="number" onChange={onChange} />
+          <BlurInput value={dt} type="number" onBlur={onChange} />
           <span className="unit">m</span>
         </div>
         <div
