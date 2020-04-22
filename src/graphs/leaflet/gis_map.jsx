@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import L from "leaflet";
 import "./leaflet_vectorField";
 import "./leaflet_customcontrol";
+import "./leaflet_colorpicker";
 import { getColor } from "../../components/gradients/gradients";
 import Loading from "../../components/loading/loading";
 import "./css/gis_map.css";
@@ -394,7 +395,8 @@ class GISMap extends Component {
   };
 
   meteolakesScalar = async (layer, data) => {
-    var { min, max, colors, unit } = layer;
+    var { min, max, colors, unit, maxdatetime, maxdepth } = layer;
+    var { depth, datetime } = this.props;
     var polygons = [];
     var matrix = data;
     for (var i = 0; i < matrix.length - 1; i++) {
@@ -414,7 +416,23 @@ class GISMap extends Component {
             this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
             this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
           ];
-          var valuestring = String(row[j][2]) + unit;
+          var value = Math.round(row[j][2] * 1000) / 1000;
+          var timediff = -Math.round(
+            (datetime.getTime() / 1000 -
+              new Date(maxdatetime).getTime() / 1000) /
+              3600
+          );
+          var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
+          var valuestring =
+            String(value) +
+            String(unit) +
+            '<br><div class="tooltipdiff">Diff: ' +
+            (timediff > 0 ? "+" : "") +
+            String(timediff) +
+            "hrs " +
+            (depthdiff > 0 ? " +" : " ") +
+            String(depthdiff) +
+            "m</div>";
           var pixelcolor = getColor(row[j][2], min, max, colors);
           polygons.push(
             L.polygon(coords, {
@@ -463,8 +481,10 @@ class GISMap extends Component {
       unit,
       title,
       datasourcelink,
+      maxdatetime,
+      maxdepth
     } = layer;
-
+    var { depth, datetime } = this.props;
     if (vectorMagnitude) {
       var polygons = [];
       var matrix = data;
@@ -488,8 +508,23 @@ class GISMap extends Component {
             var magnitude = Math.abs(
               Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
             );
+            var value = Math.round(magnitude * 1000) / 1000
+            var timediff = -Math.round(
+              (datetime.getTime() / 1000 -
+                new Date(maxdatetime).getTime() / 1000) /
+                3600
+            );
+            var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
             var valuestring =
-              String(Math.round(magnitude * 1000) / 1000) + unit;
+              String(value) +
+              String(unit) +
+              '<br><div class="tooltipdiff">Diff: ' +
+              (timediff > 0 ? "+" : "") +
+              String(timediff) +
+              "hrs " +
+              (depthdiff > 0 ? " +" : " ") +
+              String(depthdiff) +
+              "m</div>";
             var pixelcolor = getColor(magnitude, min, max, colors);
             polygons.push(
               L.polygon(coords, {
@@ -739,7 +774,7 @@ class GISMap extends Component {
       "https://api.mapbox.com/styles/v1/jamesrunnalls/ck96x8fhp6h2i1ik5q9xz0iqn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
       {
         attribution:
-          '&copy; <a href="https://shop.swisstopo.admin.ch/en/products/height_models/bathy3d">swisstopo</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://www.maptiler.com/">maptiler</a>',
+          '&copy; <a href="https://shop.swisstopo.admin.ch/en/products/height_models/bathy3d">swisstopo</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://www.mapbox.com/">mapbox</a>',
       }
     );
     var swisstopo = L.tileLayer(
@@ -756,6 +791,9 @@ class GISMap extends Component {
           "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
       }
     );
+
+    var topolink =
+      "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ";
 
     this.baseMaps = {
       datalakesmap,
@@ -774,7 +812,29 @@ class GISMap extends Component {
       zoom: zoom,
       minZoom: 7,
       maxZoom: 15,
-      layers: [this.layer],
+    });
+
+    var colorpicker = L.tileLayer
+      .colorPicker(topolink, {
+        opacity: 0,
+      })
+      .addTo(this.map);
+
+    this.layer.addTo(this.map);
+
+    var map = this.map;
+    this.map.on("mousemove", function (e) {
+      var lat = Math.round(1000 * e.latlng.lat) / 1000;
+      var lng = Math.round(1000 * e.latlng.lng) / 1000;
+      var a = colorpicker.getColor(e.latlng);
+      var h = NaN;
+      if (a !== null) {
+        h =
+          Math.round(
+            10 * (-10000 + (a[0] * 256 * 256 + a[1] * 256 + a[2]) * 0.1)
+          ) / 10;
+      }
+      map.attributionControl.setPrefix("(" + lat + "," + lng + ") " + h + "m");
     });
 
     // Menu
@@ -881,7 +941,6 @@ class GISMap extends Component {
       }, 0);
     }
     if (prevProps.basemap !== this.props.basemap) {
-      console.log(this.props.basemap);
       this.map.removeLayer(this.layer);
       this.layer = this.baseMaps[this.props.basemap];
       this.map.addLayer(this.layer);

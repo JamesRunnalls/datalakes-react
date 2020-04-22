@@ -40,7 +40,7 @@ class RemoteSensing extends Component {
       <GIS
         title="Remote Sensing"
         documentTitle="Remote Sensing - Datalakes"
-        selected={[]}
+        selected={[[1,15]]}
         hidden={[]}
         setQueryParams={this.setQueryParams}
         getQueryParams={this.getQueryParams}

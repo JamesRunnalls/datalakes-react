@@ -74,7 +74,7 @@ class Prediction extends Component {
       <GIS
         title="Lake Predictions"
         documentTitle="Predictions - Datalakes"
-        selected={[[10,5]]}
+        selected={[[11,5],[12,25],[10,5]]}
         setQueryParams={this.setQueryParams}
         getQueryParams={this.getQueryParams}
         sidebarextratop={
