@@ -295,6 +295,30 @@ class AddMetadata extends Component {
                   />
                 </td>
               </tr>
+              <tr>
+                <th>Download Embargo (Months)</th>
+                <td>
+                  <input
+                    type="text"
+                    name="embargo"
+                    defaultValue={dataset["embargo"]}
+                    placeholder="How long should data be password protected"
+                    onChange={handleChange("embargo")}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>Download Password</th>
+                <td>
+                  <input
+                    type="text"
+                    name="password"
+                    defaultValue={dataset["password"]}
+                    placeholder="Password"
+                    onChange={handleChange("password")}
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
           <div className="error-message">{message}</div>

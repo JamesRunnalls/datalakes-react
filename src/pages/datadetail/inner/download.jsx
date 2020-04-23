@@ -1,16 +1,15 @@
 import React, { Component } from "react";
 import SliderDouble from "../../../components/sliders/sliderdouble";
-import { password } from "../../../../src/config.json";
 import axios from "axios";
 import "../datadetail.css";
 
 class Download extends Component {
   state = {
     upper: "NA",
-    lower: "NA"
+    lower: "NA",
   };
 
-  onChangeTime = values => {
+  onChangeTime = (values) => {
     const lower = values[0] / 1000;
     const upper = values[1] / 1000;
     if (
@@ -21,17 +20,17 @@ class Download extends Component {
     }
   };
 
-  onChangeUpper = value => {
+  onChangeUpper = (value) => {
     var upper = value.getTime() / 1000;
     this.setState({ upper });
   };
 
-  onChangeLower = value => {
+  onChangeLower = (value) => {
     var lower = value.getTime() / 1000;
     this.setState({ lower });
   };
 
-  fileIdSelect = arr => {
+  fileIdSelect = (arr) => {
     var { files } = this.props;
     var out = [];
     for (var i = 0; i < arr.length; i++) {
@@ -41,7 +40,20 @@ class Download extends Component {
   };
 
   downloadFiles = (filetype, apiUrl, id, arr, title) => {
-    var userpassword = prompt("Please enter the password to download data");
+    var { embargo, password } = this.props.dataset;
+    var { upper } = this.state;
+    var embargoDate =
+      new Date().getTime() - embargo * 30.4167 * 24 * 60 * 60 * 1000;
+    var userpassword;
+    if ((upper*1000) > embargoDate) {
+      userpassword = prompt(
+        "Selection contains embargoed data. (after " +
+          new Date(embargoDate) +
+          ") Please enter the password to download data."
+      );
+    } else {
+      userpassword = password;
+    }
     if (password === userpassword) {
       var url = `${apiUrl}/download/${filetype}/${id}`;
       var name =
@@ -50,7 +62,7 @@ class Download extends Component {
         method: "post",
         url: url,
         responseType: "blob",
-        data: { data: arr }
+        data: { data: arr },
       })
         .then(({ data }) => {
           const downloadUrl = window.URL.createObjectURL(new Blob([data]));
@@ -61,7 +73,7 @@ class Download extends Component {
           link.click();
           link.remove();
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
           alert("Failed to download files");
         });
@@ -76,7 +88,7 @@ class Download extends Component {
       min,
       max,
       files,
-      selectedFiles
+      selectedFiles,
     } = this.props;
     var { upper, lower } = this.state;
 
@@ -100,6 +112,16 @@ class Download extends Component {
         </a>
         <div className="info-title">Citation</div>
         {dataset.citation}
+
+        {dataset.embargo > 0 && (
+          <div>
+            <div className="info-title">Embargo Period</div>
+            Data more recent than {dataset.embargo} months requires a password
+            to download. <br />
+            Please contact {getLabel("persons", dataset.persons_id, "email")} to
+            request access to this data.
+          </div>
+        )}
 
         <div className="info-title">Download</div>
 

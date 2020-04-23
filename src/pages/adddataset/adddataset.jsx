@@ -55,7 +55,9 @@ class AddDataset extends Component {
       repositories_id: "",
       lakes_id: "",
       persons_id: "",
-      projects_id: ""
+      projects_id: "",
+      embargo: 0,
+      password: "none"
     },
     datasetparameters: [],
     files_list: [],

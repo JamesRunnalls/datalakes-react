@@ -250,7 +250,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
 
           value = Math.abs(Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2)));
 
-          rotation = Math.atan2(vx, vy) + Math.PI / 2;
+          rotation = Math.atan2(vx, vy) - Math.PI / 2;
 
           cell = { center: p, value: value, rotation: rotation };
           this._drawArrow(cell, ctx, size);

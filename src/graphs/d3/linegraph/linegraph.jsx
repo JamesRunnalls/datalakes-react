@@ -382,17 +382,18 @@ class D3LineGraph extends Component {
             var x0 = x.invert(d3.mouse(this)[0]);
             var selectedData = closestCoordinates(x0, y0, xy);
             focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
-
+            var yout = selectedData.y.toExponential(3);
+            var xout = selectedData.x.toExponential(3);
             if (xlabel === "Time") {
               document.getElementById("value").innerHTML =
                 format(new Date(selectedData.x), "hh:mm dd MMM yy") +
                 " | " +
-                selectedData.y +
+                yout +
                 yunits;
             } else {
               document.getElementById(
                 "value"
-              ).innerHTML = `${selectedData.x} ${xunits} | ${selectedData.y} ${yunits}`;
+              ).innerHTML = `${xout} ${xunits} | ${yout} ${yunits}`;
             }
           }
 
