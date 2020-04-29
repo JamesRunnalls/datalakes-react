@@ -51,18 +51,30 @@ class Information extends Component {
               <tr>
                 <th>Git</th>
                 <td>
-                  <a href={dataset.datasourcelink} target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={dataset.datasourcelink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Link to Git Repository
                   </a>
                 </td>
               </tr>
               <tr>
                 <th>Start</th>
-                <td>{new Date(dataset.mindatetime).toString()}</td>
+                <td>
+                  {new Date(dataset.mindatetime).toDateString() +
+                    " " +
+                    new Date(dataset.mindatetime).toLocaleTimeString()}
+                </td>
               </tr>
               <tr>
                 <th>End</th>
-                <td>{new Date(dataset.maxdatetime).toString()}</td>
+                <td>
+                  {new Date(dataset.maxdatetime).toDateString() +
+                    " " +
+                    new Date(dataset.maxdatetime).toLocaleTimeString()}
+                </td>
               </tr>
               <tr>
                 <th>Latitude</th>

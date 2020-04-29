@@ -279,8 +279,9 @@ class GISMap extends Component {
     this.marker.push(markerGroup);
   };
 
-  remoteSensing = async (layer, data) => {
-    var { min, max, unit, maxdatetime, maxdepth } = layer;
+  remoteSensing = async (layer, file) => {
+    var { maxdatetime, maxdepth, data } = file;
+    var { min, max, unit } = layer;
     var { datetime, depth } = this.props;
     var polygons = [];
     var coords;
@@ -327,6 +328,11 @@ class GISMap extends Component {
               "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
               maxdatetime.toLocaleString() +
               "</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>LatLng</strong></td><td>" +
+              data.lat[i] +
+              "," +
+              data.lon[i] +
+              "</td></tr>" +
               "<tr><td><strong>Value at point:</strong></td><td>" +
               String(value) +
               String(unit) +
@@ -344,9 +350,10 @@ class GISMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  simstrat = async (layer, data) => {
+  simstrat = async (layer, file) => {
+    var { maxdatetime, data } = file;
     var layerData = JSON.parse(JSON.stringify(data));
-    var { min, max, maxdatetime } = layer;
+    var { min, max } = layer;
     var polygons = [];
     for (var i = 0; i < layerData.length; i++) {
       var pixelcolor = getColor(layerData[i].value, min, max, layer.colors);
@@ -394,8 +401,9 @@ class GISMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  meteolakesScalar = async (layer, data) => {
-    var { min, max, colors, unit, maxdatetime, maxdepth } = layer;
+  meteolakesScalar = async (layer, file) => {
+    var { maxdatetime, maxdepth, data } = file;
+    var { min, max, colors, unit } = layer;
     var { depth, datetime } = this.props;
     var polygons = [];
     var matrix = data;
@@ -469,7 +477,8 @@ class GISMap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  meteolakesVector = async (layer, data) => {
+  meteolakesVector = async (layer, file) => {
+    var { maxdatetime, maxdepth, data } = file;
     var {
       vectorArrows,
       vectorMagnitude,
@@ -481,8 +490,6 @@ class GISMap extends Component {
       unit,
       title,
       datasourcelink,
-      maxdatetime,
-      maxdepth
     } = layer;
     var { depth, datetime } = this.props;
     if (vectorMagnitude) {
@@ -508,7 +515,7 @@ class GISMap extends Component {
             var magnitude = Math.abs(
               Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
             );
-            var value = Math.round(magnitude * 1000) / 1000
+            var value = Math.round(magnitude * 1000) / 1000;
             var timediff = -Math.round(
               (datetime.getTime() / 1000 -
                 new Date(maxdatetime).getTime() / 1000) /
@@ -837,6 +844,22 @@ class GISMap extends Component {
       map.attributionControl.setPrefix("(" + lat + "," + lng + ") " + h + "m");
     });
 
+    var { updateLocation } = this.props;
+    this.map.on("zoomend", function (e) {
+      let zoom = e.target._zoom;
+      let latlng = e.target._lastCenter;
+      let lat = Math.round(latlng.lat * 1000) / 1000;
+      let lng = Math.round(latlng.lng * 1000) / 1000;
+      updateLocation(zoom, [lat, lng]);
+    });
+    this.map.on("moveend", function (e) {
+      let zoom = e.target._zoom;
+      let latlng = map.getCenter();
+      let lat = Math.round(latlng.lat * 1000) / 1000;
+      let lng = Math.round(latlng.lng * 1000) / 1000;
+      updateLocation(zoom, [lat, lng]);
+    });
+
     // Menu
     L.control
       .custom({
@@ -895,7 +918,7 @@ class GISMap extends Component {
   }
 
   updatePlot = () => {
-    var { selectedlayers, datasets } = this.props;
+    var { selectedlayers, datasets, center, zoom } = this.props;
 
     // Remove old layers
     this.marker.forEach((layer) => {
@@ -917,20 +940,26 @@ class GISMap extends Component {
         var { fileid } = layer;
         var { mapplotfunction } = dataset;
         var file = finddataset(fileid, dataset.files);
-        var data = file.data;
 
         mapplotfunction === "gitPlot" && this.gitPlot(layer, file);
         mapplotfunction === "foenMarkers" && this.foenMarkers(layer, file);
         mapplotfunction === "meteoSwissMarkers" &&
           this.meteoSwissMarkers(layer, file);
-        mapplotfunction === "remoteSensing" && this.remoteSensing(layer, data);
-        mapplotfunction === "simstrat" && this.simstrat(layer, data);
+        mapplotfunction === "remoteSensing" && this.remoteSensing(layer, file);
+        mapplotfunction === "simstrat" && this.simstrat(layer, file);
         mapplotfunction === "meteolakesScalar" &&
-          this.meteolakesScalar(layer, data);
+          this.meteolakesScalar(layer, file);
         mapplotfunction === "meteolakesVector" &&
-          this.meteolakesVector(layer, data);
+          this.meteolakesVector(layer, file);
       }
     }
+    // Set zoom
+    window.setTimeout(() => {
+      this.map.flyTo(center, zoom, {
+        animate: true,
+        duration: 1,
+      });
+    }, 500);
   };
 
   componentDidUpdate(prevProps, prevState) {

@@ -25,6 +25,9 @@ class Header extends Component {
     }
 
     render() { 
+        var p_link = "/predictions?selected=[[11,5],[10,5]]&hidden=[]&datetime=1588169897.827&depth=0&zoom=9&center=[46.884,8.074]&basemap=datalakesmap"
+        var l_link = "/live?selected=[[9,7],[56,12]]&hidden=[]&datetime=1588169897.827&depth=0&zoom=10&center=[46.398,6.437]&basemap=datalakesmap"
+        var r_link = "/remotesensing?selected=[[1,15],[13,23]]&hidden=[[1,15]]&datetime=1588169897.827&depth=0&zoom=9&center=[46.959,8.255]&basemap=datalakesmap"
         var { showMenu } = this.state;
          return ( 
             <header>
@@ -37,20 +40,20 @@ class Header extends Component {
                 <div className="desktop-nav">
                     <div className="desktop-navbar">
                         <div className="links">
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/live">Live</NavLink>
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/predictions">Predictions</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to={l_link}>Live</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to={p_link}>Predictions</NavLink>
                             <NavLink activeClassName="active" onClick={this.closeMenu} to="/dataportal">Data Portal</NavLink>
                         </div>
                         <div className="menu-icon" onClick={this.toggle}><h3>More <div className="symbol">{showMenu ? "<":">"}</div></h3></div>
                     </div>
                     <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
                         <NavLink activeClassName="home" onClick={this.closeMenu} to="/">Home</NavLink>
-                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/remotesensing">Remote Sensing</NavLink>
+                        <NavLink activeClassName="active" onClick={this.closeMenu} to={r_link}>Remote Sensing</NavLink>
                         <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
                         <NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink>
                         <div className="midscreen">
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/live">Live</NavLink>
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/predictions">Predictions</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to={l_link}>Live</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to={p_link}>Predictions</NavLink>
                             <NavLink activeClassName="active" onClick={this.closeMenu} to="/dataportal">Data Portal</NavLink>
                         </div>        
                     </div>
@@ -60,15 +63,15 @@ class Header extends Component {
                     <div className={showMenu ? "mobile-menu show" : "mobile-menu"}>
                         <div className="mobile-flex">
                             <NavLink onClick={this.closeMenu} to="/"><img alt="Home" src={home} /></NavLink>
-                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/remotesensing"><img alt="Remote Sensing" src={rs} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to={r_link}><img alt="Remote Sensing" src={rs} /></NavLink>
                             <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/api"><img alt="API" src={api} /></NavLink>
                             <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/about"><img alt="Contact" src={contact} /></NavLink>
                         </div>
                     </div>
                     <div className="mobile-navbar">
                         <div className="mobile-flex">
-                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/live"><img alt="Live Data" src={live} /></NavLink>
-                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/predictions"><img alt="Predictions" src={predictions} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to={l_link}><img alt="Live Data" src={live} /></NavLink>
+                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to={p_link}><img alt="Predictions" src={predictions} /></NavLink>
                             <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/dataportal"><img alt="Data Portal" src={data} /></NavLink>
                             <div onClick={this.toggle} className="more"><img alt="More" src={more} /></div>
                         </div>

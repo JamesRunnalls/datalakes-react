@@ -1,14 +1,83 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import GISMap from "../../graphs/leaflet/gis_map";
 import axios from "axios";
-import { apiUrl } from "../../../src/config.json";
+import { apiUrl } from "../../config.json";
 import FilterBox from "../../components/filterbox/filterbox";
 import MapLayers from "../../components/maplayers/maplayers";
 import AddLayers from "../../components/addlayers/addlayers";
 import Legend from "../../components/legend/legend";
-import colorlist from "../colorramp/colors";
+import colorlist from "../../components/colorramp/colors";
+import DatetimeDepthSelector from "../../components/sliders/datetimedepthselector";
 import "./gis.css";
-import DatetimeDepthSelector from "../sliders/datetimedepthselector";
+
+class LakeStations extends Component {
+  render() {
+    return (
+      <FilterBox
+        title="Lake Stations"
+        content={
+          <div className="lakestations">
+            <Link to="/live/lexplore">
+              <div
+                className="lakestations-item"
+                title="See live data from Lexplore lake station"
+              >
+                LéXPLORE
+              </div>
+            </Link>
+            <Link to="/live/buchillon">
+              <div
+                className="lakestations-item"
+                title="See live data from Buchillon lake station"
+              >
+                Buchillon
+              </div>
+            </Link>
+          </div>
+        }
+      />
+    );
+  }
+}
+
+class LakeModels extends Component {
+  render() {
+    return (
+      <FilterBox
+        title="Lake Models"
+        content={
+          <div className="lakestations">
+            <a
+              href="http://meteolakes.ch/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <div
+                className="lakestations-item"
+                title="See 3D lake model predictions"
+              >
+                Meteolakes
+              </div>
+            </a>
+            <a
+              href="https://simstrat.eawag.ch/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <div
+                className="lakestations-item"
+                title="See 1D lake model predictions"
+              >
+                Simstrat
+              </div>
+            </a>
+          </div>
+        }
+      />
+    );
+  }
+}
 
 class SidebarGIS extends Component {
   render() {
@@ -37,7 +106,11 @@ class SidebarGIS extends Component {
             <React.Fragment>
               <div className="basemap">
                 Basemap:{" "}
-                <select className="basemapselector" onChange={updateBaseMap} value={basemap}>
+                <select
+                  className="basemapselector"
+                  onChange={updateBaseMap}
+                  value={basemap}
+                >
                   <option value="datalakesmap">Datalakes Map</option>
                   <option value="swisstopo">Swisstopo</option>
                   <option value="satellite">Satellite</option>
@@ -76,12 +149,20 @@ class GIS extends Component {
     parameters: [],
     datasets: [],
     datasetparameters: [],
-    selected: this.props.selected ? this.props.selected : [],
-    hidden: this.props.hidden ? this.props.hidden : [],
     loading: true,
+    selected: [],
+    hidden: [],
     datetime: new Date(),
     depth: 0,
+    center: [46.85, 7.55],
+    zoom: 9,
     basemap: "datalakesmap",
+  };
+
+  updateLocation = (zoom, center) => {
+    if (zoom !== this.state.zoom || center !== this.state.center) {
+      this.setState({ zoom, center });
+    }
   };
 
   onChangeDatetime = async (event) => {
@@ -119,7 +200,6 @@ class GIS extends Component {
           selectedlayers[i].parameters_id,
         ]);
       }
-      this.props.setQueryParams(selected);
       this.setState({ selectedlayers, selected, loading: false });
     });
   };
@@ -151,7 +231,6 @@ class GIS extends Component {
           hidden
         ));
       }
-      this.props.setQueryParams(selected);
       this.setState({ selectedlayers, selected, datasets, loading: false });
     });
   };
@@ -166,17 +245,26 @@ class GIS extends Component {
           parseInt(x[0]) !== parseInt(dp[0]) ||
           parseInt(x[1]) !== parseInt(dp[1])
       );
-      this.props.setQueryParams(selected);
       this.setState({ selectedlayers, selected, loading: false });
     });
   };
 
   toggleLayerView = (id) => {
     this.setState({ loading: true }, () => {
-      var { selectedlayers } = this.state;
+      var { selectedlayers, hidden } = this.state;
       var index = selectedlayers.findIndex((x) => x.id === id);
       selectedlayers[index].visible = !selectedlayers[index].visible;
-      this.setState({ selectedlayers, loading: false });
+      var idArr = id.split("&");
+      var idParse = [parseInt(idArr[0]), parseInt(idArr[1])];
+      var h_fil = hidden.filter(
+        (h) => h[0] !== idParse[0] && h[1] !== idParse[1]
+      );
+      if (h_fil.length !== hidden.length) {
+        hidden = h_fil;
+      } else {
+        hidden.push(idParse);
+      }
+      this.setState({ selectedlayers, hidden, loading: false });
     });
   };
 
@@ -549,9 +637,100 @@ class GIS extends Component {
     });
   };
 
+  searchLocation = (
+    selected,
+    hidden,
+    datetime,
+    depth,
+    zoom,
+    center,
+    basemap
+  ) => {
+    return [
+      "?",
+      "selected=",
+      JSON.stringify(selected),
+      "&hidden=",
+      JSON.stringify(hidden),
+      "&datetime=",
+      datetime.getTime() / 1000,
+      "&depth=",
+      depth,
+      "&zoom=",
+      JSON.stringify(zoom),
+      "&center=",
+      JSON.stringify(center),
+      "&basemap=",
+      basemap,
+    ].join("");
+  };
+
+  parseSearch = (search) => {
+    search = search.replace("?", "").split("&");
+    var out = {};
+    for (var i = 0; i < search.length; i++) {
+      var split = search[i].split("=");
+      if (["selected", "hidden", "center"].includes(split[0])) {
+        out[split[0]] = JSON.parse(split[1]);
+      } else if (split[0] === "datetime") {
+        out[split[0]] = new Date(split[1] * 1000);
+      } else if (["depth", "zoom"].includes(split[0])) {
+        out[split[0]] = parseFloat(split[1]);
+      } else if (split[0] === "basemap") {
+        out[split[0]] = split[1];
+      }
+    }
+    return out;
+  };
+
   async componentDidMount() {
-    var { selected, hidden, datetime, depth } = this.state;
-    ({ selected } = this.props.getQueryParams(selected));
+    // Defaults
+    var {
+      selected,
+      hidden,
+      datetime,
+      depth,
+      zoom,
+      center,
+      basemap,
+    } = this.state;
+
+    var defaultSearchLocation = this.searchLocation(
+      selected,
+      hidden,
+      datetime,
+      depth,
+      zoom,
+      center,
+      basemap
+    );
+
+    // Parse location search
+    const pathname = this.props.location.pathname;
+    try {
+      var { search } = this.props.location;
+      if (search) {
+        search = this.parseSearch(search);
+        if ("selected" in search) selected = search.selected;
+        if ("hidden" in search) hidden = search.hidden;
+        if ("datetime" in search) datetime = search.datetime;
+        if ("depth" in search) depth = search.depth;
+        if ("zoom" in search) zoom = search.zoom;
+        if ("center" in search) center = search.center;
+        if ("basemap" in search) basemap = search.basemap;
+      } else {
+        this.props.history.push({
+          pathname: pathname,
+          search: defaultSearchLocation,
+        });
+      }
+    } catch (e) {
+      console.log(e);
+      this.props.history.push({
+        pathname: pathname,
+        search: defaultSearchLocation,
+      });
+    }
 
     // Get parameters
     var { data: parameters } = await axios.get(
@@ -599,14 +778,47 @@ class GIS extends Component {
 
     this.setState({
       selectedlayers,
-      selected,
-      hidden,
       parameters,
       datasets,
       datasetparameters,
       loading: false,
       templates,
+      selected,
+      hidden,
+      datetime,
+      depth,
+      zoom,
+      center,
+      basemap,
     });
+  }
+
+  componentDidUpdate(prevState) {
+    var {
+      selected,
+      hidden,
+      datetime,
+      depth,
+      zoom,
+      center,
+      basemap,
+    } = this.state;
+    var newSearch = this.searchLocation(
+      selected,
+      hidden,
+      datetime,
+      depth,
+      zoom,
+      center,
+      basemap
+    );
+    let { search, pathname } = this.props.location;
+    if (newSearch !== search) {
+      this.props.history.push({
+        pathname: pathname,
+        search: newSearch,
+      });
+    }
   }
 
   render() {
@@ -620,25 +832,24 @@ class GIS extends Component {
       depth,
       templates,
       basemap,
+      zoom,
+      center,
     } = this.state;
-    var {
-      documentTitle,
-      title,
-      sidebarextratop,
-      sidebarextrabottom,
-    } = this.props;
-    document.title = documentTitle;
+    document.title = "Datalakes GIS";
     return (
       <React.Fragment>
-        <h1>{title}</h1>
+        <h1>Online Map</h1>
         <GISMap
           datetime={datetime}
           depth={depth}
+          zoom={zoom}
+          center={center}
           selectedlayers={selectedlayers}
           datasets={datasets}
           legend={<Legend selectedlayers={selectedlayers} />}
           templates={templates}
           basemap={basemap}
+          updateLocation={this.updateLocation}
           timeselector={
             <DatetimeDepthSelector
               selectedlayers={selectedlayers}
@@ -656,8 +867,6 @@ class GIS extends Component {
               datasets={datasets}
               parameters={parameters}
               datasetparameters={datasetparameters}
-              sidebarextratop={sidebarextratop}
-              sidebarextrabottom={sidebarextrabottom}
               basemap={basemap}
               updateBaseMap={this.updateBaseMap}
               setSelected={this.setSelected}

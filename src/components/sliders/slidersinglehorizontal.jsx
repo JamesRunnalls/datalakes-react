@@ -33,6 +33,7 @@ class SliderSingleHorizontal extends Component {
   };
 
   render() {
+    
     const sliderStyle = {
       position: "relative",
       width: "100%",
@@ -43,7 +44,6 @@ class SliderSingleHorizontal extends Component {
     };
     var { value, onChange, min, max, files } = this.props;
     var { dt } = this.state;
-
     var dateTicks = scaleTime()
       .domain([min, max])
       .ticks(10)

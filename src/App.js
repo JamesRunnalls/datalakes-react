@@ -3,9 +3,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import './App.css';
 import Header from './format/header/header';
 import Footer from './format/footer/footer';
-import Live from './pages/live/live';
 import Home from './pages/home/home';
-import Predictions from './pages/prediction/prediction';
 import NotFound from './pages/notfound/notfound';
 import DataPortal from './pages/dataportal/dataportal';
 import Station from './pages/station/station';
@@ -13,7 +11,7 @@ import About from './pages/about/about';
 import API from './pages/api/api';
 import DataDetail from './pages/datadetail/datadetail';
 import AddDataset from './pages/adddataset/adddataset';
-import RemoteSensing from './pages/remotesensing/remotesensing';
+import GIS from './pages/gis/gis';
 
 class App extends Component {
   render() {
@@ -22,12 +20,12 @@ class App extends Component {
           <Header />
           <main>
               <Switch>
-                <Route path='/live' exact component={Live} />
+                <Route path='/live' exact component={GIS} />
                 <Route path='/live' component={Station} />
 
-                <Route path='/remotesensing' exact component={RemoteSensing} />
+                <Route path='/remotesensing' exact component={GIS} />
 
-                <Route path='/predictions' exact component={Predictions} />
+                <Route path='/predictions' exact component={GIS} />
 
                 <Route path='/dataportal' component={DataPortal} />
                 <Route path='/datadetail' component={DataDetail} />
