@@ -530,7 +530,7 @@ class DataPortal extends Component {
     p = p.filter(x => sids.includes(x.datasets_id))
     p = p.filter(x => ![1,2,3,4].includes(x.parameters_id))
     p = p.map(x => [x.datasets_id,x.parameters_id])
-    var link = "/live?selected="+JSON.stringify(p);
+    var link = "/map?selected="+JSON.stringify(p);
 
     return (
       <React.Fragment>

@@ -171,6 +171,13 @@ class GIS extends Component {
     }
   };
 
+  updateState = (newState) => {
+    this.setState(newState, () => {
+      // Fix this hack
+      window.location.reload();
+    });
+  };
+
   onChangeDatetime = async (event) => {
     var datetime;
     if (Array.isArray(event)) {
@@ -185,7 +192,6 @@ class GIS extends Component {
   };
 
   onChangeDepth = async (event) => {
-    console.log("Depth", event);
     var depth;
     if (Array.isArray(event)) {
       depth = parseFloat(event[0]);
@@ -915,6 +921,7 @@ class GIS extends Component {
           templates={templates}
           basemap={basemap}
           updateLocation={this.updateLocation}
+          updateState={this.updateState}
           timeselector={
             <DatetimeDepthSelector
               selectedlayers={selectedlayers}

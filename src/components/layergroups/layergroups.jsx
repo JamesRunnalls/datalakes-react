@@ -1,14 +1,19 @@
 import React, { Component } from "react";
-import editlayers from './img/editlayers.svg';
-import './layergroups.css';
+import editlayers from "./img/editlayers.svg";
+import "./layergroups.css";
 
 class Group extends Component {
-  state = {};
   render() {
-    var { name, description, img } = this.props.properties;
+    var { properties, updateState } = this.props;
+    var { name, description, img, data } = properties;
     return (
-      <div className="layergroups-item">
-        <img src={img} />
+      <div
+        className="layergroups-item"
+        onClick={() => {
+          updateState(data);
+        }}
+      >
+        <img src={img} alt={name}/>
         <div>{name}</div>
       </div>
     );
@@ -16,26 +21,30 @@ class Group extends Component {
 }
 
 class LayerGroups extends Component {
-  state = {};
   render() {
-    var { toggleMenu } = this.props;
+    var { toggleMenu, updateState } = this.props;
     var groups = [
       {
-        name: "Live Water Temperature",
+        name: "Live Wind Speed",
         description: "Some description",
         img: editlayers,
+        data: { selected: [[9, 7]] },
       },
       {
-        name: "Live Air Temperature",
+        name: "Lake Zurich 3D Model",
         description: "Some description",
         img: editlayers,
-      }
+        data: { selected: [[11,5]], center: [47.282,8.729], zoom: 12 },
+      },
     ];
     return (
       <div className="layergroups">
-        <div className="layergroups-item"></div>
+        <div className="layergroups-item" onClick={toggleMenu}>
+          <img src={editlayers} alt="Build your map from scratch" />
+          <div>Build your map from scratch</div>
+        </div>
         {groups.map((g) => (
-          <Group properties={g} />
+          <Group key={g.name} properties={g} updateState={updateState} />
         ))}
       </div>
     );
