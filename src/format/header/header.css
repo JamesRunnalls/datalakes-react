@@ -157,7 +157,7 @@ header .desktop-nav .desktop-menu.show {
   display: block;
 }
 
-header .desktop-nav .desktop-menu .midscreen {
+header .desktop-nav .midscreen {
   display: none;
 }
 
@@ -171,7 +171,7 @@ header .desktop-nav .desktop-menu .midscreen {
   header .desktop-nav .desktop-navbar .links {
     display: none;
   }
-  header .desktop-nav .desktop-menu .midscreen {
+  header .desktop-nav .midscreen {
     display: block;
   }
 

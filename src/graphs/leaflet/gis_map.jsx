@@ -5,6 +5,7 @@ import "./leaflet_customcontrol";
 import "./leaflet_colorpicker";
 import { getColor } from "../../components/gradients/gradients";
 import Loading from "../../components/loading/loading";
+import LayerGroups from "../../components/layergroups/layergroups";
 import "./css/gis_map.css";
 import "./css/leaflet.css";
 
@@ -13,19 +14,25 @@ class GISMap extends Component {
     help: false,
     fullsize: false,
     loading: false,
-    menu: window.innerWidth > 500,
-  };
-
-  toggleHelp = () => {
-    this.setState({ help: !this.state.help });
+    group: false,
+    menu: false,
+    initial: true,
   };
 
   toggleFullsize = () => {
     this.setState({ fullsize: !this.state.fullsize });
   };
 
+  toggleHelp = () => {
+    this.setState({ group: false, help: !this.state.help });
+  };
+
   toggleMenu = () => {
-    this.setState({ menu: !this.state.menu });
+    this.setState({ group: false, menu: !this.state.menu });
+  };
+
+  toggleGroup = () => {
+    this.setState({ help: false, menu: false, group: !this.state.group });
   };
 
   hoverOver = (e) => {
@@ -776,6 +783,7 @@ class GISMap extends Component {
     var toggleHelp = this.toggleHelp;
     var toggleFullsize = this.toggleFullsize;
     var toggleMenu = this.toggleMenu;
+    var toggleGroup = this.toggleGroup;
 
     var datalakesmap = L.tileLayer(
       "https://api.mapbox.com/styles/v1/jamesrunnalls/ck96x8fhp6h2i1ik5q9xz0iqn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
@@ -860,16 +868,31 @@ class GISMap extends Component {
       updateLocation(zoom, [lat, lng]);
     });
 
-    // Menu
+    // Edit Layers
     L.control
       .custom({
         position: "topleft",
         content:
-          '<div class="customcontrol" title="Menu" id="sidebar">\u2630</div>',
+          '<div class="customcontrol" id="sidebar"><img title="Edit layers" src="img/editlayers.svg" /></div>',
         classes: "leaflet-bar",
         events: {
           click: function (data) {
             toggleMenu();
+          },
+        },
+      })
+      .addTo(this.map);
+
+    // Layer groups
+    L.control
+      .custom({
+        position: "topleft",
+        content:
+          '<div class="customcontrol" id="sidebar"><img title="Layer groups" src="img/layergroups.svg" /></div>',
+        classes: "leaflet-bar",
+        events: {
+          click: function (data) {
+            toggleGroup();
           },
         },
       })
@@ -974,11 +997,18 @@ class GISMap extends Component {
       this.layer = this.baseMaps[this.props.basemap];
       this.map.addLayer(this.layer);
     }
+    if (!this.props.loading && this.state.initial) {
+      if (this.props.selectedlayers.length > 0) {
+        this.setState({ menu: true, initial: false });
+      } else {
+        this.setState({ group: true, initial: false });
+      }
+    }
     this.map.invalidateSize();
   }
 
   render() {
-    var { help, fullsize, menu } = this.state;
+    var { help, fullsize, menu, group } = this.state;
     var { legend, timeselector, loading, sidebar } = this.props;
     if (!loading)
       document.getElementById("fullsize").innerHTML = fullsize
@@ -1008,11 +1038,30 @@ class GISMap extends Component {
                 onClick={this.toggleMenu}
                 title="Hide plot controls"
               >
-                Plot Controls
+                Edit Layers
                 <div className="sidebar-symbol">{"\u2715"}</div>
               </div>
               <div className="sidebar-content">{sidebar}</div>
             </div>
+
+            <div
+              className={
+                group ? "sidebar-gis-inner wide" : "sidebar-gis-inner wide hide"
+              }
+            >
+              <div
+                className="sidebar-title"
+                onClick={this.toggleGroup}
+                title="Hide plot controls"
+              >
+                Layer Groups
+                <div className="sidebar-symbol">{"\u2715"}</div>
+              </div>
+              <div className="sidebar-content">
+                <LayerGroups toggleMenu={this.toggleMenu}/>
+              </div>
+            </div>
+
             <div
               className={help ? "sidebar-gis-inner" : "sidebar-gis-inner hide"}
             >

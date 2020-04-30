@@ -481,7 +481,7 @@ class DataDetail extends Component {
     var p = JSON.parse(JSON.stringify(parameters));
     p = p.filter((x) => ![1, 2, 3, 4].includes(x.parameters_id));
     p = p.map((x) => [dataset.id, x.parameters_id]);
-    var link = "/live?selected=" + JSON.stringify(p);
+    var link = "/map?selected=" + JSON.stringify(p);
 
     switch (step) {
       default:

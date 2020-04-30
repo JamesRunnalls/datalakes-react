@@ -166,6 +166,11 @@
   cursor: pointer;
 }
 
+.customcontrol img {
+  width: 16px;
+  padding: 5px;
+}
+
 .timeselector-gis {
   position: absolute;
   right: 10px;
@@ -179,6 +184,7 @@
   top: 10px;
   z-index: 9999;
   height: calc(100% - 60px);
+  max-width: calc(100% - 60px);
 }
 
 .sidebar-gis-inner {
@@ -192,6 +198,9 @@
   background-color: white;
   margin-right: 20px;
   vertical-align: top;
+}
+.sidebar-gis-inner.wide {
+  width: 600px;
 }
 
 .sidebar-gis-inner.hide {
@@ -231,6 +240,7 @@
   }
   .sidebar-gis {
     left: 10px;
+    max-width: calc(100% - 20px);
   }
 }
 
@@ -241,6 +251,10 @@
     width: 30px;
     height: 30px;
     line-height: 30px;
+  }
+  .customcontrol img {
+    width: 20px;
+    padding: 4px;
   }
 }
 

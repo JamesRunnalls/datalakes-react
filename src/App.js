@@ -20,14 +20,11 @@ class App extends Component {
           <Header />
           <main>
               <Switch>
-                <Route path='/live' exact component={GIS} />
                 <Route path='/live' component={Station} />
 
-                <Route path='/remotesensing' exact component={GIS} />
+                <Route path='/map' exact component={GIS} />
 
-                <Route path='/predictions' exact component={GIS} />
-
-                <Route path='/dataportal' component={DataPortal} />
+                <Route path='/data' component={DataPortal} />
                 <Route path='/datadetail' component={DataDetail} />
 
                 <Route path='/API' component={API} />

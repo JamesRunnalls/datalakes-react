@@ -55,6 +55,16 @@ li {
   font-style: italic;
 }
 
+.maplayers-label {
+  font-size: 18px;
+}
+
+.maplayers-label .maplayers-arrow {
+  font-size: 30px;
+  width: 100%;
+  text-align: center;
+}
+
 .editsettings {
   background-color: rgb(240, 240, 240);
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);

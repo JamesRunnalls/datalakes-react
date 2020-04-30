@@ -14,10 +14,14 @@ class DatetimeDepthSelector extends Component {
       onChangeDatetime,
       datasets,
     } = this.props;
-    var mindatetime = new Date(new Date().getTime() - 1209600000);
-    var maxdatetime = new Date();
-    var mindepth = 0;
-    var maxdepth = 1;
+    var mindatetime = new Date(
+      Math.min(new Date().getTime() - 1209600000, datetime.getTime())
+    );
+    var maxdatetime = new Date(
+      Math.max(new Date().getTime(), datetime.getTime())
+    );
+    var mindepth = Math.min(0, depth);
+    var maxdepth = Math.max(1, depth);
 
     function findDataset(datasets, id) {
       return datasets.find((d) => d.id === id);

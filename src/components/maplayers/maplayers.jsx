@@ -122,8 +122,8 @@ class MapLayers extends Component {
         />
       );
     } else {
-      return (<div>
-        Customise your map by adding layers from the dropdown below.
+      return (<div className="maplayers-label">
+        Customise your map by adding layers from the dropdown below. <div className="maplayers-arrow">&darr;</div>
       </div>)
     }
     

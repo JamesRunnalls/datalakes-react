@@ -96,38 +96,44 @@ class SidebarGIS extends Component {
       basemap,
       updateBaseMap,
     } = this.props;
+    var add;
+    if (selectedlayers.length === 0) add = "true";
     return (
       <React.Fragment>
         {sidebarextratop}
         <FilterBox
+          title="Basemap"
+          preopen="true"
+          content={
+            <div className="basemap">
+              <select
+                className="basemapselector"
+                onChange={updateBaseMap}
+                value={basemap}
+              >
+                <option value="datalakesmap">Datalakes Map</option>
+                <option value="swisstopo">Swisstopo</option>
+                <option value="satellite">Satellite</option>
+              </select>
+            </div>
+          }
+        />
+        <FilterBox
           title="Map Layers"
           preopen="true"
           content={
-            <React.Fragment>
-              <div className="basemap">
-                Basemap:{" "}
-                <select
-                  className="basemapselector"
-                  onChange={updateBaseMap}
-                  value={basemap}
-                >
-                  <option value="datalakesmap">Datalakes Map</option>
-                  <option value="swisstopo">Swisstopo</option>
-                  <option value="satellite">Satellite</option>
-                </select>
-              </div>
-              <MapLayers
-                selectedlayers={selectedlayers}
-                setSelected={setSelected}
-                removeSelected={removeSelected}
-                toggleLayerView={toggleLayerView}
-                updateMapLayers={updateMapLayers}
-              />
-            </React.Fragment>
+            <MapLayers
+              selectedlayers={selectedlayers}
+              setSelected={setSelected}
+              removeSelected={removeSelected}
+              toggleLayerView={toggleLayerView}
+              updateMapLayers={updateMapLayers}
+            />
           }
         />
         <FilterBox
           title="Add Layers"
+          preopen={add}
           content={
             <AddLayers
               datasets={datasets}
@@ -179,6 +185,7 @@ class GIS extends Component {
   };
 
   onChangeDepth = async (event) => {
+    console.log("Depth", event);
     var depth;
     if (Array.isArray(event)) {
       depth = parseFloat(event[0]);
@@ -219,7 +226,8 @@ class GIS extends Component {
       for (var i = 0; i < ids.length; i++) {
         var { datasets_id, parameters_id } = ids[i];
         selected.push([datasets_id, parameters_id]);
-        ({ selectedlayers, datasets } = await this.addNewLayer(
+        ({ selectedlayers, datasets, selected } = await this.addNewLayer(
+          selected,
           datasets_id,
           parameters_id,
           datasets,
@@ -503,6 +511,7 @@ class GIS extends Component {
   };
 
   addNewLayer = async (
+    selected,
     datasets_id,
     parameters_id,
     datasets,
@@ -523,75 +532,87 @@ class GIS extends Component {
       // Find index of datasets and parameters
       var dataset_index = datasets.findIndex((x) => x.id === datasets_id);
       var parameter_index = parameters.findIndex((x) => x.id === parameters_id);
-      var parameter_name = parameters[parameter_index].name;
-      var dataset = datasets[dataset_index];
-
-      // Get file list for dataset
-      if (dataset.files.length === 0) {
-        var { data: files } = await axios.get(
-          apiUrl + "/files?datasets_id=" + datasets_id + "&type=json"
+      if (dataset_index === -1 || parameter_index === -1) {
+        alert("Failed to add layer, not found in database.");
+        selected = selected.filter(
+          (x) =>
+            parseInt(x[0]) !== parseInt(datasets_id) ||
+            parseInt(x[1]) !== parseInt(parameters_id)
         );
-        dataset.files = files;
+      } else {
+        var parameter_name = parameters[parameter_index].name;
+        var dataset = datasets[dataset_index];
+
+        // Get file list for dataset
+        if (dataset.files.length === 0) {
+          var { data: files } = await axios.get(
+            apiUrl + "/files?datasets_id=" + datasets_id + "&type=json"
+          );
+          dataset.files = files;
+        }
+
+        // Find closest file to datetime and depth
+        var fileid = this.closestFile(datetime, depth, dataset.files);
+        var datafile = dataset.files.find((f) => f.id === fileid);
+
+        // Add data from file closes to datetime and depth
+        if (!datafile.data) {
+          datafile.data = await this.downloadFile(datafile, dataset.datasource);
+        }
+
+        // Get the dataset parameter
+        var dp = datasetparameters.filter((d) => d.datasets_id === datasets_id);
+
+        // Update the min and max value
+        var { min, max, array } = this.getMinMax(
+          dataset.files,
+          parameters_id,
+          dp,
+          dataset.mapplotfunction
+        );
+
+        // Get unit
+        var unit = dp.find((d) => d.parameters_id === parameters_id).unit;
+
+        // Plot properties
+        let layer = JSON.parse(JSON.stringify(dataset.plotproperties));
+
+        layer["mindatetime"] = dataset.mindatetime;
+        layer["maxdatetime"] = dataset.maxdatetime;
+        layer["mindepth"] = dataset.mindepth;
+        layer["maxdepth"] = dataset.maxdepth;
+
+        layer["title"] = dataset.title;
+        layer["mapplot"] = dataset.mapplot;
+        layer["latitude"] = dataset.latitude;
+        layer["longitude"] = dataset.longitude;
+        layer["datasource"] = dataset.datasource;
+        layer["description"] = dataset.description;
+        layer["datasourcelink"] = dataset.datasourcelink;
+
+        layer["min"] = min;
+        layer["max"] = max;
+        layer["unit"] = unit;
+        layer["array"] = array;
+        layer["fileid"] = fileid;
+        layer["datasetparameters"] = dp;
+        layer["datasets_id"] = datasets_id;
+        layer["dataset_index"] = dataset_index;
+        layer["parameters_id"] = parameters_id;
+        layer["parameter_name"] = parameter_name;
+        layer["parameter_index"] = parameter_index;
+        layer.colors = this.parseColor(layer.colors);
+        layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
+        layer["visible"] = this.layervisible(
+          datasets_id,
+          parameters_id,
+          hidden
+        );
+
+        selectedlayers.push(layer);
       }
-
-      // Find closest file to datetime and depth
-      var fileid = this.closestFile(datetime, depth, dataset.files);
-      var datafile = dataset.files.find((f) => f.id === fileid);
-
-      // Add data from file closes to datetime and depth
-      if (!datafile.data) {
-        datafile.data = await this.downloadFile(datafile, dataset.datasource);
-      }
-
-      // Get the dataset parameter
-      var dp = datasetparameters.filter((d) => d.datasets_id === datasets_id);
-
-      // Update the min and max value
-      var { min, max, array } = this.getMinMax(
-        dataset.files,
-        parameters_id,
-        dp,
-        dataset.mapplotfunction
-      );
-
-      // Get unit
-      var unit = dp.find((d) => d.parameters_id === parameters_id).unit;
-
-      // Plot properties
-      let layer = JSON.parse(JSON.stringify(dataset.plotproperties));
-
-      layer["mindatetime"] = dataset.mindatetime;
-      layer["maxdatetime"] = dataset.maxdatetime;
-      layer["mindepth"] = dataset.mindepth;
-      layer["maxdepth"] = dataset.maxdepth;
-
-      layer["title"] = dataset.title;
-      layer["mapplot"] = dataset.mapplot;
-      layer["latitude"] = dataset.latitude;
-      layer["longitude"] = dataset.longitude;
-      layer["datasource"] = dataset.datasource;
-      layer["description"] = dataset.description;
-      layer["datasourcelink"] = dataset.datasourcelink;
-
-      layer["min"] = min;
-      layer["max"] = max;
-      layer["unit"] = unit;
-      layer["array"] = array;
-      layer["fileid"] = fileid;
-      layer["datasetparameters"] = dp;
-      layer["datasets_id"] = datasets_id;
-      layer["dataset_index"] = dataset_index;
-      layer["parameters_id"] = parameters_id;
-      layer["parameter_name"] = parameter_name;
-      layer["parameter_index"] = parameter_index;
-      layer.colors = this.parseColor(layer.colors);
-      layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
-      layer["visible"] = this.layervisible(datasets_id, parameters_id, hidden);
-
-      selectedlayers.push(layer);
     }
-
-    return { selectedlayers, datasets };
+    return { selectedlayers, datasets, selected };
   };
 
   updateVariable = async (datetime, depth) => {
@@ -669,18 +690,60 @@ class GIS extends Component {
     search = search.replace("?", "").split("&");
     var out = {};
     for (var i = 0; i < search.length; i++) {
-      var split = search[i].split("=");
-      if (["selected", "hidden", "center"].includes(split[0])) {
-        out[split[0]] = JSON.parse(split[1]);
-      } else if (split[0] === "datetime") {
-        out[split[0]] = new Date(split[1] * 1000);
-      } else if (["depth", "zoom"].includes(split[0])) {
-        out[split[0]] = parseFloat(split[1]);
-      } else if (split[0] === "basemap") {
-        out[split[0]] = split[1];
+      try {
+        var split = search[i].split("=");
+        if (["selected", "hidden", "center"].includes(split[0])) {
+          out[split[0]] = JSON.parse(split[1]);
+        } else if (split[0] === "datetime") {
+          out[split[0]] = new Date(split[1] * 1000);
+        } else if (["depth", "zoom"].includes(split[0])) {
+          out[split[0]] = parseFloat(split[1]);
+        } else if (split[0] === "basemap") {
+          out[split[0]] = split[1];
+        }
+      } catch (e) {
+        console.error("Parsing query " + split[0] + " failed.");
       }
     }
     return out;
+  };
+
+  updateSearch = (query, value, search) => {
+    if (query in search) {
+      var newValue = search[query];
+      if (["selected", "hidden"].includes(query)) {
+        if (Array.isArray(newValue)) {
+          value = newValue;
+        }
+      } else if (["depth"].includes(query)) {
+        let depth = newValue;
+        if (depth > -2 && depth < 400) {
+          value = depth;
+        }
+      } else if (["datetime"].includes(query)) {
+        let dt = newValue.getTime() / 1000;
+        let dt_max = new Date().getTime() / 1000 + 30 * 24 * 60 * 60;
+        if (dt > 0 && dt < dt_max) {
+          value = newValue;
+        }
+      } else if (["zoom"].includes(query)) {
+        let zoom = parseInt(newValue);
+        if (zoom > 0 && zoom < 18) {
+          value = zoom;
+        }
+      } else if (["center"].includes(query)) {
+        let lat = parseFloat(newValue[0]);
+        let lng = parseFloat(newValue[1]);
+        if (lat > -85 && lat < 85 && lng > -180 && lng < 180) {
+          value = [lat, lng];
+        }
+      } else if (["basemap"].includes(query)) {
+        if (["datalakesmap", "swisstopo", "satellite"].includes(newValue)) {
+          value = newValue;
+        }
+      }
+    }
+    return value;
   };
 
   async componentDidMount() {
@@ -711,13 +774,13 @@ class GIS extends Component {
       var { search } = this.props.location;
       if (search) {
         search = this.parseSearch(search);
-        if ("selected" in search) selected = search.selected;
-        if ("hidden" in search) hidden = search.hidden;
-        if ("datetime" in search) datetime = search.datetime;
-        if ("depth" in search) depth = search.depth;
-        if ("zoom" in search) zoom = search.zoom;
-        if ("center" in search) center = search.center;
-        if ("basemap" in search) basemap = search.basemap;
+        selected = this.updateSearch("selected", selected, search);
+        hidden = this.updateSearch("hidden", hidden, search);
+        datetime = this.updateSearch("datetime", datetime, search);
+        depth = this.updateSearch("depth", depth, search);
+        zoom = this.updateSearch("zoom", zoom, search);
+        center = this.updateSearch("center", center, search);
+        basemap = this.updateSearch("basemap", basemap, search);
       } else {
         this.props.history.push({
           pathname: pathname,
@@ -760,10 +823,12 @@ class GIS extends Component {
 
     // Build selected layers object
     var selectedlayers = [];
-    for (var i = 0; i < selected.length; i++) {
-      var datasets_id = selected[i][0];
-      var parameters_id = selected[i][1];
-      ({ selectedlayers, datasets } = await this.addNewLayer(
+    var fixedSelected = JSON.parse(JSON.stringify(selected));
+    for (var i = 0; i < fixedSelected.length; i++) {
+      var datasets_id = fixedSelected[i][0];
+      var parameters_id = fixedSelected[i][1];
+      ({ selectedlayers, datasets, selected } = await this.addNewLayer(
+        selected,
         datasets_id,
         parameters_id,
         datasets,
@@ -835,10 +900,10 @@ class GIS extends Component {
       zoom,
       center,
     } = this.state;
-    document.title = "Datalakes GIS";
+    document.title = "Map Viewer - Datalakes";
     return (
       <React.Fragment>
-        <h1>Online Map</h1>
+        <h1>Map Viewer</h1>
         <GISMap
           datetime={datetime}
           depth={depth}

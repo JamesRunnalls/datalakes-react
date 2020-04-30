@@ -27,32 +27,17 @@ class Home extends Component {
           </div>
           <div className="home-inner">
             <div className="home-banners">
-              <Link to="/live">
+              <Link to="/map">
                 <div className="home-banner live">
                   <div className="inner-banner left">
-                    Live
+                    Map
                     <br />
-                    Observations
+                    Viewer
                   </div>
                   <div className="inner-banner right">
                     <div className="inner-banner-vert">
                       Real time access to water temperature and weather
                       observations across Switzerland.
-                    </div>
-                  </div>
-                </div>
-              </Link>
-              <Link to="/predictions">
-                <div className="home-banner predictions">
-                  <div className="inner-banner left">
-                    Model
-                    <br />
-                    Predictions
-                  </div>
-                  <div className="inner-banner right">
-                    <div className="inner-banner-vert">
-                      Hydrodynamic model now-casts and forecasts for lakes
-                      across Switzerland.
                     </div>
                   </div>
                 </div>
