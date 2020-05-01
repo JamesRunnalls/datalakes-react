@@ -587,7 +587,7 @@ class DataPortal extends Component {
                         })}
                       </div>
                       <Link to={link}>
-                        <button title="See datasets on web GIS">Preview Datasets</button>
+                        <button title="See datasets on web GIS">Map Viewer</button>
                       </Link>
                       <button title="Not currently available please download individually">Download Datasets</button>
                     </div>

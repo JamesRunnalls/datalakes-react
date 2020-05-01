@@ -119,8 +119,16 @@
 
   .sidebarlayout .rightcontainer.hide {
     right: 0;
-    width: auto;
+    width: 100%;
     min-height: 0;
+    padding: 2px 5px;
+  }
+
+  .sidebarlayout .rightcontainer {
+    right: 0;
+    width: 100%;
+    min-height: 0;
+    padding: 2px 5px;
   }
 
   .sidebarlayout .rightcontainer.hide .righthead {
@@ -128,8 +136,16 @@
     writing-mode: unset;
   }
 
+  .sidebarlayout .rightcontainer .righthead {
+    width: 100%;
+    border: 1px solid rgb(169, 169, 169);
+    padding: 4px 5px;
+    box-sizing: border-box;
+  }
+
   .sidebarlayout .rightcontainer .righthead .sidebartitle {
-    padding: 0 10px;
+    padding: 0;
+    color: rgb(50,50,50);
   }
 
   .sidebarlayout .rightcontainer .righthead span {
@@ -145,7 +161,7 @@
   }
 
   .sidebarlayout .rightcontainer .rightcontent {
-    margin-top: 20px;
+    padding: 0 5px;
     margin-bottom: 20px;
     max-width: 500px;
   }

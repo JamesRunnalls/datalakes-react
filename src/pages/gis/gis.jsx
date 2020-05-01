@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 import GISMap from "../../graphs/leaflet/gis_map";
 import axios from "axios";
 import { apiUrl } from "../../config.json";
@@ -10,74 +9,6 @@ import Legend from "../../components/legend/legend";
 import colorlist from "../../components/colorramp/colors";
 import DatetimeDepthSelector from "../../components/sliders/datetimedepthselector";
 import "./gis.css";
-
-class LakeStations extends Component {
-  render() {
-    return (
-      <FilterBox
-        title="Lake Stations"
-        content={
-          <div className="lakestations">
-            <Link to="/live/lexplore">
-              <div
-                className="lakestations-item"
-                title="See live data from Lexplore lake station"
-              >
-                LéXPLORE
-              </div>
-            </Link>
-            <Link to="/live/buchillon">
-              <div
-                className="lakestations-item"
-                title="See live data from Buchillon lake station"
-              >
-                Buchillon
-              </div>
-            </Link>
-          </div>
-        }
-      />
-    );
-  }
-}
-
-class LakeModels extends Component {
-  render() {
-    return (
-      <FilterBox
-        title="Lake Models"
-        content={
-          <div className="lakestations">
-            <a
-              href="http://meteolakes.ch/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <div
-                className="lakestations-item"
-                title="See 3D lake model predictions"
-              >
-                Meteolakes
-              </div>
-            </a>
-            <a
-              href="https://simstrat.eawag.ch/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <div
-                className="lakestations-item"
-                title="See 1D lake model predictions"
-              >
-                Simstrat
-              </div>
-            </a>
-          </div>
-        }
-      />
-    );
-  }
-}
 
 class SidebarGIS extends Component {
   render() {
@@ -110,6 +41,7 @@ class SidebarGIS extends Component {
                 className="basemapselector"
                 onChange={updateBaseMap}
                 value={basemap}
+                title="Edit the background map style"
               >
                 <option value="datalakesmap">Datalakes Map</option>
                 <option value="swisstopo">Swisstopo</option>
@@ -171,10 +103,41 @@ class GIS extends Component {
     }
   };
 
-  updateState = (newState) => {
-    this.setState(newState, () => {
-      // Fix this hack
-      window.location.reload();
+  updateState = async (newState) => {
+    this.setState({ loading: true }, async () => {
+      if ("selected" in newState) {
+        var {
+          datasets,
+          datasetparameters,
+          parameters,
+          datetime,
+          depth,
+          hidden,
+        } = this.state;
+        var { selected } = newState;
+        var selectedlayers = [];
+        var fixedSelected = JSON.parse(JSON.stringify(selected));
+        for (var i = 0; i < fixedSelected.length; i++) {
+          var datasets_id = fixedSelected[i][0];
+          var parameters_id = fixedSelected[i][1];
+          ({ selectedlayers, datasets, selected } = await this.addNewLayer(
+            selected,
+            datasets_id,
+            parameters_id,
+            datasets,
+            selectedlayers,
+            datasetparameters,
+            parameters,
+            datetime,
+            depth,
+            hidden
+          ));
+        }
+        newState["selectedlayers"] = selectedlayers;
+        newState["datasets"] = datasets;
+      }
+      newState["loading"] = false;
+      this.setState(newState);
     });
   };
 
@@ -231,7 +194,7 @@ class GIS extends Component {
       } = this.state;
       for (var i = 0; i < ids.length; i++) {
         var { datasets_id, parameters_id } = ids[i];
-        selected.push([datasets_id, parameters_id]);
+        selected.unshift([datasets_id, parameters_id]);
         ({ selectedlayers, datasets, selected } = await this.addNewLayer(
           selected,
           datasets_id,
@@ -252,14 +215,19 @@ class GIS extends Component {
   removeSelected = (id) => {
     var dp = id.split("&");
     this.setState({ loading: true }, () => {
-      var { selectedlayers, selected } = this.state;
+      var { selectedlayers, selected, hidden } = this.state;
       selectedlayers = selectedlayers.filter((x) => x.id !== id);
       selected = selected.filter(
         (x) =>
           parseInt(x[0]) !== parseInt(dp[0]) ||
           parseInt(x[1]) !== parseInt(dp[1])
       );
-      this.setState({ selectedlayers, selected, loading: false });
+      hidden = hidden.filter(
+        (x) =>
+          parseInt(x[0]) !== parseInt(dp[0]) ||
+          parseInt(x[1]) !== parseInt(dp[1])
+      );
+      this.setState({ selectedlayers, selected, hidden, loading: false });
     });
   };
 
@@ -615,7 +583,7 @@ class GIS extends Component {
           hidden
         );
 
-        selectedlayers.push(layer);
+        selectedlayers.unshift(layer);
       }
     }
     return { selectedlayers, datasets, selected };
@@ -830,7 +798,8 @@ class GIS extends Component {
     // Build selected layers object
     var selectedlayers = [];
     var fixedSelected = JSON.parse(JSON.stringify(selected));
-    for (var i = 0; i < fixedSelected.length; i++) {
+    for (var i = fixedSelected.length - 1; i > -1; i--) {
+      console.log(i)
       var datasets_id = fixedSelected[i][0];
       var parameters_id = fixedSelected[i][1];
       ({ selectedlayers, datasets, selected } = await this.addNewLayer(

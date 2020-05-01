@@ -45,8 +45,8 @@ class AvailbilityBarV extends Component {
         .attr("height", function (d) {
           return Math.max(3,y(d.max) - y(d.min));
         })
-        .attr("stroke", "deepskyblue")
-        .attr("fill", "deepskyblue")
+        .attr("stroke", "#28b5f5")
+        .attr("fill", "#28b5f5")
         .attr("y", function (d) {
           return y(d.min);
         })

@@ -44,8 +44,8 @@ class AvailbilityBar extends Component {
         .attr("width", function (d) {
           return Math.max(1,x(d.max) - x(d.min));
         })
-        .attr("stroke", "deepskyblue")
-        .attr("fill", "deepskyblue")
+        .attr("stroke", "#28b5f5")
+        .attr("fill", "#28b5f5")
         .attr("x", function (d) {
           return x(d.min);
         })

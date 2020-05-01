@@ -90,6 +90,7 @@ header .mobile-nav .imgactive img {
 header .mobile-nav .more {
   cursor: pointer;
   display: inline-block;
+  padding: 0 10px;
 }
 
 header .mobile-nav .mobile-flex {

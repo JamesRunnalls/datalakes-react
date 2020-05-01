@@ -293,12 +293,11 @@ class LineGraph extends Component {
                       yscale={yscale}
                       setDownloadGraph={this.setDownloadGraph}
                     />
-                  </div>
-                  <div className="linegraph-bottombox">
                     {fileSlider && (
                       <div className="linegraph-file">{value.toString()}</div>
                     )}
                   </div>
+                  <div className="linegraph-bottombox"></div>
                 </React.Fragment>
               )}
             </React.Fragment>

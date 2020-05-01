@@ -186,17 +186,6 @@ input.SearchBar {
   display: inline-block;
 }
 
-@media screen and (max-width: 500px) {
-  .sortbar {
-    padding: 0 5px;
-    box-sizing: border-box;
-    margin-top: 30px;
-  }
-  .filterbar {
-    padding: 0 5px;
-  }
-}
-
 .sortbar select {
   display: inline-block;
   background-color: white;
@@ -271,4 +260,28 @@ table.sortbar-table td {
 .dataportal-loading {
   text-align: center;
   margin-top: 100px;
+}
+
+@media screen and (max-width: 500px) {
+  .sortbar select {
+    padding: 4px 0;
+  }
+  table.sortbar-table td {
+    padding: 6px 4px;
+  }
+  .checkbox {
+    width: 14px;
+    height: 14px;
+  }
+  .datalist {
+    padding: 0 10px;
+  }
+  .sortbar {
+    padding: 0 4px;
+    box-sizing: border-box;
+    margin-top: 38px;
+  }
+  .filterbar {
+    padding: 0 5px;
+  }
 }

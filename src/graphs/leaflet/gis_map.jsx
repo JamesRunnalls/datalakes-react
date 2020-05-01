@@ -1009,7 +1009,7 @@ class GISMap extends Component {
 
   render() {
     var { help, fullsize, menu, group } = this.state;
-    var { legend, timeselector, loading, sidebar, updateState } = this.props;
+    var { legend, timeselector, loading, sidebar, updateState, selectedlayers } = this.props;
     if (!loading)
       document.getElementById("fullsize").innerHTML = fullsize
         ? "&#8690;"
@@ -1058,7 +1058,7 @@ class GISMap extends Component {
                 <div className="sidebar-symbol">{"\u2715"}</div>
               </div>
               <div className="sidebar-content">
-                <LayerGroups toggleMenu={this.toggleMenu} updateState={updateState}/>
+                <LayerGroups toggleMenu={this.toggleMenu} updateState={updateState} arr={selectedlayers}/>
               </div>
             </div>
 
