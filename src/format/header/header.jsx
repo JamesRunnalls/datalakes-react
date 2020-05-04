@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Link, NavLink } from 'react-router-dom'
 import logo from './img/logo.svg';
-import contact from './img/contact.svg';
 import map from './img/map.svg';
 import data from './img/data.svg';
 import home from './img/home.svg';
@@ -38,31 +37,33 @@ class Header extends Component {
                             <NavLink activeClassName="active" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
                             <NavLink activeClassName="active" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
                             <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink>
-                        </div>
-                        <div className="midscreen">
                             <div className="menu-icon" onClick={this.toggle}><h3>Menu <div className="symbol">{showMenu ? "<":">"}</div></h3></div>
-                        </div> 
+                        </div>
+                        
                     </div>
                     <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
-                        <NavLink activeClassName="home" onClick={this.closeMenu} to="/">Home</NavLink>
-                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
-                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
-                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
-                        <NavLink activeClassName="active" onClick={this.closeMenu} to="/about">About</NavLink>       
+                        <Link onClick={this.closeMenu} to="/">Home</Link>
+                        <div className="midscreen">
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
+                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
+                        </div> 
+                        <Link onClick={this.closeMenu} to="/?ourdata">Our Data</Link>
+                        <Link onClick={this.closeMenu} to="/?accessoptions">Access Options</Link>
+                        <Link onClick={this.closeMenu} to="/?about">About</Link>
+                        <Link onClick={this.closeMenu} to="/?contact">Contact</Link>                        
                     </div>
                 </div>
           
                 <div className="mobile-nav">
                     <div className={showMenu ? "mobile-menu show" : "mobile-menu"}>
                         <div className="mobile-flex">
-                            <NavLink onClick={this.closeMenu} to="/"><img alt="Home" src={home} /></NavLink>
                             <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/api"><img alt="API" src={api} /></NavLink>
-                            <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/about"><img alt="Contact" src={contact} /></NavLink>
                         </div>
                     </div>
                     <div className="mobile-navbar">
                         <div className="mobile-flex">
+                            <NavLink onClick={this.closeMenu} to="/"><img alt="Home" src={home} /></NavLink>
                             <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/map"><img alt="Map Viewer" src={map} /></NavLink>
                             <NavLink activeClassName="imgactive" onClick={this.closeMenu} to="/data"><img alt="Data Portal" src={data} /></NavLink>
                             <div onClick={this.toggle} className="more"><img alt="More" src={more} /></div>

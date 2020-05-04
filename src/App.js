@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import './App.css';
 import Header from './format/header/header';
-import Footer from './format/footer/footer';
 import Home from './pages/home/home';
 import NotFound from './pages/notfound/notfound';
 import DataPortal from './pages/dataportal/dataportal';
@@ -37,7 +36,6 @@ class App extends Component {
                 <Route path='/' component={NotFound} />
               </Switch>
           </main>
-          <Footer />
       </BrowserRouter>
     );
   }

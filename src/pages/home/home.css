@@ -1,175 +1,151 @@
-.home-container {
+.home {
+  position: absolute;
+  left: 0;
   width: 100%;
-  height: 100%;
-}
-
-.home-inner {
-  width: 50%;
-  min-height: 600px;
-  height: 100%;
-  vertical-align: top;
-  float: left;
-}
-
-.home-button {
-  font-size: 14px;
-  padding: 18px 43px;
-  border: 1px solid black;
-  cursor: pointer;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  text-align: center;
-  background-color: white;
-  width: 170px;
-}
-
-.home-button:hover {
-  color: rgb(70, 70, 70);
-}
-
-.home-content {
-  width: 100%;
-  box-sizing: border-box;
-  padding-right: 30px;
-  box-sizing: border-box;
-  padding-top: 45%;
-}
-
-.home-text {
-  font-size: 40px;
-  font-family: "The Serif Bold", serif;
-}
-
-.home-banners {
-  padding-top: 20%;
-}
-
-.home-banners a {
-  text-decoration: none;
+  margin-top: 80px;
 }
 
 .home-banner {
-  height: 120px;
   width: 100%;
-  background-color: white;
-  margin: 20px auto;
-  cursor: pointer;
+  background: url("img/banner.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 50vh;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.home-banner .home-tagline {
+  font-size: 40px;
+  font-family: "The Serif Bold", serif;
+  width: 600px;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 15vh;
+}
+
+.home-banner button {
+  font-size: 22px;
+  border-color: white;
+  background-color: red;
+  color: white;
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 20px;
+}
+
+.home-banner button:hover {
   color: black;
 }
 
-.home-banner:hover .inner-banner.right {
-  visibility: visible;
-  opacity: 1;
-  transition: opacity 0.2s linear;
-}
-
-.inner-banner {
-  display: inline-block;
-  width: 50%;
-  box-sizing: border-box;
-  vertical-align: top;
-  font-size: 16px;
-  position: relative;
-}
-
-.inner-banner.left {
-  font-size: 30px;
-  font-family: "The Serif Bold", serif;
-  padding: 20px;
-}
-
-.inner-banner.right {
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s 0.2s, opacity 0.2s linear;
-  height: 100%;
-  padding: 0 20px;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.8) 5%,
-    rgba(255, 255, 255, 0.8) 100%
-  );
-}
-
-.inner-banner-vert {
-  position: absolute;
-  top: 50%;
-  transform: translate(0, -50%);
-  padding: inherit;
-}
-
-.home-banner.live {
-  background-image: url("img/live.png");
-  background-size: 100%;
-  background-repeat: no-repeat;
-}
-
-.home-banner.predictions {
-  background-image: url("img/predictions.png");
-  background-size: 100%;
-  background-repeat: no-repeat;
-}
-
-.home-banner.data {
-  background-image: url("img/data.png");
-  background-size: 100%;
-  background-repeat: no-repeat;
-}
-
 .home-partners {
+  text-align: center;
+  padding-bottom: 20px;
+  padding-top: 10px;
+}
+
+.home-copyright {
+  text-align: right;
+  margin-top: 50px;
+  margin-bottom: 2px;
+}
+
+.home-partners img {
+  height: 30px;
+  margin: 5px 3%;
+}
+
+.home-partners .partner-logo .black {
+  display: inline-block;
+  opacity: 0.7;
+}
+
+.home-partners .partner-logo .color {
   display: none;
-  margin-top: 15px;
+}
+
+.home-partners .partner-logo:hover .black {
+  display: none;
+}
+
+.home-partners .partner-logo:hover .color {
+  display: inline-block;
+}
+
+.triple {
   text-align: center;
 }
 
-.home-partner-logo img {
-  height: 20px;
-  padding: 0 10px;
+.sectiontitle {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 80px;
+  font-size: 25px;
+  margin-top: 150px;
 }
 
-@media screen and (max-width: 960px) {
-  #home-left {
-    display: block;
-  }
-  .home-content {
-    padding: 0;
-    padding-top: 10vh;
-  }
-  .home-inner {
-    width: 100%;
-    min-height: initial;
-  }
-  .home-banners {
-    padding-top: 5vh;
-  }
-  .home-button {
-    display: none;
-  }
+.triple-inner {
+  width: 280px;
+  display: inline-block;
+  margin: 20px;
+  vertical-align: top;
+}
+
+.triple-title {
+  width: 100%;
+  text-align: center;
+  height: 40px;
+  font-family: "The Serif Bold", Arial, sans-serif;
+  font-size: 22px;
+}
+
+.triple-text {
+  font-size: 18px;
+  text-align: left;
+}
+
+.triple-img {
+  text-align: center;
+  height: 180px;
+  vertical-align: middle;
+  margin: 30px 0;
+}
+
+.triple-button {
+  width: 100%;
+  text-align: center;
+}
+
+.triple-img img {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 @media screen and (max-width: 500px) {
-  #home-left {
-    display: none;
+  .home {
+    margin-top: 20px;
   }
-  .home-banners {
-    padding: 0;
-    padding-top: calc(50vh - 285px);
-  }
-
   .home-banner {
-    margin: 8px 0;
+    margin-bottom: 0;
+  }
+  .home-banner .home-tagline {
+    font-size: 30px;
+    padding-top: 10vh;
+  }
+  .home-banner button {
+    font-size: 16px;
+  }
+  .sectiontitle {
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   .home-text {
-    font-size: 20px;
+    padding: 0 10px;
   }
-
-  .twitter {
-    display: none;
-  }
-
-  .home-partners{
-    display: block;
+  .home-copyright {
+    margin-bottom: 65px;
   }
 }

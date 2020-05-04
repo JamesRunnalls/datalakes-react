@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import epfl from './img/epfl.svg';
 import epflc from './img/epflc.svg';
 import eawag from './img/eawag.svg';
@@ -12,8 +11,6 @@ import carrtel from './img/carrtel.svg';
 import carrtelc from './img/carrtelc.svg';
 import sdsc from './img/sdsc.svg';
 import sdscc from './img/sdscc.svg';
-import mail from './img/mail.svg';
-import mailc from './img/mailc.svg';
 import twitter from './img/twitter.svg';
 import twitterc from './img/twitterc.svg';
 import './footer.css';
@@ -51,10 +48,6 @@ class Footer extends Component {
                   </div>
                   <div className="copyright">
                       <span className="contact">
-                          <Link to="about" className="contact-inner">
-                              <img src={mail} alt="Mail" title="Get in touch" className="black" />
-                              <img src={mailc} alt="Mail" title="Get in touch" className="color" />
-                          </Link>
                           <a href="https://twitter.com/Datalakes1" title="Check out our Twitter page" className="contact-inner">
                               <img src={twitter} alt="Twitter" className="black" />
                               <img src={twitterc} alt="Twitter" className="color" />

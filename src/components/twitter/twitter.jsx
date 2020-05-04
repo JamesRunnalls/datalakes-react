@@ -27,7 +27,7 @@ class Twitter extends Component {
   }
 
   render() {
-    const { link, tweet, date, error } = this.state;
+    const { link, tweet, error } = this.state;
     return !error ? (
       <div className="twitter" title="View tweet on twitter">
         <a href="https://twitter.com/Datalakes1">
@@ -35,7 +35,6 @@ class Twitter extends Component {
         </a>
         <a href={link}>
           <div className="twitter-text">"{tweet}"</div>
-          <div className="twitter-date">Tweeted {date}</div>
         </a>
       </div>
     ) : (

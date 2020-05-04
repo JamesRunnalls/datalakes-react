@@ -14,6 +14,7 @@ import DataSubMenu from "./datasubmenu";
 import Loading from "../../components/loading/loading";
 import { apiUrl } from "../../../src/config.json";
 import "./datadetail.css";
+import Footer from "../../format/footer/footer";
 
 class DataDetail extends Component {
   state = {
@@ -497,6 +498,7 @@ class DataDetail extends Component {
                 </tr>
               </tbody>
             </table>
+            <Footer />
           </React.Fragment>
         );
       case "heatmap":
@@ -518,6 +520,7 @@ class DataDetail extends Component {
               max={maxdatetime}
               min={mindatetime}
             />
+            <Footer />
           </React.Fragment>
         );
       case "linegraph":
@@ -550,6 +553,7 @@ class DataDetail extends Component {
               loading={innerLoading}
               combined={combined}
             />
+            <Footer />
           </React.Fragment>
         );
       case "preview":
@@ -567,6 +571,7 @@ class DataDetail extends Component {
               getLabel={this.getLabel}
               parameters={parameters}
             />
+            <Footer />
           </React.Fragment>
         );
       case "download":
@@ -588,6 +593,7 @@ class DataDetail extends Component {
               min={mindatetime}
               apiUrl={apiUrl}
             />
+            <Footer />
           </React.Fragment>
         );
       case "pipeline":
@@ -601,6 +607,7 @@ class DataDetail extends Component {
               link={link}
             />
             <Pipeline dataset={dataset} renku={renku} />
+            <Footer />
           </React.Fragment>
         );
       case "information":
@@ -618,6 +625,7 @@ class DataDetail extends Component {
               parameters={parameters}
               getLabel={this.getLabel}
             />
+            <Footer />
           </React.Fragment>
         );
       case "external":
@@ -630,6 +638,7 @@ class DataDetail extends Component {
               getLabel={this.getLabel}
               link={link}
             />
+            <Footer />
           </React.Fragment>
         );
       case "error":
@@ -647,6 +656,7 @@ class DataDetail extends Component {
                 </tr>
               </tbody>
             </table>
+            <Footer />
           </React.Fragment>
         );
     }

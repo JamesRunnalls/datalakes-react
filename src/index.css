@@ -113,10 +113,6 @@ button {
   padding: 4px 8px;
 }
 
-button:hover {
-  background-color: #f5f5f5;
-}
-
 /* Shapes */
 
 .circle {
