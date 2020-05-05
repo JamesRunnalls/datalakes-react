@@ -1,83 +1,258 @@
 import React, { Component } from "react";
-import SliderDouble from "../../../components/sliders/sliderdouble";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
+import DataSelect from "../../../components/dataselect/dataselect";
+import FilterBox from "../../../components/filterbox/filterbox";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
 import "../datadetail.css";
+import ColorManipulation from "../../../components/colormanipulation/colormanipulation";
+
+class DisplayOptions extends Component {
+  state = {
+    gradient: this.props.gradient,
+    title: this.props.title,
+  };
+  onChangeLocalGradient = (gradient) => {
+    this.setState({ gradient });
+  };
+  updatePlot = () => {
+    var { gradient, title } = this.state;
+    this.props.onChange(gradient);
+  };
+  render() {
+    var { gradient } = this.state;
+    return (
+      <FilterBox
+        title="Display Options"
+        content={
+          <React.Fragment>
+            <ColorManipulation
+              onChange={this.onChangeLocalGradient}
+              colors={gradient}
+            />
+            <div className="editsettings-button">
+              <button
+                type="button"
+                title="Update mapplot settings"
+                onClick={this.updatePlot}
+              >
+                Update Plot
+              </button>
+            </div>
+          </React.Fragment>
+        }
+      />
+    );
+  }
+}
 
 class HeatMap extends Component {
-    state = {
+  state = {
+    gradient: [
+      { color: "#0000ff", point: 0 },
+      { color: "#ffffff", point: 0.5 },
+      { color: "#ff0000", point: 1 },
+    ],
+    bcolor: "#ffffff",
+    xaxis: "x",
+    yaxis: "y",
+    zaxis: "z",
+    title: "",
+    xlabel: "None",
+    ylabel: "None",
+    zlabel: "None",
+    xunits: "None",
+    yunits: "None",
+    zunits: "None",
+    download: false,
+  };
+  onChangeBcolor = (event) => {
+    var bcolor = event.hex;
+    this.setState({ bcolor });
+  };
+
+  onChangeGradient = (gradient) => {
+    this.setState({ gradient });
+  };
+
+  handleAxisSelect = (axis) => (event) => {
+    var { parameters } = this.props;
+    var { xlabel, ylabel, zlabel, xunits, yunits, zunits } = this.state;
+    var parameter = parameters.find((x) => x.axis === event.value);
+    if (axis === "yaxis") {
+      ylabel = parameter.name;
+      yunits = parameter.unit;
+    } else if (axis === "xaxis") {
+      xlabel = parameter.name;
+      xunits = parameter.unit;
+    } else if (axis === "zaxis") {
+      zlabel = parameter.name;
+      zunits = parameter.unit;
+    }
+    this.setState({
+      ylabel,
+      xlabel,
+      zlabel,
+      yunits,
+      xunits,
+      zunits,
+      [axis]: event.value,
+    });
+  };
+
+  isNumeric = (n) => {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+  };
+
+  formatDate = (raw) => {
+    //return new Date(raw * 1000);
+    return new Date((raw - 719529) * 24 * 60 * 60 * 1000);
+  };
+
+  setDefault = () => {
+    var { parameters, dataset, getLabel } = this.props;
+    var { xaxis, yaxis, zaxis } = this.state;
+
+    // Get axis labels and units
+    const xparam = parameters.find((x) => x.axis === xaxis);
+    const yparam = parameters.find((y) => y.axis === yaxis);
+    const zparam = parameters.find((z) => z.axis === zaxis);
+    var xlabel = getLabel("parameters", xparam.parameters_id, "name");
+    var ylabel = getLabel("parameters", yparam.parameters_id, "name");
+    var zlabel = getLabel("parameters", zparam.parameters_id, "name");
+    var xunits = xparam.unit;
+    var yunits = yparam.unit;
+    var zunits = zparam.unit;
+    const title = dataset.title;
+
+    this.setState({
+      title,
+      xlabel,
+      ylabel,
+      zlabel,
+      xunits,
+      yunits,
+      zunits,
       bcolor: "#ffffff",
-      sgradient: "#0000ff",
-      egradient: "#ff0000",
-      minz: "",
-      maxz: ""
-    };
-    onChangeBcolor = event => {
-      var bcolor = event.hex;
-      this.setState({ bcolor });
-    };
-  
-    update = () => {
-      var sgradient = document.getElementById("sgradient").value;
-      var egradient = document.getElementById("egradient").value;
-      var minz = document.getElementById("minz").value;
-      var maxz = document.getElementById("maxz").value;
-      var bcolor = document.getElementById("bcolor").value;
-      this.setState({ sgradient, egradient, minz, maxz, bcolor });
-    };
-  
-    reset = () => {
-      this.setState({
-        bcolor: "#ffffff",
-        sgradient: "#0000ff",
-        egradient: "#ff0000",
-        minz: "",
-        maxz: ""
-      });
-      document.getElementById("maxz").value = "";
-      document.getElementById("minz").value = "";
-    };
-  
-    isNumeric = n => {
-      return !isNaN(parseFloat(n)) && isFinite(n);
-    };
-  
-    render() {
-      var { onChange, dataset, data, lower, upper, max, min } = this.props;
-      if ((lower !== min && lower !== "") || (upper !== max && upper !== "")) {
-        var l = 0;
-        var u = data.x.length - 1;
-        for (var i = 0; i < data.x.length; i++) {
-          if (data.x[i] < lower) {
-            l = i;
-          }
-          if (data.x[i] > upper && u === data.x.length - 1) {
-            u = i;
-          }
+    });
+  };
+
+  componentDidMount() {
+    this.setDefault();
+    document.addEventListener("keydown", this.handleKeyDown);
+  }
+
+  render() {
+    var {
+      onChangeTime,
+      onChangeFile,
+      onChangeFileInt,
+      onChangeLower,
+      onChangeUpper,
+      parameters,
+      getLabel,
+      data,
+      lower,
+      upper,
+      max,
+      min,
+      files,
+      file,
+      downloadData,
+      loading,
+      combined,
+    } = this.props;
+    const {
+      bcolor,
+      xaxis,
+      yaxis,
+      zaxis,
+      title,
+      xlabel,
+      ylabel,
+      zlabel,
+      xunits,
+      yunits,
+      zunits,
+      gradient,
+    } = this.state;
+
+    // Show time slider or multiple files
+    var time = parameters.filter((p) => p.parameters_id === 1);
+    var timeSlider = false;
+    var fileSlider = false;
+    if (files.length > 1) {
+      if (time.length > 0) {
+        if (time[0].axis !== "M") {
+          timeSlider = true;
+        } else {
+          fileSlider = true;
         }
-        var x = data.x.slice(l, u);
-        var y = data.y;
-        var z = [];
-        for (var zl of data.z) {
-          z.push(zl.slice(l, u));
-        }
-        data = { x: x, y: y, z: z };
       }
-      const { units, axis } = dataset;
-      const { bcolor, sgradient, egradient, minz, maxz } = this.state;
-      const xlabel = axis.x,
-        ylabel = axis.y,
-        zlabel = axis.z,
-        xunits = units.x,
-        yunits = units.y,
-        zunits = units.z;
-      return (
-        <React.Fragment>
-          <SidebarLayout
-            sidebartitle="Plot Controls"
-            left={
+    }
+
+    // Axis Options
+    var xoptions = [];
+    var yoptions = [];
+    var zoptions = [];
+    for (var j = 0; j < parameters.length; j++) {
+      if (parameters[j]["axis"].includes("x")) {
+        xoptions.push({
+          value: parameters[j]["axis"],
+          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
+        });
+      } else if (parameters[j]["axis"].includes("y")) {
+        yoptions.push({
+          value: parameters[j]["axis"],
+          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
+        });
+      } else if (parameters[j]["axis"].includes("z")) {
+        zoptions.push({
+          value: parameters[j]["axis"],
+          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
+        });
+      }
+    }
+
+    if (!loading) {
+      // Get data
+      var plotdata;
+      if (files[file].connect === "join") {
+        plotdata = {
+          x: combined[xaxis],
+          y: combined[yaxis],
+          z: combined[zaxis],
+        };
+      } else if (files[file].connect === "ind") {
+        plotdata = {
+          x: data[file][xaxis],
+          y: data[file][yaxis],
+          z: data[file][zaxis],
+        };
+      } else {
+        plotdata = { x: data[0][xaxis], y: data[0][yaxis], z: data[0][zaxis] };
+      }
+
+      if (timeSlider) {
+        plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
+      }
+
+      // Format data
+      var { x, y, z } = plotdata;
+      if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+      if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+      if (xlabel === "Depth") x = x.map((i) => -i);
+      if (ylabel === "Depth") y = y.map((i) => -i);
+      plotdata = { x, y, z };
+    }
+
+    return (
+      <React.Fragment>
+        <SidebarLayout
+          sidebartitle="Plot Controls"
+          left={
+            <div className="detailgraph">
               <D3HeatMap
-                data={data}
+                data={plotdata}
                 xlabel={xlabel}
                 ylabel={ylabel}
                 zlabel={zlabel}
@@ -85,103 +260,73 @@ class HeatMap extends Component {
                 yunits={yunits}
                 zunits={zunits}
                 bcolor={bcolor}
-                sgradient={sgradient}
-                egradient={egradient}
-                minz={minz}
-                maxz={maxz}
+                gradient={gradient}
               />
-            }
-            right={
-              <React.Fragment>
-                <div className="info-title" style={{ paddingTop: "0" }}>
-                  Set Date Range
+            </div>
+          }
+          rightNoScroll={
+            <React.Fragment>
+              <div>
+                <div>
+                  x:{" "}
+                  <div className="axis-select">
+                    <DataSelect
+                      value="value"
+                      label="label"
+                      dataList={xoptions}
+                      defaultValue={xaxis}
+                      onChange={this.handleAxisSelect("xaxis")}
+                    />
+                  </div>
                 </div>
-                <div className="side-date-slider">
-                  <SliderDouble
-                    onChange={onChange}
-                    min={min}
-                    max={max}
-                    lower={lower}
-                    upper={upper}
-                  />
+                <div>
+                  y:{" "}
+                  <div className="axis-select">
+                    <DataSelect
+                      value="value"
+                      label="label"
+                      dataList={yoptions}
+                      defaultValue={yaxis}
+                      onChange={this.handleAxisSelect("yaxis")}
+                    />
+                  </div>
                 </div>
-                <div className="info-title">Adjust Colors</div>
-                <table className="colors-table">
-                  <tbody>
-                    <tr>
-                      <td></td>
-                      <td></td>
-                      <td>Color</td>
-                      <td>Value ({zunits})</td>
-                    </tr>
-                    <tr>
-                      <td rowSpan="2">Gradient</td>
-                      <td>Max</td>
-                      <td>
-                        <input
-                          type="color"
-                          id="egradient"
-                          defaultValue={egradient}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          id="maxz"
-                          type="number"
-                          className="color-value"
-                        ></input>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Min</td>
-                      <td>
-                        <input
-                          type="color"
-                          id="sgradient"
-                          defaultValue={sgradient}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          id="minz"
-                          type="number"
-                          className="color-value"
-                        ></input>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan="2">Background</td>
-                      <td>
-                        <input type="color" id="bcolor" defaultValue={bcolor} />
-                      </td>
-                      <td></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div className="color-buttons">
-                  <button className="color-button" onClick={this.update}>
-                    Update
+                <div>
+                  z:{" "}
+                  <div className="axis-select">
+                    <DataSelect
+                      value="value"
+                      label="label"
+                      dataList={zoptions}
+                      defaultValue={zaxis}
+                      onChange={this.handleAxisSelect("zaxis")}
+                    />
+                  </div>
+                </div>
+              </div>
+              <DisplayOptions
+                gradient={gradient}
+                onChange={this.onChangeGradient}
+              />
+              <FilterBox
+                title="Download"
+                content={
+                  <button
+                    id="heatmap-download"
+                    className="download-button"
+                    onClick={this.download}
+                  >
+                    Download as PNG
                   </button>
-                  <button className="color-button" onClick={this.reset}>
-                    Reset
-                  </button>
-                </div>
-  
-                <div className="info-title">Download Image</div>
-                <button
-                  id="heatmap-download"
-                  className="download-button"
-                  onClick={this.download}
-                >
-                  Download
-                </button>
-              </React.Fragment>
-            }
-            open="False"
-          />
-        </React.Fragment>
-      );
-    }
+                }
+              />
+            </React.Fragment>
+          }
+          open="False"
+        />
+      </React.Fragment>
+    );
   }
+}
 
-  export default HeatMap;
+export default HeatMap;

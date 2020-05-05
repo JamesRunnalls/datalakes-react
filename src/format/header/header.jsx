@@ -34,24 +34,24 @@ class Header extends Component {
                 <div className="desktop-nav">
                     <div className="desktop-navbar">
                         <div className="links">
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
-                            <div className="menu-icon" onClick={this.toggle}><h3>Menu <div className="symbol">{showMenu ? "<":">"}</div></h3></div>
+                            <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
+                            <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
+                            <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/api">API</NavLink>
+                            <div className="menu-icon header-item" onClick={this.toggle}><h3>Menu <div className="symbol">{showMenu ? "<":">"}</div></h3></div>
                         </div>
                         
                     </div>
                     <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
                         <Link onClick={this.closeMenu} to="/">Home</Link>
                         <div className="midscreen">
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
-                            <NavLink activeClassName="active" onClick={this.closeMenu} to="/api">API</NavLink>
+                            <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
+                            <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
+                            <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/api">API</NavLink>
                         </div> 
-                        <Link onClick={this.closeMenu} to="/?ourdata">Our Data</Link>
-                        <Link onClick={this.closeMenu} to="/?accessoptions">Access Options</Link>
-                        <Link onClick={this.closeMenu} to="/?about">About</Link>
-                        <Link onClick={this.closeMenu} to="/?contact">Contact</Link>                        
+                        <Link onClick={this.closeMenu} className="header-item" to="/?ourdata">Our Data</Link>
+                        <Link onClick={this.closeMenu} className="header-item" to="/?accessoptions">Access Options</Link>
+                        <Link onClick={this.closeMenu} className="header-item" to="/?about">About</Link>
+                        <Link onClick={this.closeMenu} className="header-item" to="/?contact">Contact</Link>                        
                     </div>
                 </div>
           

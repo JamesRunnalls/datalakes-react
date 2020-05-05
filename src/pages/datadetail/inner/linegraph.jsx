@@ -278,7 +278,7 @@ class LineGraph extends Component {
                 </table>
               ) : (
                 <React.Fragment>
-                  <div className="detaillinegraph">
+                  <div className="detailgraph">
                     <D3LineGraph
                       data={plotdata}
                       title={title}

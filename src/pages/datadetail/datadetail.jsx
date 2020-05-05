@@ -31,130 +31,11 @@ class DataDetail extends Component {
     files: [],
     data: "",
     step: "",
-    allowedStep: ["preview", "download", "pipeline", "information", "webgis"],
+    allowedStep: ["download", "pipeline", "information", "webgis"],
     file: 0,
     innerLoading: false,
     combined: [],
   };
-
-  async componentDidMount() {
-    this._isMounted = true;
-    var { step, allowedStep } = this.state;
-    const dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
-    let server = await Promise.all([
-      axios.get(apiUrl + "/datasets/" + dataset_id),
-      axios.get(apiUrl + "/files?datasets_id=" + dataset_id),
-      axios.get(apiUrl + "/datasetparameters?datasets_id=" + dataset_id),
-      axios.get(apiUrl + "/selectiontables"),
-    ]).catch((error) => {
-      this.setState({ step: "error" });
-    });
-
-    var dataset = server[0].data;
-    var files = server[1].data;
-    var parameters = server[2].data;
-    var dropdown = server[3].data;
-
-    // Internal vs External Data source
-    if (dataset.datasource === "internal") {
-      // Add parameter details
-      var details;
-      for (var p in parameters) {
-        try {
-          details = this.parameterDetails(dropdown, parameters, p);
-          parameters[p]["name"] = details.name;
-          parameters[p]["characteristic"] = details.characteristic;
-        } catch (err) {
-          parameters[p]["name"] = null;
-          parameters[p]["characteristic"] = null;
-        }
-      }
-
-      // Logic for graphs
-      var x = parameters.filter((param) => param.axis === "x").length > 0;
-      var y = parameters.filter((param) => param.axis === "y").length > 0;
-      var z = parameters.filter((param) => param.axis === "z").length > 0;
-
-      if (x && y && z) {
-        allowedStep.push("heatmap");
-        step = "heatmap";
-      } else if (x && y) {
-        allowedStep.push("linegraph");
-        step = "linegraph";
-      } else {
-        step = "preview";
-      }
-
-      // Filter for only json files
-      files = files.filter((file) => file.filetype === "json");
-
-      // Get add average time
-      files = this.addAverageTime(files);
-
-      // Sort by value (descending)
-      files.sort(this.numDescending);
-
-      // Get min and max
-      var { mindatetime, maxdatetime, mindepth, maxdepth } = dataset;
-      mindatetime = new Date(mindatetime).getTime() / 1000;
-      maxdatetime = new Date(maxdatetime).getTime() / 1000;
-
-      // Download first file
-      var dataArray = new Array(files.length).fill(0);
-      var { data } = await axios
-        .get(apiUrl + "/files/" + files[0].id + "?get=raw")
-        .catch((error) => {
-          this.setState({ step: "error" });
-        });
-      dataArray[0] = data;
-      var combined = data;
-      var { lower, upper } = this.dataBounds(dataArray);
-
-      // Get Renku Data
-      var renku = false;
-      if (dataset.renku === 0) {
-        try {
-          ({ data: renku } = await axios.post(apiUrl + "/renku", {
-            url: dataset.datasourcelink,
-          }));
-        } catch (e) {
-          console.error(e);
-          renku = false;
-        }
-      }
-
-      this.setState({
-        renku,
-        dataset,
-        parameters,
-        files,
-        data: dataArray,
-        mindatetime,
-        maxdatetime,
-        mindepth,
-        maxdepth,
-        lower,
-        upper,
-        dropdown,
-        step,
-        allowedStep,
-        combined,
-      });
-    } else {
-      this.setState({
-        dataset,
-        parameters,
-        dropdown,
-        files,
-        step: "external",
-        allowedStep: ["external"],
-      });
-    }
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
 
   // Download data
 
@@ -457,6 +338,128 @@ class DataDetail extends Component {
     return objValue.concat(srcValue);
   };
 
+  async componentDidMount() {
+    this._isMounted = true;
+    var { step, allowedStep } = this.state;
+    const dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
+    let server = await Promise.all([
+      axios.get(apiUrl + "/datasets/" + dataset_id),
+      axios.get(apiUrl + "/files?datasets_id=" + dataset_id),
+      axios.get(apiUrl + "/datasetparameters?datasets_id=" + dataset_id),
+      axios.get(apiUrl + "/selectiontables"),
+    ]).catch((error) => {
+      this.setState({ step: "error" });
+    });
+
+    var dataset = server[0].data;
+    var files = server[1].data;
+    var parameters = server[2].data;
+    var dropdown = server[3].data;
+
+    // Internal vs External Data source
+    if (dataset.datasource === "internal") {
+      // Add parameter details
+      var details;
+      for (var p in parameters) {
+        try {
+          details = this.parameterDetails(dropdown, parameters, p);
+          parameters[p]["name"] = details.name;
+          parameters[p]["characteristic"] = details.characteristic;
+        } catch (err) {
+          parameters[p]["name"] = null;
+          parameters[p]["characteristic"] = null;
+        }
+      }
+
+      // Logic for graphs
+      var x = parameters.filter((param) => param.axis === "x").length > 0;
+      var y = parameters.filter((param) => param.axis === "y").length > 0;
+      var z = parameters.filter((param) => param.axis === "z").length > 0;
+
+      if (x && y && z) {
+        allowedStep.push("heatmap");
+        step = "heatmap";
+      } else if (x && y) {
+        allowedStep.push("linegraph");
+        allowedStep.push("preview");
+        step = "linegraph";
+      } else {
+        allowedStep.push("preview");
+        step = "preview";
+      }
+
+      // Filter for only json files
+      files = files.filter((file) => file.filetype === "json");
+
+      // Get add average time
+      files = this.addAverageTime(files);
+
+      // Sort by value (descending)
+      files.sort(this.numDescending);
+
+      // Get min and max
+      var { mindatetime, maxdatetime, mindepth, maxdepth } = dataset;
+      mindatetime = new Date(mindatetime).getTime() / 1000;
+      maxdatetime = new Date(maxdatetime).getTime() / 1000;
+
+      // Download first file
+      var dataArray = new Array(files.length).fill(0);
+      var { data } = await axios
+        .get(apiUrl + "/files/" + files[0].id + "?get=raw")
+        .catch((error) => {
+          this.setState({ step: "error" });
+        });
+
+      dataArray[0] = data;
+      var combined = data;
+      var { lower, upper } = this.dataBounds(dataArray);
+
+      // Get Renku Data
+      var renku = false;
+      if (dataset.renku === 0) {
+        try {
+          ({ data: renku } = await axios.post(apiUrl + "/renku", {
+            url: dataset.datasourcelink,
+          }));
+        } catch (e) {
+          console.error(e);
+          renku = false;
+        }
+      }
+
+      this.setState({
+        renku,
+        dataset,
+        parameters,
+        files,
+        data: dataArray,
+        mindatetime,
+        maxdatetime,
+        mindepth,
+        maxdepth,
+        lower,
+        upper,
+        dropdown,
+        step,
+        allowedStep,
+        combined,
+      });
+    } else {
+      this.setState({
+        dataset,
+        parameters,
+        dropdown,
+        files,
+        step: "external",
+        allowedStep: ["external"],
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   render() {
     const {
       renku,
@@ -512,13 +515,19 @@ class DataDetail extends Component {
               link={link}
             />
             <HeatMap
-              onChange={this.onChangeTime}
               dataset={dataset}
+              parameters={parameters}
               data={data}
               lower={lower}
               upper={upper}
               max={maxdatetime}
               min={mindatetime}
+              files={files}
+              file={file}
+              loading={innerLoading}
+              combined={combined}
+              getLabel={this.getLabel}
+              onChange={this.onChangeTime}
             />
             <Footer />
           </React.Fragment>
@@ -534,13 +543,7 @@ class DataDetail extends Component {
               link={link}
             />
             <LineGraph
-              onChangeTime={this.onChangeTime}
-              onChangeFile={this.onChangeFile}
-              onChangeFileInt={this.onChangeFileInt}
-              onChangeLower={this.onChangeLower}
-              onChangeUpper={this.onChangeUpper}
               dataset={dataset}
-              getLabel={this.getLabel}
               parameters={parameters}
               data={data}
               lower={lower}
@@ -549,9 +552,15 @@ class DataDetail extends Component {
               min={mindatetime}
               files={files}
               file={file}
-              downloadData={this.downloadData}
               loading={innerLoading}
               combined={combined}
+              onChangeTime={this.onChangeTime}
+              onChangeFile={this.onChangeFile}
+              onChangeFileInt={this.onChangeFileInt}
+              onChangeLower={this.onChangeLower}
+              onChangeUpper={this.onChangeUpper}
+              getLabel={this.getLabel}
+              downloadData={this.downloadData}
             />
             <Footer />
           </React.Fragment>
@@ -649,7 +658,7 @@ class DataDetail extends Component {
                 <tr>
                   <td>
                     <h3>Error that dataset could not be found.</h3>
-                    <Link to="/dataportal">
+                    <Link to="/data">
                       <h2>Head back to the data portal</h2>
                     </Link>
                   </td>

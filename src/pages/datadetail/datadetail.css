@@ -97,7 +97,7 @@
   height: 400px;
 }
 
-.detaillinegraph {
+.detailgraph {
   height: 500px;
   margin-top: 30px;
 }
@@ -174,7 +174,7 @@
 }
 
 @media screen and (max-width: 500px) {
-  .detaillinegraph {
+  .detailgraph {
     height: auto;
     margin-top: 45px;
   }

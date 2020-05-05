@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./colortable.css";
 
 class ColorTable extends Component {
-  deleteRow = row => {
+  deleteRow = (row) => {
     var { colors, onChange } = this.props;
     colors.splice(row, 1);
     onChange(colors);
@@ -14,13 +14,14 @@ class ColorTable extends Component {
     onChange(colors);
   };
 
-  updateColors = row => event => {
+  updateColors = (event) => {
     var { colors, onChange } = this.props;
-    colors[row].color = event.target.value;
+    var index = event.target.id;
+    colors[index].color = event.target.value;
     onChange(colors);
   };
 
-  updatePoint = (row, min, max) => event => {
+  updatePoint = (row, min, max) => (event) => {
     var { colors, onChange } = this.props;
     colors[row].point = (event.target.value - min) / (max - min);
     onChange(colors);
@@ -67,7 +68,6 @@ class ColorTable extends Component {
       min = Math.min(...array);
       max = Math.max(...array);
     }
-
     return (
       <form id="colortable" className="colortable">
         <table>
@@ -79,8 +79,9 @@ class ColorTable extends Component {
                   <td style={{ width: "45%" }}>
                     <input
                       type="color"
+                      id={index}
                       value={color.color}
-                      onChange={() => this.updateColors(index)}
+                      onChange={this.updateColors}
                     ></input>
                   </td>
                   <td style={{ width: "45%" }}>
@@ -117,17 +118,19 @@ class ColorTable extends Component {
                 </tr>
               );
             })}
-            <tr>
-              <td colSpan="2">
-                <button
-                  type="button"
-                  title="Optimise point distribution"
-                  onClick={this.optimisePoints}
-                >
-                  Optimise Points
-                </button>
-              </td>
-            </tr>
+            {array && (
+              <tr>
+                <td colSpan="2">
+                  <button
+                    type="button"
+                    title="Optimise point distribution"
+                    onClick={this.optimisePoints}
+                  >
+                    Optimise Points
+                  </button>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </form>

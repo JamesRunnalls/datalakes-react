@@ -28,16 +28,14 @@
 
 .home-banner button {
   font-size: 22px;
-  border-color: white;
-  background-color: red;
+  background-color: black;
   color: white;
-  border-radius: 8px;
   height: 40px;
   padding: 0 20px;
 }
 
 .home-banner button:hover {
-  color: black;
+  color: grey;
 }
 
 .home-partners {

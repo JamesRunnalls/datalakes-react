@@ -147,6 +147,10 @@ header .active {
   font-weight: 700;
 }
 
+header .header-item:hover {
+  font-weight: 700;
+}
+
 header .desktop-nav .desktop-menu {
   display: none;
   position: absolute;
