@@ -64,10 +64,11 @@ class ColorTable extends Component {
     var { array, colors } = this.props;
     var max = 1,
       min = 0;
-    if (array) {
+    if (array && array.length > 0) {
       min = Math.min(...array);
       max = Math.max(...array);
     }
+
     return (
       <form id="colortable" className="colortable">
         <table>
@@ -91,7 +92,7 @@ class ColorTable extends Component {
                       <input
                         type="text"
                         defaultValue={value}
-                        onChange={() => this.updatePoint(index, min, max)}
+                        onChange={this.updatePoint(index, min, max)}
                       ></input>
                     )}
                   </td>

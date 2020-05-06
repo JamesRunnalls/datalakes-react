@@ -32,6 +32,19 @@ class D3HeatMap extends Component {
     return out;
   };
 
+  indexOfClosest = (num, arr) => {
+    var index = 0;
+    var diff = Math.abs(num - arr[0]);
+    for (var val = 0; val < arr.length; val++) {
+      var newdiff = Math.abs(num - arr[val]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = val;
+      }
+    }
+    return index;
+  };
+
   plotHeatMap = () => {
     try {
       d3.select("#svg").remove();
@@ -49,8 +62,7 @@ class D3HeatMap extends Component {
           zunits,
           bcolor,
           gradient,
-          sgradient,
-          egradient,
+          title,
         } = this.props;
         const { closest, median, gaps } = this;
         var currentZoom = d3.zoomIdentity;
@@ -87,8 +99,40 @@ class D3HeatMap extends Component {
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
 
+        // Calculate pixel values
+        var ypix = height;
+        var xpix = width;
+
+        var dataypix = data.y.map((dy) => y(dy));
+        var dataxpix = data.x.map((dx) => x(dx));
+
+        var indexypix = [];
+        var indexxpix = [];
+
+        for (var i = 0; i < ypix; i++) {
+          indexypix.push(this.indexOfClosest(i, dataypix));
+        }
+
+        for (var j = 0; j < xpix; j++) {
+          indexxpix.push(this.indexOfClosest(j, dataxpix));
+        }
+
+        var newy = [...Array(ypix).keys()];
+        var newx = [...Array(xpix).keys()];
+
+        var newz = [];
+        for (var k = 0; k < ypix; k++) {
+          var row = [];
+          for (var l = 0; l < xpix; l++) {
+            row.push(data.z[indexypix[k]][indexxpix[l]]);
+          }
+          newz.push(row);
+        }
+
+        var newdata = { x: newx, y: newy, z: newz };
+
         // Calculate bar widths
-        var xp = [];
+        /*var xp = [];
         var yp = [];
         for (var i of data.y) {
           yp.push(y(i));
@@ -115,7 +159,7 @@ class D3HeatMap extends Component {
           } else {
             return s;
           }
-        });
+        });*/
 
         // Adds the svg
         var svg = d3
@@ -156,7 +200,8 @@ class D3HeatMap extends Component {
           ])
           .on("zoom", () => {
             context.save();
-            updateChart(d3.event.transform);
+            //updateChart(d3.event.transform);
+            updateChart2(d3.event.transform);
             context.restore();
           });
         canvas.call(zoom_function);
@@ -309,6 +354,16 @@ class D3HeatMap extends Component {
           .style("text-anchor", "middle")
           .text(yLabel);
 
+        // Add title
+        svg
+          .append("text")
+          .attr("x", width / 2)
+          .attr("y", 2 - margin.top / 2)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .style("text-decoration", "underline")
+          .text(title);
+
         // Add the legend
         var defs = svg.append("defs");
 
@@ -385,7 +440,8 @@ class D3HeatMap extends Component {
         // Plot data to canvas
         setTimeout(() => {
           context.clearRect(0, 0, width, height);
-          fillCanvas(x, y, 1);
+          //fillCanvas(x, y, 1);
+          fillCanvas2(0, 0, 1);
         }, 10);
 
         d3.select("#heatmap-download").on("click", function () {
@@ -418,7 +474,20 @@ class D3HeatMap extends Component {
             "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
         });
 
-        function fillCanvas(scaleX, scaleY, k) {
+        function fillCanvas2(xp, yp, k) {
+          for (var xx in newdata.x) {
+            for (var yy in newdata.y) {
+              var dx = newdata.x[xx] + xp;
+              var dy = newdata.y[yy] + yp;
+              var dv = newdata.z[yy][xx];
+              var bw = 1 * k;
+              var bh = 1 * k;
+              drawRect(dx, dy, dv, bw, bh);
+            }
+          }
+        }
+
+        /*function fillCanvas(scaleX, scaleY, k) {
           for (var xx in data.x) {
             for (var yy in data.y) {
               var dx = scaleX(data.x[xx]);
@@ -429,7 +498,7 @@ class D3HeatMap extends Component {
               drawRect(dx, dy, dv, bw, bh);
             }
           }
-        }
+        }*/
 
         function drawRect(dx, dy, dv, bw, bh) {
           var color = colorScale(dv);
@@ -439,7 +508,7 @@ class D3HeatMap extends Component {
           context.fillRect(dx, dy, bw, bh);
         }
 
-        function updateChart(transform) {
+        /*function updateChart(transform) {
           currentZoom = transform;
           var scaleX = transform.rescaleX(x);
           var scaleY = transform.rescaleY(y);
@@ -447,6 +516,16 @@ class D3HeatMap extends Component {
           gyAxis.call(yAxis.scale(scaleY));
           context.clearRect(0, 0, width, height);
           fillCanvas(scaleX, scaleY, transform.k);
+        }*/
+
+        function updateChart2(transform) {
+          currentZoom = transform;
+          var scaleX = transform.rescaleX(x);
+          var scaleY = transform.rescaleY(y);
+          gxAxis.call(xAxis.scale(scaleX));
+          gyAxis.call(yAxis.scale(scaleY));
+          context.clearRect(0, 0, width, height);
+          fillCanvas2(transform.x, transform.y, transform.k);
         }
       } catch (e) {
         console.log("Heatmap failed to plot", e);

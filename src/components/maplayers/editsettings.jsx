@@ -6,9 +6,9 @@ class EditSettings extends Component {
   state = {
     display: JSON.parse(
       JSON.stringify(this.props.display ? this.props.display : [])
-    )
+    ),
   };
-  localColorChange = colors => {
+  localColorChange = (colors) => {
     var { display } = this.state;
     display.colors = colors;
     this.setState({ display });
@@ -23,31 +23,31 @@ class EditSettings extends Component {
     display.legend = !display.legend;
     this.setState({ display });
   };
-  localMarkerSymbolChange = event => {
+  localMarkerSymbolChange = (event) => {
     var { display } = this.state;
     display.markerSymbol = event.target.value;
     this.setState({ display });
   };
-  localMarkerFixedSizeChange = event => {
+  localMarkerFixedSizeChange = (event) => {
     var { display } = this.state;
     var markerFixedSize = false;
     if (event.target.value === "true") markerFixedSize = true;
     display.markerFixedSize = markerFixedSize;
     this.setState({ display });
   };
-  localMarkerSizeChange = event => {
+  localMarkerSizeChange = (event) => {
     var { display } = this.state;
     display.markerSize = event.target.value;
     this.setState({ display });
   };
-  localVectorArrowColorChange = event => {
+  localVectorArrowColorChange = (event) => {
     var { display } = this.state;
     var vectorArrowColor = false;
     if (event.target.value === "true") vectorArrowColor = true;
     display.vectorArrowColor = vectorArrowColor;
     this.setState({ display });
   };
-  localVectorFlowColorChange = event => {
+  localVectorFlowColorChange = (event) => {
     var { display } = this.state;
     var vectorFlowColor = false;
     if (event.target.value === "true") vectorFlowColor = true;
@@ -72,7 +72,7 @@ class EditSettings extends Component {
   updateDisplay = () => {
     var { onUpdate, displayGroup } = this.props;
     var { display } = this.state;
-    var index = displayGroup.findIndex(x => x.id === display.id);
+    var index = displayGroup.findIndex((x) => x.id === display.id);
     displayGroup[index] = display;
     onUpdate(displayGroup);
   };
@@ -85,15 +85,15 @@ class EditSettings extends Component {
       markerSymbol,
       markerFixedSize,
       markerSize,
-      array,
       mapplot,
       vectorMagnitude,
       vectorArrows,
       vectorFlow,
       vectorArrowColor,
-      vectorFlowColor
+      vectorFlowColor,
     } = display;
-    var { removeSelected, id } = this.props;
+    var { removeSelected, id, display: displayProps } = this.props;
+    var { array } = displayProps;
     return (
       <div className="editsettings">
         {["marker", "group"].includes(mapplot) && (

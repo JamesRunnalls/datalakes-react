@@ -122,6 +122,10 @@ export const getColor = (value, min, max, colors) => {
   function convertToHex(rgb) {
     return hex(rgb[0]) + hex(rgb[1]) + hex(rgb[2]);
   }
+  
+  if (value === null || isNaN(value)){
+    return "#ffffff";
+  }
   var loc = (value - min) / (max - min);
   if (loc < 0 || loc > 1) {
     return "#fff";

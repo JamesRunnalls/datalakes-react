@@ -799,7 +799,6 @@ class GIS extends Component {
     var selectedlayers = [];
     var fixedSelected = JSON.parse(JSON.stringify(selected));
     for (var i = fixedSelected.length - 1; i > -1; i--) {
-      console.log(i)
       var datasets_id = fixedSelected[i][0];
       var parameters_id = fixedSelected[i][1];
       ({ selectedlayers, datasets, selected } = await this.addNewLayer(

@@ -6,37 +6,8 @@ import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import DataSelect from "../../../components/dataselect/dataselect";
 import FilterBox from "../../../components/filterbox/filterbox";
 import Loading from "../../../components/loading/loading";
+import LoadDataSets from '../../../components/loaddatasets/loaddatasets';
 import "../datadetail.css";
-
-class LoadDataSets extends Component {
-  downloadProgress = (data) => {
-    var len = data.length;
-    var count = 0;
-    for (var i = 0; i < len; i++) {
-      if (data[i] === 0) count++;
-    }
-    count = len - count;
-    return count;
-  };
-
-  render() {
-    var { downloadData, data } = this.props;
-    var count = this.downloadProgress(data);
-
-    return (
-      <div className="loaddatasets">
-        {count < data.length && (
-          <div className="linegraph-file">
-            {count} of {data.length} files in memory.
-            <button className="read-button" onClick={() => downloadData()}>
-              Preload full dataset
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-}
 
 class LineGraph extends Component {
   state = {

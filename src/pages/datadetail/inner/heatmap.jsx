@@ -1,10 +1,13 @@
 import React, { Component } from "react";
+import SliderDouble from "../../../components/sliders/sliderdouble";
+import SliderSingle from "../../../components/sliders/slidersingle";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
 import DataSelect from "../../../components/dataselect/dataselect";
 import FilterBox from "../../../components/filterbox/filterbox";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
-import "../datadetail.css";
 import ColorManipulation from "../../../components/colormanipulation/colormanipulation";
+import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
+import "../datadetail.css";
 
 class DisplayOptions extends Component {
   state = {
@@ -14,17 +17,40 @@ class DisplayOptions extends Component {
   onChangeLocalGradient = (gradient) => {
     this.setState({ gradient });
   };
+  onChangeLocalTitle = (event) => {
+    var title = event.target.value;
+    this.setState({ title });
+  };
   updatePlot = () => {
     var { gradient, title } = this.state;
-    this.props.onChange(gradient);
+    this.props.onChange(gradient, title);
   };
+  componentDidUpdate(prevProps) {
+    if (prevProps.title !== this.props.title) {
+      this.setState({ title: this.props.title });
+    }
+  }
   render() {
-    var { gradient } = this.state;
+    var { gradient, title } = this.state;
     return (
       <FilterBox
         title="Display Options"
         content={
           <React.Fragment>
+            <table className="colors-table">
+              <tbody>
+                <tr>
+                  <td>Title</td>
+                  <td colSpan="2">
+                    <textarea
+                      id="title"
+                      defaultValue={title}
+                      onChange={this.onChangeLocalTitle}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
             <ColorManipulation
               onChange={this.onChangeLocalGradient}
               colors={gradient}
@@ -49,14 +75,13 @@ class HeatMap extends Component {
   state = {
     gradient: [
       { color: "#0000ff", point: 0 },
-      { color: "#ffffff", point: 0.5 },
       { color: "#ff0000", point: 1 },
     ],
+    title: "",
     bcolor: "#ffffff",
     xaxis: "x",
     yaxis: "y",
     zaxis: "z",
-    title: "",
     xlabel: "None",
     ylabel: "None",
     zlabel: "None",
@@ -65,13 +90,14 @@ class HeatMap extends Component {
     zunits: "None",
     download: false,
   };
+
   onChangeBcolor = (event) => {
     var bcolor = event.hex;
     this.setState({ bcolor });
   };
 
-  onChangeGradient = (gradient) => {
-    this.setState({ gradient });
+  onChangeDisplay = (gradient, title) => {
+    this.setState({ gradient, title });
   };
 
   handleAxisSelect = (axis) => (event) => {
@@ -180,13 +206,11 @@ class HeatMap extends Component {
     var time = parameters.filter((p) => p.parameters_id === 1);
     var timeSlider = false;
     var fileSlider = false;
-    if (files.length > 1) {
-      if (time.length > 0) {
-        if (time[0].axis !== "M") {
-          timeSlider = true;
-        } else {
-          fileSlider = true;
-        }
+    if (time.length > 0) {
+      if (time[0].axis !== "M") {
+        timeSlider = true;
+      } else {
+        fileSlider = true;
       }
     }
 
@@ -232,17 +256,20 @@ class HeatMap extends Component {
         plotdata = { x: data[0][xaxis], y: data[0][yaxis], z: data[0][zaxis] };
       }
 
-      if (timeSlider) {
+      /*if (timeSlider) {
         plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
-      }
+      }*/
 
       // Format data
       var { x, y, z } = plotdata;
       if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
       if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-      if (xlabel === "Depth") x = x.map((i) => -i);
-      if (ylabel === "Depth") y = y.map((i) => -i);
+      //if (xlabel === "Depth") x = x.map((i) => -i);
+      //if (ylabel === "Depth") y = y.map((i) => -i);
       plotdata = { x, y, z };
+
+      // Value
+      var value = new Date(files[file].ave);
     }
 
     return (
@@ -253,6 +280,7 @@ class HeatMap extends Component {
             <div className="detailgraph">
               <D3HeatMap
                 data={plotdata}
+                title={title}
                 xlabel={xlabel}
                 ylabel={ylabel}
                 zlabel={zlabel}
@@ -304,9 +332,52 @@ class HeatMap extends Component {
                   </div>
                 </div>
               </div>
+              {fileSlider && (
+                <FilterBox
+                  title="Other Files"
+                  preopen="true"
+                  content={
+                    <div className="">
+                      <SliderSingle
+                        onChange={onChangeFile}
+                        onChangeFileInt={onChangeFileInt}
+                        file={file}
+                        value={value}
+                        min={min}
+                        max={max}
+                        files={files}
+                        type="time"
+                      />
+                      <LoadDataSets data={data} downloadData={downloadData} />
+                    </div>
+                  }
+                />
+              )}
+              {timeSlider && (
+                <FilterBox
+                  title="Date Range"
+                  preopen="true"
+                  content={
+                    <div className="side-date-slider">
+                      <SliderDouble
+                        onChange={onChangeTime}
+                        onChangeLower={onChangeLower}
+                        onChangeUpper={onChangeUpper}
+                        min={min}
+                        max={max}
+                        lower={lower}
+                        upper={upper}
+                        files={files}
+                      />
+                      <LoadDataSets data={data} downloadData={downloadData} />
+                    </div>
+                  }
+                />
+              )}
               <DisplayOptions
                 gradient={gradient}
-                onChange={this.onChangeGradient}
+                title={title}
+                onChange={this.onChangeDisplay}
               />
               <FilterBox
                 title="Download"
