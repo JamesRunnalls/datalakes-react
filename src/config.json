@@ -1,7 +1,8 @@
 {
-    "apiUrl":"http://localhost:4000",
+    "apiUrlssss":"http://localhost:4000",
     "apiUrlss":"https://datalakesapi.ch",
     "apiUrlsss":"https://api.datalakesapi.ch",
+    "apiUrl":"https://api.datalakes-eawag.ch",
     "apiUrls":"https://datalakes-api.herokuapp.com",
     "password":"thetis"
 }
