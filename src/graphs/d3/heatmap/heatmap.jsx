@@ -269,6 +269,16 @@ class D3HeatMap extends Component {
             .text(xLabel);
         }
 
+        gxAxis.selectAll("text").attr("transform", function (d) {
+          return (
+            "rotate(-45)translate(-" +
+            this.getBBox().width * (3 / 4) +
+            ",-" +
+            this.getBBox().height * (3 / 4) +
+            ")"
+          );
+        });
+
         // Add the Y Axis
         var yLabel = "";
         if ("ylabel" in this.props) {

@@ -74,7 +74,7 @@ class AddMetadata extends Component {
                 <td>
                   {datasetparameters.filter(dp => dp.parameters_id === 1)
                     .length > 0 ? (
-                    <div>{new Date(dataset["mindatetime"]).toString()}</div>
+                    <div>{new Date(dataset["mindatetime"]*1000).toString()}</div>
                   ) : (
                     <input
                       type="number"
@@ -103,7 +103,7 @@ class AddMetadata extends Component {
                 <td>
                   {datasetparameters.filter(dp => dp.parameters_id === 1)
                     .length > 0 ? (
-                    <div>{new Date(dataset["maxdatetime"]).toString()}</div>
+                    <div>{new Date(dataset["maxdatetime"]*1000).toString()}</div>
                   ) : (
                     <input
                       type="number"

@@ -159,8 +159,8 @@ class HeatMap extends Component {
   };
 
   handleAxisSelect = (axis) => (event) => {
-    var { parameters } = this.props;
-    var { xlabel, ylabel, zlabel, xunits, yunits, zunits } = this.state;
+    var { parameters, data, file } = this.props;
+    var { xlabel, ylabel, zlabel, xunits, yunits, zunits, minvalue, maxvalue } = this.state;
     var parameter = parameters.find((x) => x.axis === event.value);
     if (axis === "yaxis") {
       ylabel = parameter.name;
@@ -171,6 +171,13 @@ class HeatMap extends Component {
     } else if (axis === "zaxis") {
       zlabel = parameter.name;
       zunits = parameter.unit;
+      var zdomain = d3.extent(
+        [].concat.apply([], data[file][parameter.axis]).filter((f) => {
+          return !isNaN(parseFloat(f)) && isFinite(f);
+        })
+      );
+      minvalue = zdomain[0];
+      maxvalue = zdomain[1];
     }
     this.setState({
       ylabel,
@@ -179,6 +186,8 @@ class HeatMap extends Component {
       yunits,
       xunits,
       zunits,
+      minvalue,
+      maxvalue,
       [axis]: event.value,
     });
   };
@@ -201,8 +210,7 @@ class HeatMap extends Component {
   };
 
   formatDate = (raw) => {
-    //return new Date(raw * 1000);
-    return new Date((raw - 719529) * 24 * 60 * 60 * 1000);
+    return new Date(raw * 1000);
   };
 
   setDefault = () => {
