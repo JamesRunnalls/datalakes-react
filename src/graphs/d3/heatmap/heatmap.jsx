@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
 import { format } from "date-fns";
-import { getColor } from "../../../components/gradients/gradients";
+import { getRGBAColor } from "../../../components/gradients/gradients";
 import "./heatmap.css";
 
 class D3HeatMap extends Component {
@@ -61,10 +61,12 @@ class D3HeatMap extends Component {
           yunits,
           zunits,
           bcolor,
-          gradient,
+          colors,
           title,
+          minvalue,
+          maxvalue,
         } = this.props;
-        const { closest, median, gaps } = this;
+        const { closest, indexOfClosest } = this;
         var currentZoom = d3.zoomIdentity;
 
         // Set graph size
@@ -78,15 +80,20 @@ class D3HeatMap extends Component {
         // Get data extents
         var xdomain = d3.extent(data.x);
         var ydomain = d3.extent(data.y);
-        var zdomain = d3.extent(
-          [].concat.apply([], data.z).filter((f) => {
-            return !isNaN(parseFloat(f)) && isFinite(f);
-          })
-        );
+
+        if (!minvalue && !maxvalue) {
+          var zdomain = d3.extent(
+            [].concat.apply([], data.z).filter((f) => {
+              return !isNaN(parseFloat(f)) && isFinite(f);
+            })
+          );
+          minvalue = zdomain[0];
+          maxvalue = zdomain[1];
+        }
 
         // Set color gradients
         var colorScale = (v) => {
-          return getColor(v, zdomain[0], zdomain[1], gradient);
+          return getRGBAColor(v, minvalue, maxvalue, colors);
         };
 
         // Format X-axis
@@ -98,68 +105,6 @@ class D3HeatMap extends Component {
         // Define the axes
         var xAxis = d3.axisBottom(x);
         var yAxis = d3.axisLeft(y);
-
-        // Calculate pixel values
-        var ypix = height;
-        var xpix = width;
-
-        var dataypix = data.y.map((dy) => y(dy));
-        var dataxpix = data.x.map((dx) => x(dx));
-
-        var indexypix = [];
-        var indexxpix = [];
-
-        for (var i = 0; i < ypix; i++) {
-          indexypix.push(this.indexOfClosest(i, dataypix));
-        }
-
-        for (var j = 0; j < xpix; j++) {
-          indexxpix.push(this.indexOfClosest(j, dataxpix));
-        }
-
-        var newy = [...Array(ypix).keys()];
-        var newx = [...Array(xpix).keys()];
-
-        var newz = [];
-        for (var k = 0; k < ypix; k++) {
-          var row = [];
-          for (var l = 0; l < xpix; l++) {
-            row.push(data.z[indexypix[k]][indexxpix[l]]);
-          }
-          newz.push(row);
-        }
-
-        var newdata = { x: newx, y: newy, z: newz };
-
-        // Calculate bar widths
-        /*var xp = [];
-        var yp = [];
-        for (var i of data.y) {
-          yp.push(y(i));
-        }
-        for (var k of data.x) {
-          xp.push(x(k));
-        }
-        var bwa = gaps(xp);
-        var bha = gaps(yp);
-        var wm = median(bwa);
-        var hm = median(bha);
-        bwa.push(wm);
-        bha.push(hm);
-        bwa = bwa.map((s) => {
-          if (s > 2 * wm) {
-            return wm;
-          } else {
-            return s;
-          }
-        });
-        bha = bha.map((s) => {
-          if (s > 2 * hm) {
-            return hm;
-          } else {
-            return s;
-          }
-        });*/
 
         // Adds the svg
         var svg = d3
@@ -188,7 +133,6 @@ class D3HeatMap extends Component {
           .attr("id", "canvas")
           .attr("class", "canvas-plot");
         const context = canvas.node().getContext("2d");
-        context.globalCompositeOperation = "lighter";
 
         // Add zoom to canvas
         var zoom_function = d3
@@ -200,8 +144,7 @@ class D3HeatMap extends Component {
           ])
           .on("zoom", () => {
             context.save();
-            //updateChart(d3.event.transform);
-            updateChart2(d3.event.transform);
+            updateChart(d3.event.transform);
             context.restore();
           });
         canvas.call(zoom_function);
@@ -223,39 +166,42 @@ class D3HeatMap extends Component {
           var hoverX = scaleX.invert(d3.event.layerX || d3.event.offsetX);
           var hoverY = scaleY.invert(d3.event.layerY || d3.event.offsetY);
           var yi = closest(hoverY, data.y);
-
-          var xi;
-          if (xlabel === "Time") {
-            xi = closest(hoverX, data.x);
-            document.getElementById("value").innerHTML =
-              format(data.x[xi], "hh:mm dd MMM yy") +
-              " | " +
-              ylabel +
-              ": " +
-              data.y[yi] +
-              yunits +
-              " | " +
-              zlabel +
-              ": " +
-              Math.round(data.z[yi][xi] * 100) / 100 +
-              zunits;
-          } else {
-            xi = closest(hoverX, data.x);
-            document.getElementById("value").innerHTML =
-              xlabel +
-              ": " +
-              data.x[xi] +
-              xunits +
-              " | " +
-              ylabel +
-              ": " +
-              data.y[yi] +
-              yunits +
-              " | " +
-              zlabel +
-              ": " +
-              Math.round(data.z[yi][xi] * 100) / 100 +
-              zunits;
+          try {
+            var xi;
+            if (xlabel === "Time") {
+              xi = closest(hoverX, data.x);
+              document.getElementById("value").innerHTML =
+                format(data.x[xi], "hh:mm dd MMM yy") +
+                " | " +
+                ylabel +
+                ": " +
+                data.y[yi] +
+                yunits +
+                " | " +
+                zlabel +
+                ": " +
+                Math.round(data.z[yi][xi] * 10000) / 10000 +
+                zunits;
+            } else {
+              xi = closest(hoverX, data.x);
+              document.getElementById("value").innerHTML =
+                xlabel +
+                ": " +
+                data.x[xi] +
+                xunits +
+                " | " +
+                ylabel +
+                ": " +
+                data.y[yi] +
+                yunits +
+                " | " +
+                zlabel +
+                ": " +
+                Math.round(data.z[yi][xi] * 10000) / 10000 +
+                zunits;
+            }
+          } catch (e) {
+            document.getElementById("value").innerHTML = "";
           }
         });
         canvas.on("mouseout", () => {
@@ -275,13 +221,9 @@ class D3HeatMap extends Component {
         // Background color
         svg
           .append("rect")
-          .attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom)
-          .attr("fill", bcolor)
-          .attr(
-            "transform",
-            "translate(-" + margin.left + ",-" + margin.top + ")"
-          );
+          .attr("width", width)
+          .attr("height", height)
+          .attr("fill", bcolor);
 
         // Add the X Axis
         var gxAxis;
@@ -375,12 +317,12 @@ class D3HeatMap extends Component {
           .attr("y1", "0")
           .attr("y2", "1");
 
-        for (var g = gradient.length - 1; g > -1; g--) {
+        for (var g = colors.length - 1; g > -1; g--) {
           svggradient
             .append("stop")
             .attr("class", "end")
-            .attr("offset", 1 - gradient[g].point)
-            .attr("stop-color", gradient[g].color)
+            .attr("offset", 1 - colors[g].point)
+            .attr("stop-color", colors[g].color)
             .attr("stop-opacity", 1);
         }
 
@@ -393,8 +335,8 @@ class D3HeatMap extends Component {
           .attr("y", 0)
           .attr("fill", "url(#svgGradient)");
 
-        var t1 = Math.round(zdomain[1] * 100) / 100,
-          t5 = Math.round(zdomain[0] * 100) / 100,
+        var t1 = Math.round(maxvalue * 100) / 100,
+          t5 = Math.round(minvalue * 100) / 100,
           t3 = Math.round(((t1 + t5) / 2) * 100) / 100,
           t2 = Math.round(((t1 + t3) / 2) * 100) / 100,
           t4 = Math.round(((t3 + t5) / 2) * 100) / 100;
@@ -440,9 +382,8 @@ class D3HeatMap extends Component {
         // Plot data to canvas
         setTimeout(() => {
           context.clearRect(0, 0, width, height);
-          //fillCanvas(x, y, 1);
-          fillCanvas2(0, 0, 1);
-        }, 10);
+          fillCanvas(x, y);
+        }, 0);
 
         d3.select("#heatmap-download").on("click", function () {
           var s = new XMLSerializer();
@@ -474,58 +415,55 @@ class D3HeatMap extends Component {
             "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
         });
 
-        function fillCanvas2(xp, yp, k) {
-          for (var xx in newdata.x) {
-            for (var yy in newdata.y) {
-              var dx = newdata.x[xx] + xp;
-              var dy = newdata.y[yy] + yp;
-              var dv = newdata.z[yy][xx];
-              var bw = 1 * k;
-              var bh = 1 * k;
-              drawRect(dx, dy, dv, bw, bh);
-            }
+        function pixelMapping(data, scaleX, scaleY) {
+          var dataypix = data.y.map((dy) => scaleY(dy));
+          var dataxpix = data.x.map((dx) => scaleX(dx));
+
+          var indexypix = [];
+          var indexxpix = [];
+
+          // Currently using closest (needs to be improved)
+
+          for (var i = 0; i < height; i++) {
+            indexypix.push(indexOfClosest(i, dataypix));
           }
+
+          for (var j = 0; j < width; j++) {
+            indexxpix.push(indexOfClosest(j, dataxpix));
+          }
+          return { indexxpix, indexypix };
         }
 
-        /*function fillCanvas(scaleX, scaleY, k) {
-          for (var xx in data.x) {
-            for (var yy in data.y) {
-              var dx = scaleX(data.x[xx]);
-              var dy = scaleY(data.y[yy]);
-              var dv = data.z[yy][xx];
-              var bw = bwa[xx] * k;
-              var bh = bha[yy] * k;
-              drawRect(dx, dy, dv, bw, bh);
+        function fillCanvas(scaleX, scaleY) {
+          var { indexxpix, indexypix } = pixelMapping(data, scaleX, scaleY);
+          var imgData = context.createImageData(width, height);
+          // Get zero pixel
+          var highh = Math.min(height, Math.floor(scaleY(ydomain[0])));
+          var lowh = Math.max(0, Math.floor(scaleY(ydomain[1])));
+          var highw = Math.min(width, Math.floor(scaleX(xdomain[1])));
+          var loww = Math.max(0, Math.floor(scaleX(xdomain[0])));
+          var i, j, l, rgbacolor;
+          for (j = lowh; j < highh; j++) {
+            for (l = loww; l < highw; l++) {
+              rgbacolor = colorScale(data.z[indexypix[j]][indexxpix[l]]);
+              i = (width * j + l) * 4;
+              imgData.data[i + 0] = rgbacolor[0];
+              imgData.data[i + 1] = rgbacolor[1];
+              imgData.data[i + 2] = rgbacolor[2];
+              imgData.data[i + 3] = rgbacolor[3];
             }
           }
-        }*/
-
-        function drawRect(dx, dy, dv, bw, bh) {
-          var color = colorScale(dv);
-          context.lineWidth = 1;
-          context.strokeStyle = color;
-          context.fillStyle = color;
-          context.fillRect(dx, dy, bw, bh);
+          context.putImageData(imgData, 1, 0);
         }
 
-        /*function updateChart(transform) {
+        function updateChart(transform) {
           currentZoom = transform;
           var scaleX = transform.rescaleX(x);
           var scaleY = transform.rescaleY(y);
           gxAxis.call(xAxis.scale(scaleX));
           gyAxis.call(yAxis.scale(scaleY));
           context.clearRect(0, 0, width, height);
-          fillCanvas(scaleX, scaleY, transform.k);
-        }*/
-
-        function updateChart2(transform) {
-          currentZoom = transform;
-          var scaleX = transform.rescaleX(x);
-          var scaleY = transform.rescaleY(y);
-          gxAxis.call(xAxis.scale(scaleX));
-          gyAxis.call(yAxis.scale(scaleY));
-          context.clearRect(0, 0, width, height);
-          fillCanvas2(transform.x, transform.y, transform.k);
+          fillCanvas(scaleX, scaleY);
         }
       } catch (e) {
         console.log("Heatmap failed to plot", e);

@@ -144,13 +144,9 @@ class D3LineGraph extends Component {
         // Background color
         svg
           .append("rect")
-          .attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom)
+          .attr("width", width)
+          .attr("height", height)
           .attr("fill", bcolor)
-          .attr(
-            "transform",
-            "translate(-" + margin.left + ",-" + margin.top + ")"
-          );
 
         // Set clip
         var clip = svg

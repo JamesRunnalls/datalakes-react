@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import * as d3 from "d3";
 import SliderDouble from "../../../components/sliders/sliderdouble";
 import SliderSingle from "../../../components/sliders/slidersingle";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
@@ -7,31 +8,52 @@ import FilterBox from "../../../components/filterbox/filterbox";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
 import ColorManipulation from "../../../components/colormanipulation/colormanipulation";
 import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
+import colorlist from "../../../components/colorramp/colors";
 import "../datadetail.css";
 
 class DisplayOptions extends Component {
   state = {
-    gradient: this.props.gradient,
+    colors: this.props.colors,
     title: this.props.title,
+    bcolor: this.props.bcolor,
+    minvalue: this.props.minvalue,
+    maxvalue: this.props.maxvalue,
   };
-  onChangeLocalGradient = (gradient) => {
-    this.setState({ gradient });
+  onChangeLocalColors = (colors) => {
+    this.setState({ colors });
   };
   onChangeLocalTitle = (event) => {
     var title = event.target.value;
     this.setState({ title });
   };
+  onChangeLocalMin = (event) => {
+    var minvalue = event.target.value;
+    this.setState({ minvalue });
+  };
+  onChangeLocalMax = (event) => {
+    var maxvalue = event.target.value;
+    this.setState({ maxvalue });
+  };
+  onChangeLocalBcolor = (event) => {
+    var bcolor = event.target.value;
+    this.setState({ bcolor });
+  };
   updatePlot = () => {
-    var { gradient, title } = this.state;
-    this.props.onChange(gradient, title);
+    this.props.onChange(this.state);
   };
   componentDidUpdate(prevProps) {
-    if (prevProps.title !== this.props.title) {
-      this.setState({ title: this.props.title });
+    if (
+      prevProps.title !== this.props.title ||
+      prevProps.colors !== this.props.colors ||
+      prevProps.minvalue !== this.props.minvalue ||
+      prevProps.maxvalue !== this.props.maxvalue
+    ) {
+      var { colors, title, bcolor, minvalue, maxvalue } = this.props;
+      this.setState({ colors, title, bcolor, minvalue, maxvalue });
     }
   }
   render() {
-    var { gradient, title } = this.state;
+    var { colors, title, bcolor, minvalue, maxvalue } = this.state;
     return (
       <FilterBox
         title="Display Options"
@@ -49,11 +71,45 @@ class DisplayOptions extends Component {
                     />
                   </td>
                 </tr>
+                <tr>
+                  <td>Background</td>
+                  <td>
+                    <input
+                      type="color"
+                      id="bcolor"
+                      defaultValue={bcolor}
+                      onChange={this.onChangeLocalBcolor}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Maximum</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="maxvalue"
+                      value={maxvalue}
+                      onChange={this.onChangeLocalMax}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Minimum</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="minvalue"
+                      value={minvalue}
+                      onChange={this.onChangeLocalMin}
+                    />
+                  </td>
+                </tr>
               </tbody>
             </table>
+
             <ColorManipulation
-              onChange={this.onChangeLocalGradient}
-              colors={gradient}
+              onChange={this.onChangeLocalColors}
+              colors={colors}
             />
             <div className="editsettings-button">
               <button
@@ -73,7 +129,7 @@ class DisplayOptions extends Component {
 
 class HeatMap extends Component {
   state = {
-    gradient: [
+    colors: [
       { color: "#0000ff", point: 0 },
       { color: "#ff0000", point: 1 },
     ],
@@ -88,6 +144,8 @@ class HeatMap extends Component {
     xunits: "None",
     yunits: "None",
     zunits: "None",
+    minvalue: false,
+    maxvalue: false,
     download: false,
   };
 
@@ -96,8 +154,8 @@ class HeatMap extends Component {
     this.setState({ bcolor });
   };
 
-  onChangeDisplay = (gradient, title) => {
-    this.setState({ gradient, title });
+  onChangeDisplay = (newState) => {
+    this.setState(newState);
   };
 
   handleAxisSelect = (axis) => (event) => {
@@ -129,13 +187,26 @@ class HeatMap extends Component {
     return !isNaN(parseFloat(n)) && isFinite(n);
   };
 
+  parseColor = (colorname) => {
+    var defaultColors = [
+      { color: "#0000ff", point: 0 },
+      { color: "#ff0000", point: 1 },
+    ];
+    var colorparse = colorlist.find((c) => c.name === colorname);
+    if (colorparse) {
+      return colorparse.data;
+    } else {
+      return defaultColors;
+    }
+  };
+
   formatDate = (raw) => {
     //return new Date(raw * 1000);
     return new Date((raw - 719529) * 24 * 60 * 60 * 1000);
   };
 
   setDefault = () => {
-    var { parameters, dataset, getLabel } = this.props;
+    var { parameters, dataset, getLabel, data, file } = this.props;
     var { xaxis, yaxis, zaxis } = this.state;
 
     // Get axis labels and units
@@ -149,6 +220,14 @@ class HeatMap extends Component {
     var yunits = yparam.unit;
     var zunits = zparam.unit;
     const title = dataset.title;
+    var colors = this.parseColor(dataset.plotproperties.colors);
+    var zdomain = d3.extent(
+      [].concat.apply([], data[file].z).filter((f) => {
+        return !isNaN(parseFloat(f)) && isFinite(f);
+      })
+    );
+    var minvalue = zdomain[0];
+    var maxvalue = zdomain[1];
 
     this.setState({
       title,
@@ -158,7 +237,9 @@ class HeatMap extends Component {
       xunits,
       yunits,
       zunits,
-      bcolor: "#ffffff",
+      colors,
+      minvalue,
+      maxvalue,
     });
   };
 
@@ -199,7 +280,9 @@ class HeatMap extends Component {
       xunits,
       yunits,
       zunits,
-      gradient,
+      colors,
+      minvalue,
+      maxvalue,
     } = this.state;
 
     // Show time slider or multiple files
@@ -264,8 +347,8 @@ class HeatMap extends Component {
       var { x, y, z } = plotdata;
       if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
       if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-      //if (xlabel === "Depth") x = x.map((i) => -i);
-      //if (ylabel === "Depth") y = y.map((i) => -i);
+      if (xlabel === "Depth") x = x.map((i) => -i);
+      if (ylabel === "Depth") y = y.map((i) => -i);
       plotdata = { x, y, z };
 
       // Value
@@ -288,7 +371,9 @@ class HeatMap extends Component {
                 yunits={yunits}
                 zunits={zunits}
                 bcolor={bcolor}
-                gradient={gradient}
+                colors={colors}
+                minvalue={minvalue}
+                maxvalue={maxvalue}
               />
             </div>
           }
@@ -375,8 +460,11 @@ class HeatMap extends Component {
                 />
               )}
               <DisplayOptions
-                gradient={gradient}
+                colors={colors}
                 title={title}
+                bcolor={bcolor}
+                minvalue={minvalue}
+                maxvalue={maxvalue}
                 onChange={this.onChangeDisplay}
               />
               <FilterBox

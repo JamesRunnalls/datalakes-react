@@ -217,12 +217,12 @@ class Home extends Component {
 
             <Triple
               id="ourdata"
-              title={["Lake Simulations", "In-Situ Data", "Remote Sensing"]}
+              title={["Lake Simulation", "In-Situ Data", "Remote Sensing"]}
               img={[sim, situ, rs]}
               text={[
                 "Multi-dimentional hydrodynamic lake simulations for lakes in Switzerland.",
                 "Data measurements from Eawag and partners field campaigns.",
-                "Derived products from satelling data, including cholorphyll concentration and total suspended matter",
+                "Derived products from satellite data, including chlorophyll concentration and total suspended matter.",
               ]}
             />
             <div className="sectiontitle" ref={this.accessoptions}>
@@ -236,7 +236,7 @@ class Home extends Component {
               text={[
                 "Visualise geospatial lake data. The Datalakes Web Viewer allows you to plot multiple lake datasets.",
                 "Access our full data repository, filter, search and discover data.",
-                "Programatic access to Datalakes datasets.",
+                "Programmatic access to Datalakes datasets.",
               ]}
               link={["/map", "/data", "/api"]}
             />

@@ -315,6 +315,7 @@
 .colors-table {
   width: 100%;
   box-sizing: border-box;
+  margin-bottom: 10px;
 }
 
 .colors-table td {
