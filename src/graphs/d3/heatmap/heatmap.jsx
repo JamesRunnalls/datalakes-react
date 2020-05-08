@@ -74,8 +74,8 @@ class D3HeatMap extends Component {
           viswidth = d3.select("#heatmap").node().getBoundingClientRect().width,
           visheight =
             d3.select("#heatmap").node().getBoundingClientRect().height - 5,
-          width = viswidth - margin.left - margin.right,
-          height = visheight - margin.top - margin.bottom;
+          width = Math.floor(viswidth - margin.left - margin.right),
+          height = Math.floor(visheight - margin.top - margin.bottom);
 
         // Get data extents
         var xdomain = d3.extent(data.x);
@@ -447,6 +447,7 @@ class D3HeatMap extends Component {
         function fillCanvas(scaleX, scaleY) {
           var { indexxpix, indexypix } = pixelMapping(data, scaleX, scaleY);
           var imgData = context.createImageData(width, height);
+          
           // Get zero pixel
           var highh = Math.min(height, Math.floor(scaleY(ydomain[0])));
           var lowh = Math.max(0, Math.floor(scaleY(ydomain[1])));

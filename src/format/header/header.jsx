@@ -37,9 +37,8 @@ class Header extends Component {
                             <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/map">Map Viewer</NavLink>
                             <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/data">Data Portal</NavLink>
                             <NavLink activeClassName="active" className="header-item" onClick={this.closeMenu} to="/api">API</NavLink>
-                            <div className="menu-icon header-item" onClick={this.toggle}><h3>Menu <div className="symbol">{showMenu ? "<":">"}</div></h3></div>
                         </div>
-                        
+                        <div className="menu-icon header-item" onClick={this.toggle}><h3>Menu <div className="symbol">{showMenu ? "<":">"}</div></h3></div>
                     </div>
                     <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
                         <Link onClick={this.closeMenu} to="/">Home</Link>

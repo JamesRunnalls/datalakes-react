@@ -14,6 +14,7 @@
 
 .map {
   height: calc(100% - 140px);
+  min-height: 300px;
   z-index: 99999;
   width: 100%;
   position: absolute;

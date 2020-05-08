@@ -155,7 +155,7 @@ header .desktop-nav .desktop-menu {
   display: none;
   position: absolute;
   right: 0;
-  z-index: 999999;
+  z-index: 9999999;
 }
 
 header .desktop-nav .desktop-menu.show {

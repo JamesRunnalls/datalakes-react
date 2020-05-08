@@ -100,6 +100,7 @@
 .detailgraph {
   height: 500px;
   margin-top: 30px;
+  max-height: 100vh;
 }
 
 .separator {
@@ -385,10 +386,6 @@
 .linegraph-downloading {
   width: 100%;
   text-align: center;
-}
-
-.linegraph-bottombox {
-  margin-bottom: 120px;
 }
 
 .multipledownload .subheading {

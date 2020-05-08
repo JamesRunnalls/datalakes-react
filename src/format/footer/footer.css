@@ -88,3 +88,9 @@ footer .container .copyright .contact .contact-inner:hover .color {
     height: auto;
   }
 }
+
+@media screen and (max-height: 820px) {
+  footer {
+    position: relative;
+  }
+}
