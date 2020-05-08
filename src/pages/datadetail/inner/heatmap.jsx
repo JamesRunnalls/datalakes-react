@@ -160,7 +160,16 @@ class HeatMap extends Component {
 
   handleAxisSelect = (axis) => (event) => {
     var { parameters, data, file } = this.props;
-    var { xlabel, ylabel, zlabel, xunits, yunits, zunits, minvalue, maxvalue } = this.state;
+    var {
+      xlabel,
+      ylabel,
+      zlabel,
+      xunits,
+      yunits,
+      zunits,
+      minvalue,
+      maxvalue,
+    } = this.state;
     var parameter = parameters.find((x) => x.axis === event.value);
     if (axis === "yaxis") {
       ylabel = parameter.name;
@@ -249,6 +258,31 @@ class HeatMap extends Component {
       minvalue,
       maxvalue,
     });
+  };
+
+  datetimeFilter = (data, lower, upper, min, max) => {
+    if ((lower !== min && lower !== "") || (upper !== max && upper !== "")) {
+      var l = 0;
+      var u = data.x.length - 1;
+      for (var i = 0; i < data.x.length; i++) {
+        if (data.x[i] < lower) {
+          l = i;
+        }
+        if (data.x[i] > upper && u === data.x.length - 1) {
+          u = i;
+        }
+      }
+      var x = data.x.slice(l, u);
+      var y = data.y;
+
+      var z = [];
+      for (var j = 0; j < data.y.length; j++) {
+        z.push(data.z[j].slice(l, u));
+      }
+      return { x: x, y: y, z: z };
+    } else {
+      return data;
+    }
   };
 
   componentDidMount() {
@@ -347,9 +381,9 @@ class HeatMap extends Component {
         plotdata = { x: data[0][xaxis], y: data[0][yaxis], z: data[0][zaxis] };
       }
 
-      /*if (timeSlider) {
+      if (timeSlider) {
         plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
-      }*/
+      }
 
       // Format data
       var { x, y, z } = plotdata;

@@ -178,6 +178,7 @@ class DataDetail extends Component {
   };
 
   onChangeUpper = (value) => {
+    console.log("Upper");
     var { files, data, lower } = this.state;
     var upper = value.getTime() / 1000;
     var toDownload = this.selectedFiles(upper, lower, files, data);
@@ -189,6 +190,7 @@ class DataDetail extends Component {
   };
 
   onChangeLower = (value) => {
+    console.log("Lower");
     var { files, data, upper } = this.state;
     var lower = value.getTime() / 1000;
     var toDownload = this.selectedFiles(upper, lower, files, data);
@@ -526,8 +528,13 @@ class DataDetail extends Component {
               file={file}
               loading={innerLoading}
               combined={combined}
+              onChangeTime={this.onChangeTime}
+              onChangeFile={this.onChangeFile}
+              onChangeFileInt={this.onChangeFileInt}
+              onChangeLower={this.onChangeLower}
+              onChangeUpper={this.onChangeUpper}
               getLabel={this.getLabel}
-              onChange={this.onChangeTime}
+              downloadData={this.downloadData}
             />
             <Footer />
           </React.Fragment>

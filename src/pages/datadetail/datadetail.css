@@ -175,8 +175,8 @@
 
 @media screen and (max-width: 500px) {
   .detailgraph {
-    height: auto;
     margin-top: 45px;
+    margin-bottom: 60px;
   }
 
   .data-subnav .subnav-item .subnav-text {

@@ -54,6 +54,8 @@ class D3LineGraph extends Component {
           setDownloadGraph,
         } = this.props;
 
+        console.log(data)
+
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
           viswidth = d3.select("#vis").node().getBoundingClientRect().width,
