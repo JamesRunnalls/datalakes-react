@@ -224,18 +224,18 @@
   }
 }
 
-.renku-pipeline .renku-header {
+.pipeline .renku-header {
   margin-bottom: 20px;
 }
 
-.renku-pipeline .pipeline-left {
+.pipeline .pipeline-left {
   width: 50%;
   display: inline-block;
   vertical-align: top;
   margin-bottom: 20px;
 }
 
-.renku-pipeline .pipeline-left .datasets {
+.pipeline .pipeline-left .datasets {
   display: block;
   width: fit-content;
   border: 1px solid black;
@@ -245,7 +245,7 @@
   margin: auto;
 }
 
-.renku-pipeline .pipeline-left .script {
+.pipeline .pipeline-left .script {
   display: block;
   width: fit-content;
   background-color: rgb(200, 200, 200);
@@ -257,7 +257,7 @@
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
-.renku-pipeline .pipeline-left .connector {
+.pipeline .pipeline-left .connector {
   display: block;
   width: fit-content;
   font-size: 30px;
@@ -266,13 +266,15 @@
   margin: auto;
 }
 
-.renku-pipeline .pipeline-right {
+.pipeline .pipeline-right {
   width: 50%;
   display: inline-block;
   vertical-align: top;
+  padding-right: 5px;
+  box-sizing: border-box;
 }
 
-.renku-pipeline .pipeline-right .accessType {
+.pipeline .pipeline-right .accessType {
   border: 1px solid rgb(169, 169, 169);
   box-sizing: border-box;
   width: 100%;
@@ -281,26 +283,33 @@
   margin-bottom: 10px;
 }
 
-.renku-pipeline .pipeline-right .accessOption {
+.pipeline .pipeline-right .accessOption {
   padding: 10px 10px;
   font-size: 14px;
 }
 
-.renku-pipeline .pipeline-right .accessOption a {
+.pipeline .pipeline-right .accessOption .pipeline-private {
+  font-size: 10px;
+  color: grey;
+  margin-top: 5px;
+}
+
+.pipeline .pipeline-right .accessOption a {
   width: 100%;
 }
 
-.renku-pipeline .pipeline-right .accessOption button {
+.pipeline .pipeline-right .accessOption button {
   display: block;
 
   margin-top: 10px;
 }
 
 @media screen and (max-width: 800px) {
-  .renku-pipeline .pipeline-right {
+  .pipeline .pipeline-right {
     width: 100%;
+    padding-right: 0;
   }
-  .renku-pipeline .pipeline-left {
+  .pipeline .pipeline-left {
     width: 100%;
   }
 }
@@ -386,6 +395,10 @@
 .linegraph-downloading {
   width: 100%;
   text-align: center;
+}
+
+.linegraph-bottombox {
+  height: 80px;
 }
 
 .multipledownload .subheading {
