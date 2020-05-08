@@ -54,7 +54,7 @@ class Pipeline extends Component {
                 <div className="accessOption">
                   2. Clone the git repository
                   <div className="pipeline-private">
-                    Private repositories will cause a 404 error. Get in touch
+                    Private repositories will require login. Get in touch
                     for access to private repositories.
                   </div>
                   <a href={gitlab} target="_blank" rel="noopener noreferrer">
