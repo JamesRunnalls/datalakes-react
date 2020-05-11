@@ -128,6 +128,7 @@ class ReviewData extends Component {
       }
       rows.push(
         <tr key={"row" + i}>
+          <td>{i}</td>
           <td>{row.parseparameter}</td>
           <td>{row.parseUnit}</td>
           <td>
@@ -149,6 +150,9 @@ class ReviewData extends Component {
               defaultValue={row.axis}
               onChange={handleSelect(i, "axis")}
             />
+          </td>
+          <td>
+            <input defaultValue={row.link} type="number" onChange={handleChange(i, "link")} />
           </td>
           <td>{unit}</td>
           <td>
@@ -201,18 +205,19 @@ class ReviewData extends Component {
 
     return (
       <React.Fragment>
-        <form className="adddataset-form">
+        <form className="adddataset-form"  onSubmit={this.nextStep}>
           <table className="datareview">
             <tbody>
               <tr>
-                <th colSpan="2">Read from file</th>
-                <th colSpan="4">Check and adjust auto-parse</th>
+                <th colSpan="3">Read from file</th>
+                <th colSpan="6">Check and adjust auto-parse</th>
               </tr>
               <tr>
-                <th>Variable</th>
+                <th colSpan="2">Variable</th>
                 <th>Units</th>
                 <th style={{ width: "calc(33.33% - 55px)" }}>Parameter</th>
                 <th style={{ width: "55px" }}>Axis</th>
+                <th style={{ width: "45px" }}>Link</th>
                 <th>Units</th>
                 <th>Sensor</th>
                 <th style={{ width: "15px" }}><div title="Include parameter.">Incl.</div></th>

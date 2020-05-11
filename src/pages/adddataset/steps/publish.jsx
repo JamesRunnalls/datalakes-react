@@ -164,14 +164,6 @@ class Publish extends Component {
               <td>{renku}</td>
             </tr>
             <tr>
-              <th>Pre file</th>
-              <td>{dataset["prefile"]}</td>
-            </tr>
-            <tr>
-              <th>Pre Script</th>
-              <td>{dataset["prescript"]}</td>
-            </tr>
-            <tr>
               <th>Live Connection</th>
               <td>{dataset["liveconnect"]}</td>
             </tr>

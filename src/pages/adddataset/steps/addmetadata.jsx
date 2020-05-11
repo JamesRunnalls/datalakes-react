@@ -53,7 +53,7 @@ class AddMetadata extends Component {
     const { modal, modalValue, message } = this.state;
     return (
       <React.Fragment>
-        <form className="adddataset-form">
+        <form className="adddataset-form"  onSubmit={this.nextStep}>
           <table className="addmetadata">
             <tbody>
               <tr>

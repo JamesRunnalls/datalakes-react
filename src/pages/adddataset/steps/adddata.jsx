@@ -45,7 +45,7 @@ class AddData extends Component {
 
     return (
       <React.Fragment>
-        <form className="adddataset-form">
+        <form className="adddataset-form"  onSubmit={this.nextStep}>
           <div>
             <p>
               Welcome to the Datalakes add dataset portal. Currently we only

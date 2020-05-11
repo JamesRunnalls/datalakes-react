@@ -12,8 +12,20 @@ import ProgressBar from "./progressbar";
 
 class AddDataset extends Component {
   state = {
-    step: 1,
-    allowedStep: [1, 1, 1, 1, 1],
+    step: 3,
+    allowedStep: [1, 2, 3, 1, 1],
+    allFiles: [
+      "git/12/introduction-to-datalakes-data-processing/Dockerfile",
+      "git/12/introduction-to-datalakes-data-processing/README.md",
+      "git/12/introduction-to-datalakes-data-processing/data/Lexplore_WeatherData-Copy1.dat",
+      "git/12/introduction-to-datalakes-data-processing/data/Lexplore_WeatherData.dat",
+      "git/12/introduction-to-datalakes-data-processing/data/output/lexploreweather.nc",
+      "git/12/introduction-to-datalakes-data-processing/data/output/lexploreweather2.nc",
+      "git/12/introduction-to-datalakes-data-processing/environment.yml",
+      "git/12/introduction-to-datalakes-data-processing/notebooks/process.py",
+      "git/12/introduction-to-datalakes-data-processing/papers/Physical_Limnology.pdf",
+      "git/12/introduction-to-datalakes-data-processing/requirements.txt",
+    ],
     fileInformation: "",
     renkuResponse: "",
     dropdown: {},
@@ -37,15 +49,14 @@ class AddDataset extends Component {
         vectorFlow: false,
         vectorArrowColor: false,
         vectorFlowColor: false,
-        legend: false
+        legend: false,
       },
       citation: "",
       downloads: 0,
       fileconnect: "false",
       liveconnect: "no",
       renku: "",
-      prefile: "",
-      prescript: "",
+      accompanyingdata: [],
       mindatetime: "",
       maxdatetime: "",
       latitude: "",
@@ -57,11 +68,11 @@ class AddDataset extends Component {
       persons_id: "",
       projects_id: "",
       embargo: 0,
-      password: "none"
+      password: "none",
     },
     datasetparameters: [],
     files_list: [],
-    file: {}
+    file: {},
   };
 
   // 0) Get dropdowns
@@ -69,7 +80,7 @@ class AddDataset extends Component {
   getDropdowns = async () => {
     const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
     this.setState({
-      dropdown
+      dropdown,
     });
   };
 
@@ -84,7 +95,7 @@ class AddDataset extends Component {
     // Add blank row to datasets table
     var { data: data1 } = await axios
       .post(apiUrl + "/datasets", {})
-      .catch(error => {
+      .catch((error) => {
         console.error(error.message);
         this.setState({ allowedStep: [1, 0, 0, 0, 0] });
         throw new Error("Process failed please try again");
@@ -95,18 +106,18 @@ class AddDataset extends Component {
     reqObj["id"] = data1.id;
     var { data: data2 } = await axios
       .post(apiUrl + "/gitclone", reqObj)
-      .catch(error => {
+      .catch((error) => {
         console.error(error.message);
         this.setState({ allowedStep: [1, 0, 0, 0, 0] });
         throw new Error("Unable to clone repository please try again.");
       });
 
     // Parse variable and attribute information from incoming file
-    var { repo_id, file, files } = data2;
+    var { repo_id, file, files, allFiles } = data2;
     if (file) {
       var { data: fileInformation } = await axios
         .get(apiUrl + "/files/" + file.id + "?get=metadata")
-        .catch(error => {
+        .catch((error) => {
           console.error(error.message);
           this.setState({ allowedStep: [1, 0, 0, 0, 0] });
           throw new Error(
@@ -133,9 +144,10 @@ class AddDataset extends Component {
       fileInformation: fileInformation,
       step: step + 1,
       dataset,
+      allFiles,
       datasetparameters,
       files_list: files,
-      file: file
+      file,
     });
     return;
   };
@@ -146,7 +158,7 @@ class AddDataset extends Component {
     var { step, datasetparameters, dataset, file, files_list } = this.state;
 
     // Clean folder
-    await axios.get(apiUrl + "/files/clean/" + dataset.id).catch(error => {
+    await axios.get(apiUrl + "/files/clean/" + dataset.id).catch((error) => {
       console.error(error.message);
     });
 
@@ -164,16 +176,13 @@ class AddDataset extends Component {
     step = step + 1;
     var { data: renkuData } = await axios
       .get(apiUrl + "/renku/" + encodeURIComponent(dataset.datasourcelink))
-      .catch(error => {
+      .catch((error) => {
         console.error(error.message);
       });
     if ("data" in renkuData) {
       if (renkuData.data.lineage !== null) {
         dataset["renku"] = 0;
-        dataset["prefile"] = "NA";
-        dataset["prescript"] = "NA";
-        allowedStep = [1, 2, 0, 4, 0];
-        step = step + 1;
+        allowedStep = [1, 2, 3, 0, 0];
       }
     }
 
@@ -205,7 +214,14 @@ class AddDataset extends Component {
         datasetparameters,
         dataset.fileconnect
       );
-      var { mindatetime, maxdatetime, mindepth, maxdepth, longitude, latitude } = data;
+      var {
+        mindatetime,
+        maxdatetime,
+        mindepth,
+        maxdepth,
+        longitude,
+        latitude,
+      } = data;
     } else {
       var arr_mindatetime = [];
       var arr_maxdatetime = [];
@@ -247,7 +263,7 @@ class AddDataset extends Component {
       datasetparameters,
       dataset,
       allowedStep,
-      step
+      step,
     });
     return;
   };
@@ -257,9 +273,9 @@ class AddDataset extends Component {
       .post(apiUrl + "/convert", {
         id: id,
         variables: datasetparameters,
-        fileconnect: fileconnect
+        fileconnect: fileconnect,
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error.message);
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
         throw new Error(
@@ -273,10 +289,10 @@ class AddDataset extends Component {
 
   validateLineage = async () => {
     const { dataset, step } = this.state;
-    if (dataset["pre_script"] !== "" && dataset["pre_file"] !== "") {
+    if (dataset["accompanyingdata"].length > 0) {
       this.setState({ allowedStep: [1, 2, 3, 4, 0], step: step + 1 });
     } else {
-      throw new Error("Please complete all the fields.");
+      throw new Error("Please add some files.");
     }
     return;
   };
@@ -299,12 +315,12 @@ class AddDataset extends Component {
     await axios
       .post(apiUrl + "/datasetparameters", {
         id: dataset.id,
-        datasetparameters: datasetparameters
+        datasetparameters: datasetparameters,
       })
-      .catch(error => {
+      .catch((error) => {
         throw new Error("Failed to publish please try again.");
       });
-    await axios.put(apiUrl + "/datasets", dataset).catch(error => {
+    await axios.put(apiUrl + "/datasets", dataset).catch((error) => {
       throw new Error("Failed to publish please try again.");
     });
     window.location.href = "/datadetail/" + dataset.id;
@@ -315,18 +331,18 @@ class AddDataset extends Component {
   prevStep = () => {
     const { step } = this.state;
     this.setState({
-      step: step - 1
+      step: step - 1,
     });
   };
 
-  setStep = step => {
+  setStep = (step) => {
     if (step !== 0) {
       this.setState({ step });
     }
   };
 
   // Check nothing in dictionary is empty string
-  noEmptyString = dict => {
+  noEmptyString = (dict) => {
     var out = true;
     for (var key of Object.keys(dict)) {
       if (dict[key] === "") {
@@ -337,7 +353,7 @@ class AddDataset extends Component {
   };
 
   // Parse url
-  parseUrl = url => {
+  parseUrl = (url) => {
     var ssh;
     var dir;
     var branch;
@@ -349,10 +365,7 @@ class AddDataset extends Component {
       branch = path[0];
       ssh =
         "git@renkulab.io:" +
-        url
-          .split("/blob/")[0]
-          .split("renkulab.io/gitlab/")
-          .pop() +
+        url.split("/blob/")[0].split("renkulab.io/gitlab/").pop() +
         ".git";
       dir = path.slice(1, path.length - 1);
       dir.unshift(repo);
@@ -363,7 +376,7 @@ class AddDataset extends Component {
       ssh: ssh,
       dir: dir,
       branch: branch,
-      file: file
+      file: file,
     };
   };
 
@@ -375,7 +388,7 @@ class AddDataset extends Component {
       location: 0,
       distance: 100,
       maxPatternLength: 32,
-      minMatchCharLength: 1
+      minMatchCharLength: 1,
     };
     var fuse = new Fuse(list, options);
     var match = find.split("_").join(" ");
@@ -388,10 +401,10 @@ class AddDataset extends Component {
   };
 
   findUnits = (parameters, defaultParameter) => {
-    return parameters.find(x => x.id === defaultParameter).unit;
+    return parameters.find((x) => x.id === defaultParameter).unit;
   };
 
-  getMax = arr => {
+  getMax = (arr) => {
     let len = arr.length;
     let max = -Infinity;
 
@@ -401,7 +414,7 @@ class AddDataset extends Component {
     return max;
   };
 
-  getMin = arr => {
+  getMin = (arr) => {
     let len = arr.length;
     let min = Infinity;
 
@@ -411,14 +424,14 @@ class AddDataset extends Component {
     return min;
   };
 
-  getAve = arr => {
+  getAve = (arr) => {
     const sum = arr.reduce((a, b) => a + b, 0);
     return sum / arr.length || 0;
   };
 
-  allEqual = arr => {
+  allEqual = (arr) => {
     try {
-      return arr.every(v => v === arr[0]);
+      return arr.every((v) => v === arr[0]);
     } catch (e) {
       return "";
     }
@@ -488,8 +501,9 @@ class AddDataset extends Component {
         parameters_id: defaultParameter,
         unit: defaultUnit,
         axis: defaultAxis,
+        link: -1,
         sensors_id: defaultSensor,
-        included: true
+        included: true,
       };
       datasetparameters.push(variable);
     }
@@ -498,25 +512,31 @@ class AddDataset extends Component {
 
   // Handle changes to inputs
 
-  handleChange = input => event => {
+  handleAccompanyingData = (accompanyingdata) => {
+    var { dataset } = this.state;
+    dataset.accompanyingdata = accompanyingdata;
+    this.setState({ dataset });
+  };
+
+  handleChange = (input) => (event) => {
     var values = this.state.values;
     values[input] = event.target.value;
     this.setState({ values });
   };
 
-  handleDataset = input => event => {
+  handleDataset = (input) => (event) => {
     var dataset = this.state.dataset;
     dataset[input] = event.value ? event.value : event.target.value;
     this.setState({ dataset });
   };
 
-  handleParameter = (a, b) => event => {
+  handleParameter = (a, b) => (event) => {
     var datasetparameters = this.state.datasetparameters;
     datasetparameters[a][b] = event.value ? event.value : event.target.value;
     this.setState({ datasetparameters });
   };
 
-  handleParameterCheck = (a, b) => event => {
+  handleParameterCheck = (a, b) => (event) => {
     var { datasetparameters, dataset } = this.state;
     datasetparameters[a][b] = !datasetparameters[a][b];
     dataset.fileconnect = "no";
@@ -528,12 +548,13 @@ class AddDataset extends Component {
     const {
       step,
       allowedStep,
+      allFiles,
       fileInformation,
       renkuResponse,
       dropdown,
       dataset,
       datasetparameters,
-      files_list
+      files_list,
     } = this.state;
 
     switch (step) {
@@ -602,7 +623,9 @@ class AddDataset extends Component {
             />
             <ReviewLineage
               dataset={dataset}
+              allFiles={allFiles}
               renkuResponse={renkuResponse}
+              handleAccompanyingData={this.handleAccompanyingData}
               nextStep={this.validateLineage}
               prevStep={this.prevStep}
               handleChange={this.handleDataset}
