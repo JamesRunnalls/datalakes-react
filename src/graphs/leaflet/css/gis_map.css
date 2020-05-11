@@ -179,21 +179,20 @@
 }
 
 .menu-gis .menu-gis-item {
-  width: 26px;
-  height: 26px;
-  line-height: 26px;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
   display: block;
   text-align: center;
   border-radius: 4px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
-  font-size: 20px;
   background-color: white;
   cursor: pointer;
   margin-top: 8px;
   margin-bottom: 8px;
   font-family: "Lucida Console", Monaco, monospace;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .menu-gis .zoom {
@@ -222,7 +221,7 @@
 }
 
 .menu-gis .menu-gis-item img {
-  width: 16px;
+  width: 20px;
   padding: 5px;
 }
 
@@ -287,13 +286,13 @@
 
 @media (hover: none) and (pointer: coarse) {
   .menu-gis .menu-gis-item {
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
   }
   .menu-gis .menu-gis-item img {
-    width: 20px;
-    padding: 4px;
+    width: 22px;
+    padding: 6px;
   }
 }
 
