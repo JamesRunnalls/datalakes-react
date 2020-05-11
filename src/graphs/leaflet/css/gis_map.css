@@ -60,7 +60,7 @@
 }
 
 .help:hover {
-  background-color: rgb(246, 246, 246);
+  background-color: rgb(200, 200, 200);
 }
 
 .fullscreen {
@@ -155,27 +155,6 @@
   text-align: center;
 }
 
-.customcontrol {
-  width: 26px;
-  height: 26px;
-  line-height: 26px;
-  display: block;
-  text-align: center;
-  border-radius: 4px;
-  font-size: 20px;
-  background-color: white;
-  cursor: pointer;
-}
-
-.customcontrol:hover {
-  background-color: #f4f4f4;
-}
-
-.customcontrol img {
-  width: 16px;
-  padding: 5px;
-}
-
 .timeselector-gis {
   position: absolute;
   right: 10px;
@@ -187,9 +166,64 @@
   position: absolute;
   left: 50px;
   top: 10px;
-  z-index: 9999;
+  z-index: 999999999;
   height: calc(100% - 60px);
   max-width: calc(100% - 60px);
+}
+
+.menu-gis {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 99999999;
+}
+
+.menu-gis .menu-gis-item {
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  display: block;
+  text-align: center;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  font-size: 20px;
+  background-color: white;
+  cursor: pointer;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.menu-gis .zoom {
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  border-radius: 4px;
+}
+
+.menu-gis .zoom .menu-gis-item {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.menu-gis .zoom .menu-gis-item.one {
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.menu-gis .zoom .menu-gis-item.three {
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid #ccc;
+}
+
+.menu-gis .menu-gis-item:hover {
+  background-color: #f4f4f4;
+}
+
+.menu-gis .menu-gis-item img {
+  width: 16px;
+  padding: 5px;
 }
 
 .sidebar-gis-inner {
@@ -252,12 +286,12 @@
 /* Tocuhscreen changes */
 
 @media (hover: none) and (pointer: coarse) {
-  .customcontrol {
+  .menu-gis .menu-gis-item {
     width: 30px;
     height: 30px;
     line-height: 30px;
   }
-  .customcontrol img {
+  .menu-gis .menu-gis-item img {
     width: 20px;
     padding: 4px;
   }

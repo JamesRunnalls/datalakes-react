@@ -19,6 +19,14 @@ class GISMap extends Component {
     initial: true,
   };
 
+  zoomIn = () => {
+    this.map.setZoom(this.map.getZoom() + 1);
+  };
+
+  zoomOut = () => {
+    this.map.setZoom(this.map.getZoom() - 1);
+  };
+
   toggleFullsize = () => {
     this.setState({ fullsize: !this.state.fullsize });
   };
@@ -780,11 +788,6 @@ class GISMap extends Component {
       zoom = this.props.zoom;
     }
 
-    var toggleHelp = this.toggleHelp;
-    var toggleFullsize = this.toggleFullsize;
-    var toggleMenu = this.toggleMenu;
-    var toggleGroup = this.toggleGroup;
-
     var datalakesmap = L.tileLayer(
       "https://api.mapbox.com/styles/v1/jamesrunnalls/ck96x8fhp6h2i1ik5q9xz0iqn/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
       {
@@ -823,6 +826,7 @@ class GISMap extends Component {
 
     this.map = L.map("map", {
       preferCanvas: true,
+      zoomControl: false,
       center: center,
       zoom: zoom,
       minZoom: 7,
@@ -868,72 +872,17 @@ class GISMap extends Component {
       updateLocation(zoom, [lat, lng]);
     });
 
-    // Edit Layers
-    L.control
-      .custom({
-        position: "topleft",
-        content:
-          '<div class="customcontrol" id="sidebar"><img title="Edit layers" src="img/editlayers.svg" /></div>',
-        classes: "leaflet-bar",
-        events: {
-          click: function (data) {
-            toggleMenu();
-          },
-        },
-      })
-      .addTo(this.map);
-
-    // Layer groups
-    L.control
-      .custom({
-        position: "topleft",
-        content:
-          '<div class="customcontrol" id="sidebar"><img title="Layer groups" src="img/layergroups.svg" /></div>',
-        classes: "leaflet-bar",
-        events: {
-          click: function (data) {
-            toggleGroup();
-          },
-        },
-      })
-      .addTo(this.map);
-
-    // Full screen
-    L.control
-      .custom({
-        position: "topleft",
-        content:
-          '<div class="customcontrol" title="Full screen" id="fullsize">&#8689;</div>',
-        classes: "leaflet-bar",
-        events: {
-          click: function (data) {
-            toggleFullsize();
-          },
-        },
-      })
-      .addTo(this.map);
-
-    // Help
-    L.control
-      .custom({
-        position: "topleft",
-        content: '<div class="customcontrol" title="Help">?</div>',
-        classes: "leaflet-bar",
-        events: {
-          click: function (data) {
-            toggleHelp();
-          },
-        },
-      })
-      .addTo(this.map);
-
-    // Menu
+    // Datalakes logo
     L.control
       .custom({
         position: "bottomright",
         content: '<img src="img/logo.svg">',
         classes: "gis-datalakes-logo",
       })
+      .addTo(this.map);
+
+    L.control
+      .scale({ position: "bottomright", imperial: false })
       .addTo(this.map);
 
     this.marker = [];
@@ -1009,15 +958,20 @@ class GISMap extends Component {
 
   render() {
     var { help, fullsize, menu, group } = this.state;
-    var { legend, timeselector, loading, sidebar, updateState, selectedlayers } = this.props;
-    if (!loading)
-      document.getElementById("fullsize").innerHTML = fullsize
-        ? "&#8690;"
-        : "&#8689;";
-    if (!loading)
-      document.getElementById("fullsize").title = fullsize
-        ? "Shrink map"
-        : "Fullscreen";
+    var {
+      legend,
+      timeselector,
+      loading,
+      sidebar,
+      updateState,
+      selectedlayers,
+    } = this.props;
+    var fulllabel = "Fullscreen";
+    var fullicon = "\u21F1";
+    if (fullsize) {
+      fulllabel = "Shrink Map";
+      fullicon = "\u21F2";
+    }
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
@@ -1028,6 +982,45 @@ class GISMap extends Component {
                 Downloading and plotting data
               </div>
             )}
+          </div>
+          <div className="menu-gis">
+            <div className="zoom">
+              <div
+                className="menu-gis-item one"
+                onClick={this.zoomIn}
+                title="Zoom In"
+              >
+                +
+              </div>
+              <div
+                className="menu-gis-item two"
+                onClick={this.zoomOut}
+                title="Zoom Out"
+              >
+                −
+              </div>
+              <div
+                className="menu-gis-item three"
+                onClick={this.toggleFullsize}
+                title={fulllabel}
+              >
+                {fullicon}
+              </div>
+            </div>
+            <div className="menu-gis-item" onClick={this.toggleMenu}>
+              <img title="Edit Layers" src="img/editlayers.svg" alt="Edit Layers"/>
+            </div>
+            <div className="menu-gis-item" onClick={this.toggleGroup}>
+              <img title="Layer Groups" src="img/layergroups.svg" alt="Layer Groups"/>
+            </div>
+
+            <div
+              className="menu-gis-item"
+              onClick={this.toggleHelp}
+              title="Help"
+            >
+              ?
+            </div>
           </div>
           <div className="sidebar-gis">
             <div
@@ -1058,7 +1051,11 @@ class GISMap extends Component {
                 <div className="sidebar-symbol">{"\u2715"}</div>
               </div>
               <div className="sidebar-content">
-                <LayerGroups toggleMenu={this.toggleMenu} updateState={updateState} arr={selectedlayers}/>
+                <LayerGroups
+                  toggleMenu={this.toggleMenu}
+                  updateState={updateState}
+                  arr={selectedlayers}
+                />
               </div>
             </div>
 

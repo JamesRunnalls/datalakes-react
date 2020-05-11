@@ -146,7 +146,7 @@
 .leaflet-top,
 .leaflet-bottom {
   position: absolute;
-  z-index: 999;
+  z-index: 400;
   pointer-events: none;
 }
 .leaflet-top {
