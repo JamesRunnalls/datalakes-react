@@ -34,7 +34,7 @@ class Pipeline extends Component {
 
     var scriptHeaders = [];
     for (var k = 0; k < scripts.length; k++) {
-      var arr = scripts[0].name.split("/");
+      var arr = scripts[k].name.split("/");
       var name = arr[arr.length - 1];
       scriptHeaders.push(
         <div
