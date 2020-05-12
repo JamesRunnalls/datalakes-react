@@ -2,7 +2,7 @@
   position: absolute;
   left: 0;
   width: 100%;
-  margin-top: 80px;
+  margin-top: 60px;
 }
 
 .home-banner {
@@ -11,9 +11,11 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 50vh;
+  height: 55vh;
   text-align: center;
   margin-bottom: 30px;
+  padding-top: 15vh;
+  box-sizing: border-box;
 }
 
 .home-banner .home-tagline {
@@ -23,7 +25,10 @@
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 15vh;
+  background-color: white;
+  -webkit-box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 1);
+  -moz-box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 1);
+  box-shadow: 0px 0px 5px 5px rgba(255, 255, 255, 1);
 }
 
 .home-banner button {
@@ -130,7 +135,6 @@
   }
   .home-banner .home-tagline {
     font-size: 30px;
-    padding-top: 10vh;
   }
   .home-banner button {
     font-size: 16px;
