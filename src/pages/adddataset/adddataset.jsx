@@ -12,20 +12,9 @@ import ProgressBar from "./progressbar";
 
 class AddDataset extends Component {
   state = {
-    step: 3,
-    allowedStep: [1, 2, 3, 1, 1],
-    allFiles: [
-      "git/12/introduction-to-datalakes-data-processing/Dockerfile",
-      "git/12/introduction-to-datalakes-data-processing/README.md",
-      "git/12/introduction-to-datalakes-data-processing/data/Lexplore_WeatherData-Copy1.dat",
-      "git/12/introduction-to-datalakes-data-processing/data/Lexplore_WeatherData.dat",
-      "git/12/introduction-to-datalakes-data-processing/data/output/lexploreweather.nc",
-      "git/12/introduction-to-datalakes-data-processing/data/output/lexploreweather2.nc",
-      "git/12/introduction-to-datalakes-data-processing/environment.yml",
-      "git/12/introduction-to-datalakes-data-processing/notebooks/process.py",
-      "git/12/introduction-to-datalakes-data-processing/papers/Physical_Limnology.pdf",
-      "git/12/introduction-to-datalakes-data-processing/requirements.txt",
-    ],
+    step: 1,
+    allowedStep: [1, 1, 1, 1, 1],
+    allFiles: [],
     fileInformation: "",
     renkuResponse: "",
     dropdown: {},
@@ -53,8 +42,8 @@ class AddDataset extends Component {
       },
       citation: "",
       downloads: 0,
-      fileconnect: "false",
-      liveconnect: "no",
+      fileconnect: "no",
+      liveconnect: "false",
       renku: "",
       accompanyingdata: [],
       mindatetime: "",
@@ -114,6 +103,7 @@ class AddDataset extends Component {
 
     // Parse variable and attribute information from incoming file
     var { repo_id, file, files, allFiles } = data2;
+    var filepath = "git/" + repo_id + "/" + reqObj.dir + "/" + reqObj.file;
     if (file) {
       var { data: fileInformation } = await axios
         .get(apiUrl + "/files/" + file.id + "?get=metadata")
@@ -132,6 +122,7 @@ class AddDataset extends Component {
     }
     dataset["id"] = reqObj.id;
     dataset["repositories_id"] = repo_id;
+    dataset["accompanyingdata"] = [filepath];
 
     // Set initial dataset parameters
     var datasetparameters = this.setDatasetParameters(

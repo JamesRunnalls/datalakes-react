@@ -30,18 +30,18 @@ class ReviewLineage extends Component {
     } = this.props;
     var { accompanyingdata } = dataset;
     const { message } = this.state;
-    var selectedfiles = [];
-    for (var i = 0; i < accompanyingdata.length; i++) {
-      var arr = accompanyingdata[i].split("/");
-      selectedfiles.push(
-        <div key={"sf" + i} className="sfile">
-          {arr[arr.length - 1]}
-        </div>
-      );
-    }
-    var renku = ""
+    allFiles.sort(function(a, b){
+      return b.split("/").length - a.split("/").length;
+    })
+    var selectedfiles = accompanyingdata
+      .map((ad) => {
+        var arr = ad.split("/");
+        return arr[arr.length - 1];
+      })
+      .join(", ");
+    var renku = "";
     if (renkuResponse.stdout === 0 && renkuResponse.log.data.lineage !== null) {
-      renku = "Renku lineage information detected."
+      renku = "Renku lineage information detected.";
     }
 
     return (
@@ -63,15 +63,13 @@ class ReviewLineage extends Component {
               other information related to the data.
             </p>
             <p>{renku}</p>
-            <p>{accompanyingdata.length} files selected:</p>
-            <div className="selectedfiles">{selectedfiles}</div>
           </div>
-
           <FileSelector
             allFiles={allFiles}
             accompanyingdata={accompanyingdata}
             handleAccompanyingData={handleAccompanyingData}
           />
+          <div className="selectedfiles"><b>Selected:</b> {selectedfiles}</div>
           <div className="error-message">{message}</div>
           <div className="buttonnav">
             <button onClick={this.prevStep}>Back</button>

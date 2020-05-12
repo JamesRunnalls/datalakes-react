@@ -111,6 +111,8 @@ form.adddataset-form input {
   text-align: center;
 }
 
+
+
 .repo-connection {
   margin-top: 15px;
 }
@@ -193,12 +195,17 @@ table.metadata td {
   max-width: 100%;
   margin: auto;
   margin-top: 30px;
-  margin-bottom: 30px;
 }
 
-.lineage-text .selectedfiles {
+.adddataset-form .selectedfiles {
+  width: 820px;
+  max-width: 100%;
+  margin: auto;
+  box-sizing: border-box;
   border: 1px solid grey;
   padding: 10px;
+  border-radius: 0 0 5px 5px;
+  margin-top: -1px;
 }
 
 .lineage-text .selectedfiles .sfile {

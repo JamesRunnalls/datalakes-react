@@ -158,6 +158,18 @@
   vertical-align: top;
 }
 
+.pipeline-headitem {
+  width: auto;
+  display: inline-block;
+  padding: 5px 10px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.pipeline-headitem.active {
+  border: 1px solid grey;
+}
+
 @media screen and (max-width: 800px) {
   .data-subnav .subnav-item .subnav-text {
     display: none;
@@ -228,14 +240,15 @@
   margin-bottom: 20px;
 }
 
-.pipeline .pipeline-left {
+.pipeline-left {
   width: 50%;
   display: inline-block;
   vertical-align: top;
   margin-bottom: 20px;
+  margin-top: -70px;
 }
 
-.pipeline .pipeline-left .datasets {
+.pipeline-left .datasets {
   display: block;
   width: fit-content;
   border: 1px solid black;
@@ -245,7 +258,7 @@
   margin: auto;
 }
 
-.pipeline .pipeline-left .script {
+.pipeline-left .script {
   display: block;
   width: fit-content;
   background-color: rgb(200, 200, 200);
@@ -257,7 +270,7 @@
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
 }
 
-.pipeline .pipeline-left .connector {
+.pipeline-left .connector {
   display: block;
   width: fit-content;
   font-size: 30px;
@@ -309,8 +322,9 @@
     width: 100%;
     padding-right: 0;
   }
-  .pipeline .pipeline-left {
+  .pipeline-left {
     width: 100%;
+    margin-top: 0;
   }
 }
 

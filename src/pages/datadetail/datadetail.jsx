@@ -416,9 +416,9 @@ class DataDetail extends Component {
       var combined = data;
       var { lower, upper } = this.dataBounds(dataArray);
 
-      // Get Renku Data
+      // Get Pipeline Data
       var renku = false;
-      var scriptFile = "";
+      var scripts = [];
       if (dataset.renku === 0) {
         try {
           ({ data: renku } = await axios.post(apiUrl + "/renku", {
@@ -428,10 +428,13 @@ class DataDetail extends Component {
           console.error(e);
           renku = false;
         }
-      } else {
-        ({ data: scriptFile } = await axios.get(
-          apiUrl + "/renku/script/" + dataset_id
+      }
+      try {
+        ({ data: scripts } = await axios.get(
+          apiUrl + "/pipeline/scripts/" + dataset_id
         ));
+      } catch (e) {
+        console.error(e);
       }
 
       this.setState({
@@ -450,7 +453,7 @@ class DataDetail extends Component {
         step,
         allowedStep,
         combined,
-        scriptFile,
+        scripts,
       });
     } else {
       this.setState({
@@ -484,7 +487,7 @@ class DataDetail extends Component {
       file,
       innerLoading,
       combined,
-      scriptFile,
+      scripts,
     } = this.state;
     document.title = dataset.title
       ? dataset.title + " - Datalakes"
@@ -629,7 +632,7 @@ class DataDetail extends Component {
               updateSelectedState={this.updateSelectedState}
               link={link}
             />
-            <Pipeline dataset={dataset} renku={renku} scriptFile={scriptFile}/>
+            <Pipeline dataset={dataset} renku={renku} scripts={scripts} />
             <Footer />
           </React.Fragment>
         );
