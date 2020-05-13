@@ -6,34 +6,41 @@ import Loading from "../../../components/loading/loading";
 class ReviewData extends Component {
   state = {
     modal: false,
-    modalValue: ""
+    modalValue: "",
+    loading: false,
   };
 
   // Modal for adding to dropdown lists
-  showModal = value => {
+  showModal = (value) => {
     this.setState({
       modal: !this.state.modal,
-      modalValue: value
+      modalValue: value,
     });
   };
 
-  nextStep = e => {
-    this.setState({
-      message:
-        "Parsing data to JSON format. This might take a while for large files.",
-      loading: true
-    });
+  nextStep = (e) => {
     e.preventDefault();
-    this.props.nextStep().catch(error => {
-      console.error(error,error.message);
+    var { loading } = this.state;
+    if (!loading) {
       this.setState({
-        message: error.message,
-        loading: false
+        message:
+          "Parsing data to JSON format. This might take a while for large files.",
+        loading: true,
       });
-    });
+
+      this.props.nextStep().catch((error) => {
+        console.error(error, error.message);
+        this.setState({
+          message: error.message,
+          loading: false,
+        });
+      });
+    } else {
+      console.error("Processing Running");
+    }
   };
 
-  handleDatasetIntercept = input => {
+  handleDatasetIntercept = (input) => {
     var { handleDataset, resetFileConnect, fileconnect } = this.props;
     if (fileconnect !== "no") {
       resetFileConnect();
@@ -41,7 +48,7 @@ class ReviewData extends Component {
     handleDataset(input);
   };
 
-  prevStep = e => {
+  prevStep = (e) => {
     e.preventDefault();
     this.props.prevStep();
   };
@@ -57,7 +64,7 @@ class ReviewData extends Component {
       files_list,
       liveconnect,
       fileconnect,
-      handleDataset
+      handleDataset,
     } = this.props;
     const { parameters, sensors, axis } = dropdown;
     var { modal, modalValue, message, loading } = this.state;
@@ -152,7 +159,11 @@ class ReviewData extends Component {
             />
           </td>
           <td>
-            <input defaultValue={row.link} type="number" onChange={handleChange(i, "link")} />
+            <input
+              defaultValue={row.link}
+              type="number"
+              onChange={handleChange(i, "link")}
+            />
           </td>
           <td>{unit}</td>
           <td>
@@ -186,7 +197,7 @@ class ReviewData extends Component {
       var userMessage = (
         <div className="loading">
           {loading && <Loading />}
-          {message}
+          <div id="reviewdata-message">{message}</div>
         </div>
       );
     }
@@ -198,14 +209,14 @@ class ReviewData extends Component {
     } catch (e) {}
 
     // Multiple files
-    var fT = datasetparameters.filter(dp => dp.parameters_id === 1);
+    var fT = datasetparameters.filter((dp) => dp.parameters_id === 1);
     var filesTime = fT.length > 0 && fT[0].included;
     //var fD = datasetparameters.filter(dp => dp.parameters_id === 2);
     //var filesDepth = fD.length > 0 && fD[0].included;
 
     return (
       <React.Fragment>
-        <form className="adddataset-form"  onSubmit={this.nextStep}>
+        <form className="adddataset-form" onSubmit={this.nextStep}>
           <table className="datareview">
             <tbody>
               <tr>
@@ -220,17 +231,16 @@ class ReviewData extends Component {
                 <th style={{ width: "45px" }}>Link</th>
                 <th>Units</th>
                 <th>Sensor</th>
-                <th style={{ width: "15px" }}><div title="Include parameter.">Incl.</div></th>
+                <th style={{ width: "15px" }}>
+                  <div title="Include parameter.">Incl.</div>
+                </th>
               </tr>
               {rows}
             </tbody>
           </table>
           <div className="file-connection">
             The {noFiles} additional files in my folder
-            <select
-              value={fileconnect}
-              onChange={handleDataset("fileconnect")}
-            >
+            <select value={fileconnect} onChange={handleDataset("fileconnect")}>
               <option value="no">have no relevance to my file.</option>
               <option value="mix">are a mix of different files.</option>
               <option value="time" disabled={!filesTime}>
@@ -244,7 +254,7 @@ class ReviewData extends Component {
             </select>
           </div>
           <div className="repo-connection">
-            I want a 
+            I want a
             <select
               defaultValue={liveconnect}
               onChange={handleDataset("liveconnect")}

@@ -526,15 +526,15 @@ class DataPortal extends Component {
     fDatasets = this.sortDatasets(fDatasets, sortby);
 
     // Selected link
-    var sids = selected.map(x => x.id);
-    var p = JSON.parse(JSON.stringify(parameters))
-    p = p.filter(x => sids.includes(x.datasets_id))
-    p = p.filter(x => ![1,2,3,4].includes(x.parameters_id))
-    p = p.map(x => [x.datasets_id,x.parameters_id])
-    var link = "/map?selected="+JSON.stringify(p);
+    var sids = selected.map((x) => x.id);
+    var p = JSON.parse(JSON.stringify(parameters));
+    p = p.filter((x) => sids.includes(x.datasets_id));
+    p = p.filter((x) => ![1, 2, 3, 4].includes(x.parameters_id));
+    p = p.map((x) => [x.datasets_id, x.parameters_id]);
+    var link = "/map?selected=" + JSON.stringify(p);
 
     return (
-      <React.Fragment>
+      <React.Fragment> 
         <h1>Data Portal</h1>
         <SidebarLayout
           sidebartitle="Filters"
@@ -584,13 +584,17 @@ class DataPortal extends Component {
                     <div>
                       <div className="download-selected">
                         {selected.map((s) => {
-                          return <div key={s.title}>{"- "+s.title}</div>;
+                          return <div key={s.title}>{"- " + s.title}</div>;
                         })}
                       </div>
                       <Link to={link}>
-                        <button title="See datasets on web GIS">Map Viewer</button>
+                        <button title="See datasets on web GIS">
+                          Map Viewer
+                        </button>
                       </Link>
-                      <button title="Not currently available please download individually">Download Datasets</button>
+                      <button title="Not currently available please download individually">
+                        Download Datasets
+                      </button>
                     </div>
                   ) : (
                     <div>No datasets selected</div>

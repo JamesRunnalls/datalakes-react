@@ -5,23 +5,29 @@ import Loading from "../../../components/loading/loading";
 class AddData extends Component {
   state = {
     message: "",
-    loading: true,
+    loading: false,
   };
 
   nextStep = (e) => {
-    this.setState({
-      loading: true,
-      message:
-        "Downloading and analysing file. This might take a while for large files.",
-    });
     e.preventDefault();
-    this.props.nextStep().catch((error) => {
-      console.error(error.message);
+    var { loading } = this.state;
+    if (!loading) {
       this.setState({
-        message: error.message,
-        loading: false,
+        loading: true,
+        message:
+          "Downloading and analysing file. This might take a while for large files.",
       });
-    });
+      this.props.nextStep().catch((error) => {
+        console.log("catching");
+        console.error(error.message);
+        this.setState({
+          message: error.message,
+          loading: false,
+        });
+      });
+    } else {
+      console.error("Processing Running");
+    }
   };
 
   componentDidMount() {
@@ -38,14 +44,14 @@ class AddData extends Component {
       var userMessage = (
         <div className="loading">
           {loading && <Loading />}
-          {message}
+          <div id="adddata-message">{message}</div>
         </div>
       );
     }
 
     return (
       <React.Fragment>
-        <form className="adddataset-form"  onSubmit={this.nextStep}>
+        <form className="adddataset-form" onSubmit={this.nextStep}>
           <div>
             <p>
               Welcome to the Datalakes add dataset portal. Currently we only
@@ -77,7 +83,9 @@ class AddData extends Component {
           </div>
           <div className="error-message">{userMessage}</div>
           <div className="buttonnav">
-            <button onClick={this.nextStep}>Clone Repository and Parse File</button>
+            <button onClick={this.nextStep}>
+              Process
+            </button>
           </div>
         </form>
       </React.Fragment>

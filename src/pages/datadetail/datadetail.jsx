@@ -343,7 +343,13 @@ class DataDetail extends Component {
   async componentDidMount() {
     this._isMounted = true;
     var { step, allowedStep } = this.state;
-    const dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
+    var dataset_id;
+    if ("id" in this.props) {
+      dataset_id = this.props.id;
+    } else {
+      dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
+    }
+
     let server = await Promise.all([
       axios.get(apiUrl + "/datasets/" + dataset_id),
       axios.get(apiUrl + "/files?datasets_id=" + dataset_id),
