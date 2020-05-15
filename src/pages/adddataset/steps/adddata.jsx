@@ -8,7 +8,7 @@ class AddData extends Component {
     loading: false,
   };
 
-  nextStep = (e) => {
+  nextStep = async (e) => {
     e.preventDefault();
     var { loading } = this.state;
     if (!loading) {
@@ -18,7 +18,6 @@ class AddData extends Component {
           "Downloading and analysing file. This might take a while for large files.",
       });
       this.props.nextStep().catch((error) => {
-        console.log("catching");
         console.error(error.message);
         this.setState({
           message: error.message,
@@ -83,9 +82,7 @@ class AddData extends Component {
           </div>
           <div className="error-message">{userMessage}</div>
           <div className="buttonnav">
-            <button onClick={this.nextStep}>
-              Process
-            </button>
+            <button onClick={this.nextStep}>Process</button>
           </div>
         </form>
       </React.Fragment>

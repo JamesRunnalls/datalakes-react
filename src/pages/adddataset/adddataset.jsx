@@ -112,67 +112,80 @@ class AddDataset extends Component {
     var status = "inprogress";
     var message = "Starting clone";
 
-    var monitorclone = setInterval(async () => {
-      var { data: clonestatus } = await axios
-        .get(apiUrl + "/gitclone/status/" + clonestatus_id)
-        .catch((error) => {
-          console.error(error.message);
-          this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-          clearInterval(monitorclone);
-          throw new Error("Unable to clone repository please try again.");
-        });
-      ({ status, message } = clonestatus);
+    var repeattime = 500;
+    var internalthis = this;
 
-      if (status === "failed") {
-        clearInterval(monitorclone);
-        throw new Error("Unable to clone repository please try again.");
-      } else if (status === "succeeded") {
-        clearInterval(monitorclone);
-        // Parse variable and attribute information from incoming file
-        var data2 = JSON.parse(message);
-        var { repo_id, file, files, allFiles } = data2;
-        var filepath = "git/" + repo_id + "/" + reqObj.dir + "/" + reqObj.file;
-        if (file) {
-          var { data: fileInformation } = await axios
-            .get(apiUrl + "/files/" + file.id + "?get=metadata")
+    const clonepromise = new Promise((resolve, reject) => {
+      setTimeout(async function monitor() {
+        try {
+          var { data: clonestatus } = await axios
+            .get(apiUrl + "/gitclone/status/" + clonestatus_id)
             .catch((error) => {
               console.error(error.message);
               this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-              throw new Error(
-                "Failed to parse file please check the file structure and try again."
-              );
+              throw new Error("Unable to clone repository please try again.");
             });
-        } else {
-          this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-          throw new Error(
-            "File not found in repository please check the link and try again."
-          );
+          ({ status, message } = clonestatus);
+
+          if (status === "failed") {
+            internalthis.setState({ allowedStep: [1, 0, 0, 0, 0] });
+            throw new Error(message);
+          } else if (status === "succeeded") {
+            // Parse variable and attribute information from incoming file
+            var data2 = JSON.parse(message);
+            var { repo_id, file, files, allFiles } = data2;
+            var filepath =
+              "git/" + repo_id + "/" + reqObj.dir + "/" + reqObj.file;
+            if (file) {
+              var { data: fileInformation } = await axios
+                .get(apiUrl + "/files/" + file.id + "?get=metadata")
+                .catch((error) => {
+                  console.error(error.message);
+                  internalthis.setState({ allowedStep: [1, 0, 0, 0, 0] });
+                  throw new Error(
+                    "Failed to parse file please check the file structure and try again."
+                  );
+                });
+            } else {
+              internalthis.setState({ allowedStep: [1, 0, 0, 0, 0] });
+              throw new Error(
+                "File not found in repository please check the link and try again."
+              );
+            }
+            dataset["id"] = reqObj.id;
+            dataset["repositories_id"] = repo_id;
+            dataset["accompanyingdata"] = [filepath];
+
+            // Set initial dataset parameters
+            var datasetparameters = internalthis.setDatasetParameters(
+              fileInformation,
+              dropdown
+            );
+
+            internalthis.setState({
+              allowedStep: [1, 2, 0, 0, 0],
+              fileInformation: fileInformation,
+              step: step + 1,
+              dataset,
+              allFiles,
+              datasetparameters,
+              files_list: files,
+              file,
+            });
+            return;
+          } else {
+            document.getElementById("adddata-message").innerHTML = message;
+            setTimeout(monitor, repeattime);
+          }
+        } catch (e) {
+          reject(e);
         }
-        dataset["id"] = reqObj.id;
-        dataset["repositories_id"] = repo_id;
-        dataset["accompanyingdata"] = [filepath];
+      }, repeattime);
+    });
 
-        // Set initial dataset parameters
-        var datasetparameters = this.setDatasetParameters(
-          fileInformation,
-          dropdown
-        );
-
-        this.setState({
-          allowedStep: [1, 2, 0, 0, 0],
-          fileInformation: fileInformation,
-          step: step + 1,
-          dataset,
-          allFiles,
-          datasetparameters,
-          files_list: files,
-          file,
-        });
-        return;
-      } else {
-        document.getElementById("adddata-message").innerHTML = message;
-      }
-    }, 500);
+    await clonepromise.catch((error) => {
+      throw new Error(error);
+    });
   };
 
   // 2) Validate data parse and get lineage from Renku
