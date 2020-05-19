@@ -6,7 +6,7 @@ import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import DataSelect from "../../../components/dataselect/dataselect";
 import FilterBox from "../../../components/filterbox/filterbox";
 import Loading from "../../../components/loading/loading";
-import LoadDataSets from '../../../components/loaddatasets/loaddatasets';
+import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
 import "../datadetail.css";
 
 class LineGraph extends Component {
@@ -128,6 +128,10 @@ class LineGraph extends Component {
     });
   };
 
+  findLink = (parameters, link) => {
+    return parameters.find((p) => p.id === link);
+  };
+
   componentDidMount() {
     this.setDefault();
     document.addEventListener("keydown", this.handleKeyDown);
@@ -189,17 +193,50 @@ class LineGraph extends Component {
     // Axis Options
     var xoptions = [];
     var yoptions = [];
+    var parent;
     for (var j = 0; j < parameters.length; j++) {
       if (parameters[j]["axis"].includes("x")) {
-        xoptions.push({
-          value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
-        });
+        if (Number.isInteger(parameters[j]["link"])) {
+          parent = this.findLink(parameters, parameters[j]["link"]);
+          xoptions.push({
+            value: parameters[j]["axis"],
+            label:
+              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              " (" +
+              getLabel("parameters", parent["parameters_id"], "name") +
+              ")",
+          });
+        } else {
+          xoptions.push({
+            value: parameters[j]["axis"],
+            label: getLabel(
+              "parameters",
+              parameters[j]["parameters_id"],
+              "name"
+            ),
+          });
+        }
       } else if (parameters[j]["axis"].includes("y")) {
-        yoptions.push({
-          value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
-        });
+        if (Number.isInteger(parameters[j]["link"])) {
+          parent = this.findLink(parameters, parameters[j]["link"]);
+          yoptions.push({
+            value: parameters[j]["axis"],
+            label:
+              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              " (" +
+              getLabel("parameters", parent["parameters_id"], "name") +
+              ")",
+          });
+        } else {
+          yoptions.push({
+            value: parameters[j]["axis"],
+            label: getLabel(
+              "parameters",
+              parameters[j]["parameters_id"],
+              "name"
+            ),
+          });
+        }
       }
     }
 
