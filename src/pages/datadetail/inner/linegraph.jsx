@@ -24,6 +24,7 @@ class LineGraph extends Component {
     xunits: "None",
     yunits: "None",
     download: false,
+    mask: true,
   };
 
   formatDate = (raw) => {
@@ -132,6 +133,34 @@ class LineGraph extends Component {
     return parameters.find((p) => p.id === link);
   };
 
+  toggleMask = () => {
+    this.setState({ mask: !this.state.mask });
+  };
+
+  maskAxis = (dataset, xaxis, yaxis, mxaxis, myaxis, mask) => {
+    if (mask) {
+      var x = [];
+      var y = [];
+      var m = 0;
+      for (var i = 0; i < dataset[xaxis].length; i++) {
+        m = 0;
+        if (dataset[mxaxis]) {
+          m = Math.max(m, dataset[mxaxis][i]);
+        }
+        if (dataset[myaxis]) {
+          m = Math.max(m, dataset[myaxis][i]);
+        }
+        if (m === 0) {
+          x.push(dataset[xaxis][i]);
+          y.push(dataset[yaxis][i]);
+        }
+      }
+      return { x, y };
+    } else {
+      return { x: dataset[xaxis], y: dataset[yaxis] };
+    }
+  };
+
   componentDidMount() {
     this.setDefault();
     document.addEventListener("keydown", this.handleKeyDown);
@@ -174,6 +203,7 @@ class LineGraph extends Component {
       yscale,
       xunits,
       yunits,
+      mask,
     } = this.state;
 
     // Show time slider or multiple files
@@ -241,15 +271,30 @@ class LineGraph extends Component {
     }
 
     if (!loading) {
-      // Get data
-      var plotdata;
-      if (files[file].connect === "join") {
-        plotdata = { x: combined[xaxis], y: combined[yaxis] };
-      } else if (files[file].connect === "ind") {
-        plotdata = { x: data[file][xaxis], y: data[file][yaxis] };
-      } else {
-        plotdata = { x: data[0][xaxis], y: data[0][yaxis] };
+      // Error masks
+      var mxaxis = null;
+      var xp = parameters.find((p) => p.axis === xaxis);
+      var xpm = parameters.filter((p) => p.link === xp.id);
+      if (xpm.length === 1) {
+        mxaxis = xpm[0].axis;
       }
+      var myaxis = null;
+      var yp = parameters.find((p) => p.axis === yaxis);
+      var ypm = parameters.filter((p) => p.link === yp.id);
+      if (ypm.length === 1) {
+        myaxis = ypm[0].axis;
+      }
+
+      // Get data
+      var dataset;
+      if (files[file].connect === "join") {
+        dataset = combined;
+      } else if (files[file].connect === "ind") {
+        dataset = data[file];
+      } else {
+        dataset = data[0];
+      }
+      var plotdata = this.maskAxis(dataset, xaxis, yaxis, mxaxis, myaxis, mask);
 
       if (timeSlider) {
         plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
@@ -336,6 +381,14 @@ class LineGraph extends Component {
                       onChange={this.handleAxisSelect("yaxis")}
                     />
                   </div>
+                </div>
+                <div className="axis-mask">
+                  Show Masked Points{" "}
+                  <input
+                    type="checkbox"
+                    checked={!mask}
+                    onChange={this.toggleMask}
+                  />
                 </div>
               </div>
               {fileSlider && (
