@@ -95,9 +95,7 @@
 
 @media screen and (max-width: 960px) {
   .sidebarlayout .rightcontainer {
-    position: absolute;
-    z-index: 999999;
-    right: 0;
+    width: 250px;
   }
 
   .sidebarlayout .rightcontainer.hide {
@@ -106,8 +104,7 @@
   }
 
   .sidebarlayout .leftcontainer {
-    width: 100%;
-    padding-right: 10px;
+    width: calc(100vw - 255px);
   }
 }
 

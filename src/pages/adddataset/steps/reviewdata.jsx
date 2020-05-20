@@ -165,6 +165,13 @@ class ReviewData extends Component {
               onChange={handleChange(i, "link")}
             />
           </td>
+          <td>
+            <input
+              defaultValue={row.detail}
+              type="text"
+              onChange={handleChange(i, "detail")}
+            />
+          </td>
           <td>{unit}</td>
           <td>
             <DataSelect
@@ -221,7 +228,7 @@ class ReviewData extends Component {
             <tbody>
               <tr>
                 <th colSpan="3">Read from file</th>
-                <th colSpan="6">Check and adjust auto-parse</th>
+                <th colSpan="7">Check and adjust auto-parse</th>
               </tr>
               <tr>
                 <th colSpan="2">Variable</th>
@@ -229,6 +236,7 @@ class ReviewData extends Component {
                 <th style={{ width: "calc(33.33% - 55px)" }}>Parameter</th>
                 <th style={{ width: "55px" }}>Axis</th>
                 <th style={{ width: "45px" }}>Link</th>
+                <th>Extra Details</th>
                 <th>Units</th>
                 <th>Sensor</th>
                 <th style={{ width: "15px" }}>

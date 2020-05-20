@@ -32,9 +32,10 @@ class DataDetail extends Component {
     data: "",
     step: "",
     allowedStep: ["download", "pipeline", "information", "webgis"],
-    file: 0,
+    file: [0],
     innerLoading: false,
     combined: [],
+    addnewfiles: true,
   };
 
   // Download data
@@ -114,14 +115,15 @@ class DataDetail extends Component {
     this.setState({ step });
   };
 
-  onChangeFileInt = (values) => {
-    var { file: oldFile, data } = this.state;
-    var file = values;
-    if (file !== oldFile && this.isInt(file)) {
-      if (file >= 0 && file <= data.length) {
-        if (data[file] === 0) {
+  onChangeFileInt = (value) => {
+    var { file, data, addnewfiles } = this.state;
+    if (!file.includes(value) && this.isInt(value) && file.length < 20) {
+      if (value >= 0 && value <= data.length) {
+        if (!addnewfiles) file = [];
+        file.push(value);
+        if (data[value] === 0) {
           this.setState({ file, innerLoading: true });
-          this.downloadFile(file);
+          this.downloadFile(value);
         } else {
           this.setState({ file });
         }
@@ -130,17 +132,30 @@ class DataDetail extends Component {
   };
 
   onChangeFile = (values) => {
-    var { files, file: oldFile, data } = this.state;
+    var { files, file, data, addnewfiles } = this.state;
     let filedict = files.map((a) => a.ave.getTime());
-    var file = this.closest(values[0], filedict);
-    if (file !== oldFile && this.isInt(values[0])) {
-      if (data[file] === 0) {
+    var newfile = this.closest(values[0], filedict);
+    if (!file.includes(newfile) && this.isInt(values[0]) && file.length < 20) {
+      if (!addnewfiles) file = [];
+      file.push(newfile);
+      if (data[newfile] === 0) {
         this.setState({ file, innerLoading: true });
-        this.downloadFile(file);
+        this.downloadFile(newfile);
       } else {
         this.setState({ file });
       }
     }
+  };
+
+  removeFile = (event) => {
+    var { file } = this.state;
+    var index = parseInt(event.target.id);
+    file.splice(index, 1);
+    this.setState({ file });
+  };
+
+  toggleAddNewFile = () => {
+    this.setState({ addnewfiles: !this.state.addnewfiles });
   };
 
   selectedFiles = (upper, lower, files, data) => {
@@ -494,6 +509,7 @@ class DataDetail extends Component {
       innerLoading,
       combined,
       scripts,
+      addnewfiles,
     } = this.state;
     document.title = dataset.title
       ? dataset.title + " - Datalakes"
@@ -577,8 +593,11 @@ class DataDetail extends Component {
               file={file}
               loading={innerLoading}
               combined={combined}
+              addnewfiles={addnewfiles}
               onChangeTime={this.onChangeTime}
               onChangeFile={this.onChangeFile}
+              removeFile={this.removeFile}
+              toggleAddNewFile={this.toggleAddNewFile}
               onChangeFileInt={this.onChangeFileInt}
               onChangeLower={this.onChangeLower}
               onChangeUpper={this.onChangeUpper}

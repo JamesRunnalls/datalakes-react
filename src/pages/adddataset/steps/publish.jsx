@@ -58,6 +58,7 @@ class Publish extends Component {
           <tr key={"row" + i}>
             <td>{this.getDropdownLabel("parameters", row.parameters_id)}</td>
             <td>{row.axis}</td>
+            <td>{row.detail}</td>
             <td>{row.unit}</td>
             <td>{this.getDropdownLabel("sensors", row.sensors_id)}</td>
           </tr>
@@ -82,6 +83,7 @@ class Publish extends Component {
             <tr>
               <th>Parameter</th>
               <th>Axis</th>
+              <th>Extra Detail</th>
               <th>Units</th>
               <th>Sensor</th>
             </tr>

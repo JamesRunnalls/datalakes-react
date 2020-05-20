@@ -541,6 +541,7 @@ class AddDataset extends Component {
         unit: defaultUnit,
         axis: defaultAxis,
         link: -1,
+        detail: "none",
         sensors_id: defaultSensor,
         included: true,
       };

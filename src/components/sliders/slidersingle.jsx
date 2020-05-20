@@ -4,19 +4,19 @@ import { SliderRail, Handle, Track, Tick } from "./components";
 import { scaleLinear } from "d3";
 import { format } from "date-fns";
 import { scaleTime } from "d3";
-import AvailbilityBar from './availabilitybar';
+import AvailbilityBar from "./availabilitybar";
 import "./slider.css";
 
 class SliderSingle extends Component {
   state = {
-    update: [0]
+    update: [0],
   };
 
-  formatDate = raw => {
+  formatDate = (raw) => {
     return new Date(raw * 1000);
   };
 
-  formatTick = ms => {
+  formatTick = (ms) => {
     const { min, max } = this.props;
     const diff = max - min;
     if (diff < 172800) {
@@ -33,7 +33,7 @@ class SliderSingle extends Component {
     }
   };
 
-  onUpdate = update => {
+  onUpdate = (update) => {
     this.setState({ update });
   };
 
@@ -44,7 +44,7 @@ class SliderSingle extends Component {
       height: 42,
       margin: "auto",
       marginTop: 10,
-      boxSizing: "border-box"
+      boxSizing: "border-box",
     };
     var {
       value,
@@ -54,27 +54,30 @@ class SliderSingle extends Component {
       max,
       file,
       files,
-      onChangeFileInt
+      onChangeFileInt,
     } = this.props;
     var { update } = this.state;
 
     var dateTicks, valueStr;
     if (type === "time") {
-      valueStr = new Date(update[0]).toDateString() + " " + new Date(update[0]).toLocaleTimeString();
+      valueStr =
+        new Date(update[0]).toDateString() +
+        " " +
+        new Date(update[0]).toLocaleTimeString();
       min = this.formatDate(min);
       max = this.formatDate(max);
       dateTicks = scaleTime()
         .domain([min, max])
         .ticks(5)
-        .map(d => +d);
+        .map((d) => +d);
     } else if (type === "depth") {
       valueStr = update.toString();
       dateTicks = scaleLinear()
         .domain([min, max])
         .ticks(Math.min(files.length, 8))
-        .map(d => +d);
+        .map((d) => +d);
     }
-
+    var currentfile = file[file.length - 1];
     return (
       <div
         className="datetime-selector"
@@ -83,14 +86,14 @@ class SliderSingle extends Component {
         <div>
           <div
             className="slider-arrow"
-            onClick={() => onChangeFileInt(file + 1)}
+            onClick={() => onChangeFileInt(parseInt(currentfile) + 1)}
           >
             &#60;
           </div>
           <div className="single-value">{valueStr}</div>
           <div
             className="slider-arrow"
-            onClick={() => onChangeFileInt(file - 1)}
+            onClick={() => onChangeFileInt(parseInt(currentfile) - 1)}
           >
             &#62;
           </div>
@@ -111,7 +114,7 @@ class SliderSingle extends Component {
           <Handles>
             {({ handles, activeHandleID, getHandleProps }) => (
               <div className="slider-handles">
-                {handles.map(handle => (
+                {handles.map((handle) => (
                   <Handle
                     key={handle.id}
                     handle={handle}
@@ -140,7 +143,7 @@ class SliderSingle extends Component {
           <Ticks values={dateTicks}>
             {({ ticks }) => (
               <div>
-                {ticks.map(tick => (
+                {ticks.map((tick) => (
                   <Tick
                     key={tick.id}
                     tick={tick}

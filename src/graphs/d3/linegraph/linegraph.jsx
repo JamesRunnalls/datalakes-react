@@ -5,22 +5,24 @@ import { format } from "date-fns";
 import "./linegraph.css";
 
 class D3LineGraph extends Component {
-  getMax = (arr) => {
-    let len = arr.length;
+  getMax = (arr, param) => {
     let max = -Infinity;
-
-    while (len--) {
-      max = arr[len] > max ? arr[len] : max;
+    for (var i = 0; i < arr.length; i++) {
+      let len = arr[i][param].length;
+      while (len--) {
+        max = arr[i][param][len] > max ? arr[i][param][len] : max;
+      }
     }
     return max;
   };
 
-  getMin = (arr) => {
-    let len = arr.length;
+  getMin = (arr, param) => {
     let min = Infinity;
-
-    while (len--) {
-      min = arr[len] < min ? arr[len] : min;
+    for (var i = 0; i < arr.length; i++) {
+      let len = arr[i][param].length;
+      while (len--) {
+        min = arr[i][param][len] < min ? arr[i][param][len] : min;
+      }
     }
     return min;
   };
@@ -64,64 +66,33 @@ class D3LineGraph extends Component {
 
         // Format X-axis
         var x, xx;
+        var minx = this.getMin(data, "x");
+        var maxx = this.getMax(data, "x");
+
         if (xscale === "Time") {
-          x = d3
-            .scaleTime()
-            .range([0, width])
-            .domain([this.getMin(data.x), this.getMax(data.x)]);
-          xx = d3
-            .scaleTime()
-            .range([0, width])
-            .domain([this.getMin(data.x), this.getMax(data.x)]);
+          x = d3.scaleTime().range([0, width]).domain([minx, maxx]);
+          xx = d3.scaleTime().range([0, width]).domain([minx, maxx]);
         } else if (xscale === "Linear") {
-          x = d3
-            .scaleLinear()
-            .range([0, width])
-            .domain([this.getMin(data.x), this.getMax(data.x)]);
-          xx = d3
-            .scaleLinear()
-            .range([0, width])
-            .domain([this.getMin(data.x), this.getMax(data.x)]);
+          x = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
+          xx = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
         } else if (xscale === "Log") {
-          x = d3
-            .scaleLog()
-            .range([0, width])
-            .domain([this.getMin(data.x), this.getMax(data.x)]);
-          xx = d3
-            .scaleLog()
-            .range([0, width])
-            .domain([this.getMin(data.x), this.getMax(data.x)]);
+          x = d3.scaleLog().range([0, width]).domain([minx, maxx]);
+          xx = d3.scaleLog().range([0, width]).domain([minx, maxx]);
         }
 
         // Format Y-axis
         var y, yy;
+        var miny = this.getMin(data, "y");
+        var maxy = this.getMax(data, "y");
         if (yscale === "Time") {
-          y = d3
-            .scaleTime()
-            .range([height, 0])
-            .domain([this.getMin(data.y), this.getMax(data.y)]);
-          yy = d3
-            .scaleTime()
-            .range([height, 0])
-            .domain([this.getMin(data.y), this.getMax(data.y)]);
+          y = d3.scaleTime().range([height, 0]).domain([miny, maxy]);
+          yy = d3.scaleTime().range([height, 0]).domain([miny, maxy]);
         } else if (yscale === "Linear") {
-          y = d3
-            .scaleLinear()
-            .range([height, 0])
-            .domain([this.getMin(data.y), this.getMax(data.y)]);
-          yy = d3
-            .scaleLinear()
-            .range([height, 0])
-            .domain([this.getMin(data.y), this.getMax(data.y)]);
+          y = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
+          yy = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
         } else if (yscale === "Log") {
-          y = d3
-            .scaleLog()
-            .range([height, 0])
-            .domain([this.getMin(data.y), this.getMax(data.y)]);
-          yy = d3
-            .scaleLog()
-            .range([height, 0])
-            .domain([this.getMin(data.y), this.getMax(data.y)]);
+          y = d3.scaleLog().range([height, 0]).domain([miny, maxy]);
+          yy = d3.scaleLog().range([height, 0]).domain([miny, maxy]);
         }
 
         // Define the axes
@@ -146,7 +117,7 @@ class D3LineGraph extends Component {
           .append("rect")
           .attr("width", width)
           .attr("height", height)
-          .attr("fill", bcolor)
+          .attr("fill", bcolor);
 
         // Set clip
         var clip = svg
@@ -181,7 +152,7 @@ class D3LineGraph extends Component {
             )
             .attr("x", 6)
             .attr("dx", "1em")
-            .style("text-anchor", "end")
+            .style("text-anchor", "middle")
             .text(`${xlabel} (${xunits})`);
         }
 
@@ -213,16 +184,35 @@ class D3LineGraph extends Component {
           .style("text-decoration", "underline")
           .text(title);
 
+        // Add legend
+        if ("legend" in this.props) {
+          let div = d3.select("#legend").call(
+            d3
+              .drag()
+              .on("start.interrupt", function () {
+                div.interrupt();
+              })
+              .on("start drag", function () {
+                div.style("top", d3.event.y + "px");
+                div.style("left", d3.event.x + "px");
+              })
+          );
+        }
+
         main();
 
         async function main() {
           // Transform Data
           var xy = [];
-          for (var i = 0; i < data.x.length; i++) {
-            xy.push({
-              x: data.x[i],
-              y: data.y[i],
-            });
+          for (var i = 0; i < data.length; i++) {
+            var xyt = [];
+            for (var j = 0; j < data[i]["x"].length; j++) {
+              xyt.push({
+                x: data[i]["x"][j],
+                y: data[i]["y"][j],
+              });
+            }
+            xy.push(xyt);
           }
 
           // Define the line
@@ -241,17 +231,19 @@ class D3LineGraph extends Component {
             .attr("id", "scatterplot")
             .attr("clip-path", "url(#clip)");
 
-          line
-            .append("path")
-            .attr(
-              "style",
-              "fill:none;stroke:" +
-                lcolor +
-                "; stroke-width:" +
-                lweight +
-                "; fill-opacity:0; stroke-opacity:1;"
-            )
-            .attr("d", valueline(xy));
+          for (var k = 0; k < data.length; k++) {
+            line
+              .append("path")
+              .attr(
+                "style",
+                "fill:none;stroke:" +
+                  lcolor[k] +
+                  "; stroke-width:" +
+                  lweight[k] +
+                  "; fill-opacity:0; stroke-opacity:1;"
+              )
+              .attr("d", valueline(xy[k]));
+          }
 
           // Zooming and Panning
           var zoom = d3
@@ -277,7 +269,20 @@ class D3LineGraph extends Component {
             y.domain(d3.event.transform.rescaleY(yy).domain());
             svg.select("#axis--x").call(xAxis);
             svg.select("#axis--y").call(yAxis);
-            line.selectAll("path").attr("d", valueline(xy));
+            line.selectAll("path").remove();
+            for (var i = 0; i < data.length; i++) {
+              line
+                .append("path")
+                .attr(
+                  "style",
+                  "fill:none;stroke:" +
+                    lcolor[i] +
+                    "; stroke-width:" +
+                    lweight[i] +
+                    "; fill-opacity:0; stroke-opacity:1;"
+                )
+                .attr("d", valueline(xy[i]));
+            }
           }
 
           var brush = d3
@@ -376,7 +381,7 @@ class D3LineGraph extends Component {
           function mousemove() {
             var y0 = y.invert(d3.mouse(this)[1]);
             var x0 = x.invert(d3.mouse(this)[0]);
-            var selectedData = closestCoordinates(x0, y0, xy);
+            var selectedData = closestCoordinates(x0, y0, xy[0]);
             focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
             if (xlabel === "Time") {
               document.getElementById("value").innerHTML =
@@ -452,12 +457,32 @@ class D3LineGraph extends Component {
   }
 
   render() {
+    if ("legend" in this.props) {
+      var { legend } = this.props;
+      var legendcontent = [];
+      for (var i = 0; i < legend.length; i++) {
+        legendcontent.push(
+          <tr key={i}>
+            <td style={{ color: legend[i].color }}>––</td>
+            <td>{legend[i].text}</td>
+          </tr>
+        );
+      }
+    }
+
     return (
       <React.Fragment>
         <div className="vis-header">
           <div className="vis-data" id="value"></div>
         </div>
         <div id="vis" title="Click control to activate zoom to area"></div>
+        {"legend" in this.props && (
+          <div id="legend">
+            <table>
+              <tbody>{legendcontent}</tbody>
+            </table>
+          </div>
+        )}
       </React.Fragment>
     );
   }

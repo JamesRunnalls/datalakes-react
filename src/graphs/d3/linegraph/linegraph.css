@@ -3,6 +3,12 @@
   pointer-events: all;
 }
 
+#legend {
+  position: absolute;
+  top: 50px;
+  left: 70px;
+}
+
 #vis {
     width: 100%;
     height: 100%;

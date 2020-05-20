@@ -11,8 +11,8 @@ import "../datadetail.css";
 
 class LineGraph extends Component {
   state = {
-    lcolor: "black",
-    lweight: "0.5",
+    lcolor: ["black"],
+    lweight: ["0.5"],
     bcolor: "#ffffff",
     xaxis: "x",
     yaxis: "y",
@@ -87,12 +87,13 @@ class LineGraph extends Component {
 
   handleKeyDown = (event) => {
     var { file, onChangeFileInt } = this.props;
+    var currentfile = file[file.length - 1];
     if (event.keyCode === 37) {
       // Left
-      onChangeFileInt([file + 1]);
+      onChangeFileInt(parseInt(currentfile) + 1);
     } else if (event.keyCode === 39) {
       // right
-      onChangeFileInt([file - 1]);
+      onChangeFileInt(parseInt(currentfile) - 1);
     }
   };
 
@@ -115,6 +116,11 @@ class LineGraph extends Component {
     if (xlabel === "Time") xscale = "Time";
     if (ylabel === "TIme") yscale = "Time";
 
+    // Colors and weights
+    var lcolor = Array.from({ length: 20 }).map((x) => this.getRandomColor());
+    lcolor.unshift("#000000");
+    var lweight = Array.from({ length: 20 }).map((x) => "1");
+
     this.setState({
       title,
       xlabel,
@@ -123,8 +129,8 @@ class LineGraph extends Component {
       yunits,
       yscale,
       xscale,
-      lcolor: "#000000",
-      lweight: "0.5",
+      lcolor,
+      lweight,
       bcolor: "#ffffff",
     });
   };
@@ -135,6 +141,15 @@ class LineGraph extends Component {
 
   toggleMask = () => {
     this.setState({ mask: !this.state.mask });
+  };
+
+  getRandomColor = () => {
+    var letters = "0123456789ABCDEF";
+    var color = "#";
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
   };
 
   maskAxis = (dataset, xaxis, yaxis, mxaxis, myaxis, mask) => {
@@ -175,6 +190,8 @@ class LineGraph extends Component {
       onChangeTime,
       onChangeFile,
       onChangeFileInt,
+      removeFile,
+      toggleAddNewFile,
       onChangeLower,
       onChangeUpper,
       parameters,
@@ -189,6 +206,7 @@ class LineGraph extends Component {
       downloadData,
       loading,
       combined,
+      addnewfiles,
     } = this.props;
     const {
       lweight,
@@ -205,6 +223,10 @@ class LineGraph extends Component {
       yunits,
       mask,
     } = this.state;
+
+    // Default no legend and no filecontrol
+    var legend = false;
+    var filecontrol = false;
 
     // Show time slider or multiple files
     var time = parameters.filter((p) => p.parameters_id === 1);
@@ -225,6 +247,12 @@ class LineGraph extends Component {
     var yoptions = [];
     var parent;
     for (var j = 0; j < parameters.length; j++) {
+      var detail = parameters[j]["detail"];
+      if (["none", null, "null"].includes(detail)) {
+        detail = "";
+      } else {
+        detail = ` (${detail})`;
+      }
       if (parameters[j]["axis"].includes("x")) {
         if (Number.isInteger(parameters[j]["link"])) {
           parent = this.findLink(parameters, parameters[j]["link"]);
@@ -239,11 +267,9 @@ class LineGraph extends Component {
         } else {
           xoptions.push({
             value: parameters[j]["axis"],
-            label: getLabel(
-              "parameters",
-              parameters[j]["parameters_id"],
-              "name"
-            ),
+            label:
+              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              detail,
           });
         }
       } else if (parameters[j]["axis"].includes("y")) {
@@ -260,11 +286,9 @@ class LineGraph extends Component {
         } else {
           yoptions.push({
             value: parameters[j]["axis"],
-            label: getLabel(
-              "parameters",
-              parameters[j]["parameters_id"],
-              "name"
-            ),
+            label:
+              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              detail,
           });
         }
       }
@@ -272,45 +296,90 @@ class LineGraph extends Component {
 
     if (!loading) {
       // Error masks
+      var showmask = false;
       var mxaxis = null;
       var xp = parameters.find((p) => p.axis === xaxis);
       var xpm = parameters.filter((p) => p.link === xp.id);
       if (xpm.length === 1) {
         mxaxis = xpm[0].axis;
+        showmask = true;
       }
       var myaxis = null;
       var yp = parameters.find((p) => p.axis === yaxis);
       var ypm = parameters.filter((p) => p.link === yp.id);
       if (ypm.length === 1) {
         myaxis = ypm[0].axis;
+        showmask = true;
       }
 
-      // Get data
-      var dataset;
-      if (files[file].connect === "join") {
-        dataset = combined;
-      } else if (files[file].connect === "ind") {
-        dataset = data[file];
+      var dataset = [];
+      if (fileSlider) {
+        for (var f = 0; f < file.length; f++) {
+          dataset.push(data[file[f]]);
+        }
       } else {
-        dataset = data[0];
+        if (timeSlider) {
+          dataset = [combined];
+        } else {
+          dataset = [data[0]];
+        }
       }
-      var plotdata = this.maskAxis(dataset, xaxis, yaxis, mxaxis, myaxis, mask);
 
-      if (timeSlider) {
-        plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
+      if (fileSlider) {
+        legend = [];
+        filecontrol = [];
       }
+      for (var d = 0; d < dataset.length; d++) {
+        // Data masking
+        dataset[d] = this.maskAxis(
+          dataset[d],
+          xaxis,
+          yaxis,
+          mxaxis,
+          myaxis,
+          mask
+        );
 
-      // Format data
-      var { x, y } = plotdata;
-      if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
-      if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-      if (xlabel === "Depth") x = x.map((i) => -i);
-      if (ylabel === "Depth") y = y.map((i) => -i);
-      plotdata = { x: x, y: y };
+        // Time range
+        if (timeSlider) {
+          dataset[d] = this.datetimeFilter(dataset[d], lower, upper, min, max);
+        }
+
+        // Format data
+        var { x, y } = dataset[d];
+        if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+        if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+        if (xlabel === "Depth") x = x.map((i) => -i);
+        if (ylabel === "Depth") y = y.map((i) => -i);
+        dataset[d] = { x: x, y: y };
+
+        if (fileSlider) {
+          var value = new Date(files[file[d]].ave);
+          var text = value.toDateString() + " " + value.toLocaleTimeString();
+          var color = lcolor[d];
+          legend.push({ color, text });
+          filecontrol.push(
+            <tr key={"file" + d}>
+              <td>
+                <input type="color" value={color} />
+              </td>
+              <td>{text}</td>
+              <td
+                id={d}
+                onClick={removeFile}
+                title="Remove"
+                className="removefile"
+              >
+                ✕
+              </td>
+            </tr>
+          );
+        }
+      }
     }
 
-    // Value
-    var value = new Date(files[file].ave);
+    // Confidence Interval
+    var confidence = false;
 
     return (
       <React.Fragment>
@@ -333,7 +402,9 @@ class LineGraph extends Component {
                 <React.Fragment>
                   <div className="detailgraph">
                     <D3LineGraph
-                      data={plotdata}
+                      data={dataset}
+                      legend={legend}
+                      confidence={confidence}
                       title={title}
                       xlabel={xlabel}
                       ylabel={ylabel}
@@ -346,9 +417,6 @@ class LineGraph extends Component {
                       yscale={yscale}
                       setDownloadGraph={this.setDownloadGraph}
                     />
-                    {fileSlider && (
-                      <div className="linegraph-file">{value.toString()}</div>
-                    )}
                   </div>
                   <div className="linegraph-bottombox"></div>
                 </React.Fragment>
@@ -357,43 +425,41 @@ class LineGraph extends Component {
           }
           rightNoScroll={
             <React.Fragment>
-              <div>
-                <div>
-                  x:{" "}
-                  <div className="axis-select">
-                    <DataSelect
-                      value="value"
-                      label="label"
-                      dataList={xoptions}
-                      defaultValue={xaxis}
-                      onChange={this.handleAxisSelect("xaxis")}
-                    />
+              <FilterBox
+                title="Axis"
+                preopen="true"
+                content={
+                  <div>
+                    <div>
+                      x:{" "}
+                      <div className="axis-select">
+                        <DataSelect
+                          value="value"
+                          label="label"
+                          dataList={xoptions}
+                          defaultValue={xaxis}
+                          onChange={this.handleAxisSelect("xaxis")}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      y:{" "}
+                      <div className="axis-select">
+                        <DataSelect
+                          value="value"
+                          label="label"
+                          dataList={yoptions}
+                          defaultValue={yaxis}
+                          onChange={this.handleAxisSelect("yaxis")}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  y:{" "}
-                  <div className="axis-select">
-                    <DataSelect
-                      value="value"
-                      label="label"
-                      dataList={yoptions}
-                      defaultValue={yaxis}
-                      onChange={this.handleAxisSelect("yaxis")}
-                    />
-                  </div>
-                </div>
-                <div className="axis-mask">
-                  Show Masked Points{" "}
-                  <input
-                    type="checkbox"
-                    checked={!mask}
-                    onChange={this.toggleMask}
-                  />
-                </div>
-              </div>
+                }
+              />
               {fileSlider && (
                 <FilterBox
-                  title="Other Files"
+                  title="Files"
                   preopen="true"
                   content={
                     <div className="">
@@ -408,6 +474,17 @@ class LineGraph extends Component {
                         type="time"
                       />
                       <LoadDataSets data={data} downloadData={downloadData} />
+                      <div className="keeplines">
+                        Keep previously plotted line{" "}
+                        <input
+                          checked={addnewfiles}
+                          type="checkbox"
+                          onChange={toggleAddNewFile}
+                        />
+                      </div>
+                      <table className="filecontrol">
+                        <tbody>{filecontrol}</tbody>
+                      </table>
                     </div>
                   }
                 />
@@ -441,34 +518,11 @@ class LineGraph extends Component {
                       <tbody>
                         <tr>
                           <td>Title</td>
-                          <td colSpan="2">
+                          <td>
                             <textarea
                               id="title"
                               defaultValue={title}
                             ></textarea>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td></td>
-                          <td>Color</td>
-                          <td>Weight</td>
-                        </tr>
-                        <tr>
-                          <td>Line</td>
-                          <td>
-                            <input
-                              type="color"
-                              id="lcolor"
-                              defaultValue={lcolor}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              id="lweight"
-                              type="number"
-                              className="color-value"
-                              defaultValue={lweight}
-                            ></input>
                           </td>
                         </tr>
                         <tr>
@@ -480,11 +534,10 @@ class LineGraph extends Component {
                               defaultValue={bcolor}
                             />
                           </td>
-                          <td></td>
                         </tr>
                         <tr>
                           <td>X Scale</td>
-                          <td colSpan="2">
+                          <td>
                             <select
                               id="xscale"
                               defaultValue={xscale}
@@ -499,7 +552,7 @@ class LineGraph extends Component {
                         </tr>
                         <tr>
                           <td>Y Scale</td>
-                          <td colSpan="2">
+                          <td>
                             <select
                               id="yscale"
                               defaultValue={yscale}
@@ -512,6 +565,18 @@ class LineGraph extends Component {
                           </td>
                           <td></td>
                         </tr>
+                        {showmask && (
+                          <tr>
+                            <td>Show Masked Points</td>
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={!mask}
+                                onChange={this.toggleMask}
+                              />
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
                     </table>
                     <div className="color-buttons">

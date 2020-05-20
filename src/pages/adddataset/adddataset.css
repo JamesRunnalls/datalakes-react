@@ -197,6 +197,18 @@ table.metadata td {
   margin-top: 30px;
 }
 
+.adddataset-form {
+  width: calc(100vw - 20px);
+  position: absolute;
+  left: 10px;
+}
+
+.adddataset-form .welcome-text {
+  width: 900px;
+  max-width: 100%;
+  margin: auto;
+}
+
 .adddataset-form .selectedfiles {
   width: 820px;
   max-width: 100%;
