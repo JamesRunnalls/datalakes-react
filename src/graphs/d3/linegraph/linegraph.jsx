@@ -54,6 +54,7 @@ class D3LineGraph extends Component {
           lweight,
           title,
           setDownloadGraph,
+          confidence,
         } = this.props;
 
         // Set graph size
@@ -207,10 +208,19 @@ class D3LineGraph extends Component {
           for (var i = 0; i < data.length; i++) {
             var xyt = [];
             for (var j = 0; j < data[i]["x"].length; j++) {
-              xyt.push({
-                x: data[i]["x"][j],
-                y: data[i]["y"][j],
-              });
+              if (confidence[i] && confidence[i]["CI_upper"].length === data[i]["x"].length) {
+                xyt.push({
+                  x: data[i]["x"][j],
+                  y: data[i]["y"][j],
+                  CI_upper: confidence[i]["CI_upper"][j],
+                  CI_lower: confidence[i]["CI_lower"][j],
+                });
+              } else {
+                xyt.push({
+                  x: data[i]["x"][j],
+                  y: data[i]["y"][j],
+                });
+              }
             }
             xy.push(xyt);
           }
@@ -225,24 +235,90 @@ class D3LineGraph extends Component {
               return y(d.y);
             });
 
+          // Define confidence interval
+          var valueconfy = d3
+            .area()
+            .x(function (d) {
+              return x(d.x);
+            })
+            .y0(function (d) {
+              return y(d.CI_upper);
+            })
+            .y1(function (d) {
+              return y(d.CI_lower);
+            });
+
+          var valueconfx = d3
+            .area()
+            .y(function (d) {
+              return y(d.y);
+            })
+            .x0(function (d) {
+              return x(d.CI_upper);
+            })
+            .x1(function (d) {
+              return x(d.CI_lower);
+            });
+
+          // Add confidence interval
+          var confInt = svg
+            .append("g")
+            .attr("id", "confidenceinterval")
+            .attr("clip-path", "url(#clip)");
+
           // Add the line
           var line = svg
             .append("g")
-            .attr("id", "scatterplot")
+            .attr("id", "plotlines")
             .attr("clip-path", "url(#clip)");
 
-          for (var k = 0; k < data.length; k++) {
-            line
-              .append("path")
-              .attr(
-                "style",
-                "fill:none;stroke:" +
-                  lcolor[k] +
-                  "; stroke-width:" +
-                  lweight[k] +
-                  "; fill-opacity:0; stroke-opacity:1;"
-              )
-              .attr("d", valueline(xy[k]));
+          //
+
+          plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+
+          function plotLine(
+            line,
+            confInt,
+            data,
+            confidence,
+            value,
+            lcolor,
+            lweight
+          ) {
+            if (confidence) {
+              // Plot confidence bound
+              for (let k = 0; k < confidence.length; k++) {
+                if (confidence[k]) {
+                  try {
+                    var confplot = valueconfy;
+                    if (confidence[k].axis === "x") confplot = valueconfx;
+                    confInt
+                      .append("path")
+                      .attr("style", "fill:#DCDCDC;stroke:none")
+                      .attr("d", confplot(value[k]));
+                  } catch (e) {
+                    console.error("Failed to plot confidence interval " + k);
+                  }
+                }
+              }
+            }
+            for (let l = 0; l < data.length; l++) {
+              try {
+                line
+                  .append("path")
+                  .attr(
+                    "style",
+                    "fill:none;stroke:" +
+                      lcolor[l] +
+                      "; stroke-width:" +
+                      lweight[l] +
+                      "; fill-opacity:0; stroke-opacity:1;"
+                  )
+                  .attr("d", valueline(value[l]));
+              } catch (e) {
+                console.error("Failed to plot line " + l);
+              }
+            }
           }
 
           // Zooming and Panning
@@ -270,19 +346,8 @@ class D3LineGraph extends Component {
             svg.select("#axis--x").call(xAxis);
             svg.select("#axis--y").call(yAxis);
             line.selectAll("path").remove();
-            for (var i = 0; i < data.length; i++) {
-              line
-                .append("path")
-                .attr(
-                  "style",
-                  "fill:none;stroke:" +
-                    lcolor[i] +
-                    "; stroke-width:" +
-                    lweight[i] +
-                    "; fill-opacity:0; stroke-opacity:1;"
-                )
-                .attr("d", valueline(xy[i]));
-            }
+            confInt.selectAll("path").remove();
+            plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
           }
 
           var brush = d3
@@ -345,7 +410,7 @@ class D3LineGraph extends Component {
           }
 
           d3.select(window).on("keydown", function () {
-            if (d3.event.ctrlKey || d3.event.metaKey) {
+            if (d3.event.shiftKey || d3.event.metaKey) {
               zoombox = zoombox.style("pointer-events", "none");
             } else if (d3.event.keyCode === 27) {
               zoombox = zoombox.style("pointer-events", "all");
@@ -475,7 +540,7 @@ class D3LineGraph extends Component {
         <div className="vis-header">
           <div className="vis-data" id="value"></div>
         </div>
-        <div id="vis" title="Click control to activate zoom to area"></div>
+        <div id="vis" title="Click shift to activate zoom to area"></div>
         {"legend" in this.props && (
           <div id="legend">
             <table>

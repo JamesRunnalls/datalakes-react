@@ -3,11 +3,15 @@ import "../datadetail.css";
 
 class Preview extends Component {
   tableHeader = (i, parameters, getLabel) => {
+    var detail = "";
+    if (parameters[i] && parameters[i].detail !== null) {
+      detail = `[${parameters[i].detail}]`;
+    }
     return (
       parameters[i] &&
-      `${getLabel("parameters", parameters[i].parameters_id, "name")} (${
-        parameters[i].unit
-      })`
+      `${getLabel("parameters", parameters[i].parameters_id, "name")} ${
+        detail
+      } (${parameters[i].unit})`
     );
   };
 
@@ -29,7 +33,7 @@ class Preview extends Component {
         <td>{this.tableHeader(4, parameters, getLabel)}</td>
         <td>{this.tableHeader(5, parameters, getLabel)}</td>
         <td>{this.tableHeader(6, parameters, getLabel)}</td>
-      </tr>
+      </tr>,
     ];
     var len = data.y ? data.y.length : data.x.length;
     for (var l = 0; l < Math.min(50, len); l++) {

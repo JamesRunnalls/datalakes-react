@@ -295,21 +295,49 @@ class LineGraph extends Component {
     }
 
     if (!loading) {
-      // Error masks
+      // Error masks && confidence intervals
       var showmask = false;
       var mxaxis = null;
+      var xupper = false;
+      var xlower = false;
       var xp = parameters.find((p) => p.axis === xaxis);
-      var xpm = parameters.filter((p) => p.link === xp.id);
+      var xpm = parameters.filter(
+        (p) => p.link === xp.id && p.parameters_id === 27
+      );
+      var xpcu = parameters.filter(
+        (p) => p.link === xp.id && p.parameters_id === 29
+      );
+      var xpcl = parameters.filter(
+        (p) => p.link === xp.id && p.parameters_id === 30
+      );
       if (xpm.length === 1) {
         mxaxis = xpm[0].axis;
         showmask = true;
+      } else if (xpcu.length === 1) {
+        xupper = true;
+      } else if (xpcl.length === 1) {
+        xlower = true;
       }
       var myaxis = null;
+      var yupper = false;
+      var ylower = false;
       var yp = parameters.find((p) => p.axis === yaxis);
-      var ypm = parameters.filter((p) => p.link === yp.id);
+      var ypm = parameters.filter(
+        (p) => p.link === yp.id && p.parameters_id === 27
+      );
+      var ypcu = parameters.filter(
+        (p) => p.link === yp.id && p.parameters_id === 29
+      );
+      var ypcl = parameters.filter(
+        (p) => p.link === yp.id && p.parameters_id === 30
+      );
       if (ypm.length === 1) {
         myaxis = ypm[0].axis;
         showmask = true;
+      } else if (ypcu.length === 1) {
+        yupper = true;
+      } else if (ypcl.length === 1) {
+        ylower = true;
       }
 
       var dataset = [];
@@ -329,6 +357,7 @@ class LineGraph extends Component {
         legend = [];
         filecontrol = [];
       }
+      var confidence = [];
       for (var d = 0; d < dataset.length; d++) {
         // Data masking
         dataset[d] = this.maskAxis(
@@ -352,6 +381,28 @@ class LineGraph extends Component {
         if (xlabel === "Depth") x = x.map((i) => -i);
         if (ylabel === "Depth") y = y.map((i) => -i);
         dataset[d] = { x: x, y: y };
+
+        // Confidence
+        var CI_upper, CI_lower;
+        if (xupper || xlower) {
+          CI_upper = xupper ? dataset[d][xpcu[0].axis] : dataset[d].x;
+          CI_lower = xlower ? dataset[d][xpcl[0].axis] : dataset[d].x;
+          confidence[d] = {
+            axis: "x",
+            CI_upper,
+            CI_lower,
+          };
+        } else if (yupper || ylower) {
+          CI_upper = yupper ? dataset[d][ypcu[0].axis] : dataset[d].y;
+          CI_lower = ylower ? dataset[d][ypcl[0].axis] : dataset[d].y;
+          confidence[d] = {
+            axis: "y",
+            CI_upper,
+            CI_lower,
+          };
+        } else {
+          confidence[d] = false;
+        }
 
         if (fileSlider) {
           var value = new Date(files[file[d]].ave);
@@ -377,9 +428,6 @@ class LineGraph extends Component {
         }
       }
     }
-
-    // Confidence Interval
-    var confidence = false;
 
     return (
       <React.Fragment>
