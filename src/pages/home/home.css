@@ -19,8 +19,12 @@
 }
 
 .home-banner .home-tagline {
-  font-size: 40px;
-  font-family: "The Serif Bold", serif;
+  font-size: 60px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  text-align: left;
   width: 600px;
   max-width: 100%;
   margin-left: auto;
@@ -79,14 +83,48 @@
 
 .triple {
   text-align: center;
+  background-color: #f3f3f3;
 }
 
 .sectiontitle {
   width: 100%;
-  text-align: center;
-  margin-bottom: 80px;
+  margin-bottom: 120px;
+  font-size: 36px;
+  margin-top: 120px;
+  color: rgb(136, 136, 136);
+  font-family: "Arial", sans-serif;
+  font-weight: bold;
+}
+
+.section {
+  position: relative;
+}
+
+.section.lakesimulations img {
+  width: 100%;
+}
+
+.section.lakesimulations .textbox {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.section.lakesimulations .textbox .straptext {
+  text-align: right;
   font-size: 25px;
-  margin-top: 150px;
+  margin-top: 30px;
+}
+
+.section.lakesimulations .textbox .numberbox{
+  display: inline-block;
+  margin-left: 200px;
+  font-size: 30px;
+  text-align: center;
+}
+
+.section.lakesimulations .textbox .numberbox .number{
+  font-size: 90px;
 }
 
 .triple-inner {
@@ -126,6 +164,12 @@
   max-height: 100%;
 }
 
+@media screen and (max-width: 960px) {
+  .home-banner .home-tagline {
+    font-size: 45px;
+  }
+}
+
 @media screen and (max-width: 500px) {
   .home {
     margin-top: 20px;
@@ -135,6 +179,9 @@
   }
   .home-banner .home-tagline {
     font-size: 30px;
+    width: 100%;
+    padding-left: 10px;
+    box-sizing: border-box;
   }
   .home-banner button {
     font-size: 16px;

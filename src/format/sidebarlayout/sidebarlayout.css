@@ -141,7 +141,7 @@
 
   .sidebarlayout .rightcontainer .righthead .sidebartitle {
     padding: 0;
-    color: rgb(50,50,50);
+    color: rgb(50, 50, 50);
   }
 
   .sidebarlayout .rightcontainer .righthead span {
@@ -162,8 +162,13 @@
     max-width: 500px;
   }
 
-  .sidebarlayout .leftcontainer.full {
-    padding: 0;
+  .sidebarlayout .leftcontainer {
     width: 100%;
+    padding: 0;
+  }
+
+  .sidebarlayout .leftcontainer.full {
+    width: 100%;
+    padding: 0;
   }
 }

@@ -63,22 +63,25 @@ class Dataset extends Component {
 
   parseDate = (input) => {
     var date = new Date(input);
-    var mm = date.getMonth() + 1;
-    var dd = date.getDate();
-    return [
-      (dd > 9 ? "" : "0") + dd,
-      (mm > 9 ? "" : "0") + mm,
-      date.getFullYear(),
-    ].join("/");
+    return date.toLocaleDateString();
   };
 
   render() {
     const { dataset, selected, onSelectDataset, getLabel } = this.props;
     var url = "/datadetail/" + dataset.id;
     var params = this.getParameters(dataset.id);
-    params = params.filter((x) => x.name !== "Time");
+    params = params.filter(
+      (x) => ![1, 2, 3, 4, 27, 28, 29, 30].includes(x.parameters_id)
+    );
     var check = "checkbox unchecked";
+    var lake = getLabel("lakes", dataset.lakes_id);
+    if (lake === "Multiple") {
+      lake = "Covers multiple lakes | ";
+    } else {
+      lake = lake + " | ";
+    }
     if (selected.includes(dataset)) check = "checkbox checked";
+
     return (
       <div key={dataset.id} className="dataset">
         <div
@@ -101,16 +104,23 @@ class Dataset extends Component {
             <div className="text-external">EXTERNAL</div>
           )}
           <div>
-            <div>
-              Parameters: {params.map((param) => param.name).join(" | ")}{" "}
+            <div className="innerdatasetleft">
+              <div>{dataset.description}</div>
             </div>
-            <div>
-              {getLabel("lakes", dataset.lakes_id)} |{" "}
-              {this.parseDate(dataset.mindatetime)} to{" "}
-              {this.parseDate(dataset.maxdatetime)}
+            <div className="innerdatasetright">
+              <div className="parameters-highlight">
+                {params.map((param) => (
+                  <div>{param.name}</div>
+                ))}{" "}
+              </div>
+              <div className="date-highlight">
+                {this.parseDate(dataset.mindatetime)} to{" "}
+                {this.parseDate(dataset.maxdatetime)}
+              </div>
             </div>
-            <div>
-              License: {getLabel("licenses", dataset.licenses_id)} | Downloads:{" "}
+            <div className="footer-highlight">
+              {lake}
+              {getLabel("licenses", dataset.licenses_id)} | Downloads:{" "}
               {dataset.downloads}
             </div>
           </div>
@@ -534,7 +544,7 @@ class DataPortal extends Component {
     var link = "/map?selected=" + JSON.stringify(p);
 
     return (
-      <React.Fragment> 
+      <React.Fragment>
         <h1>Data Portal</h1>
         <SidebarLayout
           sidebartitle="Filters"

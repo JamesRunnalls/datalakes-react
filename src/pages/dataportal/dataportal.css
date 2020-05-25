@@ -1,19 +1,50 @@
 .dataset {
-  padding: 15px 0;
-  border-bottom: solid 1px rgb(169, 169, 169);
+  margin: 15px 0;
+  border: solid 1px rgb(169, 169, 169);
+  padding: 10px;
 }
 
-.dataset:hover > a > .text-title {
-  text-decoration: underline;
+.dataset:hover {
+  background-color: rgb(244, 244, 244);
 }
 
 .dataset .text {
   display: inline-block;
   margin-left: 10px;
-  width: calc(100% - 50px);
+  width: calc(100% - 30px);
   cursor: pointer;
   text-decoration: none;
   color: black;
+}
+
+.dataset .innerdatasetleft {
+  width: 66%;
+  display: inline-block;
+  vertical-align: top;
+  padding: 0 15px 0 0;
+  box-sizing: border-box;
+}
+
+.dataset .innerdatasetright {
+  width: 33%;
+  display: inline-block;
+  vertical-align: top;
+  padding: 0 5px 0 0;
+  box-sizing: border-box;
+}
+
+.dataset .innerdatasetright .parameters-highlight {
+  border-left: 1px solid black;
+  padding-left: 8px;
+}
+
+.dataset .innerdatasetright .date-highlight {
+  padding-top: 10px;
+}
+
+.dataset .footer-highlight {
+  font-size: 12px;
+  padding: 8px 0 0 0;
 }
 
 .dataset .text .text-title {
@@ -262,6 +293,22 @@ table.sortbar-table td {
   margin-top: 100px;
 }
 
+@media screen and (max-width: 800px) {
+  .dataset .innerdatasetleft {
+    width: 100%;
+  }
+
+  .dataset .innerdatasetright {
+    width: 100%;
+  }
+
+  .dataset .innerdatasetright .parameters-highlight {
+    border: none;
+    padding-left: 0;
+    padding-top: 10px;
+  }
+}
+
 @media screen and (max-width: 500px) {
   .sortbar select {
     padding: 4px 0;
@@ -279,7 +326,6 @@ table.sortbar-table td {
   .sortbar {
     padding: 0 4px;
     box-sizing: border-box;
-    margin-top: 38px;
   }
   .filterbar {
     padding: 0 5px;

@@ -20,6 +20,7 @@ import api from "./img/api.png";
 import rs from "./img/rs.png";
 import sim from "./img/sim.png";
 import situ from "./img/situ.png";
+import zurich from "./img/zurich.png";
 import "./home.css";
 
 class PartnerBanner extends Component {
@@ -200,7 +201,7 @@ class Home extends Component {
         <div className="home">
           <div id="home-banner" className="home-banner">
             <div className="home-tagline">
-              Search, visualise and download data on Swiss lakes
+              Search, visualise and download data on Swiss lakes.
             </div>
 
             <button onClick={() => this.scrollTo(this.ourdata, 80)}>
@@ -212,7 +213,24 @@ class Home extends Component {
             <Twitter />
 
             <div className="sectiontitle" ref={this.ourdata}>
-              <h2>Our Data</h2>
+              Datalakes is a collaboration between a number of Swiss
+              institutions to facilitate the disemination of reproducable
+              datasets for Swiss lakes.
+            </div>
+
+            <div className="section lakesimulations">
+              <img src={zurich} />
+              <div className="textbox">
+                <div className="numberbox">
+                  <div className="number">4</div>
+                  3D Models
+                </div>
+                <div className="numberbox">
+                  <div className="number">54</div>
+                  1D Models
+                </div>
+                <div className="straptext">Hydrodynamic lake simulations</div>
+              </div>
             </div>
 
             <Triple
