@@ -110,7 +110,7 @@ class Dataset extends Component {
             <div className="innerdatasetright">
               <div className="parameters-highlight">
                 {params.map((param) => (
-                  <div>{param.name}</div>
+                  <div key={param.name}>{param.name}</div>
                 ))}{" "}
               </div>
               <div className="date-highlight">

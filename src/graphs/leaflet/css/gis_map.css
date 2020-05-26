@@ -13,7 +13,7 @@
 }
 
 .map {
-  height: calc(100% - 140px);
+  height: calc(100% - 150px);
   min-height: 300px;
   width: 100%;
   position: absolute;

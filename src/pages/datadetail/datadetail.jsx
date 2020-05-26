@@ -15,6 +15,8 @@ import Loading from "../../components/loading/loading";
 import { apiUrl } from "../../../src/config.json";
 import "./datadetail.css";
 import Footer from "../../format/footer/footer";
+import ThreeDModel from "./inner/threedmodel";
+import RemoteSensing from './inner/remotesensing';
 
 class DataDetail extends Component {
   state = {
@@ -476,6 +478,24 @@ class DataDetail extends Component {
         combined,
         scripts,
       });
+    } else if (dataset.datasource === "Meteolakes") {
+      this.setState({
+        dataset,
+        parameters,
+        dropdown,
+        files,
+        step: "threedmodel",
+        allowedStep: ["threedmodel"],
+      });
+    } else if (dataset.datasource === "Eawag RS") {
+      this.setState({
+        dataset,
+        parameters,
+        dropdown,
+        files,
+        step: "threedmodel",
+        allowedStep: ["threedmodel"],
+      });
     } else {
       this.setState({
         dataset,
@@ -687,6 +707,34 @@ class DataDetail extends Component {
               dataset={dataset}
               parameters={parameters}
               getLabel={this.getLabel}
+              link={link}
+            />
+            <Footer />
+          </React.Fragment>
+        );
+      case "threedmodel":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <ThreeDModel
+              dataset={dataset}
+              parameters={parameters}
+              getLabel={this.getLabel}
+              files={files}
+              link={link}
+            />
+            <Footer />
+          </React.Fragment>
+        );
+      case "remotesensing":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <RemoteSensing
+              dataset={dataset}
+              parameters={parameters}
+              getLabel={this.getLabel}
+              files={files}
               link={link}
             />
             <Footer />

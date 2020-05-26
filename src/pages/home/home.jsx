@@ -18,10 +18,7 @@ import map from "./img/map.png";
 import data from "./img/data.png";
 import api from "./img/api.png";
 import rs from "./img/rs.png";
-import sim from "./img/sim.png";
-import situ from "./img/situ.png";
 import zurich from "./img/zurich.png";
-import lexplore from "./img/lexplore.jpg";
 import "./home.css";
 
 class PartnerBanner extends Component {
@@ -228,7 +225,7 @@ class Home extends Component {
           </div>
 
           <div className="section lakesimulations">
-            <img src={zurich} />
+            <img src={zurich} alt="Simulation of Lake Zurich" />
             <div className="textbox">
               <div className="straptext">
                 Datalakes provides access to{" "}
@@ -294,7 +291,7 @@ class Home extends Component {
               cholorphyll and total suspended matter for water bodies across
               Switerland.
             </div>
-            <img src={rs} />
+            <img src={rs} alt="Remote sensing layer"/>
           </div>
 
           <div className="sectiontitle" ref={this.accessoptions}>
