@@ -839,7 +839,7 @@ class GISMap extends Component {
       })
       .addTo(this.map);
 
-    this.layer.addTo(this.map);
+    //this.layer.addTo(this.map);
 
     var map = this.map;
     this.map.on("mousemove", function (e) {

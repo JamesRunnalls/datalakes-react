@@ -1,15 +1,18 @@
 /* -------------- Header -------------------------  */
 
 header {
-  padding-left: 10px;
-  padding-right: 10px;
   position: relative;
-  width: 960px;
-  margin-left: auto;
-  margin-right: auto;
   margin-top: 40px;
-  max-width: 100%;
-  box-sizing: border-box;
+  width: 100%;
+  background-color: white;
+  padding: 5px 0;
+  z-index: 999;
+}
+
+header.scroll {
+  position: fixed;
+
+  margin-top: 0;
 }
 
 @media screen and (max-width: 500px) {
@@ -18,39 +21,29 @@ header {
   }
 }
 
+header .header-inner {
+  padding: 0 10px;
+  width: 960px;
+  margin: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  height: 100%;
+}
+
 /* Logo */
 
 header .logo {
   display: inline-block;
-}
-
-header .logo a {
-  display: inline-block;
-  width: 220px;
-  height: auto;
+  height: 35px;
 }
 
 header .logo img {
-  width: 100%;
-  height: auto;
-}
-
-@media screen and (max-width: 800px) {
-  header .logo {
-    top: 80px;
-  }
-  header .logo a {
-    width: 180px;
-  }
+  height: 100%;
 }
 
 @media screen and (max-width: 500px) {
   header .logo {
-    top: 16px;
-    left: 5px;
-  }
-  header .logo a {
-    width: 140px;
+    height: 20px;
   }
 }
 
@@ -123,6 +116,7 @@ header .desktop-nav {
 header .desktop-nav .desktop-navbar .menu-icon {
   display: inline-block;
   cursor: pointer;
+  padding-left: 40px;
 }
 
 header .desktop-nav .desktop-navbar .menu-icon .symbol {
@@ -135,7 +129,7 @@ header .desktop-nav .desktop-navbar .links {
 }
 
 header .desktop-nav a {
-  padding: 10px 40px 10px 0;
+  padding: 10px 0 10px 40px;
   color: #000;
   text-decoration: none;
   font-size: 16px;
@@ -153,9 +147,10 @@ header .header-item:hover {
 
 header .desktop-nav .desktop-menu {
   display: none;
-  position: absolute;
-  right: 0;
-  z-index: 9999999;
+}
+
+header .desktop-nav .desktop-navbar {
+  text-align: right;
 }
 
 header .desktop-nav .desktop-menu.show {
@@ -190,5 +185,8 @@ header .desktop-nav .midscreen {
     background-color: white;
     padding: 0 0 0 25px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    position: absolute;
+    width: 200px;
+    right: 0;
   }
 }

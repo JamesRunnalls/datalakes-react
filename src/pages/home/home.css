@@ -1,8 +1,9 @@
 .home {
-  position: absolute;
-  left: 0;
-  width: 100%;
   margin-top: 60px;
+}
+
+#root {
+  overflow-x: auto;
 }
 
 .home-banner {
@@ -16,6 +17,8 @@
   margin-bottom: 30px;
   padding-top: 15vh;
   box-sizing: border-box;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
 }
 
 .home-banner .home-tagline {
@@ -81,23 +84,68 @@
   display: inline-block;
 }
 
-.triple {
-  text-align: center;
-  background-color: #f3f3f3;
-}
-
 .sectiontitle {
   width: 100%;
   margin-bottom: 120px;
   font-size: 36px;
   margin-top: 120px;
-  color: rgb(136, 136, 136);
+  color: rgb(134, 134, 139);
   font-family: "Arial", sans-serif;
   font-weight: bold;
+  background: #f3f3f3;
+  padding: 60px;
+  box-sizing: border-box;
+}
+
+.sectiontitle .sub {
+  margin-top: 20px;
+  color: black;
+  font-size: 26px;
+}
+
+.sectiontitle .scroll {
+  font-size: 22px;
+  width: 310px;
+  margin: auto;
+  margin-top: 30px;
+}
+
+.sectiontitle .arrow {
+  transform: rotate(180deg);
+  height: 30px;
+  width: 30px;
+  margin: auto;
+  margin-top: 20px;
+  background-color: grey;
+}
+
+.sectiontitle .acc {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.sectiontitle .letter {
+  color: black;
+  size: 50px;
+  display: inline-block;
+}
+
+.sectiontitle .word {
+  size: 14px;
+  display: inline-block;
+  padding-right: 10px;
+}
+
+.sectiontitle .lw {
+  display: inline-block;
 }
 
 .section {
   position: relative;
+}
+
+.section.lakesimulations {
+  margin-bottom: 120px;
 }
 
 .section.lakesimulations img {
@@ -114,23 +162,94 @@
   text-align: right;
   font-size: 25px;
   margin-top: 30px;
+  max-width: 712px;
+  align-items: right;
+  margin-bottom: 70px;
 }
 
-.section.lakesimulations .textbox .numberbox{
+.section.lakesimulations .textbox .numberbox {
   display: inline-block;
   margin-left: 200px;
   font-size: 30px;
   text-align: center;
+  color: grey;
 }
 
-.section.lakesimulations .textbox .numberbox .number{
+.section.lakesimulations .textbox .numberbox .number {
   font-size: 90px;
+  color: black;
+}
+
+.section.insitudata {
+  margin-top: 50px;
+}
+
+.section.insitudata .insitutext {
+  width: 100%;
+  background: url("img/lexplore.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  text-align: center;
+  box-sizing: border-box;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+.section.insitudata .insitutext table {
+  width: 100%;
+  text-align: center;
+}
+
+.section.insitudata .title {
+  font-size: 34px;
+  padding-top: 40px;
+  color: white;
+  font-family: "Arial", sans-serif;
+  font-weight: bold;
+}
+
+.section.insitudata .numberbox {
+  display: inline-block;
+  font-size: 30px;
+  text-align: center;
+  margin: 90px 0;
+}
+
+.section.insitudata .numberbox .number {
+  font-size: 90px;
+  color: black;
+}
+
+.section.rs {
+  margin-top: 120px;
+  margin-bottom: 120px;
+  background: #f3f3f3;
+}
+
+.section.rs img {
+  width: 100%;
+  padding: 40px 60px;
+  box-sizing: border-box;
+}
+
+.section.rs .text {
+  font-size: 25px;
+  margin: 60px 60px;
+  padding: 40px 60px;
+  border-bottom: 1px solid grey;
+}
+
+.triple {
+  text-align: center;
+  padding: 40px;
+  background-color: #f3f3f3;
 }
 
 .triple-inner {
   width: 280px;
   display: inline-block;
-  margin: 20px;
+  margin: 40px;
   vertical-align: top;
 }
 
@@ -164,15 +283,57 @@
   max-height: 100%;
 }
 
+@media screen and (max-width: 1300px) {
+  .section.insitudata .numberbox {
+    margin: 50px 0;
+  }
+}
+
+@media screen and (max-width: 1050px) {
+  .section.insitudata .title {
+    font-size: 28px;
+  }
+
+  .section.insitudata .numberbox {
+    margin: 20px 0;
+  }
+
+  .section.insitudata .numberbox .number {
+    font-size: 70px;
+  }
+}
+
 @media screen and (max-width: 960px) {
   .home-banner .home-tagline {
     font-size: 45px;
+  }
+  .home {
+    padding: 0 20px;
+  }
+  .section.insitudata .title {
+    font-size: 22px;
+    margin-top: 20px;
+  }
+
+  .section.insitudata .numberbox {
+    margin: 10px 0;
+    font-size: 22px;
+  }
+
+  .section.insitudata .numberbox .number {
+    font-size: 50px;
+  }
+
+  .section.lakesimulations .textbox .numberbox {
+    margin-left: 50px;
+    float: right;
   }
 }
 
 @media screen and (max-width: 500px) {
   .home {
     margin-top: 20px;
+    padding: 0;
   }
   .home-banner {
     margin-bottom: 0;
@@ -186,9 +347,63 @@
   .home-banner button {
     font-size: 16px;
   }
+
+  .triple {
+    padding: 0;
+  }
+
+  .triple-inner {
+    margin: 0;
+  }
+
   .sectiontitle {
     margin-top: 20px;
     margin-bottom: 20px;
+    padding: 20px;
+    font-size: 25px;
+  }
+
+  .sectiontitle .sub {
+    font-size: 18px;
+  }
+
+  .sectiontitle .scroll {
+    font-size: 16px;
+    width: 210px;
+  }
+
+  .sectiontitle .arrow {
+    height: 20px;
+    width: 20px;
+  }
+
+  .section.lakesimulations .textbox .straptext {
+    font-size: 14px;
+    width: 70%;
+    float: right;
+    padding-right: 20px;
+  }
+  .section.lakesimulations .textbox .numberbox {
+    margin: 0 20px;
+  }
+
+  .section.insitudata {
+    margin: 0;
+  }
+
+  .section.insitudata .title {
+    margin: 40px 20px;
+  }
+
+  .section.rs {
+    margin: 0;
+    margin-top: 20px;
+  }
+
+  .section.rs .text {
+    padding: 20px;
+    margin: 0;
+    font-size: 18px;
   }
 
   .home-text {
