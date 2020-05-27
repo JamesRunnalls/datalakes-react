@@ -199,12 +199,12 @@ class AddDataset extends Component {
     });
 
     // Check all table filled
-    for (var row of datasetparameters) {
+    /*for (var row of datasetparameters) {
       if (!this.noEmptyString(row)) {
         this.setState({ allowedStep: [1, 2, 0, 0, 0] });
         throw new Error("Please complete all the fields.");
       }
-    }
+    }*/
 
     // Lineage from Renku
     dataset["renku"] = 1;

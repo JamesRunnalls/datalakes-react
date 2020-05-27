@@ -45,6 +45,14 @@ class D3HeatMap extends Component {
     return index;
   };
 
+  getDomain = (domain) => {
+    var minarr = domain.map((d) => d[0]);
+    var maxarr = domain.map((d) => d[1]);
+    var min = d3.extent(minarr)[0];
+    var max = d3.extent(maxarr)[1];
+    return [min, max];
+  };
+
   plotHeatMap = () => {
     try {
       d3.select("#svg").remove();
@@ -78,15 +86,36 @@ class D3HeatMap extends Component {
           height = Math.floor(visheight - margin.top - margin.bottom);
 
         // Get data extents
-        var xdomain = d3.extent(data.x);
-        var ydomain = d3.extent(data.y);
-
-        if (!minvalue && !maxvalue) {
-          var zdomain = d3.extent(
+        var xdomain, ydomain, zdomain;
+        if (Array.isArray(data)) {
+          var xdomarr = [];
+          var ydomarr = [];
+          var zdomarr = [];
+          for (var h = 0; h < data.length; h++) {
+            xdomarr.push(d3.extent(data[h].x));
+            ydomarr.push(d3.extent(data[h].y));
+            zdomarr.push(
+              d3.extent(
+                [].concat.apply([], data[h].z).filter((f) => {
+                  return !isNaN(parseFloat(f)) && isFinite(f);
+                })
+              )
+            );
+          }
+          xdomain = this.getDomain(xdomarr);
+          ydomain = this.getDomain(ydomarr);
+          zdomain = this.getDomain(zdomarr);
+        } else {
+          xdomain = d3.extent(data.x);
+          ydomain = d3.extent(data.y);
+          zdomain = d3.extent(
             [].concat.apply([], data.z).filter((f) => {
               return !isNaN(parseFloat(f)) && isFinite(f);
             })
           );
+        }
+
+        if (!minvalue && !maxvalue) {
           minvalue = zdomain[0];
           maxvalue = zdomain[1];
         }
@@ -165,39 +194,43 @@ class D3HeatMap extends Component {
           var scaleY = currentZoom.rescaleY(y);
           var hoverX = scaleX.invert(d3.event.layerX || d3.event.offsetX);
           var hoverY = scaleY.invert(d3.event.layerY || d3.event.offsetY);
-          var yi = closest(hoverY, data.y);
+          var process = data;
+          if (Array.isArray(data)) {
+            process = data[getFileIndex(xdomarr, hoverX)];
+          }
+          var yi = closest(hoverY, process.y);
           try {
             var xi;
             if (xlabel === "Time") {
-              xi = closest(hoverX, data.x);
+              xi = closest(hoverX, process.x);
               document.getElementById("value").innerHTML =
-                format(data.x[xi], "hh:mm dd MMM yy") +
+                format(process.x[xi], "hh:mm dd MMM yy") +
                 " | " +
                 ylabel +
                 ": " +
-                data.y[yi] +
+                Math.round(process.y[yi] * 10000) / 10000 +
                 yunits +
                 " | " +
                 zlabel +
                 ": " +
-                Math.round(data.z[yi][xi] * 10000) / 10000 +
+                Math.round(process.z[yi][xi] * 10000) / 10000 +
                 zunits;
             } else {
-              xi = closest(hoverX, data.x);
+              xi = closest(hoverX, process.x);
               document.getElementById("value").innerHTML =
                 xlabel +
                 ": " +
-                data.x[xi] +
+                process.x[xi] +
                 xunits +
                 " | " +
                 ylabel +
                 ": " +
-                data.y[yi] +
+                Math.round(process.y[yi] * 10000) / 10000 +
                 yunits +
                 " | " +
                 zlabel +
                 ": " +
-                Math.round(data.z[yi][xi] * 10000) / 10000 +
+                Math.round(process.z[yi][xi] * 10000) / 10000 +
                 zunits;
             }
           } catch (e) {
@@ -210,7 +243,7 @@ class D3HeatMap extends Component {
 
         // Add cursor change
         window.addEventListener("keydown", function (event) {
-          if (event.ctrlKey) {
+          if (event.shiftKey) {
             canvas.style("cursor", "crosshair");
           }
         });
@@ -426,28 +459,65 @@ class D3HeatMap extends Component {
         });
 
         function pixelMapping(data, scaleX, scaleY) {
-          var dataypix = data.y.map((dy) => scaleY(dy));
-          var dataxpix = data.x.map((dx) => scaleX(dx));
+          if (!Array.isArray(data)) {
+            var dataypix = data.y.map((dy) => scaleY(dy));
+            var dataxpix = data.x.map((dx) => scaleX(dx));
 
-          var indexypix = [];
-          var indexxpix = [];
+            var indexypix = [];
+            var indexxpix = [];
 
-          // Currently using closest (needs to be improved)
+            // Currently using closest (needs to be improved)
 
-          for (var i = 0; i < height; i++) {
-            indexypix.push(indexOfClosest(i, dataypix));
+            for (var i = 0; i < height; i++) {
+              indexypix.push(indexOfClosest(i, dataypix));
+            }
+
+            for (var j = 0; j < width; j++) {
+              indexxpix.push(indexOfClosest(j, dataxpix));
+            }
+            return { indexxpix, indexypix };
+          } else {
           }
+        }
 
-          for (var j = 0; j < width; j++) {
-            indexxpix.push(indexOfClosest(j, dataxpix));
+        function getFileIndex(xscales, xp) {
+          for (var i = 0; i < xscales.length; i++) {
+            if (xp >= xscales[i][0] && xp <= xscales[i][1]) {
+              return i;
+            }
           }
-          return { indexxpix, indexypix };
+          return NaN;
+        }
+
+        function getXScales(scaleX, arr) {
+          var xscales = [];
+          for (var i = 0; i < arr.length; i++) {
+            xscales.push([scaleX(arr[i][0]), scaleX(arr[i][1])]);
+          }
+          return xscales;
+        }
+
+        function getPixelValue(data, yp, xp, xscales, dataxpix, dataypix) {
+          var fileindex = getFileIndex(xscales, xp);
+          if (isNaN(fileindex)) {
+            return NaN;
+          } else {
+            var iy = indexOfClosest(yp, dataypix[fileindex]);
+            var ix = indexOfClosest(xp, dataxpix[fileindex]);
+            return data[fileindex].z[iy][ix];
+          }
         }
 
         function fillCanvas(scaleX, scaleY) {
-          var { indexxpix, indexypix } = pixelMapping(data, scaleX, scaleY);
+          if (!Array.isArray(data)) {
+            var { indexxpix, indexypix } = pixelMapping(data, scaleX, scaleY);
+          } else {
+            var xscales = getXScales(scaleX, xdomarr);
+            var dataypix = data.map((d) => d.y.map((dd) => scaleY(dd)));
+            var dataxpix = data.map((d) => d.x.map((dd) => scaleX(dd)));
+          }
           var imgData = context.createImageData(width, height);
-          
+
           // Get zero pixel
           var highh = Math.min(height, Math.floor(scaleY(ydomain[0])));
           var lowh = Math.max(0, Math.floor(scaleY(ydomain[1])));
@@ -456,7 +526,14 @@ class D3HeatMap extends Component {
           var i, j, l, rgbacolor;
           for (j = lowh; j < highh; j++) {
             for (l = loww; l < highw; l++) {
-              rgbacolor = colorScale(data.z[indexypix[j]][indexxpix[l]]);
+              if (!Array.isArray(data)) {
+                rgbacolor = colorScale(data.z[indexypix[j]][indexxpix[l]]);
+              } else {
+                rgbacolor = colorScale(
+                  getPixelValue(data, j, l, xscales, dataxpix, dataypix)
+                );
+              }
+
               i = (width * j + l) * 4;
               imgData.data[i + 0] = rgbacolor[0];
               imgData.data[i + 1] = rgbacolor[1];

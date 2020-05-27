@@ -86,6 +86,12 @@ form.adddataset-form select {
   background-color: white;
 }
 
+#git {
+  width: 960px;
+  max-width: calc(100% - 20px);
+  margin: auto;
+}
+
 form.adddataset-form .form-group {
   display: inline-block;
   text-align: center;

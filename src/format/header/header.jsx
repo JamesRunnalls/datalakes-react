@@ -42,148 +42,150 @@ class Header extends Component {
   render() {
     var { showMenu, stuck } = this.state;
     return (
-      <header className={stuck}>
-        <div className="header-inner">
-          <div className="logo">
-            <Link to="/">
-              <img alt="Datalakes logo" src={logo} />
-            </Link>
-          </div>
+      <div className={"header"+stuck}>
+        <header className={stuck}>
+          <div className="header-inner">
+            <div className="logo">
+              <Link to="/">
+                <img alt="Datalakes logo" src={logo} />
+              </Link>
+            </div>
 
-          <div className="desktop-nav">
-            <div className="desktop-navbar">
-              <div className="links">
-                <NavLink
-                  activeClassName="active"
-                  className="header-item"
-                  onClick={this.closeMenu}
-                  to="/map"
-                >
-                  Map Viewer
-                </NavLink>
-                <NavLink
-                  activeClassName="active"
-                  className="header-item"
-                  onClick={this.closeMenu}
-                  to="/data"
-                >
-                  Data Portal
-                </NavLink>
-                <NavLink
-                  activeClassName="active"
-                  className="header-item"
-                  onClick={this.closeMenu}
-                  to="/api"
-                >
-                  API
-                </NavLink>
+            <div className="desktop-nav">
+              <div className="desktop-navbar">
+                <div className="links">
+                  <NavLink
+                    activeClassName="active"
+                    className="header-item"
+                    onClick={this.closeMenu}
+                    to="/map"
+                  >
+                    Map Viewer
+                  </NavLink>
+                  <NavLink
+                    activeClassName="active"
+                    className="header-item"
+                    onClick={this.closeMenu}
+                    to="/data"
+                  >
+                    Data Portal
+                  </NavLink>
+                  <NavLink
+                    activeClassName="active"
+                    className="header-item"
+                    onClick={this.closeMenu}
+                    to="/api"
+                  >
+                    API
+                  </NavLink>
+                </div>
+                <div className="menu-icon header-item" onClick={this.toggle}>
+                  <h3>
+                    Menu <div className="symbol">{showMenu ? "<" : ">"}</div>
+                  </h3>
+                </div>
               </div>
-              <div className="menu-icon header-item" onClick={this.toggle}>
-                <h3>
-                  Menu <div className="symbol">{showMenu ? "<" : ">"}</div>
-                </h3>
+              <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
+                <Link onClick={this.closeMenu} to="/">
+                  Home
+                </Link>
+                <div className="midscreen">
+                  <NavLink
+                    activeClassName="active"
+                    className="header-item"
+                    onClick={this.closeMenu}
+                    to="/map"
+                  >
+                    Map Viewer
+                  </NavLink>
+                  <NavLink
+                    activeClassName="active"
+                    className="header-item"
+                    onClick={this.closeMenu}
+                    to="/data"
+                  >
+                    Data Portal
+                  </NavLink>
+                  <NavLink
+                    activeClassName="active"
+                    className="header-item"
+                    onClick={this.closeMenu}
+                    to="/api"
+                  >
+                    API
+                  </NavLink>
+                </div>
+                <Link
+                  onClick={this.closeMenu}
+                  className="header-item"
+                  to="/?ourdata"
+                >
+                  Our Data
+                </Link>
+                <Link
+                  onClick={this.closeMenu}
+                  className="header-item"
+                  to="/?accessoptions"
+                >
+                  Access Options
+                </Link>
+                <Link
+                  onClick={this.closeMenu}
+                  className="header-item"
+                  to="/?about"
+                >
+                  About
+                </Link>
+                <Link
+                  onClick={this.closeMenu}
+                  className="header-item"
+                  to="/?contact"
+                >
+                  Contact
+                </Link>
               </div>
             </div>
-            <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
-              <Link onClick={this.closeMenu} to="/">
-                Home
-              </Link>
-              <div className="midscreen">
-                <NavLink
-                  activeClassName="active"
-                  className="header-item"
-                  onClick={this.closeMenu}
-                  to="/map"
-                >
-                  Map Viewer
-                </NavLink>
-                <NavLink
-                  activeClassName="active"
-                  className="header-item"
-                  onClick={this.closeMenu}
-                  to="/data"
-                >
-                  Data Portal
-                </NavLink>
-                <NavLink
-                  activeClassName="active"
-                  className="header-item"
-                  onClick={this.closeMenu}
-                  to="/api"
-                >
-                  API
-                </NavLink>
-              </div>
-              <Link
-                onClick={this.closeMenu}
-                className="header-item"
-                to="/?ourdata"
-              >
-                Our Data
-              </Link>
-              <Link
-                onClick={this.closeMenu}
-                className="header-item"
-                to="/?accessoptions"
-              >
-                Access Options
-              </Link>
-              <Link
-                onClick={this.closeMenu}
-                className="header-item"
-                to="/?about"
-              >
-                About
-              </Link>
-              <Link
-                onClick={this.closeMenu}
-                className="header-item"
-                to="/?contact"
-              >
-                Contact
-              </Link>
-            </div>
-          </div>
 
-          <div className="mobile-nav">
-            <div className={showMenu ? "mobile-menu show" : "mobile-menu"}>
-              <div className="mobile-flex">
-                <NavLink
-                  activeClassName="imgactive"
-                  onClick={this.closeMenu}
-                  to="/api"
-                >
-                  <img alt="API" src={api} />
-                </NavLink>
+            <div className="mobile-nav">
+              <div className={showMenu ? "mobile-menu show" : "mobile-menu"}>
+                <div className="mobile-flex">
+                  <NavLink
+                    activeClassName="imgactive"
+                    onClick={this.closeMenu}
+                    to="/api"
+                  >
+                    <img alt="API" src={api} />
+                  </NavLink>
+                </div>
               </div>
-            </div>
-            <div className="mobile-navbar">
-              <div className="mobile-flex">
-                <NavLink onClick={this.closeMenu} to="/">
-                  <img alt="Home" src={home} />
-                </NavLink>
-                <NavLink
-                  activeClassName="imgactive"
-                  onClick={this.closeMenu}
-                  to="/map"
-                >
-                  <img alt="Map Viewer" src={map} />
-                </NavLink>
-                <NavLink
-                  activeClassName="imgactive"
-                  onClick={this.closeMenu}
-                  to="/data"
-                >
-                  <img alt="Data Portal" src={data} />
-                </NavLink>
-                <div onClick={this.toggle} className="more">
-                  <img alt="More" src={more} />
+              <div className="mobile-navbar">
+                <div className="mobile-flex">
+                  <NavLink onClick={this.closeMenu} to="/">
+                    <img alt="Home" src={home} />
+                  </NavLink>
+                  <NavLink
+                    activeClassName="imgactive"
+                    onClick={this.closeMenu}
+                    to="/map"
+                  >
+                    <img alt="Map Viewer" src={map} />
+                  </NavLink>
+                  <NavLink
+                    activeClassName="imgactive"
+                    onClick={this.closeMenu}
+                    to="/data"
+                  >
+                    <img alt="Data Portal" src={data} />
+                  </NavLink>
+                  <div onClick={this.toggle} className="more">
+                    <img alt="More" src={more} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
     );
   }
 }

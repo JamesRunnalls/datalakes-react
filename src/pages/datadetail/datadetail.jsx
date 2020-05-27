@@ -16,7 +16,7 @@ import { apiUrl } from "../../../src/config.json";
 import "./datadetail.css";
 import Footer from "../../format/footer/footer";
 import ThreeDModel from "./inner/threedmodel";
-import RemoteSensing from './inner/remotesensing';
+import RemoteSensing from "./inner/remotesensing";
 
 class DataDetail extends Component {
   state = {
@@ -195,7 +195,6 @@ class DataDetail extends Component {
   };
 
   onChangeUpper = (value) => {
-    console.log("Upper");
     var { files, data, lower } = this.state;
     var upper = value.getTime() / 1000;
     var toDownload = this.selectedFiles(upper, lower, files, data);
@@ -207,7 +206,6 @@ class DataDetail extends Component {
   };
 
   onChangeLower = (value) => {
-    console.log("Lower");
     var { files, data, upper } = this.state;
     var lower = value.getTime() / 1000;
     var toDownload = this.selectedFiles(upper, lower, files, data);
@@ -345,12 +343,15 @@ class DataDetail extends Component {
     arrCopy.sort((a, b) => {
       return this.getAve(a.x) - this.getAve(b.x);
     });
-
-    var combinedArr = Object.assign({}, arrCopy[0]);
-    for (var i = 1; i < arrCopy.length; i++) {
-      combinedArr = mergeWith(combinedArr, arrCopy[i], this.customizer);
+    if (Object.keys(arrCopy[0]).includes("z")) {
+      return arrCopy;
+    } else {
+      var combinedArr = Object.assign({}, arrCopy[0]);
+      for (var i = 1; i < arrCopy.length; i++) {
+        combinedArr = mergeWith(combinedArr, arrCopy[i], this.customizer);
+      }
+      return combinedArr;
     }
-    return combinedArr;
   };
 
   customizer = (objValue, srcValue) => {

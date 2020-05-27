@@ -9,6 +9,11 @@ header {
   z-index: 999;
 }
 
+.headerscroll {
+  position: relative;
+  height: 88px;
+}
+
 header.scroll {
   position: fixed;
 

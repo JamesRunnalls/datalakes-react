@@ -262,27 +262,39 @@ class HeatMap extends Component {
 
   datetimeFilter = (data, lower, upper, min, max) => {
     if ((lower !== min && lower !== "") || (upper !== max && upper !== "")) {
-      var l = 0;
-      var u = data.x.length - 1;
-      for (var i = 0; i < data.x.length; i++) {
-        if (data.x[i] < lower) {
-          l = i;
+      if (Array.isArray(data)) {
+        var dataout = [];
+        for (var i = 0; i < data.length; i++) {
+          dataout.push(this.sliceArray(data[i], lower, upper));
         }
-        if (data.x[i] > upper && u === data.x.length - 1) {
-          u = i;
-        }
+        return dataout;
+      } else {
+        return this.sliceArray(data, lower, upper);
       }
-      var x = data.x.slice(l, u);
-      var y = data.y;
-
-      var z = [];
-      for (var j = 0; j < data.y.length; j++) {
-        z.push(data.z[j].slice(l, u));
-      }
-      return { x: x, y: y, z: z };
     } else {
       return data;
     }
+  };
+
+  sliceArray = (data, lower, upper) => {
+    var l = 0;
+    var u = data.x.length - 1;
+    for (var i = 0; i < data.x.length; i++) {
+      if (data.x[i] < lower) {
+        l = i;
+      }
+      if (data.x[i] > upper && u === data.x.length - 1) {
+        u = i;
+      }
+    }
+    var x = data.x.slice(l, u);
+    var y = data.y;
+
+    var z = [];
+    for (var j = 0; j < data.y.length; j++) {
+      z.push(data.z[j].slice(l, u));
+    }
+    return { x: x, y: y, z: z };
   };
 
   componentDidMount() {
@@ -366,11 +378,22 @@ class HeatMap extends Component {
       // Get data
       var plotdata;
       if (files[file].connect === "join") {
-        plotdata = {
-          x: combined[xaxis],
-          y: combined[yaxis],
-          z: combined[zaxis],
-        };
+        if (Array.isArray(combined)) {
+          plotdata = [];
+          for (var k = 0; k < combined.length; k++) {
+            plotdata.push({
+              x: combined[k][xaxis],
+              y: combined[k][yaxis],
+              z: combined[k][zaxis],
+            });
+          }
+        } else {
+          plotdata = {
+            x: combined[xaxis],
+            y: combined[yaxis],
+            z: combined[zaxis],
+          };
+        }
       } else if (files[file].connect === "ind") {
         plotdata = {
           x: data[file][xaxis],
@@ -386,12 +409,23 @@ class HeatMap extends Component {
       }
 
       // Format data
-      var { x, y, z } = plotdata;
-      if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
-      if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-      if (xlabel === "Depth") x = x.map((i) => -i);
-      if (ylabel === "Depth") y = y.map((i) => -i);
-      plotdata = { x, y, z };
+      if (Array.isArray(plotdata)) {
+        for (var i = 0; i < plotdata.length; i++) {
+          var { x, y, z } = plotdata[i];
+          if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+          if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+          if (xlabel === "Depth") x = x.map((i) => -i);
+          if (ylabel === "Depth") y = y.map((i) => -i);
+          plotdata[i] = { x, y, z };
+        }
+      } else {
+        ({ x, y, z } = plotdata);
+        if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+        if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+        if (xlabel === "Depth") x = x.map((i) => -i);
+        if (ylabel === "Depth") y = y.map((i) => -i);
+        plotdata = { x, y, z };
+      }
 
       // Value
       var value = new Date(files[file].ave);
