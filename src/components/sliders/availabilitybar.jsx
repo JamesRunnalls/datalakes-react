@@ -42,7 +42,7 @@ class AvailbilityBar extends Component {
         .append("rect")
         .attr("height", 6)
         .attr("width", function (d) {
-          return Math.max(1,x(d.max) - x(d.min));
+          return Math.max(1, x(d.max) - x(d.min));
         })
         .attr("stroke", "#28b5f5")
         .attr("fill", "#28b5f5")
@@ -57,6 +57,11 @@ class AvailbilityBar extends Component {
 
   componentDidMount() {
     this.plotBar();
+    window.addEventListener("resize", this.plotBar);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.plotBar);
   }
 
   componentDidUpdate(prevProps) {
