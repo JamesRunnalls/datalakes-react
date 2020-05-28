@@ -122,6 +122,8 @@ header .desktop-nav .desktop-navbar .menu-icon {
   display: inline-block;
   cursor: pointer;
   padding-left: 40px;
+  font-size: 16px;
+  font-family: The Serif Bold, serif;
 }
 
 header .desktop-nav .desktop-navbar .menu-icon .symbol {

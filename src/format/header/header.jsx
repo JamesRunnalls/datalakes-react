@@ -80,9 +80,7 @@ class Header extends Component {
                   </NavLink>
                 </div>
                 <div className="menu-icon header-item" onClick={this.toggle}>
-                  <h3>
                     Menu <div className="symbol">{showMenu ? "<" : ">"}</div>
-                  </h3>
                 </div>
               </div>
               <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>

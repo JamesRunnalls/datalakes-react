@@ -65,7 +65,7 @@ class DataSubMenu extends Component {
               onClick={() => updateSelectedState("pipeline")}
             >
               <img src={pipe} className="subnav-img" alt="Data Pipeline" />
-              <div className="subnav-text">Pipeline</div>
+              <div className="subnav-text">Reproduce</div>
             </div>
             <div
               title="See meta data for dataset"

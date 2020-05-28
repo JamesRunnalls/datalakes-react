@@ -146,7 +146,7 @@
   margin: 0 20px -1px 0;
   cursor: pointer;
   padding: 5px 10px;
-  border: 1px solid white;
+  border: 1px solid #f3f3f3;
 }
 
 .data-subnav .subnav-item:hover {
@@ -156,6 +156,7 @@
 
 .data-subnav .subnav-item.active {
   border: 1px solid rgb(169, 169, 169);
+  background-color: white;
   font-weight: 500;
 }
 
@@ -168,6 +169,9 @@
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 30px;
+  margin-top: 20px;
+  padding: 10px;
+  background: #f3f3f3;
 }
 
 .data-subnav .subnav-item .subnav-text {
@@ -226,6 +230,7 @@
   }
   .data-subnav .subnav-item {
     margin: 0 0 -1px 0;
+    border-color: white;
   }
   .data-subnav {
     padding: 10px 15px 10px 5px;
@@ -234,6 +239,7 @@
     box-sizing: border-box;
     display: flex;
     justify-content: space-between;
+    background-color: white;
   }
   .info-inner {
     margin: 0;
