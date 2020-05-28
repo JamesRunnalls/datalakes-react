@@ -4,4 +4,5 @@ main {
   margin-left: auto;
   margin-right: auto;
   margin-top: 10px;
+  min-height: calc(100vh - 220px);
 }

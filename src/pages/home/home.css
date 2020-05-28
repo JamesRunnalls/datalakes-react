@@ -3,7 +3,7 @@
 }
 
 #root {
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .home-banner {

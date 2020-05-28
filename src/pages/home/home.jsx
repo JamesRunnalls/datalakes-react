@@ -369,9 +369,6 @@ class Home extends Component {
           <div className="home-text">
             <ContactForm />
           </div>
-          <div className="home-copyright">
-            Version 0.1 | Copyright © 2020 Datalakes | Developed @ Eawag
-          </div>
         </div>
       </React.Fragment>
     );

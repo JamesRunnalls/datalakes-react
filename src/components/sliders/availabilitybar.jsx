@@ -55,13 +55,22 @@ class AvailbilityBar extends Component {
     }
   };
 
+  debounce = (func, time) => {
+    time = time || 100;
+    var timer;
+    return function (event) {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(func, time, event);
+    };
+  };
+
   componentDidMount() {
     this.plotBar();
-    window.addEventListener("resize", this.plotBar);
+    window.addEventListener("resize", this.debounce(this.plotBar, 300));
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.plotBar);
+    window.removeEventListener("resize", this.debounce(this.plotBar, 300));
   }
 
   componentDidUpdate(prevProps) {

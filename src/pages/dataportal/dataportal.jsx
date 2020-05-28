@@ -7,7 +7,6 @@ import FilterBox from "../../components/filterbox/filterbox";
 import MapSelect from "../../graphs/leaflet/mapselect.jsx";
 import "./dataportal.css";
 import Loading from "../../components/loading/loading.jsx";
-import Footer from "../../format/footer/footer";
 
 class DatasetList extends Component {
   render() {
@@ -740,7 +739,6 @@ class DataPortal extends Component {
             </React.Fragment>
           }
         />
-        <Footer />
       </React.Fragment>
     );
   }

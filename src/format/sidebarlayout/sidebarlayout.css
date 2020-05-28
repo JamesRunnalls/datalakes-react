@@ -1,5 +1,9 @@
 /* -------------- Side Bar -------------------------  */
 
+.sidebarlayout {
+  overflow: auto;
+}
+
 /* Right Side */
 
 .sidebarlayout .rightcontainer {

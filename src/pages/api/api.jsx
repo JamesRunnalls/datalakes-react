@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import "./api.css";
-import Footer from "../../format/footer/footer";
 
 class API extends Component {
   render() {
@@ -17,7 +16,6 @@ class API extends Component {
             API begins to stabalise.
           </div>
         </div>
-        <Footer />
       </React.Fragment>
     );
   }

@@ -2,12 +2,11 @@
 
 footer {
   border-top: 1px solid #d8d6d3;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  background-color: white;
-  z-index: 999999;
+  width: 960px;
+  color: rgb(153, 153, 153);
+  margin: auto;
+  margin-top: 50px;
+  max-width: 100%;
 }
 
 footer .container {
@@ -27,20 +26,12 @@ footer .container .partners img {
   margin: 5px 3%;
 }
 
-footer .container .partners .partner-logo .black {
-  display: inline-block;
+footer .container .partners .partner-logo img {
+  opacity: 0.5;
 }
 
-footer .container .partners .partner-logo .color {
-  display: none;
-}
-
-footer .container .partners .partner-logo:hover .black {
-  display: none;
-}
-
-footer .container .partners .partner-logo:hover .color {
-  display: inline-block;
+footer .container .partners .partner-logo img:hover {
+  opacity: 1;
 }
 
 footer .container .copyright {
@@ -59,22 +50,11 @@ footer .container .copyright .contact img {
   height: 20px;
   margin-top: -4px;
   padding-right: 20px;
+  opacity: 0.5;
 }
 
-footer .container .copyright .contact .contact-inner .black {
-  display: inline-block;
-}
-
-footer .container .copyright .contact .contact-inner .color {
-  display: none;
-}
-
-footer .container .copyright .contact .contact-inner:hover .black {
-  display: none;
-}
-
-footer .container .copyright .contact .contact-inner:hover .color {
-  display: inline-block;
+footer .container .copyright .contact img:hover {
+  opacity: 1;
 }
 
 @media screen and (max-width: 500px) {
