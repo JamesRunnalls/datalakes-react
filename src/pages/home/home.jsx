@@ -17,8 +17,6 @@ import sdscc from "./img/sdscc.svg";
 import map from "./img/map.png";
 import data from "./img/data.png";
 import api from "./img/api.png";
-import rs from "./img/rs.png";
-import zurich from "./img/zurich.png";
 import "./home.css";
 
 class PartnerBanner extends Component {
@@ -26,7 +24,7 @@ class PartnerBanner extends Component {
   render() {
     return (
       <React.Fragment>
-        <div className="home-partners">
+        <div className="home-partners" title="Our partners">
           <a
             className="partner-logo"
             rel="noopener noreferrer"
@@ -163,6 +161,9 @@ class Home extends Component {
     this.accessoptions = React.createRef();
     this.about = React.createRef();
     this.contact = React.createRef();
+    this.insitu = React.createRef();
+    this.simulation = React.createRef();
+    this.rs = React.createRef();
   }
   componentDidMount() {
     this.parseSearch();
@@ -212,86 +213,96 @@ class Home extends Component {
 
           <div className="sectiontitle" ref={this.ourdata}>
             Datalakes is a collaboration between a number of Swiss institutions
-            to facilitate the disemination of reproducable datasets for Swiss
-            lakes.
-            <div className="sub">
-              We provide lake simulations, insitu measurements and remote
-              sensing data.
-            </div>
-            <div className="scroll">
-              Keep scrolling to find our more about our datasets.
-            </div>
-            <div className="arrow">&darr;</div>
+            to facilitate the visualisation and disemination of reproducable
+            datasets for Swiss lakes.
+            <div className="sub">We provide:</div>
+            <button
+              title="Find out more"
+              onClick={() => this.scrollTo(this.insitu, -50)}
+            >
+              Insitu Measurements
+            </button>
+            <button
+              title="Find out more"
+              onClick={() => this.scrollTo(this.simulation, -50)}
+            >
+              Lake Simulations
+            </button>
+            <button
+              title="Find out more"
+              onClick={() => this.scrollTo(this.rs, -50)}
+            >
+              Remote Sensing Data
+            </button>
           </div>
 
-          <div className="section lakesimulations">
-            <img src={zurich} alt="Simulation of Lake Zurich" />
-            <div className="textbox">
-              <div className="straptext">
-                Datalakes provides access to{" "}
-                <b>hydrodynamic lake simulations</b>. Explore fluctuations of
-                temperature and velocity at incredibly high spatial resolution
-                over extended periods of time.
+          <div className="section insitudata" ref={this.insitu}>
+            <div className="img">
+              <div className="outer">
+                <div className="inner">
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>
+                          Discover years of sampling and insitu data
+                          measurements from across Switzerland.
+                          <Link to="/data">
+                            <button>Data Portal</button>
+                          </Link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div className="numberbox">
-                <div className="number">4</div>
-                3D Models
-              </div>
-              <div className="numberbox">
-                <div className="number">54</div>
-                1D Models
-              </div>
-            </div>
-          </div>
-
-          <div className="section insitudata">
-            <div className="insitutext">
-              <div className="title">
-                {" "}
-                Discover years of sampling and insitu data measurements.
-              </div>
-              <table>
-                <tbody>
-                  <tr>
-                    <td>
-                      <div className="numberbox">
-                        <div className="number">22</div>
-                        Insitu Datasets
-                      </div>
-                    </td>
-                    <td>
-                      <div className="numberbox">
-                        <div className="number">36</div>
-                        Measured Parameters
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className="numberbox">
-                        <div className="number">8</div>
-                        Near-realtime datasets
-                      </div>
-                    </td>
-                    <td>
-                      <div className="numberbox">
-                        <div className="number">34</div>
-                        Lakes sampled
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </div>
 
-          <div className="section rs">
-            <div className="text">
-              Access remotely sensed water quality parameters including
-              cholorphyll and total suspended matter for water bodies across
-              Switerland.
+          <div className="section lakesimulations" ref={this.simulation}>
+            <div className="img">
+              <div className="outer">
+                <div className="inner">
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>
+                          Datalakes provides access to{" "}
+                          <b>hydrodynamic lake simulations</b>. Explore
+                          fluctuations of temperature and velocity at incredibly
+                          high spatial resolution over extended periods of time.
+                          <Link to="/map">
+                            <button>Map Viewer</button>
+                          </Link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-            <img src={rs} alt="Remote sensing layer"/>
+          </div>
+
+          <div className="section rs" ref={this.rs}>
+            <div className="img">
+              <div className="outer">
+                <div className="inner">
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td>
+                          Access remotely sensed water quality parameters
+                          including cholorphyll and total suspended matter for
+                          water bodies across Switerland.
+                          <Link to="/map">
+                            <button>Map Viewer</button>
+                          </Link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="sectiontitle" ref={this.accessoptions}>
@@ -322,7 +333,6 @@ class Home extends Component {
             <div className="scroll">
               Keep scrolling to find our more about access options.
             </div>
-            <div className="arrow">&darr;</div>
           </div>
 
           <Triple
@@ -337,7 +347,7 @@ class Home extends Component {
             ]}
             link={["/map", "/data", "/api"]}
           />
-          <div className="sectiontitle" ref={this.about}>
+          <div className="sectiontitlemin" ref={this.about}>
             <h2>About Datalakes</h2>
           </div>
           <div className="home-text">
@@ -363,7 +373,7 @@ class Home extends Component {
             platform providing and analyzing the dynamics of lake ecosystems at
             high spatial and temporal resolutions.
           </div>
-          <div className="sectiontitle" ref={this.contact}>
+          <div className="sectiontitlemin" ref={this.contact}>
             <h2>Get in Touch</h2>
           </div>
           <div className="home-text">
