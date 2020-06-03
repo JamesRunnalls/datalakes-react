@@ -177,6 +177,10 @@
   right: 0;
 }
 
+.section.lakesimulations .outer {
+  margin: 0;
+}
+
 .section.lakesimulations .textbox .straptext {
   text-align: right;
   font-size: 25px;
@@ -391,6 +395,10 @@
   text-align: center;
 }
 
+.triple-button a button:hover {
+  background-color: #d9d6d6;
+}
+
 .triple-img img {
   max-width: 100%;
   max-height: 100%;
@@ -462,10 +470,6 @@
     font-size: 16px;
   }
 
-  .triple {
-    padding: 0;
-  }
-
   .triple-inner {
     margin: 0;
   }
@@ -498,6 +502,22 @@
   }
   .section.lakesimulations .textbox .numberbox {
     margin: 0 20px;
+  }
+
+  .section.lakesimulations .outer {
+    font-size: 18px;
+  }
+
+  .section.lakesimulations .inner {
+    width: 100%;
+  }
+
+  .section.rs .outer {
+    font-size: 18px;
+  }
+
+  .section.rs .inner {
+    width: 100%;
   }
 
   .section.insitudata {
