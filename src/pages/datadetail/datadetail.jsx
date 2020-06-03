@@ -484,6 +484,7 @@ class DataDetail extends Component {
         parameters,
         dropdown,
         files,
+        loading: false,
         step: "threedmodel",
         allowedStep: ["threedmodel"],
       });
@@ -737,7 +738,10 @@ class DataDetail extends Component {
               <tbody>
                 <tr>
                   <td>
-                    <h3>Error that dataset could not be found.</h3>
+                    <h3>
+                      Error. Either the connection to the server failed or that
+                      dataset could not be found.
+                    </h3>
                     <Link to="/data">
                       <h2>Head back to the data portal</h2>
                     </Link>

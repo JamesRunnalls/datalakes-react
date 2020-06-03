@@ -170,58 +170,11 @@
   max-width: calc(100% - 60px);
 }
 
-.menu-gis {
+.gis-controls {
   position: absolute;
   left: 10px;
   top: 10px;
   z-index: 99999999;
-}
-
-.menu-gis .menu-gis-item {
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  display: block;
-  text-align: center;
-  border-radius: 4px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
-  background-color: white;
-  cursor: pointer;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  font-family: "Lucida Console", Monaco, monospace;
-  font-weight: bold;
-  font-size: 22px;
-}
-
-.menu-gis .zoom {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
-  border-radius: 4px;
-}
-
-.menu-gis .zoom .menu-gis-item {
-  margin: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.menu-gis .zoom .menu-gis-item.one {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #ccc;
-}
-
-.menu-gis .zoom .menu-gis-item.three {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #ccc;
-}
-
-.menu-gis .menu-gis-item:hover {
-  background-color: #f4f4f4;
-}
-
-.menu-gis .menu-gis-item img {
-  width: 20px;
-  padding: 5px;
 }
 
 .sidebar-gis-inner {

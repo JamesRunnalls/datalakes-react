@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import L from "leaflet";
+import "leaflet-draw";
 import "./leaflet_vectorField";
 import "./leaflet_customcontrol";
 import "./leaflet_colorpicker";
@@ -834,6 +835,10 @@ class Basemap extends Component {
 
     this.layer.addTo(this.map);
 
+    // Draw
+    this.point = {};
+    this.line = L.layerGroup().addTo(this.map);
+
     var map = this.map;
     this.map.on("mousemove", function (e) {
       var lat = Math.round(1000 * e.latlng.lat) / 1000;
@@ -883,6 +888,62 @@ class Basemap extends Component {
     this.marker = [];
     this.raster = [];
   }
+
+  addPoint = (e) => {
+    this.map.removeLayer(this.point);
+    var lat = Math.round(e.latlng.lat * 100) / 100;
+    var lng = Math.round(e.latlng.lng * 100) / 100;
+    this.point = new L.marker(e.latlng, {
+      icon: L.divIcon({
+        className: "map-marker",
+        html:
+          `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
+          `<div class="circle" style="background-color:red;height:15px;width:15px;">` +
+          `</div></div> `,
+      }),
+    })
+      .bindTooltip(`(${lat},${lng})`, {
+        direction: "top",
+      })
+      .addTo(this.map);
+    this.props.updatePoint(e.latlng);
+  };
+
+  addLine = (e) => {
+    if (Object.keys(this.line._layers).length > 1) {
+      this.line.clearLayers();
+      this.props.updateLine([]);
+    }
+    var lat = Math.round(e.latlng.lat * 100) / 100;
+    var lng = Math.round(e.latlng.lng * 100) / 100;
+    new L.marker(e.latlng, {
+      icon: L.divIcon({
+        className: "map-marker",
+        html:
+          `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
+          `<div class="circle" style="background-color:red;height:15px;width:15px;">` +
+          `</div></div> `,
+      }),
+    })
+      .bindTooltip(`(${lat},${lng})`, {
+        direction: "top",
+      })
+      .addTo(this.line);
+    if (Object.keys(this.line._layers).length === 2) {
+      var pointList = [];
+      for (var key in this.line._layers) {
+        pointList.push(this.line._layers[key]["_latlng"]);
+      }
+      new L.Polyline(pointList, {
+        color: "red",
+        weight: 2,
+        smoothFactor: 1,
+        dashArray: '20, 10', 
+        dashOffset: '0'
+      }).addTo(this.line);
+      this.props.updateLine(pointList);
+    }
+  };
 
   updatePlot = () => {
     var { selectedlayers, datasets, center, zoom } = this.props;
@@ -942,6 +1003,26 @@ class Basemap extends Component {
       this.map.removeLayer(this.layer);
       this.layer = this.baseMaps[this.props.basemap];
       this.map.addLayer(this.layer);
+    }
+    if (prevProps.point !== this.props.point) {
+      var { addPoint } = this;
+      if (this.props.point) {
+        this.map.on("click", addPoint);
+      } else {
+        this.map.off("click", addPoint);
+        this.map.removeLayer(this.point);
+        this.props.updatePoint({});
+      }
+    }
+    if (prevProps.line !== this.props.line) {
+      var { addLine } = this;
+      if (this.props.line) {
+        this.map.on("click", addLine);
+      } else {
+        this.map.off("click", addLine);
+        this.line.clearLayers();
+        this.props.updateLine([]);
+      }
     }
     this.map.invalidateSize();
   }

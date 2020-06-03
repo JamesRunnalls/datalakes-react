@@ -196,10 +196,6 @@
   border: 1px solid grey;
 }
 
-.basemapwrapper {
-  height: 600px;
-}
-
 @media screen and (max-width: 800px) {
   .data-subnav .subnav-item .subnav-text {
     display: none;

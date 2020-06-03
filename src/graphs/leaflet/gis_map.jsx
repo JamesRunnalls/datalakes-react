@@ -3,6 +3,9 @@ import Loading from "../../components/loading/loading";
 import LayerGroups from "../../components/layergroups/layergroups";
 import "./css/gis_map.css";
 import Basemap from "./basemap";
+import MapControl from "../../components/mapcontrol/mapcontrol";
+import menuicon from "./img/menuicon.svg";
+import groupicon from "./img/groupicon.svg";
 
 class GISMap extends Component {
   state = {
@@ -12,18 +15,16 @@ class GISMap extends Component {
     group: false,
     menu: false,
     initial: true,
+    zoomIn: () => {},
+    zoomOut: () => {},
   };
-
-  zoomIn = () => {};
 
   setZoomIn = (newFunc) => {
-    this.zoomIn = newFunc;
+    this.setState({ zoomIn: newFunc });
   };
 
-  zoomOut = () => {};
-
   setZoomOut = (newFunc) => {
-    this.zoomOut = newFunc;
+    this.setState({ zoomOut: newFunc });
   };
 
   toggleFullsize = () => {
@@ -53,7 +54,7 @@ class GISMap extends Component {
   }
 
   render() {
-    var { help, fullsize, menu, group } = this.state;
+    var { help, fullsize, menu, group, zoomIn, zoomOut } = this.state;
     var {
       legend,
       timeselector,
@@ -67,15 +68,34 @@ class GISMap extends Component {
       depth,
       templates,
     } = this.props;
-    var fulllabel = "Fullscreen";
-    var fullicon = "\u21F1";
-    if (fullsize) {
-      fulllabel = "Shrink Map";
-      fullicon = "\u21F2";
-    }
+    var controls = [
+      {
+        title: "Edit Layers",
+        active: menu,
+        onClick: this.toggleMenu,
+        img: menuicon,
+      },
+      {
+        title: "Layer Groups",
+        active: group,
+        onClick: this.toggleGroup,
+        img: groupicon,
+      },
+    ];
     return (
       <React.Fragment>
         <div className={fullsize ? "map full" : "map"}>
+          <div className="gis-controls">
+            <MapControl
+              zoomIn={zoomIn}
+              zoomOut={zoomOut}
+              fullsize={fullsize}
+              help={help}
+              controls={controls}
+              toggleFullsize={this.toggleFullsize}
+              toggleHelp={this.toggleHelp}
+            />
+          </div>
           <Basemap
             selectedlayers={selectedlayers}
             basemap={basemap}
@@ -87,61 +107,14 @@ class GISMap extends Component {
             setZoomIn={this.setZoomIn}
             setZoomOut={this.setZoomOut}
           />
-          <div id="map">
-            {loading && (
-              <div className="map-loader">
-                <Loading />
-                Downloading and plotting data
-              </div>
-            )}
-          </div>
-          <div className="menu-gis">
-            <div className="zoom">
-              <div
-                className="menu-gis-item one"
-                onClick={this.zoomIn}
-                title="Zoom In"
-              >
-                +
-              </div>
-              <div
-                className="menu-gis-item two"
-                onClick={this.zoomOut}
-                title="Zoom Out"
-              >
-                −
-              </div>
-              <div
-                className="menu-gis-item three"
-                onClick={this.toggleFullsize}
-                title={fulllabel}
-              >
-                {fullicon}
-              </div>
-            </div>
-            <div className="menu-gis-item" onClick={this.toggleMenu}>
-              <img
-                title="Edit Layers"
-                src="img/editlayers.svg"
-                alt="Edit Layers"
-              />
-            </div>
-            <div className="menu-gis-item" onClick={this.toggleGroup}>
-              <img
-                title="Layer Groups"
-                src="img/layergroups.svg"
-                alt="Layer Groups"
-              />
-            </div>
 
-            <div
-              className="menu-gis-item"
-              onClick={this.toggleHelp}
-              title="Help"
-            >
-              ?
+          {loading && (
+            <div className="map-loader">
+              <Loading />
+              Downloading and plotting data
             </div>
-          </div>
+          )}
+
           <div className="sidebar-gis">
             <div
               className={menu ? "sidebar-gis-inner" : "sidebar-gis-inner hide"}

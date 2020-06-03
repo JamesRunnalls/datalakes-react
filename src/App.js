@@ -25,6 +25,7 @@ class App extends Component {
 
             <Route path="/data" component={DataPortal} />
             <Route path="/datadetail" component={DataDetail} />
+            <Route path="/lakestation" component={Station} />
 
             <Route path="/API" component={API} />
 
