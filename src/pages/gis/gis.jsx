@@ -769,30 +769,27 @@ class GIS extends Component {
       });
     }
 
-    // Get parameters
-    var { data: parameters } = await axios.get(
-      apiUrl + "/selectiontables/parameters"
-    );
+    // Get data
+    let server = await Promise.all([
+      axios.get(apiUrl + "/selectiontables/parameters"),
+      axios.get(apiUrl + "/datasets"),
+      axios.get(apiUrl + "/datasetparameters"),
+      axios.get(apiUrl + "/externaldata/templates/meteoswiss"),
+      axios.get(apiUrl + "/externaldata/templates/foen"),
+    ]).catch((error) => {
+      this.setState({ step: "error" });
+    });
 
-    // Get datasets
-    var { data: datasets } = await axios.get(apiUrl + "/datasets");
+    var parameters = server[0].data;
+    var datasets = server[1].data;
+    var datasetparameters = server[2].data;
+    var meteoswiss = server[3].data;
+    var foen = server[4].data;
+
     datasets = datasets.map((d) => {
       d.files = [];
       return d;
     });
-
-    // Get datasetparameters
-    var { data: datasetparameters } = await axios.get(
-      apiUrl + "/datasetparameters"
-    );
-
-    // Get templates
-    var { data: meteoswiss } = await axios.get(
-      apiUrl + "/externaldata/templates/meteoswiss"
-    );
-    var { data: foen } = await axios.get(
-      apiUrl + "/externaldata/templates/foen"
-    );
     var templates = { meteoswiss, foen };
 
     // Build selected layers object

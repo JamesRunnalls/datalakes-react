@@ -494,8 +494,8 @@ class DataDetail extends Component {
         parameters,
         dropdown,
         files,
-        step: "threedmodel",
-        allowedStep: ["threedmodel"],
+        step: "external",
+        allowedStep: ["external"],
       });
     } else {
       this.setState({

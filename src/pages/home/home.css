@@ -19,6 +19,28 @@
   box-sizing: border-box;
   width: 100vw;
   margin-left: calc(-50vw + 50%);
+  -webkit-animation: fadeIn 2s; /* Chrome, Safari, Opera */
+  animation: fadeIn 2s;
+}
+
+/* Chrome, Safari, Opera */
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Standard syntax */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .home-banner .home-tagline {
@@ -44,6 +66,33 @@
   color: white;
   height: 40px;
   padding: 0 20px;
+  animation: pulse 2s 5;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4);
+  }
+  70% {
+      -webkit-box-shadow: 0 0 0 10px rgba(0,0,0, 0);
+  }
+  100% {
+      -webkit-box-shadow: 0 0 0 0 rgba(0,0,0, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(0,0,0, 0.4);
+    box-shadow: 0 0 0 0 rgba(0,0,0, 0.4);
+  }
+  70% {
+      -moz-box-shadow: 0 0 0 10px rgba(0,0,0, 0);
+      box-shadow: 0 0 0 10px rgba(0,0,0, 0);
+  }
+  100% {
+      -moz-box-shadow: 0 0 0 0 rgba(0,0,0, 0);
+      box-shadow: 0 0 0 0 rgba(0,0,0, 0);
+  }
 }
 
 .home-banner button:hover {
@@ -63,7 +112,7 @@
 }
 
 .home-partners img {
-  height: 30px;
+  height: 26px;
   margin: 5px 3%;
 }
 
@@ -106,7 +155,6 @@
   font-weight: bold;
   box-sizing: border-box;
 }
-
 
 .sectiontitle button {
   font-size: 18px;

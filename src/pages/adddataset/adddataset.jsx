@@ -397,6 +397,7 @@ class AddDataset extends Component {
     var dir;
     var branch;
     var file;
+    url = url.replace("/-/", "/");
     if (url.includes("renkulab.io/gitlab")) {
       const path = url.split("/blob/")[1].split("/");
       const loc = url.split("/blob/")[0].split("/");
