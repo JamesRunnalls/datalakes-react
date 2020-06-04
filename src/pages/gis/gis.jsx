@@ -268,7 +268,7 @@ class GIS extends Component {
       ));
     } else {
       ({ data } = await axios
-        .get(datafile.filelink, { timeout: 2000 })
+        .get(datafile.filelink, { timeout: 10000 })
         .catch((error) => {
           console.error(error);
           alert("Failed to add layer");

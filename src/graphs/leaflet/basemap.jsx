@@ -475,7 +475,10 @@ class Basemap extends Component {
         }
       }
     }
-    this.raster.push(L.layerGroup(polygons).addTo(this.map));
+    this.raster.push(L.featureGroup(polygons).addTo(this.map));
+    if (!("center" in this.props) && !("zoom" in this.props)) {
+      this.map.fitBounds(this.raster[0].getBounds());
+    }
   };
 
   meteolakesVector = async (layer, file) => {
@@ -587,6 +590,10 @@ class Basemap extends Component {
     }
 
     if (vectorFlow) {
+    }
+
+    if (!("center" in this.props) && !("zoom" in this.props)) {
+      this.map.fitBounds(this.raster[0].getBounds());
     }
   };
 
@@ -876,7 +883,7 @@ class Basemap extends Component {
     L.control
       .custom({
         position: "bottomright",
-        content: '<img src="img/logo.svg">',
+        content: '<img src="/img/logo.svg">',
         classes: "gis-datalakes-logo",
       })
       .addTo(this.map);
@@ -898,7 +905,7 @@ class Basemap extends Component {
         className: "map-marker",
         html:
           `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
-          `<div class="circle" style="background-color:red;height:15px;width:15px;">` +
+          `<div class="pin2">` +
           `</div></div> `,
       }),
     })
@@ -921,7 +928,7 @@ class Basemap extends Component {
         className: "map-marker",
         html:
           `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
-          `<div class="circle" style="background-color:red;height:15px;width:15px;">` +
+          `<div class="pin2">` +
           `</div></div> `,
       }),
     })
@@ -938,8 +945,8 @@ class Basemap extends Component {
         color: "red",
         weight: 2,
         smoothFactor: 1,
-        dashArray: '20, 10', 
-        dashOffset: '0'
+        dashArray: "20, 10",
+        dashOffset: "0",
       }).addTo(this.line);
       this.props.updateLine(pointList);
     }
@@ -968,7 +975,6 @@ class Basemap extends Component {
         var { fileid } = layer;
         var { mapplotfunction } = dataset;
         var file = finddataset(fileid, dataset.files);
-
         mapplotfunction === "gitPlot" && this.gitPlot(layer, file);
         mapplotfunction === "foenMarkers" && this.foenMarkers(layer, file);
         mapplotfunction === "meteoSwissMarkers" &&
@@ -1008,20 +1014,25 @@ class Basemap extends Component {
       var { addPoint } = this;
       if (this.props.point) {
         this.map.on("click", addPoint);
+        console.log(this.map)
+        L.DomUtil.addClass(this.map._container, "crosshair-cursor-enabled");
       } else {
         this.map.off("click", addPoint);
         this.map.removeLayer(this.point);
         this.props.updatePoint({});
+        L.DomUtil.removeClass(this.map._container, "crosshair-cursor-enabled");
       }
     }
     if (prevProps.line !== this.props.line) {
       var { addLine } = this;
       if (this.props.line) {
         this.map.on("click", addLine);
+        L.DomUtil.addClass(this.map._container, "crosshair-cursor-enabled");
       } else {
         this.map.off("click", addLine);
         this.line.clearLayers();
         this.props.updateLine([]);
+        L.DomUtil.removeClass(this.map._container, "crosshair-cursor-enabled");
       }
     }
     this.map.invalidateSize();

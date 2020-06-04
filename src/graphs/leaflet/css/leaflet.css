@@ -203,6 +203,9 @@
   -ms-transform-origin: 0 0;
   transform-origin: 0 0;
 }
+.leaflet-container.crosshair-cursor-enabled .leaflet-zoom-animated {
+  pointer-events: none;
+}
 .leaflet-zoom-anim .leaflet-zoom-animated {
   will-change: transform;
 }
@@ -247,6 +250,10 @@
   cursor: -webkit-grabbing;
   cursor: -moz-grabbing;
   cursor: grabbing;
+}
+
+.leaflet-container.crosshair-cursor-enabled {
+  cursor: crosshair;
 }
 
 /* marker & overlays interactivity */

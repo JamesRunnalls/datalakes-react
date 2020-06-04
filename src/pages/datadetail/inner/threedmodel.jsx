@@ -9,10 +9,12 @@ import menuicon from "../img/menuicon.svg";
 import sliceicon from "../img/sliceicon.svg";
 import timeicon from "../img/timeicon.svg";
 import profileicon from "../img/profileicon.svg";
+import colorlist from "../../../components/colorramp/colors";
 
 class ThreeDModel extends Component {
   state = {
     selectedlayers: [],
+    datasets: [],
     profile: false,
     timeline: false,
     slice: false,
@@ -94,8 +96,82 @@ class ThreeDModel extends Component {
     this.setState({ lineValue });
   };
 
+  meteolakesScalarMinMax = (inarray) => {
+    var min = Infinity;
+    var max = -Infinity;
+    var flat = inarray.flat();
+    flat = flat.filter((item) => item !== null);
+    flat = flat.map((item) => item[2]);
+    min = Math.min(min, this.getMin(flat));
+    max = Math.max(max, this.getMax(flat));
+    return { min, max, array: flat };
+  };
+
+  meteolakesVectorMinMax = (inarray) => {
+    var min = Infinity;
+    var max = -Infinity;
+    var flat = inarray.flat();
+    flat = flat.filter((item) => item !== null);
+    flat = flat.map((item) =>
+      Math.abs(Math.sqrt(Math.pow(item[2], 2) + Math.pow(item[3], 2)))
+    );
+    min = Math.min(min, this.getMin(flat));
+    max = Math.max(max, this.getMax(flat));
+    return { min, max, array: flat };
+  };
+
+  getMax = (arr) => {
+    let len = arr.length;
+    let max = -Infinity;
+
+    while (len--) {
+      max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
+  };
+
+  getMin = (arr) => {
+    let len = arr.length;
+    let min = Infinity;
+
+    while (len--) {
+      min = arr[len] < min ? arr[len] : min;
+    }
+    return min;
+  };
+
+  parseColor = (colorname) => {
+    var defaultColors = [
+      { color: "#0000ff", point: 0 },
+      { color: "#ff0000", point: 1 },
+    ];
+    var colorparse = colorlist.find((c) => c.name === colorname);
+    if (colorparse) {
+      return colorparse.data;
+    } else {
+      return defaultColors;
+    }
+  };
+
+  parseBoolean = (bool) => {
+    if (bool === "true") {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  addNewLayer = () => {};
+
   async componentDidMount() {
-    var { files } = this.props;
+    var { files, dataset } = this.props;
+    var layer = {
+      visible: true,
+      dataset_index: 0,
+    };
+    layer = { ...layer, ...dataset.plotproperties };
+    layer["colors"] = this.parseColor(layer["colors"]);
+
     var depths = [
       ...new Set(files.map((item) => parseFloat(item.mindepth))),
     ].sort(function (a, b) {
@@ -105,32 +181,49 @@ class ThreeDModel extends Component {
     times = times
       .map((t) => new Date(t))
       .sort(function (a, b) {
-        return a - b;
+        return b - a;
       });
     var depth = depths[0];
-    var time = times[0];
-    var file = files.find(
-      (f) => f.mindepth === String(depth) && f.mindatetime === time.toISOString()
+    var time = times[times.length - 1];
+
+    var fileIndex = files.findIndex(
+      (f) =>
+        f.mindepth === String(depth) && f.mindatetime === time.toISOString()
     );
-    var dataArray = new Array(files.length).fill(0);
-    var { data } = await axios.get(file.filelink).catch((error) => {
+    layer["fileid"] = files[fileIndex].id;
+    var { data } = await axios.get(files[fileIndex].filelink).catch((error) => {
       console.log(error);
     });
-    dataArray[0] = data;
+
+    var min, max, array;
+    if (dataset.mapplotfunction === "meteolakesVector") {
+      ({ min, max, array } = this.meteolakesVectorMinMax(data));
+    } else {
+      ({ min, max, array } = this.meteolakesScalarMinMax(data));
+    }
+    layer["min"] = min;
+    layer["max"] = max;
+    layer["array"] = array;
+
+    files[fileIndex]["data"] = data;
+    dataset["files"] = files;
+    var selectedlayers = [layer];
+    var datasets = [dataset];
     this.setState({
       loading: false,
-      data: dataArray,
       depths,
       times,
       depth,
       time,
-      file,
+      datasets,
+      selectedlayers,
     });
   }
+
   render() {
-    var { dataset } = this.props;
     var {
       selectedlayers,
+      datasets,
       menu,
       profile,
       timeline,
@@ -146,19 +239,19 @@ class ThreeDModel extends Component {
     var controls = [
       { title: "Menu", active: menu, onClick: this.toggleMenu, img: menuicon },
       {
-        title: "Profile",
+        title: "Depth Profile",
         active: profile,
         onClick: this.toggleProfile,
         img: profileicon,
       },
       {
-        title: "Timeline",
+        title: "Time Series",
         active: timeline,
         onClick: this.toggleTimeline,
         img: timeicon,
       },
       {
-        title: "Slice",
+        title: "Transect",
         active: slice,
         onClick: this.toggleSlice,
         img: sliceicon,
@@ -180,13 +273,14 @@ class ThreeDModel extends Component {
           </div>
           <Basemap
             selectedlayers={selectedlayers}
-            datasets={[dataset]}
+            datasets={datasets}
             setZoomIn={this.setZoomIn}
             setZoomOut={this.setZoomOut}
             point={point}
             line={line}
             updatePoint={this.updatePoint}
             updateLine={this.updateLine}
+            loading={loading}
           />
           {loading && (
             <div className="map-loader">

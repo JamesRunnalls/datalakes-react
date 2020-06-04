@@ -1,34 +1,34 @@
 import L from "leaflet";
 
 L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
-  initialize: function(inputdata, options) {
+  initialize: function (inputdata, options) {
     this._inputdata = inputdata;
     L.setOptions(this, options);
   },
 
-  setInputData: function(inputdata) {
+  setInputData: function (inputdata) {
     this._inputdata = inputdata;
     return this.redraw();
   },
 
-  addInputData: function(inputdata) {
+  addInputData: function (inputdata) {
     this._inputdata.push(inputdata);
     return this.redraw();
   },
 
-  setOptions: function(options) {
+  setOptions: function (options) {
     L.setOptions(this, options);
     return this.redraw();
   },
 
-  redraw: function() {
+  redraw: function () {
     if (!this._frame && this._map && !this._map._animating) {
       this._frame = L.Util.requestAnimFrame(this._redraw, this);
     }
     return this;
   },
 
-  onAdd: function(map) {
+  onAdd: function (map) {
     this._map = map;
 
     if (!this._canvas) {
@@ -50,7 +50,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     this._reset();
   },
 
-  onRemove: function(map) {
+  onRemove: function (map) {
     if (this.options.pane) {
       this.getPane().removeChild(this._canvas);
     } else {
@@ -64,12 +64,12 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     }
   },
 
-  addTo: function(map) {
+  addTo: function (map) {
     map.addLayer(this);
     return this;
   },
 
-  _initCanvas: function() {
+  _initCanvas: function () {
     var canvas = (this._canvas = L.DomUtil.create(
       "canvas",
       "leaflet-vectorfield-layer leaflet-layer"
@@ -78,7 +78,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     var originProp = L.DomUtil.testProp([
       "transformOrigin",
       "WebkitTransformOrigin",
-      "msTransformOrigin"
+      "msTransformOrigin",
     ]);
     canvas.style[originProp] = "50% 50%";
 
@@ -98,13 +98,13 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     this._height = canvas.height;
   },
 
-  _reset: function() {
+  _reset: function () {
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this._canvas, topLeft);
     this._redraw();
   },
 
-  _CHtolatlng: function(yx) {
+  _CHtolatlng: function (yx) {
     var y_aux = (yx[0] - 600000) / 1000000;
     var x_aux = (yx[1] - 200000) / 1000000;
     var lat =
@@ -126,7 +126,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     return [lat, lng];
   },
 
-  _pixelSize: function() {
+  _pixelSize: function () {
     var d = this._inputdata;
     var nRows = d.length;
     var nCols = d[0].length;
@@ -167,7 +167,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     return Math.max(pixelx, pixely);
   },
 
-  _drawArrow: function(cell, ctx, size) {
+  _drawArrow: function (cell, ctx, size) {
     var { min, max, vectorArrowColor, colors } = this.options;
     var { center, value, rotation } = cell;
 
@@ -200,7 +200,16 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     ctx.restore();
   },
 
-  _drawArrows: function() {
+  getBounds: function () {
+    var noNan = this._inputdata.flat().filter((i) => isNaN(i));
+    var lat = noNan.map((n) => n[0]);
+    var lng = noNan.map((n) => n[1]);
+    var southWest = L.latLng(this._CHtolatlng([Math.min(...lat), Math.min(...lng)]));
+    var northEast = L.latLng(this._CHtolatlng([Math.max(...lat), Math.max(...lng)]));
+    return L.latLngBounds(southWest, northEast);
+  },
+
+  _drawArrows: function () {
     var ctx = this._ctx;
     ctx.clearRect(0, 0, this._width, this._height);
 
@@ -222,7 +231,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     var maxRow = (Math.floor(nRows / stride) - 1) * stride + 1;
     var maxCol = (Math.floor(nCols / stride) - 1) * stride + 1;
 
-    for (i = 0; i < maxRow;i += stride) {
+    for (i = 0; i < maxRow; i += stride) {
       for (j = 0; j < maxCol; j += stride) {
         alat = [];
         alng = [];
@@ -259,12 +268,12 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     }
   },
 
-  _getAve: function(arr) {
+  _getAve: function (arr) {
     const sum = arr.reduce((a, b) => a + b, 0);
     return sum / arr.length || 0;
   },
 
-  _hex: function(c) {
+  _hex: function (c) {
     var s = "0123456789abcdef";
     var i = parseInt(c, 10);
     if (i === 0 || isNaN(c)) return "00";
@@ -272,11 +281,11 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     return s.charAt((i - (i % 16)) / 16) + s.charAt(i % 16);
   },
 
-  _trim: function(s) {
+  _trim: function (s) {
     return s.charAt(0) === "#" ? s.substring(1, 7) : s;
   },
 
-  _convertToRGB: function(hex) {
+  _convertToRGB: function (hex) {
     var color = [];
     color[0] = parseInt(this._trim(hex).substring(0, 2), 16);
     color[1] = parseInt(this._trim(hex).substring(2, 4), 16);
@@ -284,11 +293,11 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     return color;
   },
 
-  _convertToHex: function(rgb) {
+  _convertToHex: function (rgb) {
     return this._hex(rgb[0]) + this._hex(rgb[1]) + this._hex(rgb[2]);
   },
 
-  _getColor: function(value, min, max, colors) {
+  _getColor: function (value, min, max, colors) {
     var loc = (value - min) / (max - min);
     if (loc < 0 || loc > 1) {
       return "#fff";
@@ -308,21 +317,21 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
       var rgb = [
         color1[0] + (color2[0] - color1[0]) * f,
         color1[1] + (color2[1] - color1[1]) * f,
-        color1[2] + (color2[2] - color1[2]) * f
+        color1[2] + (color2[2] - color1[2]) * f,
       ];
 
       return `#${this._convertToHex(rgb)}`;
     }
   },
 
-  _redraw: function() {
+  _redraw: function () {
     if (!this._map) {
       return;
     }
     this._drawArrows();
   },
 
-  _animateZoom: function(e) {
+  _animateZoom: function (e) {
     var scale = this._map.getZoomScale(e.zoom),
       offset = this._map
         ._getCenterOffset(e.center)
@@ -335,9 +344,9 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
       this._canvas.style[L.DomUtil.TRANSFORM] =
         L.DomUtil.getTranslateString(offset) + " scale(" + scale + ")";
     }
-  }
+  },
 });
 
-L.vectorField = function(inputdata, options) {
+L.vectorField = function (inputdata, options) {
   return new L.VectorField(inputdata, options);
 };

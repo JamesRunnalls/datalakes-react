@@ -38,7 +38,7 @@ class MapControl extends Component {
         }
         othercontrol.push(
           <div key={title} className={classes.join(" ")} onClick={onClick}>
-            <img title={title} src={img} alt={title} />
+            <img src={img} alt={title} /><span>{title}</span>
           </div>
         );
       }

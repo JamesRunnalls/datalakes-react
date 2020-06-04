@@ -61,12 +61,15 @@ class GISMap extends Component {
       loading,
       sidebar,
       updateState,
+      updateLocation,
       selectedlayers,
       basemap,
       datasets,
       datetime,
       depth,
       templates,
+      center,
+      zoom,
     } = this.props;
     var controls = [
       {
@@ -103,7 +106,10 @@ class GISMap extends Component {
             datasets={datasets}
             depth={depth}
             datetime={datetime}
+            center={center}
+            zoom={zoom}
             templates={templates}
+            updateLocation={updateLocation}
             setZoomIn={this.setZoomIn}
             setZoomOut={this.setZoomOut}
           />

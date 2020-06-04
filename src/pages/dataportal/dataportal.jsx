@@ -460,7 +460,6 @@ class DataPortal extends Component {
 
   async componentDidMount() {
     this.refs.search.focus();
-    this.refs.search.select();
     const { data: dropdown } = await axios.get(apiUrl + "/selectiontables");
     var { data: datasets, status: dstatus } = await axios.get(
       apiUrl + "/datasets"
@@ -485,6 +484,7 @@ class DataPortal extends Component {
         }
       }
     }
+    console.log(datasets)
     this.setState({ datasets, parameters, dropdown, loading: false });
   }
 

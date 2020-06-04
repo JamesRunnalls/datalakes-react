@@ -182,3 +182,24 @@ button {
   margin-top: -6.5px;
   background-color: #fff;
 }
+
+.pin2 {
+  position: absolute;
+  top: -80%;
+  left: 32%;
+  border-radius: 50%;
+  border: 8px solid red;
+  width: 8px;
+  height: 8px;
+}
+
+.pin2::after {
+  position: absolute;
+  content: "";
+  width: 0px;
+  height: 0px;
+  bottom: -30px;
+  left: -6px;
+  border: 10px solid transparent;
+  border-top: 17px solid red;
+}
