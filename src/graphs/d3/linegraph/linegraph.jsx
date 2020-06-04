@@ -57,6 +57,8 @@ class D3LineGraph extends Component {
           confidence,
         } = this.props;
 
+        if (!Array.isArray(data)) data = [data];
+
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
           viswidth = d3.select("#vis").node().getBoundingClientRect().width,
@@ -73,12 +75,12 @@ class D3LineGraph extends Component {
         if (xscale === "Time") {
           x = d3.scaleTime().range([0, width]).domain([minx, maxx]);
           xx = d3.scaleTime().range([0, width]).domain([minx, maxx]);
-        } else if (xscale === "Linear") {
-          x = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
-          xx = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
         } else if (xscale === "Log") {
           x = d3.scaleLog().range([0, width]).domain([minx, maxx]);
           xx = d3.scaleLog().range([0, width]).domain([minx, maxx]);
+        } else {
+          x = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
+          xx = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
         }
 
         // Format Y-axis
@@ -88,12 +90,12 @@ class D3LineGraph extends Component {
         if (yscale === "Time") {
           y = d3.scaleTime().range([height, 0]).domain([miny, maxy]);
           yy = d3.scaleTime().range([height, 0]).domain([miny, maxy]);
-        } else if (yscale === "Linear") {
-          y = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
-          yy = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
         } else if (yscale === "Log") {
           y = d3.scaleLog().range([height, 0]).domain([miny, maxy]);
           yy = d3.scaleLog().range([height, 0]).domain([miny, maxy]);
+        } else {
+          y = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
+          yy = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
         }
 
         // Define the axes
@@ -208,7 +210,11 @@ class D3LineGraph extends Component {
           for (var i = 0; i < data.length; i++) {
             var xyt = [];
             for (var j = 0; j < data[i]["x"].length; j++) {
-              if (confidence[i] && confidence[i]["CI_upper"].length === data[i]["x"].length) {
+              if (
+                confidence &&
+                confidence[i] &&
+                confidence[i]["CI_upper"].length === data[i]["x"].length
+              ) {
                 xyt.push({
                   x: data[i]["x"][j],
                   y: data[i]["y"][j],
@@ -216,10 +222,12 @@ class D3LineGraph extends Component {
                   CI_lower: confidence[i]["CI_lower"][j],
                 });
               } else {
-                xyt.push({
-                  x: data[i]["x"][j],
-                  y: data[i]["y"][j],
-                });
+                if ((!isNaN(data[i]["x"][j]), !isNaN(data[i]["y"][j]))) {
+                  xyt.push({
+                    x: data[i]["x"][j],
+                    y: data[i]["y"][j],
+                  });
+                }
               }
             }
             xy.push(xyt);

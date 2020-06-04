@@ -10,6 +10,8 @@ import sliceicon from "../img/sliceicon.svg";
 import timeicon from "../img/timeicon.svg";
 import profileicon from "../img/profileicon.svg";
 import colorlist from "../../../components/colorramp/colors";
+import { apiUrl } from "../../../../src/config.json";
+import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 
 class ThreeDModel extends Component {
   state = {
@@ -26,6 +28,8 @@ class ThreeDModel extends Component {
     line: false,
     lineValue: [],
     loading: true,
+    graph: "none",
+    plotdata: {},
     zoomIn: () => {},
     zoomOut: () => {},
   };
@@ -88,8 +92,17 @@ class ThreeDModel extends Component {
     });
   };
 
-  updatePoint = (pointValue) => {
-    this.setState({ pointValue });
+  updatePoint = async (pointValue) => {
+    var graph = "linegraph";
+    var { data: plotdata } = await axios
+      .get(
+        apiUrl +
+          "/externaldata/meteolakes/depthprofile/zurich/temperature/737873/697139/230954"
+      )
+      .catch((error) => {
+        this.setState({ pointValue });
+      });
+    this.setState({ pointValue, graph, plotdata });
   };
 
   updateLine = (lineValue) => {
@@ -233,6 +246,8 @@ class ThreeDModel extends Component {
       point,
       line,
       loading,
+      graph,
+      plotdata,
       zoomIn,
       zoomOut,
     } = this.state;
@@ -289,7 +304,23 @@ class ThreeDModel extends Component {
             </div>
           )}
         </div>
-        <div className="graphwrapper"></div>
+        <div className="graphwrapper">
+          {graph === "linegraph" && (
+            <D3LineGraph
+              data={plotdata}
+              title={"Title"}
+              xlabel={"xlabel"}
+              ylabel={"ylabel"}
+              xunits={"xunits"}
+              yunits={"yunits"}
+              lcolor={"black"}
+              lweight={"1"}
+              bcolor={"white"}
+              xscale={"linear"}
+              yscale={"linear"}
+            />
+          )}
+        </div>
       </div>
     );
   }
