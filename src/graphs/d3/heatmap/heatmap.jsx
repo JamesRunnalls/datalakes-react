@@ -157,7 +157,7 @@ class D3HeatMap extends Component {
           .style("margin-left", margin.left + "px")
           .style("margin-top", margin.top + "px")
           .style("position", "absolute")
-          .style("left", "10px")
+          .style("left", "0")
           .style("cursor", "grab")
           .attr("id", "canvas")
           .attr("class", "canvas-plot");

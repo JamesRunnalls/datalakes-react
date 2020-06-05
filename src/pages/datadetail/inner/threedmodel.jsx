@@ -131,6 +131,14 @@ class ThreeDModel extends Component {
     var out = { [keys[0]]: var1, [keys[1]]: var2 };
     return out;
   };
+  fillNaN2D = (data) => {
+    for (var i = 0; i < data.y.length; i++) {
+      if (data.z[i].every((e) => e === null)) {
+        data.y[i] = null;
+      }
+    }
+    return data;
+  };
 
   matlabToJavascriptDatetime = (date) => {
     return new Date((date - 719529) * 24 * 60 * 60 * 1000);
@@ -212,7 +220,7 @@ class ThreeDModel extends Component {
             `/externaldata/meteolakes/timeline/zurich/water_temperature/12/${x}/${y}`
         )
         .then((response) => {
-          var { x, y, z } = response.data;
+          var { x, y, z } = this.fillNaN2D(response.data);
           x = x.map((i) => new Date(i * 1000));
           var plotdata = { x, y, z };
           this.setState({ pointValue, plotdata });

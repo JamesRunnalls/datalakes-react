@@ -1,5 +1,5 @@
 {
-    "apiUrl":"http://localhost:4000",
-    "apiUrls":"https://api.datalakes-eawag.ch",
+    "apiUrls":"http://localhost:4000",
+    "apiUrl":"https://api.datalakes-eawag.ch",
     "password":"thetis"
 }
