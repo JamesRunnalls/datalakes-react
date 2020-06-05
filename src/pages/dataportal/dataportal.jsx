@@ -484,7 +484,6 @@ class DataPortal extends Component {
         }
       }
     }
-    console.log(datasets)
     this.setState({ datasets, parameters, dropdown, loading: false });
   }
 

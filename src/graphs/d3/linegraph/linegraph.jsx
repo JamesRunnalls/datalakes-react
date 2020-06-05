@@ -57,7 +57,12 @@ class D3LineGraph extends Component {
           confidence,
         } = this.props;
 
+        if (!lcolor) lcolor = ["#000000"];
+        if (!lweight) lweight = [1];
+
         if (!Array.isArray(data)) data = [data];
+        if (!Array.isArray(lcolor)) lcolor = [lcolor];
+        if (!Array.isArray(lweight)) lweight = [lweight];
 
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
@@ -452,23 +457,25 @@ class D3LineGraph extends Component {
           }
 
           function mousemove() {
-            var y0 = y.invert(d3.mouse(this)[1]);
-            var x0 = x.invert(d3.mouse(this)[0]);
-            var selectedData = closestCoordinates(x0, y0, xy[0]);
-            focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
-            if (xlabel === "Time") {
-              document.getElementById("value").innerHTML =
-                format(new Date(selectedData.x), "hh:mm dd MMM yy") +
-                " | " +
-                selectedData.y.toExponential(3) +
-                yunits;
-            } else {
-              document.getElementById(
-                "value"
-              ).innerHTML = `${selectedData.x.toExponential(
-                3
-              )} ${xunits} | ${selectedData.y.toExponential(3)} ${yunits}`;
-            }
+            try {
+              var y0 = y.invert(d3.mouse(this)[1]);
+              var x0 = x.invert(d3.mouse(this)[0]);
+              var selectedData = closestCoordinates(x0, y0, xy[0]);
+              focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
+              if (xlabel === "Time") {
+                document.getElementById("value").innerHTML =
+                  format(new Date(selectedData.x), "hh:mm dd MMM yy") +
+                  " | " +
+                  selectedData.y.toExponential(3) +
+                  yunits;
+              } else {
+                document.getElementById(
+                  "value"
+                ).innerHTML = `${selectedData.x.toExponential(
+                  3
+                )} ${xunits} | ${selectedData.y.toExponential(3)} ${yunits}`;
+              }
+            } catch (e) {}
           }
 
           function idled() {

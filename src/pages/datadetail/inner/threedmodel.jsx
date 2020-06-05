@@ -12,6 +12,7 @@ import profileicon from "../img/profileicon.svg";
 import colorlist from "../../../components/colorramp/colors";
 import { apiUrl } from "../../../../src/config.json";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
+import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
 
 class ThreeDModel extends Component {
   state = {
@@ -29,7 +30,11 @@ class ThreeDModel extends Component {
     lineValue: [],
     loading: true,
     graph: "none",
-    plotdata: {},
+    colors: [
+      { color: "#0000ff", point: 0 },
+      { color: "#ff0000", point: 1 },
+    ],
+    plotdata: { x: [], y: [], z: [] },
     zoomIn: () => {},
     zoomOut: () => {},
   };
@@ -57,18 +62,34 @@ class ThreeDModel extends Component {
   };
 
   toggleProfile = () => {
+    var { profile, graph, plotdata } = this.state;
+    if (profile && graph === "depthgraph") {
+      graph = "none";
+    } else {
+      graph = "depthgraph";
+    }
+    plotdata = { x: [], y: [], z: [] };
     this.setState({
-      profile: !this.state.profile,
+      profile: !profile,
       timeline: false,
       slice: false,
       menu: false,
       help: false,
       line: false,
-      point: !this.state.profile,
+      graph,
+      plotdata,
+      point: !profile,
     });
   };
 
   toggleTimeline = () => {
+    var { timeline, graph, plotdata } = this.state;
+    if (timeline && graph === "timegraph") {
+      graph = "none";
+    } else {
+      graph = "timegraph";
+    }
+    plotdata = { x: [], y: [], z: [] };
     this.setState({
       timeline: !this.state.timeline,
       slice: false,
@@ -76,6 +97,8 @@ class ThreeDModel extends Component {
       help: false,
       profile: false,
       line: false,
+      graph,
+      plotdata,
       point: !this.state.timeline,
     });
   };
@@ -92,17 +115,112 @@ class ThreeDModel extends Component {
     });
   };
 
+  removeNaN = (data) => {
+    var keys = Object.keys(data);
+    var var1 = [];
+    var var2 = [];
+    for (var i = 0; i < data[keys[0]].length; i++) {
+      if (
+        !isNaN(parseInt(data[keys[0]][i])) &&
+        !isNaN(parseInt(data[keys[1]][i]))
+      ) {
+        var1.push(data[keys[0]][i]);
+        var2.push(data[keys[1]][i]);
+      }
+    }
+    var out = { [keys[0]]: var1, [keys[1]]: var2 };
+    return out;
+  };
+
+  matlabToJavascriptDatetime = (date) => {
+    return new Date((date - 719529) * 24 * 60 * 60 * 1000);
+  };
+
+  javascriptDatetimeToMatlab = (date) => {
+    return 719529 + date.getTime() / (24 * 60 * 60 * 1000);
+  };
+
+  CHtoWGSlatlng = (yx) => {
+    var y_aux = (yx[0] - 600000) / 1000000;
+    var x_aux = (yx[1] - 200000) / 1000000;
+    var lat =
+      16.9023892 +
+      3.238272 * x_aux -
+      0.270978 * Math.pow(y_aux, 2) -
+      0.002528 * Math.pow(x_aux, 2) -
+      0.0447 * Math.pow(y_aux, 2) * x_aux -
+      0.014 * Math.pow(x_aux, 3);
+    var lng =
+      2.6779094 +
+      4.728982 * y_aux +
+      0.791484 * y_aux * x_aux +
+      0.1306 * y_aux * Math.pow(x_aux, 2) -
+      0.0436 * Math.pow(y_aux, 3);
+    lat = (lat * 100) / 36;
+    lng = (lng * 100) / 36;
+
+    return [lat, lng];
+  };
+
+  WGSlatlngtoCH = (lat, lng) => {
+    lat = lat * 3600;
+    lng = lng * 3600;
+    var lat_aux = (lat - 169028.66) / 10000;
+    var lng_aux = (lng - 26782.5) / 10000;
+    var y =
+      2600072.37 +
+      211455.93 * lng_aux -
+      10938.51 * lng_aux * lat_aux -
+      0.36 * lng_aux * lat_aux ** 2 -
+      44.54 * lng_aux ** 3 -
+      2000000;
+    var x =
+      1200147.07 +
+      308807.95 * lat_aux +
+      3745.25 * lng_aux ** 2 +
+      76.63 * lat_aux ** 2 -
+      194.56 * lng_aux ** 2 * lat_aux +
+      119.79 * lat_aux ** 3 -
+      1000000;
+    return { x, y };
+  };
+
   updatePoint = async (pointValue) => {
-    var graph = "linegraph";
-    var { data: plotdata } = await axios
-      .get(
-        apiUrl +
-          "/externaldata/meteolakes/depthprofile/zurich/temperature/737873/697139/230954"
-      )
-      .catch((error) => {
-        this.setState({ pointValue });
-      });
-    this.setState({ pointValue, graph, plotdata });
+    var { graph, time } = this.state;
+    if (graph === "depthgraph") {
+      // Convert to meteolakes units
+      var t = this.javascriptDatetimeToMatlab(time);
+      var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
+      axios
+        .get(
+          apiUrl +
+            `/externaldata/meteolakes/depthprofile/zurich/water_temperature/${t}/${x}/${y}`
+        )
+        .then((response) => {
+          var plotdata = this.removeNaN(response.data);
+          this.setState({ pointValue, plotdata });
+        })
+        .catch((error) => {
+          this.setState({ pointValue, plotdata: { x: [], y: [], z: [] } });
+        });
+    } else if (graph === "timegraph") {
+      // Convert to meteolakes units
+      ({ x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng));
+      axios
+        .get(
+          apiUrl +
+            `/externaldata/meteolakes/timeline/zurich/water_temperature/12/${x}/${y}`
+        )
+        .then((response) => {
+          var { x, y, z } = response.data;
+          x = x.map((i) => new Date(i * 1000));
+          var plotdata = { x, y, z };
+          this.setState({ pointValue, plotdata });
+        })
+        .catch((error) => {
+          this.setState({ pointValue, plotdata: { x: [], y: [], z: [] } });
+        });
+    }
   };
 
   updateLine = (lineValue) => {
@@ -183,7 +301,8 @@ class ThreeDModel extends Component {
       dataset_index: 0,
     };
     layer = { ...layer, ...dataset.plotproperties };
-    layer["colors"] = this.parseColor(layer["colors"]);
+    var colors = this.parseColor(layer["colors"]);
+    layer["colors"] = colors;
 
     var depths = [
       ...new Set(files.map((item) => parseFloat(item.mindepth))),
@@ -224,6 +343,7 @@ class ThreeDModel extends Component {
     var datasets = [dataset];
     this.setState({
       loading: false,
+      colors,
       depths,
       times,
       depth,
@@ -248,9 +368,11 @@ class ThreeDModel extends Component {
       loading,
       graph,
       plotdata,
+      colors,
       zoomIn,
       zoomOut,
     } = this.state;
+    var { dataset } = this.props;
     var controls = [
       { title: "Menu", active: menu, onClick: this.toggleMenu, img: menuicon },
       {
@@ -305,19 +427,33 @@ class ThreeDModel extends Component {
           )}
         </div>
         <div className="graphwrapper">
-          {graph === "linegraph" && (
+          {graph === "depthgraph" && (
             <D3LineGraph
               data={plotdata}
-              title={"Title"}
-              xlabel={"xlabel"}
-              ylabel={"ylabel"}
-              xunits={"xunits"}
-              yunits={"yunits"}
-              lcolor={"black"}
+              title={`${dataset.title} Depth Profile`}
+              xlabel={"Temperature"}
+              ylabel={"Depth"}
+              xunits={"°C"}
+              yunits={"m"}
+              lcolor={"#000000"}
               lweight={"1"}
               bcolor={"white"}
-              xscale={"linear"}
-              yscale={"linear"}
+              xscale={"Linear"}
+              yscale={"Linear"}
+            />
+          )}
+          {graph === "timegraph" && (
+            <D3HeatMap
+              data={plotdata}
+              title={`${dataset.title} Timeline`}
+              xlabel={"Time"}
+              ylabel={"Depth"}
+              zlabel={"Temperature"}
+              xunits={""}
+              yunits={"m"}
+              zunits={"°C"}
+              bcolor={"white"}
+              colors={colors}
             />
           )}
         </div>

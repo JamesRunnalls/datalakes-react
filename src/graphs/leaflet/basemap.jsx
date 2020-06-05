@@ -1014,7 +1014,6 @@ class Basemap extends Component {
       var { addPoint } = this;
       if (this.props.point) {
         this.map.on("click", addPoint);
-        console.log(this.map)
         L.DomUtil.addClass(this.map._container, "crosshair-cursor-enabled");
       } else {
         this.map.off("click", addPoint);
