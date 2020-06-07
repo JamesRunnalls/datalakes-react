@@ -709,6 +709,12 @@ class DataDetail extends Component {
         return (
           <React.Fragment>
             <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
             <ThreeDModel
               dataset={dataset}
               parameters={parameters}

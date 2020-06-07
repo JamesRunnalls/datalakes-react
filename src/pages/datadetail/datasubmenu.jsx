@@ -23,6 +23,15 @@ class DataSubMenu extends Component {
         <React.Fragment>
           <div className="data-subnav">
             <div
+              title="Interact with 3D model"
+              className={this.active("threedmodel",step) ? "subnav-item active" : "subnav-item"}
+              style={{display: this.hide("threedmodel",allowedStep) && 'none'}}
+              onClick={() => updateSelectedState("threedmodel")}
+            >
+              <img src={heat} className="subnav-img" alt="Heatmap" />
+              <div className="subnav-text">3D Model</div>
+            </div>
+            <div
               title="Preview data as a heat map"
               className={this.active("heatmap",step) ? "subnav-item active" : "subnav-item"}
               style={{display: this.hide("heatmap",allowedStep) && 'none'}}
