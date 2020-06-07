@@ -104,6 +104,13 @@ class ThreeDModel extends Component {
   };
 
   toggleSlice = () => {
+    var { slice, graph, plotdata } = this.state;
+    if (slice && graph === "slicegraph") {
+      graph = "none";
+    } else {
+      graph = "slicegraph";
+    }
+    plotdata = { x: [], y: [], z: [] };
     this.setState({
       slice: !this.state.slice,
       timeline: false,
@@ -111,6 +118,8 @@ class ThreeDModel extends Component {
       help: false,
       profile: false,
       point: false,
+      graph,
+      plotdata,
       line: !this.state.slice,
     });
   };
@@ -131,6 +140,7 @@ class ThreeDModel extends Component {
     var out = { [keys[0]]: var1, [keys[1]]: var2 };
     return out;
   };
+
   fillNaN2D = (data) => {
     for (var i = 0; i < data.y.length; i++) {
       if (data.z[i].every((e) => e === null)) {
@@ -232,7 +242,34 @@ class ThreeDModel extends Component {
   };
 
   updateLine = (lineValue) => {
-    this.setState({ lineValue });
+    var { graph, time } = this.state;
+    if (graph === "slicegraph" && lineValue.length > 0) {
+      // Convert to meteolakes units
+      var t = this.javascriptDatetimeToMatlab(time);
+      var { x: x1, y: y1 } = this.WGSlatlngtoCH(
+        lineValue[0].lat,
+        lineValue[0].lng
+      );
+      var { x: x2, y: y2 } = this.WGSlatlngtoCH(
+        lineValue[1].lat,
+        lineValue[1].lng
+      );
+      axios
+        .get(
+          apiUrl +
+            `/externaldata/meteolakes/transect/zurich/water_temperature/${t}/${x1}/${y1}/${x2}/${y2}`
+        )
+        .then((response) => {
+          var { x, y, z } = this.fillNaN2D(response.data);
+          var plotdata = { x, y, z };
+          this.setState({ lineValue, plotdata });
+        })
+        .catch((error) => {
+          this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
+        });
+    } else {
+      this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
+    }
   };
 
   meteolakesScalarMinMax = (inarray) => {
@@ -403,9 +440,16 @@ class ThreeDModel extends Component {
       },
     ];
 
+    var basemapclass = "basemapwrapper";
+    var graphclass = "graphwrapper";
+    if (graph === "none") {
+      basemapclass = "basemapwrapper wide";
+      graphclass = "graphwrapper hide";
+    }
+
     return (
       <div className="threed">
-        <div className="basemapwrapper">
+        <div className={basemapclass}>
           <div className="controls">
             <MapControl
               zoomIn={zoomIn}
@@ -434,7 +478,7 @@ class ThreeDModel extends Component {
             </div>
           )}
         </div>
-        <div className="graphwrapper">
+        <div className={graphclass}>
           {graph === "depthgraph" && (
             <D3LineGraph
               data={plotdata}
@@ -458,6 +502,21 @@ class ThreeDModel extends Component {
               ylabel={"Depth"}
               zlabel={"Temperature"}
               xunits={""}
+              yunits={"m"}
+              zunits={"°C"}
+              bcolor={"white"}
+              colors={colors}
+            />
+          )}
+          {graph === "slicegraph" && (
+            <D3HeatMap
+              data={plotdata}
+              title={`${dataset.title} Transect`}
+              xlinear={true}
+              xlabel={"Distance"}
+              ylabel={"Depth"}
+              zlabel={"Temperature"}
+              xunits={"m"}
               yunits={"m"}
               zunits={"°C"}
               bcolor={"white"}

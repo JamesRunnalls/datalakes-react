@@ -13,38 +13,62 @@
   position: relative;
   display: inline-block;
   padding-right: 20px;
+  max-height: calc(100vh - 100px);
+  min-height: 340px;
+}
+
+.threed .basemapwrapper.wide {
+  width: 960px;
+  margin: auto;
+  display: block;
+  padding: 0;
 }
 
 .threed .basemapwrapper .controls {
   position: absolute;
   left: 10px;
   top: 10px;
-  z-index: 999999;
+  z-index: 998;
 }
 
 .threed .graphwrapper {
-    height: 600px;
-    width: 50%;
-    box-sizing: border-box;
-    max-width: 960px;
-    position: relative;
-    border: 1px solid black;
-    display: inline-block;
-  }
+  height: 600px;
+  width: 50%;
+  box-sizing: border-box;
+  max-width: 960px;
+  position: relative;
+  display: inline-block;
+  max-height: calc(100vh - 100px);
+  min-height: 340px;
+}
 
-  @media screen and (max-width: 1050px) {
-    .threed {
-        width: 100%;
-        margin: 0;
-        margin-bottom: 100px;
-        padding: 0 10px;
-        box-sizing: border-box;
-      }
-      .threed .basemapwrapper {
-        width: 100%;
-        padding: 0;
-      }
-      .threed .graphwrapper {
-        width: 100%;
-      }
+.threed .graphwrapper.hide {
+  display: none;
+}
+
+.threed .graphwrapper table {
+  height: 100%;
+  margin: auto;
+}
+
+@media screen and (max-width: 1050px) {
+  .threed {
+    width: 100%;
+    margin: 0;
+    margin-bottom: 100px;
+    padding: 0;
+    box-sizing: border-box;
   }
+  .threed .basemapwrapper {
+    width: 100%;
+    padding: 0;
+  }
+  .threed .graphwrapper {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .threed .basemapwrapper.wide {
+    width: 100%;
+  }
+}

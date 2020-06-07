@@ -126,7 +126,12 @@ class D3HeatMap extends Component {
         };
 
         // Format X-axis
-        var x = d3.scaleTime().range([0, width]).domain(xdomain);
+        var x;
+        if ("xlinear" in this.props) {
+          x = d3.scaleLinear().range([0, width]).domain(xdomain);
+        } else {
+          x = d3.scaleTime().range([0, width]).domain(xdomain);
+        }
 
         // Format Y-axis
         var y = d3.scaleLinear().range([height, 0]).domain(ydomain);
