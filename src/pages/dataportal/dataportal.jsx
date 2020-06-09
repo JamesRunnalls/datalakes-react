@@ -72,6 +72,8 @@ class Dataset extends Component {
     params = params.filter(
       (x) => ![1, 2, 3, 4, 27, 28, 29, 30].includes(x.parameters_id)
     );
+    var param_names = params.map((p) => p.name);
+    param_names = [...new Set(param_names)];
     var check = "checkbox unchecked";
     var lake = getLabel("lakes", dataset.lakes_id);
     if (lake === "Multiple") {
@@ -108,8 +110,8 @@ class Dataset extends Component {
             </div>
             <div className="innerdatasetright">
               <div className="parameters-highlight">
-                {params.map((param) => (
-                  <div key={param.name}>{param.name}</div>
+                {param_names.map((param) => (
+                  <div key={param}>{param}</div>
                 ))}{" "}
               </div>
               <div className="date-highlight">

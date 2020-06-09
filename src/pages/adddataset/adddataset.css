@@ -117,8 +117,6 @@ form.adddataset-form input {
   text-align: center;
 }
 
-
-
 .repo-connection {
   margin-top: 15px;
 }
@@ -204,9 +202,8 @@ table.metadata td {
 }
 
 .adddataset-form {
-  width: calc(100vw - 20px);
-  position: absolute;
-  left: 10px;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
 }
 
 .adddataset-form .welcome-text {

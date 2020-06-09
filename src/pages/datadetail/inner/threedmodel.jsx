@@ -47,6 +47,20 @@ class ThreeDModel extends Component {
     this.setState({ zoomOut: newFunc });
   };
 
+  closeSelect = () => {
+    this.setState({
+      profile: false,
+      timeline: false,
+      slice: false,
+      menu: false,
+      help: false,
+      line: false,
+      graph: "none",
+      plotdata: { x: [], y: [], z: [] },
+      point: false,
+    });
+  };
+
   toggleHelp = () => {
     this.setState({
       help: !this.state.help,
@@ -478,8 +492,12 @@ class ThreeDModel extends Component {
             </div>
           )}
         </div>
-        <div className={graphclass}>
-          {graph === "depthgraph" && (
+
+        {graph === "depthgraph" && plotdata.x.length > 0 && (
+          <div className={graphclass}>
+            <div className="close" onClick={this.closeSelect}>
+              ×
+            </div>
             <D3LineGraph
               data={plotdata}
               title={`${dataset.title} Depth Profile`}
@@ -493,8 +511,13 @@ class ThreeDModel extends Component {
               xscale={"Linear"}
               yscale={"Linear"}
             />
-          )}
-          {graph === "timegraph" && (
+          </div>
+        )}
+        {graph === "timegraph" && plotdata.x.length > 0 && (
+          <div className={graphclass}>
+            <div className="close" onClick={this.closeSelect}>
+              ×
+            </div>
             <D3HeatMap
               data={plotdata}
               title={`${dataset.title} Timeline`}
@@ -507,8 +530,13 @@ class ThreeDModel extends Component {
               bcolor={"white"}
               colors={colors}
             />
-          )}
-          {graph === "slicegraph" && (
+          </div>
+        )}
+        {graph === "slicegraph" && plotdata.x.length > 0 && (
+          <div className={graphclass}>
+            <div className="close" onClick={this.closeSelect}>
+              ×
+            </div>
             <D3HeatMap
               data={plotdata}
               title={`${dataset.title} Transect`}
@@ -522,8 +550,8 @@ class ThreeDModel extends Component {
               bcolor={"white"}
               colors={colors}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     );
   }

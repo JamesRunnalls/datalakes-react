@@ -4,7 +4,7 @@ import "../datadetail.css";
 class Preview extends Component {
   tableHeader = (i, parameters, getLabel) => {
     var detail = "";
-    if (parameters[i] && parameters[i].detail !== null) {
+    if (parameters[i] && parameters[i].detail !== null && parameters[i].detail !== "none") {
       detail = `[${parameters[i].detail}]`;
     }
     return (
