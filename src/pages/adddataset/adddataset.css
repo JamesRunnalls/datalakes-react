@@ -262,3 +262,11 @@ table.metadata td {
 .orderarrows div {
   cursor: pointer;
 }
+
+.fileconnection {
+  margin-left: 20px;
+}
+
+.liveconnection {
+  margin-left: 20px;
+}

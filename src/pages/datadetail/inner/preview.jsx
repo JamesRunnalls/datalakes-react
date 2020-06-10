@@ -4,19 +4,27 @@ import "../datadetail.css";
 class Preview extends Component {
   tableHeader = (i, parameters, getLabel) => {
     var detail = "";
-    if (parameters[i] && parameters[i].detail !== null && parameters[i].detail !== "none") {
+    if (
+      parameters[i] &&
+      parameters[i].detail !== null &&
+      parameters[i].detail !== "none"
+    ) {
       detail = `[${parameters[i].detail}]`;
     }
     return (
       parameters[i] &&
-      `${getLabel("parameters", parameters[i].parameters_id, "name")} ${
-        detail
-      } (${parameters[i].unit})`
+      `${getLabel(
+        "parameters",
+        parameters[i].parameters_id,
+        "name"
+      )} ${detail} (${parameters[i].unit})`
     );
   };
 
   tableBody = (i, l, parameters, data) => {
-    return parameters[i] && data[parameters[i].axis][l];
+    var out = parameters[i] && data[parameters[i].axis][l];
+    if (out === null) out = 0;
+    return out;
   };
 
   render() {
@@ -36,6 +44,7 @@ class Preview extends Component {
       </tr>,
     ];
     var len = data.y ? data.y.length : data.x.length;
+    console.log(data);
     for (var l = 0; l < Math.min(50, len); l++) {
       inner.push(
         <tr key={"h" + l}>

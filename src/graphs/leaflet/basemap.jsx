@@ -1019,7 +1019,12 @@ class Basemap extends Component {
         this.map.off("click", addPoint);
         this.map.removeLayer(this.point);
         this.props.updatePoint({});
-        L.DomUtil.removeClass(this.map._container, "crosshair-cursor-enabled");
+        if (!this.props.point && !this.props.line) {
+          L.DomUtil.removeClass(
+            this.map._container,
+            "crosshair-cursor-enabled"
+          );
+        }
       }
     }
     if (prevProps.line !== this.props.line) {
@@ -1031,7 +1036,12 @@ class Basemap extends Component {
         this.map.off("click", addLine);
         this.line.clearLayers();
         this.props.updateLine([]);
-        L.DomUtil.removeClass(this.map._container, "crosshair-cursor-enabled");
+        if (!this.props.point && !this.props.line) {
+          L.DomUtil.removeClass(
+            this.map._container,
+            "crosshair-cursor-enabled"
+          );
+        }
       }
     }
     this.map.invalidateSize();

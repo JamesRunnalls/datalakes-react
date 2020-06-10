@@ -486,7 +486,7 @@ class DataDetail extends Component {
         files,
         loading: false,
         step: "threedmodel",
-        allowedStep: ["threedmodel"],
+        allowedStep: ["threedmodel","external"],
       });
     } else if (dataset.datasource === "Eawag RS") {
       this.setState({
@@ -697,6 +697,12 @@ class DataDetail extends Component {
         return (
           <React.Fragment>
             <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
             <External
               dataset={dataset}
               parameters={parameters}

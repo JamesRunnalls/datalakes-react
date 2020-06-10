@@ -49,15 +49,7 @@ class ThreeDModel extends Component {
 
   closeSelect = () => {
     this.setState({
-      profile: false,
-      timeline: false,
-      slice: false,
-      menu: false,
-      help: false,
-      line: false,
-      graph: "none",
       plotdata: { x: [], y: [], z: [] },
-      point: false,
     });
   };
 
@@ -454,16 +446,12 @@ class ThreeDModel extends Component {
       },
     ];
 
-    var basemapclass = "basemapwrapper";
-    var graphclass = "graphwrapper";
-    if (graph === "none") {
-      basemapclass = "basemapwrapper wide";
-      graphclass = "graphwrapper hide";
-    }
+    var graphclass = "graphwrapper hide";
+    if (graph !== "none" && plotdata.x.length > 0) graphclass = "graphwrapper";
 
     return (
       <div className="threed">
-        <div className={basemapclass}>
+        <div className="basemapwrapper">
           <div className="controls">
             <MapControl
               zoomIn={zoomIn}

@@ -102,6 +102,7 @@ class ReviewData extends Component {
             table="parameters"
             value="id"
             label="name"
+            defaultValue={row.link}
             dataList={list}
             onChange={handleSelect(i, "link")}
           />
@@ -146,7 +147,7 @@ class ReviewData extends Component {
           <td>{link}</td>
           <td>
             <input
-              defaultValue={row.detail}
+              value={row.detail}
               type="text"
               onChange={handleChange(i, "detail")}
             />
@@ -155,7 +156,7 @@ class ReviewData extends Component {
             <input
               type="text"
               name="unit"
-              defaultValue={row.unit}
+              value={row.unit}
               onChange={handleChange(i, "unit")}
             />
           </td>

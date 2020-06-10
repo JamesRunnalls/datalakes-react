@@ -28,8 +28,17 @@ class DataSubMenu extends Component {
               style={{display: this.hide("threedmodel",allowedStep) && 'none'}}
               onClick={() => updateSelectedState("threedmodel")}
             >
-              <img src={heat} className="subnav-img" alt="Heatmap" />
+              <img src={heat} className="subnav-img" alt="3D" />
               <div className="subnav-text">3D Model</div>
+            </div>
+            <div
+              title="Information on external data source"
+              className={this.active("external",step) ? "subnav-item active" : "subnav-item"}
+              style={{display: this.hide("external",allowedStep) && 'none'}}
+              onClick={() => updateSelectedState("external")}
+            >
+              <img src={info} className="subnav-img" alt="Info" />
+              <div className="subnav-text">Information</div>
             </div>
             <div
               title="Preview data as a heat map"
