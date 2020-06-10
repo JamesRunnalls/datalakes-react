@@ -161,6 +161,10 @@ class AddDataset extends Component {
               fileInformation,
               dropdown
             );
+            datasetparameters = datasetparameters.map((dp, index) => {
+              dp.id = index;
+              return dp;
+            });
 
             internalthis.setState({
               allowedStep: [1, 2, 0, 0, 0],
@@ -574,6 +578,7 @@ class AddDataset extends Component {
   handleParameter = (a, b) => (event) => {
     var datasetparameters = this.state.datasetparameters;
     datasetparameters[a][b] = event.value ? event.value : event.target.value;
+    if (b === "parameters_id") datasetparameters[a]["link"] = -1;
     this.setState({ datasetparameters });
   };
 
@@ -582,6 +587,22 @@ class AddDataset extends Component {
     datasetparameters[a][b] = !datasetparameters[a][b];
     dataset.fileconnect = "no";
     this.setState({ datasetparameters, dataset });
+  };
+
+  moveParameterUp = (i) => {
+    if (i > 0) {
+      var { datasetparameters } = this.state;
+      datasetparameters.splice(i - 1, 0, datasetparameters.splice(i, 1)[0]);
+      this.setState({ datasetparameters });
+    }
+  };
+
+  moveParameterDown = (i) => {
+    var { datasetparameters } = this.state;
+    if (i < datasetparameters.length - 1) {
+      datasetparameters.splice(i + 1, 0, datasetparameters.splice(i, 1)[0]);
+      this.setState({ datasetparameters });
+    }
   };
 
   render() {
@@ -651,6 +672,8 @@ class AddDataset extends Component {
               handleDataset={this.handleDataset}
               handleCheck={this.handleParameterCheck}
               getDropdowns={this.getDropdowns}
+              moveParameterUp={this.moveParameterUp}
+              moveParameterDown={this.moveParameterDown}
             />
           </React.Fragment>
         );

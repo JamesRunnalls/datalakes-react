@@ -152,9 +152,17 @@ class PopupBox extends Component {
 }
 
 class FilterBoxInner extends Component {
+  capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
   state = {};
   render() {
     var { params, checkbox, cat, filters, table } = this.props;
+    params = params.map((p) => {
+      if (p.name === "internal") p.name = "Datalakes";
+      return p;
+    });
+    params = params.filter((p) => p.name !== "Error");
     return (
       <React.Fragment>
         <div id="filterboxinner" className="">
@@ -170,7 +178,7 @@ class FilterBoxInner extends Component {
                 checked={param.name in filters}
                 readOnly
               ></input>
-              {param.name + " "}({param.count})
+              {this.capitalizeFirstLetter(param.name) + " "}({param.count})
             </div>
           ))}
         </div>
@@ -531,6 +539,7 @@ class DataPortal extends Component {
     var dLake = this.filterList(dataL, "lakes_id", "lakes");
     var dChar = this.filterList(dataC, "characteristic", "characterstic");
     var dSource = this.filterList(datasets, "datasource", "NA");
+    var dOrigin = this.filterList(datasets, "origin", "NA");
 
     // Sort by
     fDatasets = this.sortDatasets(fDatasets, sortby);
@@ -653,6 +662,19 @@ class DataPortal extends Component {
                   table="parameters"
                 />
               </div>
+              <FilterBox
+                title="Origin"
+                content={
+                  <FilterBoxInner
+                    checkbox={this.checkboxAddFilter}
+                    cat="origin"
+                    params={dOrigin}
+                    filters={filters}
+                    table="datasets"
+                  />
+                }
+                preopen="true"
+              />
               <FilterBox
                 title="Data Source"
                 content={

@@ -258,3 +258,7 @@ table.metadata td {
   text-align: center;
   margin-bottom: 150px;
 }
+
+.orderarrows div {
+  cursor: pointer;
+}

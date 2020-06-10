@@ -119,6 +119,7 @@ class MapLayers extends Component {
           onSortEnd={this.onSortEnd}
           distance={10}
           useDragHandle
+          lockAxis="y"
         />
       );
     } else {
