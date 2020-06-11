@@ -149,12 +149,12 @@ class Station extends Component {
   render() {
     var { dataset, datainfo, selected, error } = this.state;
     if (error) {
-      return <Redirect to="/live" />;
+      return <Redirect to="/" />;
     } else {
-      document.title = datainfo.name + " Weather Station - Datalakes";
+      document.title = datainfo.name + " Live - Datalakes";
       return (
         <React.Fragment>
-          <h1>{datainfo.name} Weather Station</h1>
+          <h1>{datainfo.name} Live</h1>
           <SidebarLayout
             sidebartitle="Time Series"
             left={

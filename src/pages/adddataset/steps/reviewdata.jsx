@@ -66,6 +66,10 @@ class ReviewData extends Component {
     this.props.prevStep();
   };
 
+  dpfilter = (datasetparameters, pid) => {
+    return datasetparameters.filter((dp) => dp.parameters_id !== pid);
+  };
+
   render() {
     const {
       dropdown,
@@ -91,9 +95,7 @@ class ReviewData extends Component {
     for (var row of datasetparameters) {
       var link = <div></div>;
       if (errorids.includes(row.parameters_id)) {
-        var ids = datasetparameters.filter(
-          (dp) => dp.parameters_id !== row.parameters_id
-        );
+        var ids = this.dpfilter(datasetparameters, row.parameters_id);
         var list = ids.map((i) => {
           return { id: i.id, name: i.id };
         });
@@ -111,7 +113,7 @@ class ReviewData extends Component {
       var location = "";
       if (i === 0) location = "top";
       if (i === datasetparameters.length - 1) location = "bottom";
-      let temp_id = i
+      let temp_id = i;
       rows.push(
         <tr key={"row" + i}>
           <td>

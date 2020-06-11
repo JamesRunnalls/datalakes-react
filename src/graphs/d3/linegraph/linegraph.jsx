@@ -35,6 +35,34 @@ class D3LineGraph extends Component {
     return;
   };
 
+  downloadCSV = () => {
+    var { data, xlabel, xunits, ylabel, yunits, title } = this.props;
+    var csvContent = `data:text/csv;charset=utf-8,${xlabel} (${xunits}),${ylabel} (${yunits})\n`;
+    for (var i = 0; i < data.x.length; i++) {
+      csvContent = csvContent + `${data.x[i]},${data.y[i]}\n`;
+    }
+    var name = title.split(" ").join("_") + ".csv";
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", name);
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  downloadJSON = () => {
+    var { data, xlabel, xunits, ylabel, yunits, title } = this.props;
+    var arr = { ...{ xlabel, xunits, ylabel, yunits, title }, ...data };
+    var name = title.split(" ").join("_") + ".json";
+    var encodedUri =
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(arr));
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", name);
+    document.body.appendChild(link);
+    link.click();
+  };
+
   plotLineGraph = async () => {
     try {
       d3.select("#linegraphsvg").remove();
@@ -466,21 +494,33 @@ class D3LineGraph extends Component {
                 document.getElementById("value").innerHTML =
                   format(new Date(selectedData.x), "hh:mm dd MMM yy") +
                   " | " +
-                  selectedData.y.toExponential(3) +
+                  numberformat(selectedData.y) +
                   yunits;
               } else {
-                document.getElementById(
-                  "value"
-                ).innerHTML = `${selectedData.x.toExponential(
-                  3
-                )} ${xunits} | ${selectedData.y.toExponential(3)} ${yunits}`;
+                document.getElementById("value").innerHTML = `${numberformat(
+                  selectedData.x
+                )} ${xunits} | ${numberformat(selectedData.y)} ${yunits}`;
               }
             } catch (e) {}
+          }
+
+          function numberformat(num) {
+            num = parseFloat(num);
+            if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
+              num = num.toExponential(3);
+            } else {
+              num = Math.round(num * 10000) / 10000;
+            }
+            return num;
           }
 
           function idled() {
             idleTimeout = null;
           }
+
+          d3.select("#pngdownloadline").on("click", function () {
+            downloadGraph();
+          });
 
           function downloadGraph() {
             var s = new XMLSerializer();
@@ -555,7 +595,28 @@ class D3LineGraph extends Component {
         <div className="vis-header">
           <div className="vis-data" id="value"></div>
         </div>
-        <div id="vis" title="Click shift to activate zoom to area"></div>
+        <div id="vis" title="Click shift to activate zoom to area">
+          <div className="downloadbar">
+            <button id="pngdownloadline" title="Download Image">
+              PNG
+            </button>
+            <button
+              className="blue"
+              onClick={this.downloadJSON}
+              title="Download as JSON"
+            >
+              JSON
+            </button>
+            <button
+              className="red"
+              onClick={this.downloadCSV}
+              title="Download as CSV"
+            >
+              CSV
+            </button>
+          </div>
+        </div>
+
         {"legend" in this.props && (
           <div id="legend">
             <table>

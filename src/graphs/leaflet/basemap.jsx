@@ -870,7 +870,7 @@ class Basemap extends Component {
         let lng = Math.round(latlng.lng * 1000) / 1000;
         updateLocation(zoom, [lat, lng]);
       });
-      this.map.on("moveend", function (e) {
+      this.map.on("dragend", function (e) {
         let zoom = e.target._zoom;
         let latlng = map.getCenter();
         let lat = Math.round(latlng.lat * 1000) / 1000;

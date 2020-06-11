@@ -532,7 +532,7 @@ class ThreeDModel extends Component {
               xlabel={"Distance"}
               ylabel={"Depth"}
               zlabel={"Temperature"}
-              xunits={"m"}
+              xunits={"km"}
               yunits={"m"}
               zunits={"°C"}
               bcolor={"white"}

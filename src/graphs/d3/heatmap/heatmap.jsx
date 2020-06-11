@@ -45,6 +45,56 @@ class D3HeatMap extends Component {
     return index;
   };
 
+  downloadCSV = () => {
+    var {
+      data,
+      xlabel,
+      ylabel,
+      zlabel,
+      xunits,
+      yunits,
+      zunits,
+      title,
+    } = this.props;
+    var csvContent = `data:text/csv;charset=utf-8,,${xlabel} (${xunits})\n${ylabel} (${yunits}),${zlabel} (${zunits})\n`;
+    csvContent = csvContent + `,${data.x.join(",")}\n`;
+    for (var i = 0; i < data.y.length; i++) {
+      csvContent = csvContent + `${data.y[i]},${data.z[i].join(",")}\n`;
+    }
+    var name = title + ".csv";
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", name);
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  downloadJSON = () => {
+    var {
+      data,
+      xlabel,
+      ylabel,
+      zlabel,
+      xunits,
+      yunits,
+      zunits,
+      title,
+    } = this.props;
+    var arr = {
+      ...{ xlabel, xunits, ylabel, yunits, zlabel, zunits, title },
+      ...data,
+    };
+    var name = title.split(" ").join("_") + ".json";
+    var encodedUri =
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(arr));
+    var link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", name);
+    document.body.appendChild(link);
+    link.click();
+  };
+
   getDomain = (domain) => {
     var minarr = domain.map((d) => d[0]);
     var maxarr = domain.map((d) => d[1]);
@@ -213,29 +263,29 @@ class D3HeatMap extends Component {
                 " | " +
                 ylabel +
                 ": " +
-                Math.round(process.y[yi] * 10000) / 10000 +
+                numberformat(process.y[yi]) +
                 yunits +
                 " | " +
                 zlabel +
                 ": " +
-                Math.round(process.z[yi][xi] * 10000) / 10000 +
+                numberformat(process.z[yi][xi]) +
                 zunits;
             } else {
               xi = closest(hoverX, process.x);
               document.getElementById("value").innerHTML =
                 xlabel +
                 ": " +
-                process.x[xi] +
+                numberformat(process.x[xi]) +
                 xunits +
                 " | " +
                 ylabel +
                 ": " +
-                Math.round(process.y[yi] * 10000) / 10000 +
+                numberformat(process.y[yi]) +
                 yunits +
                 " | " +
                 zlabel +
                 ": " +
-                Math.round(process.z[yi][xi] * 10000) / 10000 +
+                numberformat(process.z[yi][xi]) +
                 zunits;
             }
           } catch (e) {
@@ -245,6 +295,16 @@ class D3HeatMap extends Component {
         canvas.on("mouseout", () => {
           document.getElementById("value").innerHTML = "";
         });
+
+        function numberformat(num) {
+          num = parseFloat(num);
+          if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
+            num = num.toExponential(3);
+          } else {
+            num = Math.round(num * 10000) / 10000;
+          }
+          return num;
+        }
 
         // Add cursor change
         window.addEventListener("keydown", function (event) {
@@ -434,6 +494,14 @@ class D3HeatMap extends Component {
         }, 0);
 
         d3.select("#heatmap-download").on("click", function () {
+          downloadGraph();
+        });
+
+        d3.select("#pngdownload").on("click", function () {
+          downloadGraph();
+        });
+
+        function downloadGraph() {
           var s = new XMLSerializer();
           var str = s.serializeToString(document.getElementById("svg"));
 
@@ -461,7 +529,7 @@ class D3HeatMap extends Component {
           };
           image.src =
             "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
-        });
+        }
 
         function pixelMapping(data, scaleX, scaleY) {
           if (!Array.isArray(data)) {
@@ -584,6 +652,11 @@ class D3HeatMap extends Component {
           <div className="heat-data" id="value"></div>
         </div>
         <div id="heatmap"></div>
+        <div className="downloadbar">
+          <button id="pngdownload">PNG</button>
+          <button className="blue" onClick={this.downloadJSON}>JSON</button>
+          <button className="red" onClick={this.downloadCSV}>CSV</button>
+        </div>
       </React.Fragment>
     );
   }

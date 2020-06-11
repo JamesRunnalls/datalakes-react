@@ -270,7 +270,7 @@ class Home extends Component {
                           <b>hydrodynamic lake simulations</b>. Explore
                           fluctuations of temperature and velocity at incredibly
                           high spatial resolution over extended periods of time.
-                          <Link to="/map">
+                          <Link to="/map?selected=[[12,25],[11,5]]&zoom=11&center=[47.284,8.706]">
                             <button>Map Viewer</button>
                           </Link>
                         </td>
@@ -293,7 +293,7 @@ class Home extends Component {
                           Access remotely sensed water quality parameters
                           including cholorphyll and total suspended matter for
                           water bodies across Switerland.
-                          <Link to="/map">
+                          <Link to="/map?selected=[[13,23],[1,15]]&hidden=[[13,23]]">
                             <button>Map Viewer</button>
                           </Link>
                         </td>

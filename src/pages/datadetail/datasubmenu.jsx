@@ -7,6 +7,7 @@ import download from "./img/download.svg";
 import pipe from "./img/pipe.svg";
 import info from "./img/info.svg";
 import webgis from "./img/webgis.svg";
+import td from "./img/3d.svg";
 import "./datadetail.css";
 
 class DataSubMenu extends Component {
@@ -28,7 +29,7 @@ class DataSubMenu extends Component {
               style={{display: this.hide("threedmodel",allowedStep) && 'none'}}
               onClick={() => updateSelectedState("threedmodel")}
             >
-              <img src={heat} className="subnav-img" alt="3D" />
+              <img src={td} className="subnav-img" alt="3D" />
               <div className="subnav-text">3D Model</div>
             </div>
             <div

@@ -466,7 +466,6 @@ class LineGraph extends Component {
                       setDownloadGraph={this.setDownloadGraph}
                     />
                   </div>
-                  <div className="linegraph-bottombox"></div>
                 </React.Fragment>
               )}
             </React.Fragment>

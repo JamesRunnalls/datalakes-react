@@ -6,7 +6,7 @@ header {
   width: 100%;
   background-color: white;
   padding: 5px 0;
-  z-index: 999;
+  z-index: 998;
 }
 
 .headerscroll {
@@ -154,6 +154,9 @@ header .header-item:hover {
 
 header .desktop-nav .desktop-menu {
   display: none;
+  max-width: 500px;
+  position: absolute;
+  background-color: white;
 }
 
 header .desktop-nav .desktop-navbar {

@@ -214,8 +214,9 @@
 
 @media screen and (max-width: 500px) {
   .detailgraph {
-    margin-top: 45px;
-    margin-bottom: 60px;
+    margin-top: 10px;
+    margin-bottom: 0;
+    height: calc(100vh - 220px)
   }
 
   .data-subnav .subnav-item .subnav-text {
@@ -234,7 +235,6 @@
     width: 100%;
     box-sizing: border-box;
     display: flex;
-    justify-content: space-between;
     background-color: white;
   }
   .info-inner {

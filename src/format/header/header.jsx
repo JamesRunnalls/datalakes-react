@@ -6,6 +6,10 @@ import data from "./img/data.svg";
 import home from "./img/home.svg";
 import more from "./img/more.svg";
 import api from "./img/api.svg";
+import contact from "./img/contact.svg";
+import live from "./img/live.svg";
+import about from "./img/about.svg";
+
 import "./header.css";
 
 class Header extends Component {
@@ -42,7 +46,7 @@ class Header extends Component {
   render() {
     var { showMenu, stuck } = this.state;
     return (
-      <div className={"header"+stuck}>
+      <div className={"header" + stuck}>
         <header className={stuck}>
           <div className="header-inner">
             <div className="logo">
@@ -80,7 +84,7 @@ class Header extends Component {
                   </NavLink>
                 </div>
                 <div className="menu-icon header-item" onClick={this.toggle}>
-                    Menu <div className="symbol">{showMenu ? "<" : ">"}</div>
+                  Menu <div className="symbol">{showMenu ? "<" : ">"}</div>
                 </div>
               </div>
               <div className={showMenu ? "desktop-menu show" : "desktop-menu"}>
@@ -113,6 +117,13 @@ class Header extends Component {
                     API
                   </NavLink>
                 </div>
+                <Link
+                  onClick={this.closeMenu}
+                  className="header-item"
+                  to="/lakestation/lexplore"
+                >
+                  LéXPLORE Live
+                </Link>
                 <Link
                   onClick={this.closeMenu}
                   className="header-item"
@@ -153,6 +164,19 @@ class Header extends Component {
                     to="/api"
                   >
                     <img alt="API" src={api} />
+                  </NavLink>
+                  <NavLink
+                    activeClassName="imgactive"
+                    onClick={this.closeMenu}
+                    to="/lakestation/lexplore"
+                  >
+                    <img alt="Live" src={live} />
+                  </NavLink>
+                  <NavLink onClick={this.closeMenu} to="/?about">
+                    <img alt="About" src={about} />
+                  </NavLink>
+                  <NavLink onClick={this.closeMenu} to="/?contact">
+                    <img alt="Contact" src={contact} />
                   </NavLink>
                 </div>
               </div>
