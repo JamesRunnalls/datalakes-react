@@ -15,6 +15,11 @@
   top: 0;
 }
 
+.downloadbar {
+  position: absolute;
+  bottom: 0;
+}
+
 .downloadbar button {
   margin: 0;
   margin-left: 10px;

@@ -27,7 +27,7 @@
 
 .downloadbar {
   position: absolute;
-  bottom: 10px;
+  bottom: 0;
 }
 
 .downloadbar button {
@@ -49,7 +49,7 @@
 
 @media screen and (max-width: 500px) {
   #vis {
-    height: calc(100vh - 230px);
+    height: calc(100vh - 260px);
   }
   .vis-header {
     width: 100vw;
