@@ -80,11 +80,11 @@
 @media screen and (max-width: 500px) {
   .threed .graphwrapper {
     width: 100%;
-    height: calc(100vh - 170px);
+    height: calc(100vh - 200px);
   }
   .threed .basemapwrapper {
     height: 500px;
-    height: calc(100vh - 150px);
+    height: calc(100vh - 200px);
   }
 
   .threed {
