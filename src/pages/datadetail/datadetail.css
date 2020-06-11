@@ -230,12 +230,13 @@
     border-color: white;
   }
   .data-subnav {
-    padding: 10px 15px 10px 5px;
+    padding: 0 5px 8px 5px;
     margin: 0;
     width: 100%;
     box-sizing: border-box;
     display: flex;
     background-color: white;
+    margin-top: -5px;
   }
   .info-inner {
     margin: 0;
@@ -435,7 +436,7 @@
 
 .loading-table {
   width: 100%;
-  height: 600px;
+  height: 400px;
   text-align: center;
 }
 
