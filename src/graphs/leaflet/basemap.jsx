@@ -395,94 +395,9 @@ class Basemap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
-  meteolakesScalar = async (layer, file) => {
+  meteolakes = async (layer, file) => {
     var { maxdatetime, maxdepth, data } = file;
-    var { min, max, colors, unit } = layer;
-    var { depth, datetime } = this.props;
-    var polygons = [];
-    var matrix = data;
-    for (var i = 0; i < matrix.length - 1; i++) {
-      var row = matrix[i];
-      var nextRow = matrix[i + 1];
-      for (var j = 0; j < row.length - 1; j++) {
-        if (
-          row[j] === null ||
-          nextRow[j] === null ||
-          row[j + 1] === null ||
-          nextRow[j + 1] === null
-        ) {
-        } else {
-          var coords = [
-            this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
-            this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
-            this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-            this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
-          ];
-          var value = Math.round(row[j][2] * 1000) / 1000;
-          var timediff = "";
-          if (datetime) {
-            timediff = -Math.round(
-              (datetime.getTime() / 1000 -
-                new Date(maxdatetime).getTime() / 1000) /
-                3600
-            );
-          }
-          var depthdiff = "";
-          if (depth) {
-            depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-          }
-
-          var valuestring =
-            String(value) +
-            String(unit) +
-            '<br><div class="tooltipdiff">Diff: ' +
-            (timediff > 0 ? "+" : "") +
-            String(timediff) +
-            "hrs " +
-            (depthdiff > 0 ? " +" : " ") +
-            String(depthdiff) +
-            "m</div>";
-          var pixelcolor = getColor(row[j][2], min, max, colors);
-          polygons.push(
-            L.polygon(coords, {
-              color: pixelcolor,
-              fillColor: pixelcolor,
-              fillOpacity: 1,
-              title: row[j][2],
-            })
-              .bindPopup(
-                "<table><tbody>" +
-                  '<tr><td colSpan="2"><strong>' +
-                  layer.title +
-                  "</strong></td></tr>" +
-                  "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-                  "</td></tr>" +
-                  "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
-                  "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                  "<tr><td><strong>Value at point:</strong></td><td>" +
-                  row[j][2] +
-                  unit +
-                  '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-                  layer.datasourcelink +
-                  '">More information</a></td></tr>' +
-                  "</tbody></table>"
-              )
-              .bindTooltip(valuestring, {
-                permanent: false,
-                direction: "top",
-              })
-          );
-        }
-      }
-    }
-    this.raster.push(L.featureGroup(polygons).addTo(this.map));
-    if (!("center" in this.props) && !("zoom" in this.props)) {
-      this.map.fitBounds(this.raster[0].getBounds());
-    }
-  };
-
-  meteolakesVector = async (layer, file) => {
-    var { maxdatetime, maxdepth, data } = file;
+    var { parameters_id } = layer;
     var {
       vectorArrows,
       vectorMagnitude,
@@ -496,13 +411,25 @@ class Basemap extends Component {
       datasourcelink,
     } = layer;
     var { depth, datetime } = this.props;
-    if (vectorMagnitude) {
-      var polygons = [];
-      var matrix = data;
-      for (var i = 0; i < matrix.length - 1; i++) {
-        var row = matrix[i];
-        var nextRow = matrix[i + 1];
-        for (var j = 0; j < row.length - 1; j++) {
+    var polygons,
+      matrix,
+      i,
+      j,
+      row,
+      nextRow,
+      coords,
+      value,
+      timediff,
+      depthdiff,
+      valuestring,
+      pixelcolor;
+    if (parameters_id === 5) {
+      polygons = [];
+      matrix = data;
+      for (i = 0; i < matrix.length - 1; i++) {
+        row = matrix[i];
+        nextRow = matrix[i + 1];
+        for (j = 0; j < row.length - 1; j++) {
           if (
             row[j] === null ||
             nextRow[j] === null ||
@@ -510,23 +437,27 @@ class Basemap extends Component {
             nextRow[j + 1] === null
           ) {
           } else {
-            var coords = [
+            coords = [
               this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
               this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
               this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
               this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
             ];
-            var magnitude = Math.abs(
-              Math.sqrt(Math.pow(row[j][2], 2) + Math.pow(row[j][3], 2))
-            );
-            var value = Math.round(magnitude * 1000) / 1000;
-            var timediff = -Math.round(
-              (datetime.getTime() / 1000 -
-                new Date(maxdatetime).getTime() / 1000) /
-                3600
-            );
-            var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-            var valuestring =
+            value = Math.round(row[j][2] * 1000) / 1000;
+            timediff = "";
+            if (datetime) {
+              timediff = -Math.round(
+                (datetime.getTime() / 1000 -
+                  new Date(maxdatetime).getTime() / 1000) /
+                  3600
+              );
+            }
+            depthdiff = "";
+            if (depth) {
+              depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
+            }
+
+            valuestring =
               String(value) +
               String(unit) +
               '<br><div class="tooltipdiff">Diff: ' +
@@ -536,34 +467,28 @@ class Basemap extends Component {
               (depthdiff > 0 ? " +" : " ") +
               String(depthdiff) +
               "m</div>";
-            var pixelcolor = getColor(magnitude, min, max, colors);
+            pixelcolor = getColor(row[j][2], min, max, colors);
             polygons.push(
               L.polygon(coords, {
                 color: pixelcolor,
                 fillColor: pixelcolor,
                 fillOpacity: 1,
-                title: magnitude,
+                title: row[j][2],
               })
                 .bindPopup(
                   "<table><tbody>" +
                     '<tr><td colSpan="2"><strong>' +
-                    layer.name +
+                    layer.title +
                     "</strong></td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-                    title +
                     "</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                    "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
+                    "<tr><td><strong>Value at point:</strong></td><td>" +
                     row[j][2] +
                     unit +
-                    "<tr><td><strong>Eastern Water Velocity:</strong></td><td>" +
-                    row[j][3] +
-                    unit +
-                    "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
-                    valuestring +
                     '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-                    datasourcelink +
+                    layer.datasourcelink +
                     '">More information</a></td></tr>' +
                     "</tbody></table>"
                 )
@@ -575,25 +500,112 @@ class Basemap extends Component {
           }
         }
       }
-      this.raster.push(L.layerGroup(polygons).addTo(this.map));
-    }
+      this.raster.push(L.featureGroup(polygons).addTo(this.map));
+      if (!("center" in this.props) && !("zoom" in this.props)) {
+        this.map.fitBounds(this.raster[0].getBounds());
+      }
+    } else if (parameters_id === 25) {
+      if (vectorMagnitude) {
+        polygons = [];
+        matrix = data;
+        for (i = 0; i < matrix.length - 1; i++) {
+          row = matrix[i];
+          nextRow = matrix[i + 1];
+          for (j = 0; j < row.length - 1; j++) {
+            if (
+              row[j] === null ||
+              nextRow[j] === null ||
+              row[j + 1] === null ||
+              nextRow[j + 1] === null
+            ) {
+            } else {
+              coords = [
+                this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
+                this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
+                this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
+                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
+              ];
+              var magnitude = Math.abs(
+                Math.sqrt(Math.pow(row[j][3], 2) + Math.pow(row[j][4], 2))
+              );
+              value = Math.round(magnitude * 1000) / 1000;
+              if (datetime) {
+                timediff = -Math.round(
+                  (datetime.getTime() / 1000 -
+                    new Date(maxdatetime).getTime() / 1000) /
+                    3600
+                );
+              }
+              depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
+              valuestring =
+                String(value) +
+                String(unit) +
+                '<br><div class="tooltipdiff">Diff: ' +
+                (timediff > 0 ? "+" : "") +
+                String(timediff) +
+                "hrs " +
+                (depthdiff > 0 ? " +" : " ") +
+                String(depthdiff) +
+                "m</div>";
+              pixelcolor = getColor(magnitude, min, max, colors);
+              polygons.push(
+                L.polygon(coords, {
+                  color: pixelcolor,
+                  fillColor: pixelcolor,
+                  fillOpacity: 1,
+                  title: magnitude,
+                })
+                  .bindPopup(
+                    "<table><tbody>" +
+                      '<tr><td colSpan="2"><strong>' +
+                      layer.name +
+                      "</strong></td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+                      title +
+                      "</td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                      "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
+                      row[j][2] +
+                      unit +
+                      "<tr><td><strong>Eastern Water Velocity:</strong></td><td>" +
+                      row[j][3] +
+                      unit +
+                      "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
+                      valuestring +
+                      '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+                      datasourcelink +
+                      '">More information</a></td></tr>' +
+                      "</tbody></table>"
+                  )
+                  .bindTooltip(valuestring, {
+                    permanent: false,
+                    direction: "top",
+                  })
+              );
+            }
+          }
+        }
+        this.raster.push(L.layerGroup(polygons).addTo(this.map));
+      }
 
-    if (vectorArrows) {
-      var arrows = L.vectorField(data, {
-        vectorArrowColor,
-        colors,
-        min,
-        max,
-        size: 15,
-      }).addTo(this.map);
-      this.raster.push(arrows);
-    }
+      if (vectorArrows) {
+        var arrows = L.vectorField(data, {
+          vectorArrowColor,
+          colors,
+          min,
+          max,
+          size: 15,
+        }).addTo(this.map);
+        this.raster.push(arrows);
+      }
 
-    if (vectorFlow) {
-    }
+      if (vectorFlow) {
+      }
 
-    if (!("center" in this.props) && !("zoom" in this.props)) {
-      this.map.fitBounds(this.raster[0].getBounds());
+      if (!("center" in this.props) && !("zoom" in this.props)) {
+        this.map.fitBounds(this.raster[0].getBounds());
+      }
     }
   };
 
@@ -981,10 +993,7 @@ class Basemap extends Component {
           this.meteoSwissMarkers(layer, file);
         mapplotfunction === "remoteSensing" && this.remoteSensing(layer, file);
         mapplotfunction === "simstrat" && this.simstrat(layer, file);
-        mapplotfunction === "meteolakesScalar" &&
-          this.meteolakesScalar(layer, file);
-        mapplotfunction === "meteolakesVector" &&
-          this.meteolakesVector(layer, file);
+        mapplotfunction === "meteolakes" && this.meteolakes(layer, file);
       }
     }
     // Set zoom

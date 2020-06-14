@@ -13,6 +13,55 @@ import colorlist from "../../../components/colorramp/colors";
 import { apiUrl } from "../../../../src/config.json";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
+import FilterBox from "../../../components/filterbox/filterbox";
+import MapMenu from "../../../components/mapmenu/mapmenu";
+import MapLayers from "../../../components/maplayers/maplayers";
+import Legend from "../../../components/legend/legend";
+
+class ThreeDMenu extends Component {
+  render() {
+    var {
+      basemap,
+      updateBaseMap,
+      selectedlayers,
+      toggleLayerView,
+      updateMapLayers,
+    } = this.props;
+    return (
+      <React.Fragment>
+        <FilterBox
+          title="Basemap"
+          preopen="true"
+          content={
+            <div className="basemap">
+              <select
+                className="basemapselector"
+                onChange={updateBaseMap}
+                value={basemap}
+                title="Edit the background map style"
+              >
+                <option value="datalakesmap">Datalakes Map</option>
+                <option value="swisstopo">Swisstopo</option>
+                <option value="satellite">Satellite</option>
+              </select>
+            </div>
+          }
+        />
+        <FilterBox
+          title="Map Layers"
+          preopen="true"
+          content={
+            <MapLayers
+              selectedlayers={selectedlayers}
+              toggleLayerView={toggleLayerView}
+              updateMapLayers={updateMapLayers}
+            />
+          }
+        />
+      </React.Fragment>
+    );
+  }
+}
 
 class ThreeDModel extends Component {
   state = {
@@ -29,7 +78,9 @@ class ThreeDModel extends Component {
     line: false,
     lineValue: [],
     loading: true,
+    basemap: "datalakesmap",
     graph: "none",
+    parameter: "Temperature",
     colors: [
       { color: "#0000ff", point: 0 },
       { color: "#ff0000", point: 1 },
@@ -37,6 +88,10 @@ class ThreeDModel extends Component {
     plotdata: { x: [], y: [], z: [] },
     zoomIn: () => {},
     zoomOut: () => {},
+  };
+
+  changePlotParameter = (event) => {
+    this.setState({ parameter: event.target.value });
   };
 
   setZoomIn = (newFunc) => {
@@ -134,16 +189,19 @@ class ThreeDModel extends Component {
     var keys = Object.keys(data);
     var var1 = [];
     var var2 = [];
+    var var3 = [];
     for (var i = 0; i < data[keys[0]].length; i++) {
       if (
         !isNaN(parseInt(data[keys[0]][i])) &&
-        !isNaN(parseInt(data[keys[1]][i]))
+        !isNaN(parseInt(data[keys[1]][i])) &&
+        !isNaN(parseInt(data[keys[2]][i]))
       ) {
         var1.push(data[keys[0]][i]);
         var2.push(data[keys[1]][i]);
+        var3.push(data[keys[2]][i]);
       }
     }
-    var out = { [keys[0]]: var1, [keys[1]]: var2 };
+    var out = { [keys[0]]: var1, [keys[1]]: var2, [keys[2]]: var3 };
     return out;
   };
 
@@ -217,8 +275,7 @@ class ThreeDModel extends Component {
       var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
       axios
         .get(
-          apiUrl +
-            `/externaldata/meteolakes/depthprofile/zurich/water_temperature/${t}/${x}/${y}`
+          apiUrl + `/externaldata/meteolakes/depthprofile/zurich/${t}/${x}/${y}`
         )
         .then((response) => {
           var plotdata = this.removeNaN(response.data);
@@ -231,14 +288,11 @@ class ThreeDModel extends Component {
       // Convert to meteolakes units
       ({ x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng));
       axios
-        .get(
-          apiUrl +
-            `/externaldata/meteolakes/timeline/zurich/water_temperature/12/${x}/${y}`
-        )
+        .get(apiUrl + `/externaldata/meteolakes/timeline/zurich/12/${x}/${y}`)
         .then((response) => {
-          var { x, y, z } = this.fillNaN2D(response.data);
+          var { x, y, z, z1 } = this.fillNaN2D(response.data);
           x = x.map((i) => new Date(i * 1000));
-          var plotdata = { x, y, z };
+          var plotdata = { x, y, z, z1 };
           this.setState({ pointValue, plotdata });
         })
         .catch((error) => {
@@ -263,11 +317,11 @@ class ThreeDModel extends Component {
       axios
         .get(
           apiUrl +
-            `/externaldata/meteolakes/transect/zurich/water_temperature/${t}/${x1}/${y1}/${x2}/${y2}`
+            `/externaldata/meteolakes/transect/zurich/${t}/${x1}/${y1}/${x2}/${y2}`
         )
         .then((response) => {
-          var { x, y, z } = this.fillNaN2D(response.data);
-          var plotdata = { x, y, z };
+          var { x, y, z, z1 } = this.fillNaN2D(response.data);
+          var plotdata = { x, y, z, z1 };
           this.setState({ lineValue, plotdata });
         })
         .catch((error) => {
@@ -295,11 +349,20 @@ class ThreeDModel extends Component {
     var flat = inarray.flat();
     flat = flat.filter((item) => item !== null);
     flat = flat.map((item) =>
-      Math.abs(Math.sqrt(Math.pow(item[2], 2) + Math.pow(item[3], 2)))
+      Math.abs(Math.sqrt(Math.pow(item[3], 2) + Math.pow(item[4], 2)))
     );
     min = Math.min(min, this.getMin(flat));
     max = Math.max(max, this.getMax(flat));
     return { min, max, array: flat };
+  };
+
+  toggleLayerView = (id) => {
+    this.setState({ loading: true }, () => {
+      var { selectedlayers } = this.state;
+      var index = selectedlayers.findIndex((x) => x.id === id);
+      selectedlayers[index].visible = !selectedlayers[index].visible;
+      this.setState({ selectedlayers, loading: false });
+    });
   };
 
   getMax = (arr) => {
@@ -343,18 +406,20 @@ class ThreeDModel extends Component {
     }
   };
 
-  addNewLayer = () => {};
+  updateBaseMap = (event) => {
+    this.setState({ basemap: event.target.value });
+  };
+
+  updateMapLayers = (selectedlayers) => {
+    this.setState({ loading: true }, () => {
+      this.setState({ selectedlayers, loading: false });
+    });
+  };
 
   async componentDidMount() {
-    var { files, dataset } = this.props;
-    var layer = {
-      visible: true,
-      dataset_index: 0,
-    };
-    layer = { ...layer, ...dataset.plotproperties };
-    var colors = this.parseColor(layer["colors"]);
-    layer["colors"] = colors;
+    var { files, dataset, parameters } = this.props;
 
+    // Depth and Time
     var depths = [
       ...new Set(files.map((item) => parseFloat(item.mindepth))),
     ].sort(function (a, b) {
@@ -369,29 +434,64 @@ class ThreeDModel extends Component {
     var depth = depths[0];
     var time = times[times.length - 1];
 
-    var fileIndex = files.findIndex(
-      (f) =>
-        f.mindepth === String(depth) && f.mindatetime === time.toISOString()
+    // Build Selected Layers object
+    var selectedlayers = [];
+    var plotparameters = parameters.filter(
+      (p) => ![1, 2, 3, 4].includes(p.parameters_id)
     );
-    layer["fileid"] = files[fileIndex].id;
-    var { data } = await axios.get(files[fileIndex].filelink).catch((error) => {
-      console.log(error);
-    });
+    plotparameters.sort((a, b) => (a.parameters_id > b.parameters_id ? -1 : 1));
+    var layer;
+    for (var i = 0; i < plotparameters.length; i++) {
+      layer = {
+        visible: true,
+        dataset_index: 0,
+      };
+      layer = { ...layer, ...dataset.plotproperties };
+      var colors = this.parseColor(layer["colors"]);
+      layer["colors"] = colors;
 
-    var min, max, array;
-    if (dataset.mapplotfunction === "meteolakesVector") {
-      ({ min, max, array } = this.meteolakesVectorMinMax(data));
-    } else {
-      ({ min, max, array } = this.meteolakesScalarMinMax(data));
+      var fileIndex = files.findIndex(
+        (f) =>
+          f.mindepth === String(depth) && f.mindatetime === time.toISOString()
+      );
+      layer["fileid"] = files[fileIndex].id;
+      var { data } = await axios
+        .get(files[fileIndex].filelink)
+        .catch((error) => {
+          console.log(error);
+        });
+
+      var parameters_id = plotparameters[i].parameters_id;
+
+      var min, max, array, mapplot, parameter_name;
+      if (parameters_id === 25) {
+        mapplot = "field";
+        parameter_name = "Water Velocity";
+        ({ min, max, array } = this.meteolakesVectorMinMax(data));
+      } else {
+        mapplot = "raster";
+        parameter_name = "Water Temperature";
+        ({ min, max, array } = this.meteolakesScalarMinMax(data));
+      }
+      layer["id"] = dataset.id + "?" + parameters_id;
+      layer["min"] = min;
+      layer["max"] = max;
+      layer["array"] = array;
+      layer["legend"] = true;
+      layer["mapplot"] = mapplot;
+      layer["parameter_name"] = parameter_name;
+      layer["datasetparameters"] = parameters;
+      layer["parameters_id"] = parameters_id;
+      layer["unit"] = plotparameters[i].unit;
+      layer["title"] = dataset.title;
+      layer["description"] = dataset.description;
+      selectedlayers.push(layer);
     }
-    layer["min"] = min;
-    layer["max"] = max;
-    layer["array"] = array;
 
     files[fileIndex]["data"] = data;
     dataset["files"] = files;
-    var selectedlayers = [layer];
     var datasets = [dataset];
+
     this.setState({
       loading: false,
       colors,
@@ -422,6 +522,8 @@ class ThreeDModel extends Component {
       colors,
       zoomIn,
       zoomOut,
+      parameter,
+      basemap,
     } = this.state;
     var { dataset } = this.props;
     var controls = [
@@ -449,6 +551,19 @@ class ThreeDModel extends Component {
     var graphclass = "graphwrapper hide";
     if (graph !== "none" && plotdata.x.length > 0) graphclass = "graphwrapper";
 
+    var punit = "°C";
+    
+    if (parameter === "Velocity") {
+      punit = "m/s";
+      if (graph === "depthgraph" && plotdata.x1) {
+        plotdata = { x: plotdata.x1, y: plotdata.y };
+      } else if (graph === "timegraph" && plotdata.z1) {
+        plotdata = { x: plotdata.x, y: plotdata.y, z: plotdata.z1 };
+      } else if (graph === "slicegraph" && plotdata.z1) {
+        plotdata = { x: plotdata.x, y: plotdata.y, z: plotdata.z1 };
+      }
+    }
+
     return (
       <div className="threed">
         <div className="basemapwrapper">
@@ -471,8 +586,28 @@ class ThreeDModel extends Component {
             line={line}
             updatePoint={this.updatePoint}
             updateLine={this.updateLine}
+            basemap={basemap}
             loading={loading}
           />
+
+          <MapMenu
+            menu={menu}
+            help={help}
+            toggleMenu={this.toggleMenu}
+            toggleHelp={this.toggleHelp}
+            menucontent={
+              <ThreeDMenu
+                basemap={basemap}
+                updateBaseMap={this.updateBaseMap}
+                selectedlayers={selectedlayers}
+                toggleLayerView={this.toggleLayerView}
+                updateMapLayers={this.updateMapLayers}
+              />
+            }
+          />
+
+          <Legend selectedlayers={selectedlayers} />
+
           {loading && (
             <div className="map-loader">
               <Loading />
@@ -489,9 +624,9 @@ class ThreeDModel extends Component {
             <D3LineGraph
               data={plotdata}
               title={`${dataset.title} Depth Profile`}
-              xlabel={"Temperature"}
+              xlabel={parameter}
               ylabel={"Depth"}
-              xunits={"°C"}
+              xunits={punit}
               yunits={"m"}
               lcolor={"#000000"}
               lweight={"1"}
@@ -511,10 +646,10 @@ class ThreeDModel extends Component {
               title={`${dataset.title} Timeline`}
               xlabel={"Time"}
               ylabel={"Depth"}
-              zlabel={"Temperature"}
+              zlabel={parameter}
               xunits={""}
               yunits={"m"}
-              zunits={"°C"}
+              zunits={punit}
               bcolor={"white"}
               colors={colors}
             />
@@ -531,14 +666,20 @@ class ThreeDModel extends Component {
               xlinear={true}
               xlabel={"Distance"}
               ylabel={"Depth"}
-              zlabel={"Temperature"}
+              zlabel={parameter}
               xunits={"km"}
               yunits={"m"}
-              zunits={"°C"}
+              zunits={punit}
               bcolor={"white"}
               colors={colors}
             />
           </div>
+        )}
+        {plotdata.x.length > 0 && (
+          <select className="parameter-select" onChange={this.changePlotParameter} value={parameter}>
+            <option value="Temperature">Water Temperature</option>
+            <option value="Velocity">Water Velocity</option>
+          </select>
         )}
       </div>
     );

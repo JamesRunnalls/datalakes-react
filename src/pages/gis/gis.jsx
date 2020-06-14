@@ -325,7 +325,7 @@ class GIS extends Component {
     var flat = inarray.flat();
     flat = flat.filter((item) => item !== null);
     flat = flat.map((item) =>
-      Math.abs(Math.sqrt(Math.pow(item[2], 2) + Math.pow(item[3], 2)))
+      Math.abs(Math.sqrt(Math.pow(item[3], 2) + Math.pow(item[4], 2)))
     );
     min = Math.min(min, this.getMin(flat));
     max = Math.max(max, this.getMax(flat));
@@ -370,12 +370,18 @@ class GIS extends Component {
         if (mapplotfunction === "remoteSensing") {
           ({ filemin, filemax, filearray } = this.remoteSensingMinMax(data));
         }
-        if (mapplotfunction === "meteolakesScalar") {
-          ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(data));
+        if (mapplotfunction === "meteolakes") {
+          if (parameters_id === 25) {
+            ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(
+              data
+            ));
+          } else {
+            ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(
+              data
+            ));
+          }
         }
-        if (mapplotfunction === "meteolakesVector") {
-          ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(data));
-        }
+
         if (mapplotfunction === "foenMarkers") {
           ({ filemin, filemax, filearray } = this.foenMarkersMinMax(data));
         }
@@ -551,13 +557,19 @@ class GIS extends Component {
         // Plot properties
         let layer = JSON.parse(JSON.stringify(dataset.plotproperties));
 
+        // Meteolakes hack
+        if (parameters_id === 25) {
+          layer["mapplot"] = "field";
+        } else {
+          layer["mapplot"] = dataset.mapplot;
+        }
+
         layer["mindatetime"] = dataset.mindatetime;
         layer["maxdatetime"] = dataset.maxdatetime;
         layer["mindepth"] = dataset.mindepth;
         layer["maxdepth"] = dataset.maxdepth;
 
         layer["title"] = dataset.title;
-        layer["mapplot"] = dataset.mapplot;
         layer["latitude"] = dataset.latitude;
         layer["longitude"] = dataset.longitude;
         layer["datasource"] = dataset.datasource;

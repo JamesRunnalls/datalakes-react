@@ -13,6 +13,14 @@
   top: -30px;
 }
 
+.threed .parameter-select {
+  float: right;
+  margin-top: -22px;
+  z-index: 999;
+  position: relative;
+  margin-right: 20px;
+}
+
 .threed .basemapwrapper {
   height: 600px;
   width: 100%;
@@ -85,6 +93,10 @@
   .threed .basemapwrapper {
     height: 500px;
     height: calc(100vh - 210px);
+  }
+
+  .threed .parameter-select {
+    margin-right: 10px;
   }
 
   .threed {

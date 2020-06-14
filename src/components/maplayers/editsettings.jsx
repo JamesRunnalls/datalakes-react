@@ -229,13 +229,15 @@ class EditSettings extends Component {
           >
             Update Plot
           </button>
-          <button
-            type="button"
-            title="Delete layer"
-            onClick={() => removeSelected(id)}
-          >
-            Delete Layer
-          </button>
+          {removeSelected && (
+            <button
+              type="button"
+              title="Delete layer"
+              onClick={() => removeSelected(id)}
+            >
+              Delete Layer
+            </button>
+          )}
         </div>
       </div>
     );

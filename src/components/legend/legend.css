@@ -1,7 +1,7 @@
 .legend {
   position: absolute;
   bottom: 0px;
-  z-index: 999;
+  z-index: 998;
   background-color: white;
   margin: 10px;
   border-radius: 4px;

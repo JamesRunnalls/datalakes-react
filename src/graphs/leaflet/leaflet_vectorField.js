@@ -242,8 +242,8 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
             if (this._inputdata[i + k][j + l] !== null) {
               alat.push(this._inputdata[i + k][j + l][0]);
               alng.push(this._inputdata[i + k][j + l][1]);
-              avx.push(this._inputdata[i + k][j + l][2]);
-              avy.push(this._inputdata[i + k][j + l][3]);
+              avx.push(this._inputdata[i + k][j + l][3]);
+              avy.push(this._inputdata[i + k][j + l][4]);
             }
           }
         }

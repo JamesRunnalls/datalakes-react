@@ -41,7 +41,7 @@ class LayerGroups extends Component {
         name: "Lake Zurich 3D Model",
         description: "Some description",
         img: editlayers,
-        data: { selected: [[11, 5]], center: [47.282, 8.729], zoom: 12 },
+        data: { selected: [[11, 5],[11,25]], center: [47.282, 8.729], zoom: 12 },
       },
     ];
     return (

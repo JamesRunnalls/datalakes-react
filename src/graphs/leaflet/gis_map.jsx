@@ -6,6 +6,7 @@ import Basemap from "./basemap";
 import MapControl from "../../components/mapcontrol/mapcontrol";
 import menuicon from "./img/menuicon.svg";
 import groupicon from "./img/groupicon.svg";
+import MapMenu from "../../components/mapmenu/mapmenu";
 
 class GISMap extends Component {
   state = {
@@ -121,57 +122,24 @@ class GISMap extends Component {
             </div>
           )}
 
-          <div className="sidebar-gis">
-            <div
-              className={menu ? "sidebar-gis-inner" : "sidebar-gis-inner hide"}
-            >
-              <div
-                className="sidebar-title"
-                onClick={this.toggleMenu}
-                title="Hide plot controls"
-              >
-                Edit Layers
-                <div className="sidebar-symbol">{"\u2715"}</div>
-              </div>
-              <div className="sidebar-content">{sidebar}</div>
-            </div>
+          <MapMenu
+            menu={menu}
+            help={help}
+            group={group}
+            toggleMenu={this.toggleMenu}
+            toggleHelp={this.toggleHelp}
+            toggleGroup={this.toggleGroup}
+            menucontent={sidebar}
+            helpcontent={help}
+            groupcontent={
+              <LayerGroups
+                toggleMenu={this.toggleMenu}
+                updateState={updateState}
+                arr={selectedlayers}
+              />
+            }
+          />
 
-            <div
-              className={
-                group ? "sidebar-gis-inner wide" : "sidebar-gis-inner wide hide"
-              }
-            >
-              <div
-                className="sidebar-title"
-                onClick={this.toggleGroup}
-                title="Hide plot controls"
-              >
-                Layer Groups
-                <div className="sidebar-symbol">{"\u2715"}</div>
-              </div>
-              <div className="sidebar-content">
-                <LayerGroups
-                  toggleMenu={this.toggleMenu}
-                  updateState={updateState}
-                  arr={selectedlayers}
-                />
-              </div>
-            </div>
-
-            <div
-              className={help ? "sidebar-gis-inner" : "sidebar-gis-inner hide"}
-            >
-              <div
-                className="sidebar-title"
-                onClick={this.toggleHelp}
-                title="Hide help"
-              >
-                Help
-                <div className="sidebar-symbol">{"\u2715"}</div>
-              </div>
-              <div className="sidebar-content">{help}</div>
-            </div>
-          </div>
           <div className="timeselector-gis">{timeselector}</div>
           {legend}
         </div>
