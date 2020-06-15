@@ -17,6 +17,7 @@ import FilterBox from "../../../components/filterbox/filterbox";
 import MapMenu from "../../../components/mapmenu/mapmenu";
 import MapLayers from "../../../components/maplayers/maplayers";
 import Legend from "../../../components/legend/legend";
+import DatetimeDepthSelector from "../../../components/sliders/datetimedepthselector";
 
 class ThreeDMenu extends Component {
   render() {
@@ -65,6 +66,8 @@ class ThreeDMenu extends Component {
 
 class ThreeDModel extends Component {
   state = {
+    time: new Date(),
+    depth: 0,
     selectedlayers: [],
     datasets: [],
     profile: false,
@@ -112,6 +115,12 @@ class ThreeDModel extends Component {
     this.setState({
       help: !this.state.help,
       menu: false,
+    });
+  };
+
+  toggleFullsize = () => {
+    this.setState({
+      fullsize: !this.state.fullsize,
     });
   };
 
@@ -425,12 +434,18 @@ class ThreeDModel extends Component {
     ].sort(function (a, b) {
       return a - b;
     });
+    var maxdepth = Math.max(...depths);
+    var mindepth = Math.min(...depths);
     var times = [...new Set(files.map((item) => item.mindatetime))];
+
     times = times
       .map((t) => new Date(t))
       .sort(function (a, b) {
         return b - a;
       });
+    var timesunix = times.map((t) => t.getTime());
+    var mindatetime = Math.min(...timesunix);
+    var maxdatetime = Math.max(...timesunix);
     var depth = depths[0];
     var time = times[times.length - 1];
 
@@ -474,6 +489,7 @@ class ThreeDModel extends Component {
         ({ min, max, array } = this.meteolakesScalarMinMax(data));
       }
       layer["id"] = dataset.id + "?" + parameters_id;
+      layer["datasets_id"] = dataset.id;
       layer["min"] = min;
       layer["max"] = max;
       layer["array"] = array;
@@ -485,6 +501,11 @@ class ThreeDModel extends Component {
       layer["unit"] = plotparameters[i].unit;
       layer["title"] = dataset.title;
       layer["description"] = dataset.description;
+      layer["files"] = files;
+      layer["maxdepth"] = maxdepth;
+      layer["mindepth"] = mindepth;
+      layer["maxdatetime"] = maxdatetime;
+      layer["mindatetime"] = mindatetime;
       selectedlayers.push(layer);
     }
 
@@ -516,14 +537,16 @@ class ThreeDModel extends Component {
       help,
       point,
       line,
+      colors,
       loading,
       graph,
       plotdata,
-      colors,
-      zoomIn,
-      zoomOut,
       parameter,
       basemap,
+      depth,
+      time,
+      zoomIn,
+      zoomOut,
     } = this.state;
     var { dataset } = this.props;
     var controls = [
@@ -551,8 +574,15 @@ class ThreeDModel extends Component {
     var graphclass = "graphwrapper hide";
     if (graph !== "none" && plotdata.x.length > 0) graphclass = "graphwrapper";
 
+    if (selectedlayers.length > 0) {
+      if (parameter === "Velocity") {
+        colors = selectedlayers.find((sl) => sl.parameters_id === 25).colors;
+      } else {
+        colors = selectedlayers.find((sl) => sl.parameters_id === 5).colors;
+      }
+    }
+
     var punit = "°C";
-    
     if (parameter === "Velocity") {
       punit = "m/s";
       if (graph === "depthgraph" && plotdata.x1) {
@@ -565,7 +595,7 @@ class ThreeDModel extends Component {
     }
 
     return (
-      <div className="threed">
+      <div className={fullsize ? "threed full" : "threed"}>
         <div className="basemapwrapper">
           <div className="controls">
             <MapControl
@@ -575,6 +605,7 @@ class ThreeDModel extends Component {
               controls={controls}
               help={help}
               toggleHelp={this.toggleHelp}
+              toggleFullsize={this.toggleFullsize}
             />
           </div>
           <Basemap
@@ -605,6 +636,16 @@ class ThreeDModel extends Component {
               />
             }
           />
+          <div className="timeselector-gis">
+            <DatetimeDepthSelector
+              selectedlayers={selectedlayers}
+              datasets={datasets}
+              datetime={time}
+              depth={depth}
+              //onChangeDatetime={this.onChangeDatetime}
+              //onChangeDepth={this.onChangeDepth}
+            />
+          </div>
 
           <Legend selectedlayers={selectedlayers} />
 
@@ -676,7 +717,11 @@ class ThreeDModel extends Component {
           </div>
         )}
         {plotdata.x.length > 0 && (
-          <select className="parameter-select" onChange={this.changePlotParameter} value={parameter}>
+          <select
+            className="parameter-select"
+            onChange={this.changePlotParameter}
+            value={parameter}
+          >
             <option value="Temperature">Water Temperature</option>
             <option value="Velocity">Water Velocity</option>
           </select>

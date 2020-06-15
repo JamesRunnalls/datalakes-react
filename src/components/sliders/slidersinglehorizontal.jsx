@@ -3,7 +3,7 @@ import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { scaleTime } from "d3";
 import DateTimePicker from "react-datetime-picker";
-import AvailbilityBar from './availabilitybar';
+import AvailbilityBar from "./availabilitybar";
 import { format } from "date-fns";
 import "./slider.css";
 
@@ -33,7 +33,6 @@ class SliderSingleHorizontal extends Component {
   };
 
   render() {
-    
     const sliderStyle = {
       position: "relative",
       width: "100%",
@@ -48,14 +47,10 @@ class SliderSingleHorizontal extends Component {
       .domain([min, max])
       .ticks(10)
       .map((d) => +d);
-
     return (
       <React.Fragment>
         {" "}
-        <div
-          className="horizontalslider"
-          title="Select your desired datetime"
-        >
+        <div className="horizontalslider" title="Select your desired datetime">
           <Slider
             mode={1}
             step={1}
@@ -115,6 +110,7 @@ class SliderSingleHorizontal extends Component {
           </Slider>
         </div>
         <div className="maintime" title="Map reference time">
+          <div>Date & Time</div>
           <DateTimePicker
             value={dt}
             clearIcon={null}
@@ -123,6 +119,7 @@ class SliderSingleHorizontal extends Component {
             minDate={min}
             disableClock={true}
             onChange={onChange}
+            format="h:mm:ss dd-MM-y"
           />
         </div>
       </React.Fragment>

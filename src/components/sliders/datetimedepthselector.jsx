@@ -20,6 +20,7 @@ class DatetimeDepthSelector extends Component {
     var maxdatetime = new Date(
       Math.max(new Date().getTime(), datetime.getTime())
     );
+    
     var mindepth = Math.min(0, depth);
     var maxdepth = Math.max(1, depth);
 
@@ -28,7 +29,6 @@ class DatetimeDepthSelector extends Component {
     }
 
     var files = [];
-
     for (var i = 0; i < selectedlayers.length; i++) {
       mindatetime = new Date(
         Math.min(mindatetime, new Date(selectedlayers[i].mindatetime))

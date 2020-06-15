@@ -3,7 +3,7 @@ import { Slider, Rail, Handles, Tracks, Ticks } from "react-compound-slider";
 import { SliderRail, Handle, Track, Tick } from "./componentsvertical";
 import { scaleLinear } from "d3";
 import "./slider.css";
-import AvailbilityBarV from './availabilitybarv';
+import AvailbilityBarV from "./availabilitybarv";
 import BlurInput from "../blurinput/blurinput";
 
 class SliderSingleVertical extends Component {
@@ -38,13 +38,11 @@ class SliderSingleVertical extends Component {
     return (
       <React.Fragment>
         <div className="maindepth" title="Map reference depth">
-          <BlurInput value={dt} type="number" onBlur={onChange} />
+          <div>Depth</div>
+          <BlurInput value={dt} type="number" onBlur={onChange} min={0} />
           <span className="unit">m</span>
         </div>
-        <div
-          className="verticalslider"
-          title="Select your desired depth"
-        >
+        <div className="verticalslider" title="Select your desired depth">
           <Slider
             vertical
             mode={1}

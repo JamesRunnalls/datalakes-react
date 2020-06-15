@@ -30,6 +30,7 @@ class BlurInput extends Component {
         onChange={this.onChange}
         onBlur={onBlur}
         onKeyUp={this.onKeyUp}
+        min={0}
       />
     );
   }
