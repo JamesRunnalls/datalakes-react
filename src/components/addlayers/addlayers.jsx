@@ -82,7 +82,7 @@ class AddLayersInner extends Component {
 
     var subparameters = datasetparameters.filter(
       (p) =>
-        ids.includes(p.datasets_id) && ![1, 2, 3, 4].includes(p.parameters_id)
+        ids.includes(p.datasets_id) && ![1, 2, 3, 4, 27, 28, 29, 30].includes(p.parameters_id)
     );
 
     function filterparam(pid, params) {

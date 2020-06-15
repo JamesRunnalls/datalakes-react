@@ -648,8 +648,6 @@ class Basemap extends Component {
     var maxSize = 30;
     var markerGroup = L.layerGroup().addTo(this.map);
 
-    console.log(type)
-
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler
       var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
@@ -666,7 +664,6 @@ class Basemap extends Component {
       // 2D Depth Time Dataset
       var indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
       var indexy = this.indexClosest(depth, data["y"]);
-      console.log(datasetparameter.axis)
       value = this.numberformat(data[datasetparameter.axis][indexy][indexx]);
       timediff = -Math.round(
         (datetime.getTime() / 1000 - data["x"][indexx]) / 3600
