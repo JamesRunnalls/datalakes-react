@@ -609,6 +609,16 @@ class Basemap extends Component {
     }
   };
 
+  numberformat = (num) => {
+    num = parseFloat(num);
+    if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
+      num = num.toExponential(3);
+    } else {
+      num = Math.round(num * 10000) / 10000;
+    }
+    return num;
+  };
+
   gitPlot = async (layer, file) => {
     var {
       datasetparameters,
@@ -631,143 +641,106 @@ class Basemap extends Component {
     );
     var { datetime, depth } = this.props;
     var data = file.data;
-    var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
-    var index, value, minSize, maxSize, markerGroup, timediff, depthdiff;
-    var valuestring, color, shape, size, marker;
+    var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id).join(",");
+    var index, value, timediff, depthdiff;
+    var size, marker, dt, dd;
+    var minSize = 5;
+    var maxSize = 30;
+    var markerGroup = L.layerGroup().addTo(this.map);
+
+    console.log(type)
+
     if (type.includes("M&1") && type.includes("y&2")) {
-      // Profiler e.g Thetis
+      // Profiler
       var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
       var dp3 = datasetparameters.find((dp) => dp.parameters_id === 2);
       index = this.indexClosest(depth, data.y);
-      value = parseFloat(data[datasetparameter.axis][index]).toExponential(3);
-      minSize = 5;
-      maxSize = 30;
-      markerGroup = L.layerGroup().addTo(this.map);
+      value = this.numberformat(parseFloat(data[datasetparameter.axis][index]));
       timediff = -Math.round(
         (datetime.getTime() / 1000 - data[dp2.axis][index]) / 3600
       );
       depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
-      valuestring =
-        String(value) +
-        String(datasetparameter.unit) +
-        '<br><div class="tooltipdiff">Diff: ' +
-        (timediff > 0 ? "+" : "") +
-        String(timediff) +
-        "hrs " +
-        (depthdiff > 0 ? " +" : " ") +
-        String(depthdiff) +
-        "m</div>";
-
-      color = getColor(value, min, max, colors);
-      shape = markerSymbol;
-      if (markerFixedSize) {
-        size = markerSize;
-      } else {
-        size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
-      }
-      marker = new L.marker([latitude, longitude], {
-        icon: L.divIcon({
-          className: "map-marker",
-          html:
-            `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
-            `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
-            `</div></div> `,
-        }),
-      })
-        .bindTooltip(valuestring, {
-          permanent: markerLabel,
-          direction: "top",
-        })
-        .addTo(markerGroup);
-      marker.bindPopup(
-        "<table><tbody>" +
-          '<tr><td colSpan="2"><strong>' +
-          layer.title +
-          "</strong></td></tr>" +
-          "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-          new Date(data[dp2.axis][index] * 1000) +
-          "</td></tr>" +
-          "<tr><td><strong>Value</strong></td><td>" +
-          String(value) +
-          String(unit) +
-          "</td></tr>" +
-          "<tr><td><strong>Depth</strong></td><td>" +
-          data[dp3.axis][index] +
-          "</td></tr>" +
-          '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +
-          datasets_id +
-          '">More information</a></td></tr>' +
-          "</tbody></table>"
+      dt = new Date(data[dp2.axis][index] * 1000);
+      dd = data[dp3.axis][index];
+    } else if (type.includes("z&") && type.includes("x&1") && type.includes("y&2")) {
+      // 2D Depth Time Dataset
+      var indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      var indexy = this.indexClosest(depth, data["y"]);
+      console.log(datasetparameter.axis)
+      value = this.numberformat(data[datasetparameter.axis][indexy][indexx]);
+      timediff = -Math.round(
+        (datetime.getTime() / 1000 - data["x"][indexx]) / 3600
       );
-
-      this.marker.push(markerGroup);
-    } else if (type.includes("x&1")) {
+      depthdiff = depth - data["y"][indexy];
+      dt = new Date(data["x"][indexx] * 1000);
+      dd = data["y"][indexy];
+    } else if (type.includes("x&1") && type.includes("y&") && !type.includes("z&")) {
+      // 1D Parameter Time Dataset
       index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
-      value = data[datasetparameter.axis][index];
-      minSize = 5;
-      maxSize = 30;
-      markerGroup = L.layerGroup().addTo(this.map);
+      value = this.numberformat(data[datasetparameter.axis][index]);
       timediff = -Math.round(
         (datetime.getTime() / 1000 - data["x"][index]) / 3600
       );
       depthdiff = maxdepth - depth;
-      valuestring =
-        String(value) +
-        String(datasetparameter.unit) +
-        '<br><div class="tooltipdiff">Diff: ' +
-        (timediff > 0 ? "+" : "") +
-        String(timediff) +
-        "hrs " +
-        (depthdiff > 0 ? " +" : " ") +
-        String(depthdiff) +
-        "m</div>";
-
-      color = getColor(value, min, max, colors);
-      shape = markerSymbol;
-      if (markerFixedSize) {
-        size = markerSize;
-      } else {
-        size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
-      }
-      marker = new L.marker([latitude, longitude], {
-        icon: L.divIcon({
-          className: "map-marker",
-          html:
-            `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
-            `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
-            `</div></div> `,
-        }),
-      })
-        .bindTooltip(valuestring, {
-          permanent: markerLabel,
-          direction: "top",
-        })
-        .addTo(markerGroup);
-      marker.bindPopup(
-        "<table><tbody>" +
-          '<tr><td colSpan="2"><strong>' +
-          layer.title +
-          "</strong></td></tr>" +
-          "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-          new Date(data["x"][index] * 1000) +
-          "</td></tr>" +
-          "<tr><td><strong>Value</strong></td><td>" +
-          String(value) +
-          String(unit) +
-          "</td></tr>" +
-          "<tr><td><strong>Depth</strong></td><td>" +
-          maxdepth +
-          "</td></tr>" +
-          '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +
-          datasets_id +
-          '">More information</a></td></tr>' +
-          "</tbody></table>"
-      );
-
-      this.marker.push(markerGroup);
+      dt = new Date(data["x"][index] * 1000);
+      dd = maxdepth;
     } else {
       alert("No plotting function defined");
     }
+
+    var valuestring =
+      String(value) +
+      String(datasetparameter.unit) +
+      '<br><div class="tooltipdiff">Diff: ' +
+      (timediff > 0 ? "+" : "") +
+      String(Math.round(timediff * 100) / 100) +
+      "hrs " +
+      (depthdiff > 0 ? " +" : " ") +
+      String(Math.round(depthdiff * 10) / 10) +
+      "m</div>";
+    var color = getColor(value, min, max, colors);
+    var shape = markerSymbol;
+    if (markerFixedSize) {
+      size = markerSize;
+    } else {
+      size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
+    }
+    marker = new L.marker([latitude, longitude], {
+      icon: L.divIcon({
+        className: "map-marker",
+        html:
+          `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
+          `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
+          `</div></div> `,
+      }),
+    })
+      .bindTooltip(valuestring, {
+        permanent: markerLabel,
+        direction: "top",
+      })
+      .addTo(markerGroup);
+    marker.bindPopup(
+      "<table><tbody>" +
+        '<tr><td colSpan="2"><strong>' +
+        layer.title +
+        "</strong></td></tr>" +
+        "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
+        dt +
+        "</td></tr>" +
+        "<tr><td><strong>Value</strong></td><td>" +
+        String(value) +
+        String(unit) +
+        "</td></tr>" +
+        "<tr><td><strong>Depth</strong></td><td>" +
+        dd +
+        "</td></tr>" +
+        '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +
+        datasets_id +
+        '">More information</a></td></tr>' +
+        "</tbody></table>"
+    );
+
+    this.marker.push(markerGroup);
   };
 
   indexClosest = (num, arr) => {
