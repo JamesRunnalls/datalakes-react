@@ -5,14 +5,14 @@ import "../datadetail.css";
 class External extends Component {
   state = {};
   render() {
-    const { dataset, parameters, getLabel, link } = this.props;
+    const { dataset, datasetparameters, getLabel, link } = this.props;
 
     // Parameter Table
     var rows = [];
-    for (var row of parameters) {
+    for (var row of datasetparameters) {
       rows.push(
         <tr key={row.id}>
-          <td>{getLabel("parameters", row.parameters_id, "name")}</td>
+          <td>{getLabel("datasetparameters", row.parameters_id, "name")}</td>
           <td>{row.axis}</td>
           <td>{row.unit}</td>
           <td>

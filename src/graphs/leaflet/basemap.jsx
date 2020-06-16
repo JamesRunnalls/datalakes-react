@@ -57,13 +57,24 @@ class Basemap extends Component {
     }
     var { maxdatetime, maxdepth } = file;
     var { datetime, depth, templates } = this.props;
+    var {
+      markerLabel,
+      markerSymbol,
+      markerFixedSize,
+      markerSize,
+      min,
+      max,
+      unit,
+      colors,
+      data,
+    } = layer;
     var arr = file.filelink.split("/");
     var source = arr[arr.length - 3];
     var parameter = arr[arr.length - 2];
 
     // Merge template and data
     var template = JSON.parse(JSON.stringify(templates[source][parameter]));
-    var inputData = JSON.parse(JSON.stringify(file.data));
+    var inputData = JSON.parse(JSON.stringify(data));
     var ids = inputData.map((fd) => fd.id);
     var layerData = template.features;
     layerData = layerData.filter((t) => ids.includes(t.id));
@@ -79,16 +90,7 @@ class Basemap extends Component {
         );
       }
     }
-    var {
-      markerLabel,
-      markerSymbol,
-      markerFixedSize,
-      markerSize,
-      min,
-      max,
-      unit,
-      colors,
-    } = layer;
+
     var minSize = 5;
     var maxSize = 30;
     var markerGroup = L.layerGroup().addTo(this.map);
@@ -169,23 +171,6 @@ class Basemap extends Component {
       return data[index].v;
     }
     var { maxdatetime, maxdepth } = file;
-    var { datetime, depth, templates } = this.props;
-    var arr = file.filelink.split("/");
-    var source = arr[arr.length - 3];
-    var parameter = arr[arr.length - 2];
-
-    // Merge template and data
-    var template = JSON.parse(JSON.stringify(templates[source][parameter]));
-    var inputData = JSON.parse(JSON.stringify(file.data));
-    var ids = inputData.map((fd) => fd.id);
-    var layerData = template.features;
-    layerData = layerData.filter((t) => ids.includes(t.id));
-    for (var i = 0; i < layerData.length; i++) {
-      layerData[i].properties.value = getValueFromID(
-        layerData[i].id,
-        inputData
-      );
-    }
     var {
       markerLabel,
       markerSymbol,
@@ -195,7 +180,26 @@ class Basemap extends Component {
       max,
       unit,
       colors,
+      data,
     } = layer;
+    var { datetime, depth, templates } = this.props;
+    var arr = file.filelink.split("/");
+    var source = arr[arr.length - 3];
+    var parameter = arr[arr.length - 2];
+
+    // Merge template and data
+    var template = JSON.parse(JSON.stringify(templates[source][parameter]));
+    var inputData = JSON.parse(JSON.stringify(data));
+    var ids = inputData.map((fd) => fd.id);
+    var layerData = template.features;
+    layerData = layerData.filter((t) => ids.includes(t.id));
+    for (var i = 0; i < layerData.length; i++) {
+      layerData[i].properties.value = getValueFromID(
+        layerData[i].id,
+        inputData
+      );
+    }
+
     var minSize = 5;
     var maxSize = 30;
     var markerGroup = L.layerGroup().addTo(this.map);
@@ -268,8 +272,8 @@ class Basemap extends Component {
   };
 
   remoteSensing = async (layer, file) => {
-    var { maxdatetime, maxdepth, data } = file;
-    var { min, max, unit } = layer;
+    var { maxdatetime, maxdepth } = file;
+    var { min, max, unit, data } = layer;
     var { datetime, depth } = this.props;
     var polygons = [];
     var coords;
@@ -345,9 +349,9 @@ class Basemap extends Component {
   };
 
   simstrat = async (layer, file) => {
-    var { maxdatetime, data } = file;
+    var { maxdatetime } = file;
+    var { min, max, data } = layer;
     var layerData = JSON.parse(JSON.stringify(data));
-    var { min, max } = layer;
     var polygons = [];
     for (var i = 0; i < layerData.length; i++) {
       var pixelcolor = getColor(layerData[i].value, min, max, layer.colors);
@@ -396,8 +400,8 @@ class Basemap extends Component {
   };
 
   meteolakes = async (layer, file) => {
-    var { maxdatetime, maxdepth, data } = file;
-    var { parameters_id } = layer;
+    var { maxdatetime, maxdepth } = file;
+    var { parameters_id, data } = layer;
     var {
       vectorArrows,
       vectorMagnitude,
@@ -609,16 +613,6 @@ class Basemap extends Component {
     }
   };
 
-  numberformat = (num) => {
-    num = parseFloat(num);
-    if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
-      num = num.toExponential(3);
-    } else {
-      num = Math.round(num * 10000) / 10000;
-    }
-    return num;
-  };
-
   gitPlot = async (layer, file) => {
     var {
       datasetparameters,
@@ -635,13 +629,15 @@ class Basemap extends Component {
       longitude,
       unit,
       maxdepth,
+      data,
     } = layer;
     var datasetparameter = datasetparameters.find(
       (dp) => dp.parameters_id === parameters_id
     );
     var { datetime, depth } = this.props;
-    var data = file.data;
-    var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id).join(",");
+    var type = datasetparameters
+      .map((dp) => dp.axis + "&" + dp.parameters_id)
+      .join(",");
     var index, value, timediff, depthdiff;
     var size, marker, dt, dd;
     var minSize = 5;
@@ -660,7 +656,11 @@ class Basemap extends Component {
       depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
       dt = new Date(data[dp2.axis][index] * 1000);
       dd = data[dp3.axis][index];
-    } else if (type.includes("z&") && type.includes("x&1") && type.includes("y&2")) {
+    } else if (
+      type.includes("z&") &&
+      type.includes("x&1") &&
+      type.includes("y&2")
+    ) {
       // 2D Depth Time Dataset
       var indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
       var indexy = this.indexClosest(depth, data["y"]);
@@ -671,7 +671,11 @@ class Basemap extends Component {
       depthdiff = depth - data["y"][indexy];
       dt = new Date(data["x"][indexx] * 1000);
       dd = data["y"][indexy];
-    } else if (type.includes("x&1") && type.includes("y&") && !type.includes("z&")) {
+    } else if (
+      type.includes("x&1") &&
+      type.includes("y&") &&
+      !type.includes("z&")
+    ) {
       // 1D Parameter Time Dataset
       index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
       value = this.numberformat(data[datasetparameter.axis][index]);
@@ -738,6 +742,16 @@ class Basemap extends Component {
     );
 
     this.marker.push(markerGroup);
+  };
+
+  numberformat = (num) => {
+    num = parseFloat(num);
+    if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
+      num = num.toExponential(3);
+    } else {
+      num = Math.round(num * 10000) / 10000;
+    }
+    return num;
   };
 
   indexClosest = (num, arr) => {
@@ -935,7 +949,7 @@ class Basemap extends Component {
   };
 
   updatePlot = () => {
-    var { selectedlayers, datasets, center, zoom } = this.props;
+    var { selectedlayers, center, zoom } = this.props;
 
     // Remove old layers
     this.marker.forEach((layer) => {
@@ -953,10 +967,8 @@ class Basemap extends Component {
     for (var i = selectedlayers.length - 1; i > -1; i--) {
       var layer = selectedlayers[i];
       if (layer.visible) {
-        var dataset = datasets[layer.dataset_index];
-        var { fileid } = layer;
-        var { mapplotfunction } = dataset;
-        var file = finddataset(fileid, dataset.files);
+        var { fileid, files, mapplotfunction } = layer;
+        var file = finddataset(fileid, files);
         mapplotfunction === "gitPlot" && this.gitPlot(layer, file);
         mapplotfunction === "foenMarkers" && this.foenMarkers(layer, file);
         mapplotfunction === "meteoSwissMarkers" &&

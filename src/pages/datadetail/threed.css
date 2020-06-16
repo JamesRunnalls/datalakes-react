@@ -2,6 +2,7 @@
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   box-sizing: border-box;
+  position: relative;
 }
 
 .threed.full {
@@ -18,7 +19,7 @@
   font-weight: bold;
   position: absolute;
   right: 10px;
-  top: -30px;
+  top: 0px;
 }
 
 .threed.full .close {
@@ -27,10 +28,9 @@
 
 .threed .parameter-select {
   float: right;
-  margin-top: -22px;
-  z-index: 999;
+  z-index: 99999;
   position: relative;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 .threed .basemapwrapper {
@@ -56,18 +56,19 @@
 }
 
 .threed .graphwrapper {
-  height: 600px;
+  height: 500px;
   width: 50%;
   box-sizing: border-box;
   max-width: 960px;
   position: absolute;
-  right: 0;
+  right: 120px;
   max-height: calc(100vh - 100px);
   min-height: 340px;
   display: inline-block;
   z-index: 999;
   background-color: rgba(255, 255, 255, 0.9);
   padding: 20px 0;
+  top: 70px;
 }
 
 .threed .graphwrapper.hide {
@@ -97,8 +98,12 @@
     position: absolute;
     right: 0;
     background-color: white;
-    z-index: 998;
+    z-index: 9999;
     padding-top: 20px;
+    top: 0;
+  }
+  .threed .close {
+    top: -30px;
   }
 }
 

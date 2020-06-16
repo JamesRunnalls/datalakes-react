@@ -4,11 +4,11 @@ import "../datadetail.css";
 class Information extends Component {
   state = {};
   render() {
-    const { dataset, parameters, getLabel } = this.props;
+    const { dataset, datasetparameters, getLabel } = this.props;
 
     // Parameter Table
     var rows = [];
-    for (var row of parameters) {
+    for (var row of datasetparameters) {
       rows.push(
         <tr key={row.id}>
           <td>{row.name}</td>

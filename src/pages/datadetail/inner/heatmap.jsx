@@ -159,7 +159,7 @@ class HeatMap extends Component {
   };
 
   handleAxisSelect = (axis) => (event) => {
-    var { parameters, data, file } = this.props;
+    var { datasetparameters, data, file } = this.props;
     var {
       xlabel,
       ylabel,
@@ -170,7 +170,7 @@ class HeatMap extends Component {
       minvalue,
       maxvalue,
     } = this.state;
-    var parameter = parameters.find((x) => x.axis === event.value);
+    var parameter = datasetparameters.find((x) => x.axis === event.value);
     if (axis === "yaxis") {
       ylabel = parameter.name;
       yunits = parameter.unit;
@@ -223,13 +223,13 @@ class HeatMap extends Component {
   };
 
   setDefault = () => {
-    var { parameters, dataset, getLabel, data, file } = this.props;
+    var { datasetparameters, dataset, getLabel, data, file } = this.props;
     var { xaxis, yaxis, zaxis } = this.state;
 
     // Get axis labels and units
-    const xparam = parameters.find((x) => x.axis === xaxis);
-    const yparam = parameters.find((y) => y.axis === yaxis);
-    const zparam = parameters.find((z) => z.axis === zaxis);
+    const xparam = datasetparameters.find((x) => x.axis === xaxis);
+    const yparam = datasetparameters.find((y) => y.axis === yaxis);
+    const zparam = datasetparameters.find((z) => z.axis === zaxis);
     var xlabel = getLabel("parameters", xparam.parameters_id, "name");
     var ylabel = getLabel("parameters", yparam.parameters_id, "name");
     var zlabel = getLabel("parameters", zparam.parameters_id, "name");
@@ -309,7 +309,7 @@ class HeatMap extends Component {
       onChangeFileInt,
       onChangeLower,
       onChangeUpper,
-      parameters,
+      datasetparameters,
       getLabel,
       data,
       lower,
@@ -340,7 +340,7 @@ class HeatMap extends Component {
     } = this.state;
 
     // Show time slider or multiple files
-    var time = parameters.filter((p) => p.parameters_id === 1);
+    var time = datasetparameters.filter((p) => p.parameters_id === 1);
     var timeSlider = false;
     var fileSlider = false;
     if (time.length > 0) {
@@ -355,21 +355,21 @@ class HeatMap extends Component {
     var xoptions = [];
     var yoptions = [];
     var zoptions = [];
-    for (var j = 0; j < parameters.length; j++) {
-      if (parameters[j]["axis"].includes("x")) {
+    for (var j = 0; j < datasetparameters.length; j++) {
+      if (datasetparameters[j]["axis"].includes("x")) {
         xoptions.push({
-          value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
+          value: datasetparameters[j]["axis"],
+          label: getLabel("parameters", datasetparameters[j]["parameters_id"], "name"),
         });
-      } else if (parameters[j]["axis"].includes("y")) {
+      } else if (datasetparameters[j]["axis"].includes("y")) {
         yoptions.push({
-          value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
+          value: datasetparameters[j]["axis"],
+          label: getLabel("parameters", datasetparameters[j]["parameters_id"], "name"),
         });
-      } else if (parameters[j]["axis"].includes("z")) {
+      } else if (datasetparameters[j]["axis"].includes("z")) {
         zoptions.push({
-          value: parameters[j]["axis"],
-          label: getLabel("parameters", parameters[j]["parameters_id"], "name"),
+          value: datasetparameters[j]["axis"],
+          label: getLabel("parameters", datasetparameters[j]["parameters_id"], "name"),
         });
       }
     }

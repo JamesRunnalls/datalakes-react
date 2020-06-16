@@ -21,7 +21,7 @@ class DataDetail extends Component {
   state = {
     selection: "",
     dataset: [],
-    parameters: [],
+    datasetparameters: [],
     error: false,
     mindatetime: "",
     maxdatetime: "",
@@ -378,28 +378,28 @@ class DataDetail extends Component {
 
     var dataset = server[0].data;
     var files = server[1].data;
-    var parameters = server[2].data;
+    var datasetparameters = server[2].data;
     var dropdown = server[3].data;
 
     // Internal vs External Data source
     if (dataset.datasource === "internal") {
       // Add parameter details
       var details;
-      for (var p in parameters) {
+      for (var p in datasetparameters) {
         try {
-          details = this.parameterDetails(dropdown, parameters, p);
-          parameters[p]["name"] = details.name;
-          parameters[p]["characteristic"] = details.characteristic;
+          details = this.parameterDetails(dropdown, datasetparameters, p);
+          datasetparameters[p]["name"] = details.name;
+          datasetparameters[p]["characteristic"] = details.characteristic;
         } catch (err) {
-          parameters[p]["name"] = null;
-          parameters[p]["characteristic"] = null;
+          datasetparameters[p]["name"] = null;
+          datasetparameters[p]["characteristic"] = null;
         }
       }
 
       // Logic for graphs
-      var x = parameters.filter((param) => param.axis === "x").length > 0;
-      var y = parameters.filter((param) => param.axis === "y").length > 0;
-      var z = parameters.filter((param) => param.axis === "z").length > 0;
+      var x = datasetparameters.filter((param) => param.axis === "x").length > 0;
+      var y = datasetparameters.filter((param) => param.axis === "y").length > 0;
+      var z = datasetparameters.filter((param) => param.axis === "z").length > 0;
 
       if (x && y && z) {
         allowedStep.push("heatmap");
@@ -463,7 +463,7 @@ class DataDetail extends Component {
       this.setState({
         renku,
         dataset,
-        parameters,
+        datasetparameters,
         files,
         data: dataArray,
         mindatetime,
@@ -481,30 +481,30 @@ class DataDetail extends Component {
     } else if (dataset.datasource === "Meteolakes") {
       this.setState({
         dataset,
-        parameters,
+        datasetparameters,
         dropdown,
         files,
         loading: false,
         step: "threedmodel",
-        allowedStep: ["threedmodel","external"],
+        allowedStep: ["threedmodel","external","webgis"],
       });
     } else if (dataset.datasource === "Eawag RS") {
       this.setState({
         dataset,
-        parameters,
+        datasetparameters,
         dropdown,
         files,
         step: "external",
-        allowedStep: ["external"],
+        allowedStep: ["external","webgis"],
       });
     } else {
       this.setState({
         dataset,
-        parameters,
+        datasetparameters,
         dropdown,
         files,
         step: "external",
-        allowedStep: ["external"],
+        allowedStep: ["external","webgis"],
       });
     }
   }
@@ -517,7 +517,7 @@ class DataDetail extends Component {
     const {
       renku,
       dataset,
-      parameters,
+      datasetparameters,
       data,
       mindatetime,
       maxdatetime,
@@ -537,7 +537,7 @@ class DataDetail extends Component {
       : "Datalakes";
 
     // Link
-    var p = JSON.parse(JSON.stringify(parameters));
+    var p = JSON.parse(JSON.stringify(datasetparameters));
     p = p.filter((x) => ![1, 2, 3, 4].includes(x.parameters_id));
     p = p.map((x) => [dataset.id, x.parameters_id]);
     var link = "/map?selected=" + JSON.stringify(p);
@@ -570,7 +570,7 @@ class DataDetail extends Component {
             />
             <HeatMap
               dataset={dataset}
-              parameters={parameters}
+              datasetparameters={datasetparameters}
               data={data}
               lower={lower}
               upper={upper}
@@ -602,7 +602,7 @@ class DataDetail extends Component {
             />
             <LineGraph
               dataset={dataset}
-              parameters={parameters}
+              datasetparameters={datasetparameters}
               data={data}
               lower={lower}
               upper={upper}
@@ -638,7 +638,7 @@ class DataDetail extends Component {
             <Preview
               data={data}
               getLabel={this.getLabel}
-              parameters={parameters}
+              datasetparameters={datasetparameters}
             />
           </React.Fragment>
         );
@@ -688,7 +688,7 @@ class DataDetail extends Component {
             />
             <Information
               dataset={dataset}
-              parameters={parameters}
+              datasetparameters={datasetparameters}
               getLabel={this.getLabel}
             />
           </React.Fragment>
@@ -705,7 +705,7 @@ class DataDetail extends Component {
             />
             <External
               dataset={dataset}
-              parameters={parameters}
+              datasetparameters={datasetparameters}
               getLabel={this.getLabel}
               link={link}
             />
@@ -723,7 +723,7 @@ class DataDetail extends Component {
             />
             <ThreeDModel
               dataset={dataset}
-              parameters={parameters}
+              datasetparameters={datasetparameters}
               getLabel={this.getLabel}
               files={files}
               link={link}
@@ -736,7 +736,7 @@ class DataDetail extends Component {
             <h1>{dataset.title}</h1>
             <RemoteSensing
               dataset={dataset}
-              parameters={parameters}
+              datasetparameters={datasetparameters}
               getLabel={this.getLabel}
               files={files}
               link={link}

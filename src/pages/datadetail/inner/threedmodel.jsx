@@ -66,9 +66,10 @@ class ThreeDMenu extends Component {
 
 class ThreeDModel extends Component {
   state = {
-    time: new Date(),
+    datetime: new Date(),
     depth: 0,
     selectedlayers: [],
+    downloads: [],
     datasets: [],
     profile: false,
     timeline: false,
@@ -91,6 +92,91 @@ class ThreeDModel extends Component {
     plotdata: { x: [], y: [], z: [] },
     zoomIn: () => {},
     zoomOut: () => {},
+  };
+
+  onChangeDatetime = async (event) => {
+    var { depth, pointValue, lineValue } = this.state;
+    var datetime;
+    if (Array.isArray(event)) {
+      datetime = new Date(event[0]);
+    } else {
+      datetime = event;
+    }
+    if (datetime.getTime() !== this.state.datetime.getTime()) {
+      this.setState({ datetime }, async () => {
+        this.updateVariable(datetime, depth);
+        this.updatePoint(pointValue);
+        this.updateLine(lineValue);
+      });
+    }
+  };
+
+  onChangeDepth = async (event) => {
+    var { datetime, pointValue, lineValue } = this.state;
+    var depth;
+    if (Array.isArray(event)) {
+      depth = parseFloat(event[0]);
+    } else {
+      depth = parseFloat(event.target.value);
+    }
+    if (depth !== this.state.depth) {
+      this.setState({ depth }, async () => {
+        this.updateVariable(datetime, depth);
+        this.updatePoint(pointValue);
+        this.updateLine(lineValue);
+      });
+    }
+  };
+
+  updateVariable = async (datetime, depth) => {
+    function findFileId(files, fileid) {
+      return files.find((f) => f.id === fileid);
+    }
+    this.setState({ loading: true }, async () => {
+      var { selectedlayers, downloads } = this.state;
+
+      for (var i = 0; i < selectedlayers.length; i++) {
+        // Find closest file to datetime and depth
+        var fileid = this.closestFile(datetime, depth, selectedlayers[i].files);
+        var datafile = findFileId(selectedlayers[i].files, fileid);
+
+        // Add data from file closes to datetime and depth
+        var data, realdatetime, realdepth;
+        ({ data, realdatetime, realdepth, downloads } = await this.downloadFile(
+          selectedlayers[i].datasets_id,
+          fileid,
+          datafile.filelink,
+          selectedlayers[i].datasource,
+          datetime,
+          depth,
+          downloads
+        ));
+
+        var min, max, array;
+        if (selectedlayers[i].parameters_id === 25) {
+          ({ min, max, array } = this.meteolakesVectorMinMax(data));
+        } else {
+          ({ min, max, array } = this.meteolakesScalarMinMax(data));
+        }
+
+        // Update the min and max value
+        selectedlayers[i].realdatetime = realdatetime;
+        selectedlayers[i].realdepth = realdepth;
+        selectedlayers[i].data = data;
+        selectedlayers[i].min = min;
+        selectedlayers[i].max = max;
+        selectedlayers[i].array = array;
+        selectedlayers[i].fileid = fileid;
+      }
+
+      this.setState({
+        datetime,
+        depth,
+        selectedlayers,
+        downloads,
+        loading: false,
+      });
+    });
   };
 
   changePlotParameter = (event) => {
@@ -228,6 +314,7 @@ class ThreeDModel extends Component {
   };
 
   javascriptDatetimeToMatlab = (date) => {
+    console.log(date);
     return 719529 + date.getTime() / (24 * 60 * 60 * 1000);
   };
 
@@ -277,10 +364,10 @@ class ThreeDModel extends Component {
   };
 
   updatePoint = async (pointValue) => {
-    var { graph, time } = this.state;
+    var { graph, datetime } = this.state;
     if (graph === "depthgraph") {
       // Convert to meteolakes units
-      var t = this.javascriptDatetimeToMatlab(time);
+      var t = this.javascriptDatetimeToMatlab(datetime);
       var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
       axios
         .get(
@@ -311,10 +398,10 @@ class ThreeDModel extends Component {
   };
 
   updateLine = (lineValue) => {
-    var { graph, time } = this.state;
+    var { graph, datetime } = this.state;
     if (graph === "slicegraph" && lineValue.length > 0) {
       // Convert to meteolakes units
-      var t = this.javascriptDatetimeToMatlab(time);
+      var t = this.javascriptDatetimeToMatlab(datetime);
       var { x: x1, y: y1 } = this.WGSlatlngtoCH(
         lineValue[0].lat,
         lineValue[0].lng
@@ -425,103 +512,218 @@ class ThreeDModel extends Component {
     });
   };
 
-  async componentDidMount() {
-    var { files, dataset, parameters } = this.props;
-
-    // Depth and Time
-    var depths = [
-      ...new Set(files.map((item) => parseFloat(item.mindepth))),
-    ].sort(function (a, b) {
-      return a - b;
+  closestFile = (datetime, depth, files) => {
+    var time = new Date(datetime).getTime() / 1000;
+    var array = [];
+    for (var i = 0; i < files.length; i++) {
+      var fileid = files[i].id;
+      var mintime = new Date(files[i].mindatetime).getTime() / 1000;
+      var maxtime = new Date(files[i].maxdatetime).getTime() / 1000;
+      var mindepth = files[i].mindepth;
+      var maxdepth = files[i].maxdepth;
+      var timedistance;
+      if (time > mintime && time < maxtime) {
+        timedistance = 0;
+      } else {
+        timedistance = Math.min(
+          Math.abs(mintime - time),
+          Math.abs(maxtime - time)
+        );
+      }
+      var depthdistance;
+      if (depth > mindepth && depth < maxdepth) {
+        depthdistance = 0;
+      } else {
+        depthdistance = Math.min(
+          Math.abs(mindepth - depth),
+          Math.abs(maxdepth - depth)
+        );
+      }
+      array.push({ fileid, timedistance, depthdistance });
+    }
+    array.sort((a, b) => {
+      if (a.timedistance > b.timedistance) {
+        return 1;
+      } else if (a.timedistance === b.timedistance) {
+        if (a.depthdistance > b.depthdistance) {
+          return 1;
+        } else {
+          return -1;
+        }
+      } else {
+        return -1;
+      }
     });
-    var maxdepth = Math.max(...depths);
-    var mindepth = Math.min(...depths);
-    var times = [...new Set(files.map((item) => item.mindatetime))];
+    return array[0].fileid;
+  };
 
-    times = times
-      .map((t) => new Date(t))
-      .sort(function (a, b) {
-        return b - a;
+  getSliderParameters = (selectedlayers) => {
+    var files = [];
+    var mindatetime = Infinity;
+    var maxdatetime = -Infinity;
+    var mindepth = 0;
+    var maxdepth = 1;
+    for (var i = 0; i < selectedlayers.length; i++) {
+      mindatetime = new Date(
+        Math.min(mindatetime, new Date(selectedlayers[i].mindatetime))
+      );
+      maxdatetime = new Date(
+        Math.max(maxdatetime, new Date(selectedlayers[i].maxdatetime))
+      );
+      maxdepth = Math.max(maxdepth, selectedlayers[i].maxdepth);
+
+      files = files.concat(selectedlayers[i].files);
+    }
+    maxdepth = Math.min(370, maxdepth);
+    if (mindatetime === Infinity)
+      mindatetime = new Date().getTime() - 1209600000;
+    if (maxdatetime === -Infinity) maxdatetime = new Date().getTime();
+    maxdatetime = new Date(maxdatetime);
+    mindatetime = new Date(mindatetime);
+    return { files, mindepth, maxdepth, mindatetime, maxdatetime };
+  };
+
+  lastFile = (files) => {
+    files.sort((a, b) =>
+      new Date(a.maxdatetime).getTime() > new Date(b.maxdatetime).getTime()
+        ? 1
+        : -1
+    );
+    return files[0];
+  };
+
+  downloadFile = async (
+    datasets_id,
+    fileid,
+    filelink,
+    source,
+    datetime,
+    depth,
+    downloads
+  ) => {
+    var downloaded = downloads.find(
+      (d) =>
+        d.datasets_id === datasets_id &&
+        d.fileid === fileid &&
+        d.datetime.getTime() === datetime.getTime() &&
+        parseFloat(d.depth) === parseFloat(depth)
+    );
+
+    if (downloaded) {
+      return {
+        data: downloaded.data,
+        realdatetime: downloaded.realdatetime,
+        realdepth: downloaded.realdepth,
+        downloads,
+      };
+    } else {
+      var data, realdatetime, realdepth, realdata;
+      var datetimeunix = Math.round(datetime.getTime() / 1000);
+      filelink = filelink.replace(":datetime", datetimeunix);
+      filelink = filelink.replace(":depth", depth);
+      ({ data } = await axios
+        .get(filelink, { timeout: 10000 })
+        .catch((error) => {
+          console.error(error);
+          alert("Failed to add layer");
+          this.setState({ loading: false });
+        }));
+      ({ datetime: realdatetime, depth: realdepth, data: realdata } = data);
+      data = realdata;
+
+      downloads.push({
+        data,
+        datetime,
+        depth,
+        datasets_id,
+        fileid,
+        realdatetime,
+        realdepth,
       });
-    var timesunix = times.map((t) => t.getTime());
-    var mindatetime = Math.min(...timesunix);
-    var maxdatetime = Math.max(...timesunix);
-    var depth = depths[0];
-    var time = times[times.length - 1];
+      return { data, realdatetime, realdepth, downloads };
+    }
+  };
+
+  async componentDidMount() {
+    var { files, dataset, datasetparameters } = this.props;
+    var { downloads } = this.state;
 
     // Build Selected Layers object
     var selectedlayers = [];
-    var plotparameters = parameters.filter(
+    var plotparameters = datasetparameters.filter(
       (p) => ![1, 2, 3, 4].includes(p.parameters_id)
     );
     plotparameters.sort((a, b) => (a.parameters_id > b.parameters_id ? -1 : 1));
-    var layer;
     for (var i = 0; i < plotparameters.length; i++) {
-      layer = {
-        visible: true,
-        dataset_index: 0,
-      };
-      layer = { ...layer, ...dataset.plotproperties };
-      var colors = this.parseColor(layer["colors"]);
-      layer["colors"] = colors;
-
-      var fileIndex = files.findIndex(
-        (f) =>
-          f.mindepth === String(depth) && f.mindatetime === time.toISOString()
-      );
-      layer["fileid"] = files[fileIndex].id;
-      var { data } = await axios
-        .get(files[fileIndex].filelink)
-        .catch((error) => {
-          console.log(error);
-        });
-
       var parameters_id = plotparameters[i].parameters_id;
+      var datasets_id = dataset.id;
 
-      var min, max, array, mapplot, parameter_name;
+      // Find file with most recent data
+      var file = this.lastFile(files);
+      var datetime = new Date(file.maxdatetime);
+      var depth = Math.round(file.mindepth * 10) / 10;
+
+      // Download data
+      var data, realdatetime, realdepth;
+      ({ data, realdatetime, realdepth, downloads } = await this.downloadFile(
+        datasets_id,
+        file.id,
+        file.filelink,
+        dataset.datasource,
+        datetime,
+        depth,
+        downloads
+      ));
+
+      // Get data min and max
+      var min, max, array, mapplot, unit, name;
       if (parameters_id === 25) {
         mapplot = "field";
-        parameter_name = "Water Velocity";
+        unit = "m/s";
+        name = "Water Velocity";
         ({ min, max, array } = this.meteolakesVectorMinMax(data));
       } else {
         mapplot = "raster";
-        parameter_name = "Water Temperature";
+        unit = "°C";
+        name = "Water Temperature";
         ({ min, max, array } = this.meteolakesScalarMinMax(data));
       }
-      layer["id"] = dataset.id + "?" + parameters_id;
-      layer["datasets_id"] = dataset.id;
+
+      let layer = {
+        ...JSON.parse(JSON.stringify(dataset.plotproperties)),
+        ...JSON.parse(JSON.stringify(dataset)),
+      };
+
+      // Add Additional Parameters
+      layer["realdatetime"] = realdatetime;
+      layer["realdepth"] = realdepth;
+      layer["mapplot"] = mapplot;
+      layer["files"] = files;
+      layer["name"] = name;
+      layer["data"] = data;
       layer["min"] = min;
       layer["max"] = max;
+      layer["unit"] = unit;
       layer["array"] = array;
-      layer["legend"] = true;
-      layer["mapplot"] = mapplot;
-      layer["parameter_name"] = parameter_name;
-      layer["datasetparameters"] = parameters;
+      layer["fileid"] = file.id;
+      layer["datasets_id"] = datasets_id;
+      layer["datasetparameters"] = plotparameters;
       layer["parameters_id"] = parameters_id;
-      layer["unit"] = plotparameters[i].unit;
-      layer["title"] = dataset.title;
-      layer["description"] = dataset.description;
-      layer["files"] = files;
-      layer["maxdepth"] = maxdepth;
-      layer["mindepth"] = mindepth;
-      layer["maxdatetime"] = maxdatetime;
-      layer["mindatetime"] = mindatetime;
+      layer["colors"] = this.parseColor(layer.colors);
+      layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
+      layer["visible"] = true;
+
       selectedlayers.push(layer);
     }
 
-    files[fileIndex]["data"] = data;
-    dataset["files"] = files;
     var datasets = [dataset];
-
     this.setState({
       loading: false,
-      colors,
-      depths,
-      times,
       depth,
-      time,
+      datetime,
       datasets,
       selectedlayers,
+      downloads,
     });
   }
 
@@ -544,7 +746,7 @@ class ThreeDModel extends Component {
       parameter,
       basemap,
       depth,
-      time,
+      datetime,
       zoomIn,
       zoomOut,
     } = this.state;
@@ -594,6 +796,14 @@ class ThreeDModel extends Component {
       }
     }
 
+    var {
+      files,
+      mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
+    } = this.getSliderParameters(selectedlayers);
+
     return (
       <div className={fullsize ? "threed full" : "threed"}>
         <div className="basemapwrapper">
@@ -638,12 +848,15 @@ class ThreeDModel extends Component {
           />
           <div className="timeselector-gis">
             <DatetimeDepthSelector
-              selectedlayers={selectedlayers}
-              datasets={datasets}
-              datetime={time}
+              files={files}
+              mindatetime={mindatetime}
+              maxdatetime={maxdatetime}
+              mindepth={mindepth}
+              maxdepth={maxdepth}
+              datetime={datetime}
               depth={depth}
-              //onChangeDatetime={this.onChangeDatetime}
-              //onChangeDepth={this.onChangeDepth}
+              onChangeDatetime={this.onChangeDatetime}
+              onChangeDepth={this.onChangeDepth}
             />
           </div>
 
@@ -675,6 +888,14 @@ class ThreeDModel extends Component {
               xscale={"Linear"}
               yscale={"Linear"}
             />
+            <select
+              className="parameter-select"
+              onChange={this.changePlotParameter}
+              value={parameter}
+            >
+              <option value="Temperature">Water Temperature</option>
+              <option value="Velocity">Water Velocity</option>
+            </select>
           </div>
         )}
         {graph === "timegraph" && plotdata.x.length > 0 && (
@@ -694,6 +915,14 @@ class ThreeDModel extends Component {
               bcolor={"white"}
               colors={colors}
             />
+            <select
+              className="parameter-select"
+              onChange={this.changePlotParameter}
+              value={parameter}
+            >
+              <option value="Temperature">Water Temperature</option>
+              <option value="Velocity">Water Velocity</option>
+            </select>
           </div>
         )}
         {graph === "slicegraph" && plotdata.x.length > 0 && (
@@ -714,17 +943,15 @@ class ThreeDModel extends Component {
               bcolor={"white"}
               colors={colors}
             />
+            <select
+              className="parameter-select"
+              onChange={this.changePlotParameter}
+              value={parameter}
+            >
+              <option value="Temperature">Water Temperature</option>
+              <option value="Velocity">Water Velocity</option>
+            </select>
           </div>
-        )}
-        {plotdata.x.length > 0 && (
-          <select
-            className="parameter-select"
-            onChange={this.changePlotParameter}
-            value={parameter}
-          >
-            <option value="Temperature">Water Temperature</option>
-            <option value="Velocity">Water Velocity</option>
-          </select>
         )}
       </div>
     );

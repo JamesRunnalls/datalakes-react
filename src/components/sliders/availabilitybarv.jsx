@@ -17,42 +17,46 @@ class AvailbilityBarV extends Component {
       d3.select("#availabilitybarvsvg").remove();
     } catch (e) {}
 
-    var height = d3.select("#availabilitybarv").node().getBoundingClientRect()
-      .height;
+    try {
+      var height = d3.select("#availabilitybarv").node().getBoundingClientRect()
+        .height;
 
-    if (this.props.files.length > 0) {
-      this.setState({ plotted: true });
-      var { min, max, files } = this.props;
+      if (this.props.files.length > 0) {
+        this.setState({ plotted: true });
+        var { min, max, files } = this.props;
 
-      var array = files.map((x) => ({
-        min: x.mindepth,
-        max: x.maxdepth,
-      }));
+        var array = files.map((x) => ({
+          min: x.mindepth,
+          max: x.maxdepth,
+        }));
 
-      var svg = d3
-        .select("#availabilitybarv")
-        .append("svg")
-        .attr("id", "availabilitybarvsvg")
-        .attr("height", height)
-        .attr("width", 6);
-      var y = scaleLinear().domain([min, max]).range([0, height]);
-      svg
-        .selectAll("dot")
-        .data(array)
-        .enter()
-        .append("rect")
-        .attr("width", 6)
-        .attr("height", function (d) {
-          return Math.max(3, y(d.max) - y(d.min));
-        })
-        .attr("stroke", "#28b5f5")
-        .attr("fill", "#28b5f5")
-        .attr("y", function (d) {
-          return y(d.min);
-        })
-        .attr("x", function (d) {
-          return 0;
-        });
+        var svg = d3
+          .select("#availabilitybarv")
+          .append("svg")
+          .attr("id", "availabilitybarvsvg")
+          .attr("height", height)
+          .attr("width", 6);
+        var y = scaleLinear().domain([min, max]).range([0, height]);
+        svg
+          .selectAll("dot")
+          .data(array)
+          .enter()
+          .append("rect")
+          .attr("width", 6)
+          .attr("height", function (d) {
+            return Math.max(3, y(d.max) - y(d.min));
+          })
+          .attr("stroke", "#28b5f5")
+          .attr("fill", "#28b5f5")
+          .attr("y", function (d) {
+            return y(d.min);
+          })
+          .attr("x", function (d) {
+            return 0;
+          });
+      }
+    } catch (e) {
+      console.error("Failed to plot availability bar");
     }
   };
 

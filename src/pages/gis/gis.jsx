@@ -86,6 +86,7 @@ class GIS extends Component {
     selectedlayers: [],
     parameters: [],
     datasets: [],
+    downloads: [],
     datasetparameters: [],
     loading: true,
     selected: [],
@@ -150,7 +151,9 @@ class GIS extends Component {
     }
     if (datetime.getTime() !== this.state.datetime.getTime()) {
       var { depth } = this.state;
-      await this.updateVariable(datetime, depth);
+      this.setState({ datetime }, async () => {
+        this.updateVariable(datetime, depth);
+      });
     }
   };
 
@@ -163,7 +166,9 @@ class GIS extends Component {
     }
     if (depth !== this.state.depth) {
       var { datetime } = this.state;
-      await this.updateVariable(datetime, depth);
+      this.setState({ depth }, async () => {
+        this.updateVariable(datetime, depth);
+      });
     }
   };
 
@@ -260,24 +265,6 @@ class GIS extends Component {
     this.setState({ basemap: event.target.value });
   };
 
-  downloadFile = async (datafile, source) => {
-    var data;
-    if (source === "internal") {
-      ({ data } = await axios.get(
-        apiUrl + "/files/" + datafile.id + "?get=raw"
-      ));
-    } else {
-      ({ data } = await axios
-        .get(datafile.filelink, { timeout: 10000 })
-        .catch((error) => {
-          console.error(error);
-          alert("Failed to add layer");
-          this.setState({ loading: false });
-        }));
-    }
-    return data;
-  };
-
   meteoSwissMarkersMinMax = (layer) => {
     var array = layer.map((x) => x.v);
     array = array.filter((x) => x !== 9999);
@@ -342,55 +329,46 @@ class GIS extends Component {
     return { filemin: min, filemax: max, filearray: array };
   };
 
-  getMinMax = (files, parameters_id, datasetparameters, mapplotfunction) => {
+  getMinMax = (data, parameters_id, datasetparameters, mapplotfunction) => {
     var min = Infinity;
     var max = -Infinity;
     var array = [];
 
-    for (var i = 0; i < files.length; i++) {
-      if (files[i].data) {
-        var filemin, filemax;
-        var filearray = [];
-        var data = files[i].data;
-        if (mapplotfunction === "gitPlot") {
-          ({ filemin, filemax, filearray } = this.gitPlotMinMax(
-            data,
-            parameters_id,
-            datasetparameters
-          ));
-        }
-        if (mapplotfunction === "meteoSwissMarkers") {
-          ({ filemin, filemax, filearray } = this.meteoSwissMarkersMinMax(
-            data
-          ));
-        }
-        if (mapplotfunction === "simstrat") {
-          ({ filemin, filemax, filearray } = this.simstratMinMax(data));
-        }
-        if (mapplotfunction === "remoteSensing") {
-          ({ filemin, filemax, filearray } = this.remoteSensingMinMax(data));
-        }
-        if (mapplotfunction === "meteolakes") {
-          if (parameters_id === 25) {
-            ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(
-              data
-            ));
-          } else {
-            ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(
-              data
-            ));
-          }
-        }
+    var filemin, filemax;
+    var filearray = [];
 
-        if (mapplotfunction === "foenMarkers") {
-          ({ filemin, filemax, filearray } = this.foenMarkersMinMax(data));
-        }
-
-        if (filemin < min) min = filemin;
-        if (filemax > max) max = filemax;
-        array = array.concat(filearray);
+    if (mapplotfunction === "gitPlot") {
+      ({ filemin, filemax, filearray } = this.gitPlotMinMax(
+        data,
+        parameters_id,
+        datasetparameters
+      ));
+    }
+    if (mapplotfunction === "meteoSwissMarkers") {
+      ({ filemin, filemax, filearray } = this.meteoSwissMarkersMinMax(data));
+    }
+    if (mapplotfunction === "simstrat") {
+      ({ filemin, filemax, filearray } = this.simstratMinMax(data));
+    }
+    if (mapplotfunction === "remoteSensing") {
+      ({ filemin, filemax, filearray } = this.remoteSensingMinMax(data));
+    }
+    if (mapplotfunction === "meteolakes") {
+      if (parameters_id === 25) {
+        ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(data));
+      } else {
+        ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(data));
       }
     }
+
+    if (mapplotfunction === "foenMarkers") {
+      ({ filemin, filemax, filearray } = this.foenMarkersMinMax(data));
+    }
+
+    if (filemin < min) min = filemin;
+    if (filemax > max) max = filemax;
+    array = array.concat(filearray);
+
     return { min, max, array };
   };
 
@@ -490,6 +468,97 @@ class GIS extends Component {
     return visible;
   };
 
+  getSliderParameters = (selectedlayers) => {
+    var files = [];
+    var mindatetime = Infinity;
+    var maxdatetime = -Infinity;
+    var mindepth = 0;
+    var maxdepth = 1;
+    for (var i = 0; i < selectedlayers.length; i++) {
+      mindatetime = new Date(
+        Math.min(mindatetime, new Date(selectedlayers[i].mindatetime))
+      );
+      maxdatetime = new Date(
+        Math.max(maxdatetime, new Date(selectedlayers[i].maxdatetime))
+      );
+      maxdepth = Math.max(maxdepth, selectedlayers[i].maxdepth);
+
+      files = files.concat(selectedlayers[i].files);
+    }
+    maxdepth = Math.min(370, maxdepth);
+    if (mindatetime === Infinity)
+      mindatetime = new Date().getTime() - 1209600000;
+    if (maxdatetime === -Infinity) maxdatetime = new Date().getTime();
+    maxdatetime = new Date(maxdatetime);
+    mindatetime = new Date(mindatetime);
+    return { files, mindepth, maxdepth, mindatetime, maxdatetime };
+  };
+
+  downloadFile = async (
+    datasets_id,
+    fileid,
+    filelink,
+    source,
+    datetime,
+    depth
+  ) => {
+    var { downloads } = this.state;
+    var downloaded = downloads.find(
+      (d) =>
+        d.datasets_id === datasets_id &&
+        d.fileid === fileid &&
+        d.datetime === datetime &&
+        d.depth === depth
+    );
+
+    if (downloaded) {
+      return downloaded.data;
+    } else {
+      var data, realdatetime, realdepth, realdata;
+      if (source === "internal") {
+        ({ data } = await axios.get(apiUrl + "/files/" + fileid + "?get=raw"));
+        realdatetime = datetime;
+        realdepth = depth;
+      } else if (filelink.includes("?closest")) {
+        var datetimeunix = Math.round(datetime.getTime() / 1000);
+        filelink = filelink.replace(":datetime", datetimeunix);
+        filelink = filelink.replace(":depth", depth);
+        ({ data } = await axios
+          .get(filelink, { timeout: 10000 })
+          .catch((error) => {
+            console.error(error);
+            alert("Failed to add layer");
+            this.setState({ loading: false });
+          }));
+        ({ datetime: realdatetime, depth: realdepth, data: realdata } = data);
+        data = realdata;
+      } else {
+        filelink = filelink.replace(":datetime", datetimeunix);
+        filelink = filelink.replace(":depth", depth);
+        ({ data } = await axios
+          .get(filelink, { timeout: 10000 })
+          .catch((error) => {
+            console.error(error);
+            alert("Failed to add layer");
+            this.setState({ loading: false });
+          }));
+        realdatetime = datetime;
+        realdepth = depth;
+      }
+      downloads.push({
+        data,
+        datetime,
+        depth,
+        datasets_id,
+        fileid,
+        realdatetime,
+        realdepth,
+      });
+      this.setState({ downloads });
+      return data;
+    }
+  };
+
   addNewLayer = async (
     selected,
     datasets_id,
@@ -510,42 +579,34 @@ class GIS extends Component {
       ).length === 0
     ) {
       // Find index of datasets and parameters
-      var dataset_index = datasets.findIndex((x) => x.id === datasets_id);
-      var parameter_index = parameters.findIndex((x) => x.id === parameters_id);
-      if (dataset_index === -1 || parameter_index === -1) {
-        alert("Failed to add layer, not found in database.");
-        selected = selected.filter(
-          (x) =>
-            parseInt(x[0]) !== parseInt(datasets_id) ||
-            parseInt(x[1]) !== parseInt(parameters_id)
-        );
-      } else {
-        var parameter_name = parameters[parameter_index].name;
-        var dataset = datasets[dataset_index];
+      var dataset = datasets.find((d) => d.id === datasets_id);
+      var parameter = parameters.find((p) => p.id === parameters_id);
 
+      if (dataset && parameter) {
         // Get file list for dataset
-        if (dataset.files.length === 0) {
-          var { data: files } = await axios.get(
-            apiUrl + "/files?datasets_id=" + datasets_id + "&type=json"
-          );
-          dataset.files = files;
-        }
+        var { data: files } = await axios.get(
+          apiUrl + "/files?datasets_id=" + datasets_id + "&type=json"
+        );
 
         // Find closest file to datetime and depth
-        var fileid = this.closestFile(datetime, depth, dataset.files);
-        var datafile = dataset.files.find((f) => f.id === fileid);
+        var fileid = this.closestFile(datetime, depth, files);
+        var datafile = files.find((f) => f.id === fileid);
 
-        // Add data from file closes to datetime and depth
-        if (!datafile.data) {
-          datafile.data = await this.downloadFile(datafile, dataset.datasource);
-        }
+        var data = await this.downloadFile(
+          datasets_id,
+          fileid,
+          datafile.filelink,
+          dataset.datasource,
+          datetime,
+          depth
+        );
 
         // Get the dataset parameter
         var dp = datasetparameters.filter((d) => d.datasets_id === datasets_id);
 
-        // Update the min and max value
+        // Update the parameter min and max value
         var { min, max, array } = this.getMinMax(
-          dataset.files,
+          data,
           parameters_id,
           dp,
           dataset.mapplotfunction
@@ -554,28 +615,21 @@ class GIS extends Component {
         // Get unit
         var unit = dp.find((d) => d.parameters_id === parameters_id).unit;
 
-        // Plot properties
-        let layer = JSON.parse(JSON.stringify(dataset.plotproperties));
+        // Merge Plot properties, dataset and parameter
+        let layer = {
+          ...JSON.parse(JSON.stringify(dataset.plotproperties)),
+          ...JSON.parse(JSON.stringify(parameter)),
+          ...JSON.parse(JSON.stringify(dataset)),
+        };
 
         // Meteolakes hack
         if (parameters_id === 25) {
           layer["mapplot"] = "field";
-        } else {
-          layer["mapplot"] = dataset.mapplot;
         }
 
-        layer["mindatetime"] = dataset.mindatetime;
-        layer["maxdatetime"] = dataset.maxdatetime;
-        layer["mindepth"] = dataset.mindepth;
-        layer["maxdepth"] = dataset.maxdepth;
-
-        layer["title"] = dataset.title;
-        layer["latitude"] = dataset.latitude;
-        layer["longitude"] = dataset.longitude;
-        layer["datasource"] = dataset.datasource;
-        layer["description"] = dataset.description;
-        layer["datasourcelink"] = dataset.datasourcelink;
-
+        // Add Additional Parameters
+        layer["files"] = files;
+        layer["data"] = data;
         layer["min"] = min;
         layer["max"] = max;
         layer["unit"] = unit;
@@ -583,10 +637,7 @@ class GIS extends Component {
         layer["fileid"] = fileid;
         layer["datasetparameters"] = dp;
         layer["datasets_id"] = datasets_id;
-        layer["dataset_index"] = dataset_index;
         layer["parameters_id"] = parameters_id;
-        layer["parameter_name"] = parameter_name;
-        layer["parameter_index"] = parameter_index;
         layer.colors = this.parseColor(layer.colors);
         layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
         layer["visible"] = this.layervisible(
@@ -596,6 +647,13 @@ class GIS extends Component {
         );
 
         selectedlayers.unshift(layer);
+      } else {
+        alert("Failed to add layer, not found in database.");
+        selected = selected.filter(
+          (x) =>
+            parseInt(x[0]) !== parseInt(datasets_id) ||
+            parseInt(x[1]) !== parseInt(parameters_id)
+        );
       }
     }
     return { selectedlayers, datasets, selected };
@@ -609,25 +667,28 @@ class GIS extends Component {
       var { selectedlayers, datasets } = this.state;
 
       for (var i = 0; i < selectedlayers.length; i++) {
-        var dataset = datasets[selectedlayers[i].dataset_index];
-
         // Find closest file to datetime and depth
-        var fileid = this.closestFile(datetime, depth, dataset.files);
-        var datafile = findFileId(dataset.files, fileid);
+        var fileid = this.closestFile(datetime, depth, selectedlayers[i].files);
+        var datafile = findFileId(selectedlayers[i].files, fileid);
 
         // Add data from file closes to datetime and depth
-        if (!datafile.data) {
-          datafile.data = await this.downloadFile(datafile, dataset.datasource);
-        }
+        var data = await this.downloadFile(
+          selectedlayers[i].datasets_id,
+          fileid,
+          datafile.filelink,
+          selectedlayers[i].datasource,
+          datetime,
+          depth
+        );
 
         // Update the min and max value
         var { min, max, array } = this.getMinMax(
-          dataset.files,
+          data,
           selectedlayers[i].parameters_id,
           selectedlayers[i].datasetparameters,
-          dataset.mapplotfunction
+          selectedlayers[i].mapplotfunction
         );
-
+        selectedlayers[i].data = data;
         selectedlayers[i].min = min;
         selectedlayers[i].max = max;
         selectedlayers[i].array = array;
@@ -637,8 +698,8 @@ class GIS extends Component {
       this.setState({
         datetime,
         depth,
-        selectedlayers,
         datasets,
+        selectedlayers,
         loading: false,
       });
     });
@@ -732,6 +793,34 @@ class GIS extends Component {
     return value;
   };
 
+  componentDidUpdate(prevState) {
+    var {
+      selected,
+      hidden,
+      datetime,
+      depth,
+      zoom,
+      center,
+      basemap,
+    } = this.state;
+    var newSearch = this.searchLocation(
+      selected,
+      hidden,
+      datetime,
+      depth,
+      zoom,
+      center,
+      basemap
+    );
+    let { search, pathname } = this.props.location;
+    if (newSearch !== search) {
+      this.props.history.push({
+        pathname: pathname,
+        search: newSearch,
+      });
+    }
+  }
+
   async componentDidMount() {
     // Defaults
     var {
@@ -797,11 +886,6 @@ class GIS extends Component {
     var datasetparameters = server[2].data;
     var meteoswiss = server[3].data;
     var foen = server[4].data;
-
-    datasets = datasets.map((d) => {
-      d.files = [];
-      return d;
-    });
     var templates = { meteoswiss, foen };
 
     // Build selected layers object
@@ -841,34 +925,6 @@ class GIS extends Component {
     });
   }
 
-  componentDidUpdate(prevState) {
-    var {
-      selected,
-      hidden,
-      datetime,
-      depth,
-      zoom,
-      center,
-      basemap,
-    } = this.state;
-    var newSearch = this.searchLocation(
-      selected,
-      hidden,
-      datetime,
-      depth,
-      zoom,
-      center,
-      basemap
-    );
-    let { search, pathname } = this.props.location;
-    if (newSearch !== search) {
-      this.props.history.push({
-        pathname: pathname,
-        search: newSearch,
-      });
-    }
-  }
-
   render() {
     var {
       selectedlayers,
@@ -883,6 +939,13 @@ class GIS extends Component {
       zoom,
       center,
     } = this.state;
+    var {
+      files,
+      mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
+    } = this.getSliderParameters(selectedlayers);
     document.title = "Map Viewer - Datalakes";
     return (
       <React.Fragment>
@@ -901,8 +964,11 @@ class GIS extends Component {
           updateState={this.updateState}
           timeselector={
             <DatetimeDepthSelector
-              selectedlayers={selectedlayers}
-              datasets={datasets}
+              files={files}
+              mindatetime={mindatetime}
+              maxdatetime={maxdatetime}
+              mindepth={mindepth}
+              maxdepth={maxdepth}
               datetime={datetime}
               depth={depth}
               onChangeDatetime={this.onChangeDatetime}

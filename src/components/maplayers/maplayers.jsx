@@ -62,7 +62,7 @@ class GroupDisplay extends Component {
 }
 
 const SortableItem = SortableElement(({ layer, props }) => {
-  var { id, title, parameter_name } = layer;
+  var { id, title, name } = layer;
   var {
     selectedlayers,
     removeSelected,
@@ -75,7 +75,7 @@ const SortableItem = SortableElement(({ layer, props }) => {
         id={id}
         key={id}
         title={title}
-        parameter_name={parameter_name}
+        parameter_name={name}
         allowSettings={true}
         display={layer}
         displayGroup={selectedlayers}

@@ -183,6 +183,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     ctx.strokeStyle = color;
 
     // Arrow Rotation
+    if (value === 0) rotation = Math.PI / 4;
     ctx.rotate(rotation); // Rotation in rads
 
     // Set other properties
@@ -190,22 +191,36 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     ctx.lineWidth = 1;
 
     // Draw Path
-    ctx.beginPath();
-    ctx.moveTo(-size / 2, 0);
-    ctx.lineTo(+size / 2, 0);
-    ctx.moveTo(size * 0.25, -size * 0.25);
-    ctx.lineTo(+size / 2, 0);
-    ctx.lineTo(size * 0.25, size * 0.25);
-    ctx.stroke();
-    ctx.restore();
+    if (value === 0) {
+      ctx.beginPath();
+      ctx.moveTo(-size / 4, 0);
+      ctx.lineTo(+size / 4, 0);
+      ctx.moveTo(0, -size / 4);
+      ctx.lineTo(0, +size / 4);
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(-size / 2, 0);
+      ctx.lineTo(+size / 2, 0);
+      ctx.moveTo(size * 0.25, -size * 0.25);
+      ctx.lineTo(+size / 2, 0);
+      ctx.lineTo(size * 0.25, size * 0.25);
+      ctx.stroke();
+      ctx.restore();
+    }
   },
 
   getBounds: function () {
     var noNan = this._inputdata.flat().filter((i) => isNaN(i));
     var lat = noNan.map((n) => n[0]);
     var lng = noNan.map((n) => n[1]);
-    var southWest = L.latLng(this._CHtolatlng([Math.min(...lat), Math.min(...lng)]));
-    var northEast = L.latLng(this._CHtolatlng([Math.max(...lat), Math.max(...lng)]));
+    var southWest = L.latLng(
+      this._CHtolatlng([Math.min(...lat), Math.min(...lng)])
+    );
+    var northEast = L.latLng(
+      this._CHtolatlng([Math.max(...lat), Math.max(...lng)])
+    );
     return L.latLngBounds(southWest, northEast);
   },
 

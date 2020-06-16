@@ -7,9 +7,6 @@ import AvailbilityBarV from "./availabilitybarv";
 import BlurInput from "../blurinput/blurinput";
 
 class SliderSingleVertical extends Component {
-  state = {
-    dt: this.props.value,
-  };
   formatTick = (ms) => {
     return ms;
   };
@@ -28,25 +25,22 @@ class SliderSingleVertical extends Component {
       boxSizing: "border-box",
     };
     var { value, onChange, min, max, files } = this.props;
-    var { dt } = this.state;
-
     var dateTicks = scaleLinear()
       .domain([min, max])
       .ticks(8)
       .map((d) => +d);
-
     return (
       <React.Fragment>
         <div className="maindepth" title="Map reference depth">
           <div>Depth</div>
-          <BlurInput value={dt} type="number" onBlur={onChange} min={0} />
+          <BlurInput value={value} type="number" onBlur={onChange} min={0} />
           <span className="unit">m</span>
         </div>
         <div className="verticalslider" title="Select your desired depth">
           <Slider
             vertical
             mode={1}
-            step={1}
+            step={0.1}
             domain={[+min, +max]}
             rootStyle={sliderStyle}
             values={[value]}

@@ -9,7 +9,7 @@ class BlurInput extends Component {
   };
   onKeyUp = (e) => {
     if (e.keyCode === 13) {
-        var { onBlur } = this.props;
+      var { onBlur } = this.props;
       var value = [document.getElementById("input").value];
       onBlur(value);
     }

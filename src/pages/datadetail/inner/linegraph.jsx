@@ -46,9 +46,9 @@ class LineGraph extends Component {
   };
 
   handleAxisSelect = (axis) => (event) => {
-    var { parameters } = this.props;
+    var { datasetparameters } = this.props;
     var { xlabel, ylabel, xunits, yunits } = this.state;
-    var parameter = parameters.find((x) => x.axis === event.value);
+    var parameter = datasetparameters.find((x) => x.axis === event.value);
     if (axis === "yaxis") {
       ylabel = parameter.name;
       yunits = parameter.unit;
@@ -98,12 +98,12 @@ class LineGraph extends Component {
   };
 
   setDefault = () => {
-    var { parameters, dataset, getLabel } = this.props;
+    var { datasetparameters, dataset, getLabel } = this.props;
     var { xaxis, yaxis } = this.state;
 
     // Get axis labels and units
-    const xparam = parameters.find((x) => x.axis === xaxis);
-    const yparam = parameters.find((y) => y.axis === yaxis);
+    const xparam = datasetparameters.find((x) => x.axis === xaxis);
+    const yparam = datasetparameters.find((y) => y.axis === yaxis);
     var xlabel = getLabel("parameters", xparam.parameters_id, "name");
     var ylabel = getLabel("parameters", yparam.parameters_id, "name");
     var xunits = xparam.unit;
@@ -194,7 +194,7 @@ class LineGraph extends Component {
       toggleAddNewFile,
       onChangeLower,
       onChangeUpper,
-      parameters,
+      datasetparameters,
       getLabel,
       data,
       lower,
@@ -229,7 +229,7 @@ class LineGraph extends Component {
     var filecontrol = false;
 
     // Show time slider or multiple files
-    var time = parameters.filter((p) => p.parameters_id === 1);
+    var time = datasetparameters.filter((p) => p.parameters_id === 1);
     var timeSlider = false;
     var fileSlider = false;
     if (files.length > 1) {
@@ -246,48 +246,48 @@ class LineGraph extends Component {
     var xoptions = [];
     var yoptions = [];
     var parent;
-    for (var j = 0; j < parameters.length; j++) {
-      var detail = parameters[j]["detail"];
+    for (var j = 0; j < datasetparameters.length; j++) {
+      var detail = datasetparameters[j]["detail"];
       if (["none", null, "null"].includes(detail)) {
         detail = "";
       } else {
         detail = ` (${detail})`;
       }
-      if (parameters[j]["axis"].includes("x")) {
-        if (Number.isInteger(parameters[j]["link"])) {
-          parent = this.findLink(parameters, parameters[j]["link"]);
+      if (datasetparameters[j]["axis"].includes("x")) {
+        if (Number.isInteger(datasetparameters[j]["link"])) {
+          parent = this.findLink(datasetparameters, datasetparameters[j]["link"]);
           xoptions.push({
-            value: parameters[j]["axis"],
+            value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
               " (" +
               getLabel("parameters", parent["parameters_id"], "name") +
               ")",
           });
         } else {
           xoptions.push({
-            value: parameters[j]["axis"],
+            value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
               detail,
           });
         }
-      } else if (parameters[j]["axis"].includes("y")) {
-        if (Number.isInteger(parameters[j]["link"])) {
-          parent = this.findLink(parameters, parameters[j]["link"]);
+      } else if (datasetparameters[j]["axis"].includes("y")) {
+        if (Number.isInteger(datasetparameters[j]["link"])) {
+          parent = this.findLink(datasetparameters, datasetparameters[j]["link"]);
           yoptions.push({
-            value: parameters[j]["axis"],
+            value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
               " (" +
               getLabel("parameters", parent["parameters_id"], "name") +
               ")",
           });
         } else {
           yoptions.push({
-            value: parameters[j]["axis"],
+            value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", parameters[j]["parameters_id"], "name") +
+              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
               detail,
           });
         }
@@ -300,14 +300,14 @@ class LineGraph extends Component {
       var mxaxis = null;
       var xupper = false;
       var xlower = false;
-      var xp = parameters.find((p) => p.axis === xaxis);
-      var xpm = parameters.filter(
+      var xp = datasetparameters.find((p) => p.axis === xaxis);
+      var xpm = datasetparameters.filter(
         (p) => p.link === xp.id && p.parameters_id === 27
       );
-      var xpcu = parameters.filter(
+      var xpcu = datasetparameters.filter(
         (p) => p.link === xp.id && p.parameters_id === 29
       );
-      var xpcl = parameters.filter(
+      var xpcl = datasetparameters.filter(
         (p) => p.link === xp.id && p.parameters_id === 30
       );
       if (xpm.length === 1) {
@@ -321,14 +321,14 @@ class LineGraph extends Component {
       var myaxis = null;
       var yupper = false;
       var ylower = false;
-      var yp = parameters.find((p) => p.axis === yaxis);
-      var ypm = parameters.filter(
+      var yp = datasetparameters.find((p) => p.axis === yaxis);
+      var ypm = datasetparameters.filter(
         (p) => p.link === yp.id && p.parameters_id === 27
       );
-      var ypcu = parameters.filter(
+      var ypcu = datasetparameters.filter(
         (p) => p.link === yp.id && p.parameters_id === 29
       );
-      var ypcl = parameters.filter(
+      var ypcl = datasetparameters.filter(
         (p) => p.link === yp.id && p.parameters_id === 30
       );
       if (ypm.length === 1) {

@@ -7,45 +7,16 @@ import SliderSingleVertical from "./slidersinglevertical";
 class DatetimeDepthSelector extends Component {
   render() {
     var {
-      selectedlayers,
+      files,
+      mindepth,
+      maxdepth,
+      mindatetime,
+      maxdatetime,
       datetime,
       depth,
       onChangeDepth,
       onChangeDatetime,
-      datasets,
     } = this.props;
-    var mindatetime = new Date(
-      Math.min(new Date().getTime() - 1209600000, datetime.getTime())
-    );
-    var maxdatetime = new Date(
-      Math.max(new Date().getTime(), datetime.getTime())
-    );
-    
-    var mindepth = Math.min(0, depth);
-    var maxdepth = Math.max(1, depth);
-
-    function findDataset(datasets, id) {
-      return datasets.find((d) => d.id === id);
-    }
-
-    var files = [];
-    for (var i = 0; i < selectedlayers.length; i++) {
-      mindatetime = new Date(
-        Math.min(mindatetime, new Date(selectedlayers[i].mindatetime))
-      );
-      maxdatetime = new Date(
-        Math.max(maxdatetime, new Date(selectedlayers[i].maxdatetime))
-      );
-      maxdepth = Math.max(maxdepth, selectedlayers[i].maxdepth);
-
-      // File list
-      files = files.concat(
-        findDataset(datasets, selectedlayers[i].datasets_id).files
-      );
-    }
-
-    maxdepth = Math.min(370, maxdepth);
-
     return (
       <div className="ddselector">
         <div className="datetime">
