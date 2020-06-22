@@ -17,6 +17,7 @@
     "react": "^16.9.0",
     "react-color": "^2.17.3",
     "react-compound-slider": "^2.3.0",
+    "react-datepicker": "^3.0.0",
     "react-datetime-picker": "^2.9.0",
     "react-dom": "^16.9.0",
     "react-native-hyperlink": "0.0.16",

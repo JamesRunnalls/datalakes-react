@@ -190,7 +190,6 @@ class EditSettings extends Component {
                       type="checkbox"
                       checked={vectorFlow}
                       onChange={this.localVectorFlowChange}
-                      disabled
                     ></input>
                   </td>
                   <td>Flow Path</td>
@@ -198,7 +197,6 @@ class EditSettings extends Component {
                     <select
                       value={vectorFlowColor}
                       onChange={this.localVectorFlowColorChange}
-                      disabled
                     >
                       <option value="true">Color Ramp</option>
                       <option value="false">Fixed Color</option>

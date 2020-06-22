@@ -1,0 +1,79 @@
+.rs {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  box-sizing: border-box;
+  position: relative;
+  height: 600px;
+}
+
+.rs.full {
+  height: 100vh;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 999;
+}
+
+.rs .title {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.rs .sidebar {
+  width: 300px;
+  height: 100%;
+  display: inline-block;
+  background: #f3f3f3;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.rs .sidebar.hidden {
+  display: none;
+}
+
+.rs .sidebar .layers {
+  height: 120px;
+}
+
+.rs .sidebar .layers .react-datepicker-wrapper {
+  width: 100%;
+}
+
+.rs .sidebar .layers select {
+  width: 100%;
+  margin-bottom: 10px;
+  height: 22px;
+}
+
+.rs .sidebar .layers input {
+  width: calc(100% - 8px);
+  margin-bottom: 10px;
+}
+
+.rs .sidebar .pixelinfo {
+  height: calc(100% - 390px);
+}
+
+.rs .sidebar .colormanipulation-outer {
+  height: 250px;
+}
+
+.rs .basemapwrapper {
+  width: calc(100vw - 300px);
+  height: 100%;
+  display: inline-block;
+  vertical-align: top;
+  position: relative;
+}
+
+.rs .basemapwrapper.full {
+  width: 100%;
+}
+
+.rs .basemapwrapper .controls {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 998;
+}

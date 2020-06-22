@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import L from "leaflet";
+import * as d3 from "d3";
 import "leaflet-draw";
 import "./leaflet_vectorField";
+import "./leaflet_vectorFieldAnim";
 import "./leaflet_customcontrol";
 import "./leaflet_colorpicker";
 import { getColor } from "../../components/gradients/gradients";
@@ -605,12 +607,52 @@ class Basemap extends Component {
       }
 
       if (vectorFlow) {
+        var vectordata = this.meteolakesParseVectorData(data);
+        //var vectors = L.vectorFieldAnim(data, {
+        //  paths: 800,
+        //}).addTo(this.map);
+        //this.raster.push(vectors);
       }
 
       if (!("center" in this.props) && !("zoom" in this.props)) {
         this.map.fitBounds(this.raster[0].getBounds());
       }
     }
+  };
+
+  meteolakesParseVectorData = (data, x, y, radius) => {
+    var nCols = data[0].length;
+    var nRows = data.length;
+    let flatdata = data.flat().filter((d) => d !== null);
+    let quadtreedata = flatdata.map((f) => [f[1], f[0], f[3], f[4]]);
+
+    let y_array = flatdata.map((df) => df[0]);
+    let x_array = flatdata.map((df) => df[1]);
+    let min_x = Math.min(...x_array);
+    let min_y = Math.min(...y_array);
+    let max_x = Math.max(...x_array);
+    let max_y = Math.max(...y_array);
+    let xSize = (max_x - min_x) / nCols;
+    let ySize = (max_y - min_y) / nRows;
+
+    let quadtree = d3
+      .quadtree()
+      .extent([
+        [min_x, min_y],
+        [max_x, max_y],
+      ])
+      .addAll(quadtreedata);
+
+    var outdata = Array(nRows).fill(Array(nCols).fill(null));
+    var dist, x, y;
+    for (var i = 0; i < nRows; i++) {
+      y = max_y - i * ySize;
+      for (var j = 0; j < nCols; j++) {
+        x = min_x + j * xSize;
+        outdata[i][j] = quadtree.find(x, y, radius);
+      }
+    }
+    return outdata;
   };
 
   gitPlot = async (layer, file) => {
@@ -843,18 +885,24 @@ class Basemap extends Component {
     this.line = L.layerGroup().addTo(this.map);
 
     var map = this.map;
+    var passLocation = this.props.passLocation;
     this.map.on("mousemove", function (e) {
       var lat = Math.round(1000 * e.latlng.lat) / 1000;
       var lng = Math.round(1000 * e.latlng.lng) / 1000;
       var a = colorpicker.getColor(e.latlng);
-      var h = NaN;
+      var alt = NaN;
       if (a !== null) {
-        h =
+        alt =
           Math.round(
             10 * (-10000 + (a[0] * 256 * 256 + a[1] * 256 + a[2]) * 0.1)
           ) / 10;
       }
-      map.attributionControl.setPrefix("(" + lat + "," + lng + ") " + h + "m");
+      map.attributionControl.setPrefix(
+        "(" + lat + "," + lng + ") " + alt + "m"
+      );
+      if (passLocation) {
+        passLocation({ lat, lng, alt });
+      }
     });
 
     if ("updateLocation" in this.props) {

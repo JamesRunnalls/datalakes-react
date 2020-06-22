@@ -70,71 +70,73 @@ class ColorTable extends Component {
     }
 
     return (
-      <form id="colortable" className="colortable">
-        <table>
-          <tbody>
-            {colors.map((color, index) => {
-              var value = min + color.point * (max - min);
-              return (
-                <tr key={index}>
-                  <td style={{ width: "45%" }}>
-                    <input
-                      type="color"
-                      id={index}
-                      value={color.color}
-                      onChange={this.updateColors}
-                    ></input>
-                  </td>
-                  <td style={{ width: "45%" }}>
-                    {index === 0 || index === colors.length - 1 ? (
-                      <div>{value}</div>
-                    ) : (
+      <div className="colortable">
+        <form id="colortable">
+          <table>
+            <tbody>
+              {colors.map((color, index) => {
+                var value = min + color.point * (max - min);
+                return (
+                  <tr key={index}>
+                    <td style={{ width: "45%" }}>
                       <input
-                        type="text"
-                        defaultValue={value}
-                        onChange={this.updatePoint(index, min, max)}
+                        type="color"
+                        id={index}
+                        value={color.color}
+                        onChange={this.updateColors}
                       ></input>
-                    )}
-                  </td>
-                  <td style={{ width: "10%" }}>
-                    {index !== colors.length - 1 && index !== 0 && (
-                      <div
-                        className="colortable-deleterow"
-                        title="Delete color"
-                        onClick={() => this.deleteRow(index)}
-                      >
-                        -
-                      </div>
-                    )}
-                    {index === colors.length - 1 && (
-                      <div
-                        className="colortable-deleterow"
-                        title="Add extra color"
-                        onClick={this.addRow}
-                      >
-                        +
-                      </div>
-                    )}
+                    </td>
+                    <td style={{ width: "45%" }}>
+                      {index === 0 || index === colors.length - 1 ? (
+                        <div>{value}</div>
+                      ) : (
+                        <input
+                          type="text"
+                          defaultValue={value}
+                          onChange={this.updatePoint(index, min, max)}
+                        ></input>
+                      )}
+                    </td>
+                    <td style={{ width: "10%" }}>
+                      {index !== colors.length - 1 && index !== 0 && (
+                        <div
+                          className="colortable-deleterow"
+                          title="Delete color"
+                          onClick={() => this.deleteRow(index)}
+                        >
+                          -
+                        </div>
+                      )}
+                      {index === colors.length - 1 && (
+                        <div
+                          className="colortable-deleterow"
+                          title="Add extra color"
+                          onClick={this.addRow}
+                        >
+                          +
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {array && (
+                <tr>
+                  <td colSpan="2">
+                    <button
+                      type="button"
+                      title="Optimise point distribution"
+                      onClick={this.optimisePoints}
+                    >
+                      Optimise Points
+                    </button>
                   </td>
                 </tr>
-              );
-            })}
-            {array && (
-              <tr>
-                <td colSpan="2">
-                  <button
-                    type="button"
-                    title="Optimise point distribution"
-                    onClick={this.optimisePoints}
-                  >
-                    Optimise Points
-                  </button>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </form>
+              )}
+            </tbody>
+          </table>
+        </form>
+      </div>
     );
   }
 }

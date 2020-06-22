@@ -494,8 +494,8 @@ class DataDetail extends Component {
         datasetparameters,
         dropdown,
         files,
-        step: "external",
-        allowedStep: ["external","webgis"],
+        step: "remotesensing",
+        allowedStep: ["remotesensing","external","webgis"],
       });
     } else {
       this.setState({
@@ -734,6 +734,12 @@ class DataDetail extends Component {
         return (
           <React.Fragment>
             <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
             <RemoteSensing
               dataset={dataset}
               datasetparameters={datasetparameters}

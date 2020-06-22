@@ -33,6 +33,15 @@ class DataSubMenu extends Component {
               <div className="subnav-text">3D Model</div>
             </div>
             <div
+              title="Interact with remote sensing data"
+              className={this.active("remotesensing",step) ? "subnav-item active" : "subnav-item"}
+              style={{display: this.hide("remotesensing",allowedStep) && 'none'}}
+              onClick={() => updateSelectedState("remotesensing")}
+            >
+              <img src={td} className="subnav-img" alt="3D" />
+              <div className="subnav-text">Map</div>
+            </div>
+            <div
               title="Information on external data source"
               className={this.active("external",step) ? "subnav-item active" : "subnav-item"}
               style={{display: this.hide("external",allowedStep) && 'none'}}

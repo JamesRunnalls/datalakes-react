@@ -1,5 +1,12 @@
+.colortable {
+  height: calc(100% - 60px);
+  overflow: auto;
+}
+
 .colortable table {
   width: 100%;
+  height: 100%;
+  overflow: auto;
 }
 
 form.colortable table input {

@@ -12,7 +12,7 @@ class External extends Component {
     for (var row of datasetparameters) {
       rows.push(
         <tr key={row.id}>
-          <td>{getLabel("datasetparameters", row.parameters_id, "name")}</td>
+          <td>{getLabel("parameters", row.parameters_id, "name")}</td>
           <td>{row.axis}</td>
           <td>{row.unit}</td>
           <td>

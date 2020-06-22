@@ -7,24 +7,30 @@ import ColorSolid from "../colorsolid/colorsolid";
 
 class ColorManipulation extends Component {
   state = {
-    manipulation: "ramp"
+    manipulation: "ramp",
+    colors: [
+      { color: "#000080", point: 0 },
+      { color: "#3366FF", point: 0.142857142857143 },
+      { color: "#00B0DC", point: 0.285714285714286 },
+      { color: "#009933", point: 0.428571428571429 },
+      { color: "#FFFF5B", point: 0.571428571428571 },
+      { color: "#E63300", point: 0.714285714285714 },
+      { color: "#CC0000", point: 0.857142857142857 },
+      { color: "#800000", point: 1 },
+    ],
   };
 
-  setManipulation = manipulation => {
+  setManipulation = (manipulation) => {
     if (manipulation !== this.state.manipulation) {
       this.setState({ manipulation });
     }
-  };
-
-  localColorChange = colors => {
-    this.setState({ colors });
   };
 
   render() {
     var { manipulation } = this.state;
     var { onChange, array, colors } = this.props;
     return (
-      <div>
+      <div className="colormanipulation-outer">
         <div className="colormanipulation-headerbar">
           <div
             className={
@@ -67,25 +73,23 @@ class ColorManipulation extends Component {
             Slider
           </div>*/}
         </div>
-        <div>
-          {manipulation === "solid" && (
-            <ColorSolid onChange={onChange} colors={colors} />
-          )}
-          {manipulation === "ramp" && (
-            <ColorRamp onChange={onChange} colors={colors} />
-          )}
-          {manipulation === "table" && (
-            <ColorTable
-              onChange={onChange}
-              colors={colors}
-              array={array}
-              autoOptimise={true}
-            />
-          )}
-          {manipulation === "slider" && (
-            <ColorSlider onChange={onChange} colors={colors} array={array} />
-          )}
-        </div>
+        {manipulation === "solid" && (
+          <ColorSolid onChange={onChange} colors={colors} />
+        )}
+        {manipulation === "ramp" && (
+          <ColorRamp onChange={onChange} colors={colors} />
+        )}
+        {manipulation === "table" && (
+          <ColorTable
+            onChange={onChange}
+            colors={colors}
+            array={array}
+            autoOptimise={true}
+          />
+        )}
+        {manipulation === "slider" && (
+          <ColorSlider onChange={onChange} colors={colors} array={array} />
+        )}
       </div>
     );
   }
