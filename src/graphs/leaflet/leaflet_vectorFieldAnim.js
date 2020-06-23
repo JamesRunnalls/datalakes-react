@@ -3,13 +3,13 @@ import * as d3 from "d3";
 
 L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
   options: {
-    paths: 50,
-    color: "black", // html-color | function colorFor(value) [e.g. chromajs.scale]
-    width: 2.0, // number | function widthFor(value)
-    fade: 0.96, // 0 to 1
-    duration: 20, // milliseconds per 'frame'
-    maxAge: 500, // number of maximum frames per path
-    velocityScale: 100,
+    paths: 800,
+    color: "black",
+    width: 0.5,
+    fade: 0.97,
+    duration: 10,
+    maxAge: 1000,
+    velocityScale: 700,
   },
   initialize: function (inputdata, options) {
     this._inputdata = inputdata;
@@ -29,20 +29,13 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     } else {
       map._panes.overlayPane.appendChild(this._canvas);
     }
-
+    map.on("click", this._onClick, this);
     map.on("moveend", this._reset, this);
-
     map.on("movestart", this._clear, this);
-
-    if (map.options.zoomAnimation && L.Browser.any3d) {
-      //map.on("zoomanim", this._animateZoom, this);
-    }
-
     this._reset();
   },
 
   _reset: function () {
-    console.log("Firing");
     this._stopAnimation();
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this._canvas, topLeft);
@@ -60,13 +53,9 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     } else {
       map.getPanes().overlayPane.removeChild(this._canvas);
     }
-
+    map.off("click", this._onClick, this);
     map.off("moveend", this._reset, this);
     map.off("movestart", this._clear, this);
-
-    if (map.options.zoomAnimation) {
-      //map.off("zoomanim", this._animateZoom, this);
-    }
   },
 
   addTo: function (map) {
@@ -107,7 +96,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     this._ctx.clearRect(0, 0, this._width, this._height);
     this._paths = this._prepareParticlePaths();
     let self = this;
-    /*for (var i = 0; i < 20; i++) {
+    /*for (var i = 0; i < 2000; i++) {
       self._moveParticles();
       self._drawParticles();
     }*/
@@ -122,22 +111,22 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     let self = this;
     this._paths.forEach(function (par) {
       if (par.age > self.options.maxAge) {
-        par = self._randomPosition();
+        self._randomPosition(par);
+        par.age = 0;
+      }
+      let xt = par.x + par.u * self.options.velocityScale;
+      let yt = par.y + par.v * self.options.velocityScale;
+      let index = self._getIndexAtPoint(xt, yt);
+      if (index === null) {
+        self._randomPosition(par);
         par.age = 0;
       } else {
-        let xt = par.x + par.u * self.options.velocityScale;
-        let yt = par.y + par.v * self.options.velocityScale;
-        let index = self._getIndexAtPoint(xt, yt);
-        if (index === null) {
-          par = self._randomPosition();
-          par.age = 0;
-        } else {
-          par.xt = xt;
-          par.yt = yt;
-          par.ut = vectordata[index[0]][index[1]][0];
-          par.vt = vectordata[index[0]][index[1]][1];
-        }
+        par.xt = xt;
+        par.yt = yt;
+        par.ut = vectordata[index[0]][index[1]][0];
+        par.vt = vectordata[index[0]][index[1]][1];
       }
+
       par.age += 1;
     });
   },
@@ -145,11 +134,10 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
   _drawParticles: function () {
     // Previous paths...
     let ctx = this._ctx;
-    let prev = ctx.globalCompositeOperation;
     ctx.globalCompositeOperation = "destination-in";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    //ctx.globalCompositeOperation = 'source-over';
-    ctx.globalCompositeOperation = prev;
+    ctx.globalCompositeOperation = "source-over";
+    //ctx.globalCompositeOperation = prev;
 
     // fading paths...
     ctx.fillStyle = `rgba(0, 0, 0, ${this.options.fade})`;
@@ -187,12 +175,14 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
         // colormap vs. simple color
         let color = this.options.color;
         if (typeof color === "function") {
-          ctx.strokeStyle = color(par.m);
+          let mag = Math.sqrt(par.u ** 2 + par.v ** 2);
+          ctx.strokeStyle = color(mag);
         }
 
         let width = this.options.width;
         if (typeof width === "function") {
-          ctx.lineWidth = width(par.m);
+          let mag = Math.sqrt(par.u ** 2 + par.v ** 2);
+          ctx.lineWidth = width(mag);
         }
 
         ctx.stroke();
@@ -252,13 +242,22 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
       vectordata,
     } = this._inputdata;
 
+    delete o.xt;
+    delete o.yt;
+    delete o.ut;
+    delete o.vt;
+
     var maxiter = 1000;
     for (var k = 0; k < maxiter; k++) {
       let i = (Math.random() * nRows) | 0;
       let j = (Math.random() * nCols) | 0;
       if (vectordata[i][j] !== null) {
-        o.x = xllcorner + j * xSize;
-        o.y = yllcorner + (vectordata.length - i) * ySize;
+        o.x = xllcorner + j * xSize + xSize * Math.random() - xSize / 2;
+        o.y =
+          yllcorner +
+          (vectordata.length - i) * ySize +
+          ySize * Math.random() -
+          ySize / 2;
         o.u = vectordata[i][j][0];
         o.v = vectordata[i][j][1];
         return o;
@@ -287,10 +286,50 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
 
     return [lat, lng];
   },
+  _WGSlatlngtoCH: function (lat, lng) {
+    lat = lat * 3600;
+    lng = lng * 3600;
+    var lat_aux = (lat - 169028.66) / 10000;
+    var lng_aux = (lng - 26782.5) / 10000;
+    var y =
+      2600072.37 +
+      211455.93 * lng_aux -
+      10938.51 * lng_aux * lat_aux -
+      0.36 * lng_aux * lat_aux ** 2 -
+      44.54 * lng_aux ** 3 -
+      2000000;
+    var x =
+      1200147.07 +
+      308807.95 * lat_aux +
+      3745.25 * lng_aux ** 2 +
+      76.63 * lat_aux ** 2 -
+      194.56 * lng_aux ** 2 * lat_aux +
+      119.79 * lat_aux ** 3 -
+      1000000;
+    return { x, y };
+  },
   _stopAnimation: function () {
     if (this.timer) {
       this.timer.stop();
     }
+  },
+  _onClick: function (t) {
+    var e = this._queryValue(t);
+    this.fire("click", e);
+  },
+  _queryValue: function (click) {
+    var { vectordata } = this._inputdata;
+    var point = this._WGSlatlngtoCH(click.latlng.lat, click.latlng.lng);
+    let index = this._getIndexAtPoint(point.y, point.x);
+    if (index === null) {
+      click["value"] = { u: null, v: null };
+    } else {
+      click["value"] = {
+        u: vectordata[index[0]][index[1]][0],
+        v: vectordata[index[0]][index[1]][1],
+      };
+    }
+    return click;
   },
 });
 

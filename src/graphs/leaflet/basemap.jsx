@@ -408,6 +408,7 @@ class Basemap extends Component {
       vectorArrows,
       vectorMagnitude,
       vectorFlow,
+      vectorFlowColor,
       vectorArrowColor,
       min,
       max,
@@ -429,6 +430,7 @@ class Basemap extends Component {
       depthdiff,
       valuestring,
       pixelcolor;
+    var map = this.map;
     if (parameters_id === 5) {
       polygons = [];
       matrix = data;
@@ -487,6 +489,7 @@ class Basemap extends Component {
                     layer.title +
                     "</strong></td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+                    "Lake Zurich" +
                     "</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
@@ -603,14 +606,86 @@ class Basemap extends Component {
           max,
           size: 15,
         }).addTo(this.map);
+        arrows.on("click", function (e) {
+          if (e.value !== null && e.value.u !== null) {
+            let { u, v } = e.value;
+            let { lat, lng } = e.latlng;
+            lat = Math.round(lat * 1000) / 1000;
+            lng = Math.round(lng * 1000) / 1000;
+            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+            let deg = Math.round(
+              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+            );
+            if (deg < 0) deg = 360 + deg;
+            let html =
+              "<table><tbody>" +
+              '<tr><td colSpan="2"><strong>' +
+              layer.title +
+              "</strong></td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+              "Lake Zurich" +
+              "</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
+              `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
+              `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
+              `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
+              `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
+              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
+              ">More information</a></td></tr>" +
+              "</tbody></table>";
+            L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
+          }
+        });
         this.raster.push(arrows);
       }
 
       if (vectorFlow) {
-        var vectordata = this.meteolakesParseVectorData(data, 120);
+        function getLineColor(val) {
+          return getColor(val, min, max, colors);
+        }
+        var color = "white";
+        if (vectorFlowColor) {
+          color = getLineColor;
+        }
+        var vectordata = this.meteolakesParseVectorData(data, 150);
         var vectors = L.vectorFieldAnim(vectordata, {
-          paths: 800,
+          paths: 5000,
+          color,
         }).addTo(this.map);
+        vectors.on("click", function (e) {
+          if (e.value !== null && e.value.u !== null) {
+            let { u, v } = e.value;
+            let { lat, lng } = e.latlng;
+            lat = Math.round(lat * 1000) / 1000;
+            lng = Math.round(lng * 1000) / 1000;
+            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+            let deg = Math.round(
+              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+            );
+            if (deg < 0) deg = 360 + deg;
+            let html =
+              "<table><tbody>" +
+              '<tr><td colSpan="2"><strong>' +
+              layer.title +
+              "</strong></td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
+              "Lake Zurich" +
+              "</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
+              `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
+              `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
+              `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
+              `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
+              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
+              ">More information</a></td></tr>" +
+              "</tbody></table>";
+            L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
+          }
+        });
         this.raster.push(vectors);
       }
 
@@ -865,6 +940,14 @@ class Basemap extends Component {
       }
     );
 
+    var dark = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      }
+    );
+
     var topolink =
       "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.pngraw?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ";
 
@@ -872,6 +955,7 @@ class Basemap extends Component {
       datalakesmap,
       swisstopo,
       satellite,
+      dark,
     };
 
     this.layer = datalakesmap;

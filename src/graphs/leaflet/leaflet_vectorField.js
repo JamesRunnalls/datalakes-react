@@ -40,7 +40,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     } else {
       map._panes.overlayPane.appendChild(this._canvas);
     }
-
+    map.on("click", this._onClick, this);
     map.on("moveend", this._reset, this);
 
     if (map.options.zoomAnimation && L.Browser.any3d) {
@@ -56,7 +56,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     } else {
       map.getPanes().overlayPane.removeChild(this._canvas);
     }
-
+    map.off("click", this._onClick, this);
     map.off("moveend", this._reset, this);
 
     if (map.options.zoomAnimation) {
@@ -125,7 +125,28 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
 
     return [lat, lng];
   },
-
+  _WGSlatlngtoCH: function (lat, lng) {
+    lat = lat * 3600;
+    lng = lng * 3600;
+    var lat_aux = (lat - 169028.66) / 10000;
+    var lng_aux = (lng - 26782.5) / 10000;
+    var y =
+      2600072.37 +
+      211455.93 * lng_aux -
+      10938.51 * lng_aux * lat_aux -
+      0.36 * lng_aux * lat_aux ** 2 -
+      44.54 * lng_aux ** 3 -
+      2000000;
+    var x =
+      1200147.07 +
+      308807.95 * lat_aux +
+      3745.25 * lng_aux ** 2 +
+      76.63 * lat_aux ** 2 -
+      194.56 * lng_aux ** 2 * lat_aux +
+      119.79 * lat_aux ** 3 -
+      1000000;
+    return { x, y };
+  },
   _pixelSize: function () {
     var d = this._inputdata;
     var nRows = d.length;
@@ -359,6 +380,30 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
       this._canvas.style[L.DomUtil.TRANSFORM] =
         L.DomUtil.getTranslateString(offset) + " scale(" + scale + ")";
     }
+  },
+
+  _onClick: function (t) {
+    var e = this._queryValue(t);
+    this.fire("click", e);
+  },
+  _queryValue: function (click) {
+    let point = this._WGSlatlngtoCH(click.latlng.lat, click.latlng.lng);
+    let data = this._inputdata.flat().filter((i) => i !== null);
+    data = data.map((d) => {
+      return {
+        data: d,
+        dist: Math.sqrt((d[0] - point.y) ** 2 + (d[1] - point.x) ** 2),
+      };
+    });
+    data.sort((a, b) => (a.dist > b.dist ? 1 : -1));
+    let u = null;
+    let v = null;
+    if (data[0].dist < 100) {
+      u = data[0].data[3];
+      v = data[0].data[4];
+    }
+    click["value"] = { u, v };
+    return click;
   },
 });
 

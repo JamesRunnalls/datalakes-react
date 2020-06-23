@@ -44,6 +44,7 @@ class ThreeDMenu extends Component {
                 <option value="datalakesmap">Datalakes Map</option>
                 <option value="swisstopo">Swisstopo</option>
                 <option value="satellite">Satellite</option>
+                <option value="dark">Dark</option>
               </select>
             </div>
           }

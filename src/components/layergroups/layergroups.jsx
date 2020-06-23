@@ -43,6 +43,12 @@ class LayerGroups extends Component {
         img: editlayers,
         data: { selected: [[11, 5],[11,25]], center: [47.282, 8.729], zoom: 12 },
       },
+      {
+        name: "Lake Zurich Velocities",
+        description: "Some description",
+        img: editlayers,
+        data: { selected: [[11,25]], center: [47.274,8.761], zoom: 11, basemap: "dark" },
+      },
     ];
     return (
       <div className="layergroups">

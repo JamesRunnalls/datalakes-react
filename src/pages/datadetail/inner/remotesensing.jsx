@@ -11,9 +11,7 @@ import colorlist from "../../../components/colorramp/colors";
 import { apiUrl } from "../../../../src/config.json";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Legend from "../../../components/legend/legend";
 import ColorManipulation from "../../../components/colormanipulation/colormanipulation";
-import { array } from "prop-types";
 
 class RemoteSensingSidebar extends Component {
   state = {};
@@ -77,6 +75,7 @@ class RemoteSensingSidebar extends Component {
             <option value="datalakesmap">Datalakes Map</option>
             <option value="swisstopo">Swisstopo</option>
             <option value="satellite">Satellite</option>
+            <option value="dark">Dark</option>
           </select>
         </div>
         <div className="pixelinfo">
@@ -603,7 +602,7 @@ class RemoteSensing extends Component {
         downloads,
       };
     } else {
-      var data, realdatetime, realdepth, realdata;
+      var data, realdatetime, realdepth;
       var datetimeunix = Math.round(datetime.getTime() / 1000);
       filelink = filelink.replace(":datetime", datetimeunix);
       filelink = filelink.replace(":depth", depth);
@@ -738,7 +737,6 @@ class RemoteSensing extends Component {
       zoomIn,
       zoomOut,
     } = this.state;
-    var { dataset } = this.props;
     var controls = [
       { title: "Menu", active: menu, onClick: this.toggleMenu, img: menuicon },
       {

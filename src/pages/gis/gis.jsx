@@ -46,6 +46,7 @@ class SidebarGIS extends Component {
                 <option value="datalakesmap">Datalakes Map</option>
                 <option value="swisstopo">Swisstopo</option>
                 <option value="satellite">Satellite</option>
+                <option value="dark">Dark</option>
               </select>
             </div>
           }
@@ -785,7 +786,7 @@ class GIS extends Component {
           value = [lat, lng];
         }
       } else if (["basemap"].includes(query)) {
-        if (["datalakesmap", "swisstopo", "satellite"].includes(newValue)) {
+        if (["datalakesmap", "swisstopo", "satellite","dark"].includes(newValue)) {
           value = newValue;
         }
       }
