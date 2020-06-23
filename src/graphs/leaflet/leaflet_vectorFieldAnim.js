@@ -3,18 +3,16 @@ import * as d3 from "d3";
 
 L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
   options: {
-    paths: 1600,
+    paths: 50,
     color: "black", // html-color | function colorFor(value) [e.g. chromajs.scale]
     width: 2.0, // number | function widthFor(value)
     fade: 0.96, // 0 to 1
-    duration: 5, // milliseconds per 'frame'
-    maxAge: 200, // number of maximum frames per path
+    duration: 20, // milliseconds per 'frame'
+    maxAge: 500, // number of maximum frames per path
     velocityScale: 100,
-    maxDistance: 100,
   },
   initialize: function (inputdata, options) {
     this._inputdata = inputdata;
-    this._searchinput = inputdata.flat().filter((id) => id !== null);
     L.Util.setOptions(this, options);
     this.timer = null;
   },
@@ -34,18 +32,26 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
 
     map.on("moveend", this._reset, this);
 
+    map.on("movestart", this._clear, this);
+
     if (map.options.zoomAnimation && L.Browser.any3d) {
       //map.on("zoomanim", this._animateZoom, this);
     }
 
-    //this._reset();
+    this._reset();
   },
 
   _reset: function () {
+    console.log("Firing");
     this._stopAnimation();
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this._canvas, topLeft);
     this._drawLayer();
+  },
+
+  _clear: function () {
+    this._ctx.clearRect(0, 0, this._width, this._height);
+    this._stopAnimation();
   },
 
   onRemove: function (map) {
@@ -56,6 +62,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     }
 
     map.off("moveend", this._reset, this);
+    map.off("movestart", this._clear, this);
 
     if (map.options.zoomAnimation) {
       //map.off("zoomanim", this._animateZoom, this);
@@ -94,53 +101,43 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     this._ctx = canvas.getContext("2d");
     this._width = canvas.width;
     this._height = canvas.height;
-
-    this._nRows = this._inputdata.length;
-    this._nCols = this._inputdata[0].length;
   },
 
   _drawLayer: function () {
     this._ctx.clearRect(0, 0, this._width, this._height);
     this._paths = this._prepareParticlePaths();
     let self = this;
-    this.timer = d3.timer(function (elapsed) {
+    /*for (var i = 0; i < 20; i++) {
+      self._moveParticles();
+      self._drawParticles();
+    }*/
+    this.timer = d3.timer(function () {
       self._moveParticles();
       self._drawParticles();
     }, this.options.duration);
   },
 
   _moveParticles: function () {
+    let { vectordata } = this._inputdata;
     let self = this;
     this._paths.forEach(function (par) {
-      if (par.x === null || par.age > self.options.maxAge) {
+      if (par.age > self.options.maxAge) {
+        par = self._randomPosition();
         par.age = 0;
-        self._randomPosition(par);
-        par.xt = null;
-        par.yt = null;
-        par.ut = null;
-        par.vt = null;
       } else {
         let xt = par.x + par.u * self.options.velocityScale;
         let yt = par.y + par.v * self.options.velocityScale;
-
-        let newPar = self._getValueAtPoint(xt, yt);
-        if (newPar.x === null) {
-          par.xt = null;
-          par.yt = null;
-          par.ut = null;
-          par.vt = null;
+        let index = self._getIndexAtPoint(xt, yt);
+        if (index === null) {
+          par = self._randomPosition();
+          par.age = 0;
         } else {
           par.xt = xt;
           par.yt = yt;
-          par.ut = newPar.u;
-          par.vt = newPar.v;
-        }
-
-        if (par.xt === null) {
-          par.age = self.options.maxAge;
+          par.ut = vectordata[index[0]][index[1]][0];
+          par.vt = vectordata[index[0]][index[1]][1];
         }
       }
-
       par.age += 1;
     });
   },
@@ -167,67 +164,77 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   _drawParticle: function (ctx, par) {
-    if (par.age <= this.options.maxAge && par.x !== null && par.xt !== null) {
-      let sourcelatlng = this._CHtolatlng([par.y, par.x]);
-      let targetlatlng = this._CHtolatlng([par.yt, par.xt]);
+    if (par.age <= this.options.maxAge && par !== null && par.xt) {
+      let sourcelatlng = this._CHtolatlng([par.x, par.y]);
+      let targetlatlng = this._CHtolatlng([par.xt, par.yt]);
       let source = new L.latLng(sourcelatlng[0], sourcelatlng[1]);
       let target = new L.latLng(targetlatlng[0], targetlatlng[1]);
 
-      let pA = this._map.latLngToContainerPoint(source);
-      let pB = this._map.latLngToContainerPoint(target);
+      try {
+        let pA = this._map.latLngToContainerPoint(source);
+        let pB = this._map.latLngToContainerPoint(target);
 
-      ctx.beginPath();
-      ctx.moveTo(pA.x, pA.y);
-      ctx.lineTo(pB.x, pB.y);
+        ctx.beginPath();
+        ctx.moveTo(pA.x, pA.y);
+        ctx.lineTo(pB.x, pB.y);
 
-      // next-step movement
-      par.x = par.xt;
-      par.y = par.yt;
-      par.u = par.ut;
-      par.v = par.vt;
+        // next-step movement
+        par.x = par.xt;
+        par.y = par.yt;
+        par.u = par.ut;
+        par.v = par.vt;
 
-      // colormap vs. simple color
-      let color = this.options.color;
-      if (typeof color === "function") {
-        ctx.strokeStyle = color(par.m);
+        // colormap vs. simple color
+        let color = this.options.color;
+        if (typeof color === "function") {
+          ctx.strokeStyle = color(par.m);
+        }
+
+        let width = this.options.width;
+        if (typeof width === "function") {
+          ctx.lineWidth = width(par.m);
+        }
+
+        ctx.stroke();
+      } catch (e) {
+        this._stopAnimation();
       }
-
-      let width = this.options.width;
-      if (typeof width === "function") {
-        ctx.lineWidth = width(par.m);
-      }
-
-      ctx.stroke();
     }
   },
 
-  _getValueAtPoint(x, y) {
-    let par = {};
-    let distance = this._searchinput.map((s) => {
-      return { data: s, dist: Math.sqrt((x - s[1]) ** 2 + (y - s[0]) ** 2) };
-    });
-    distance.sort((a, b) => (a.dist > b.dist ? 1 : -1));
-    if (distance[0].dist < this.options.maxDistance) {
-      par.x = distance[0].data[1];
-      par.y = distance[0].data[0];
-      par.u = distance[0].data[3];
-      par.v = distance[0].data[4];
+  _getIndexAtPoint(x, y) {
+    let {
+      xSize,
+      ySize,
+      xllcorner,
+      yllcorner,
+      nCols,
+      nRows,
+      vectordata,
+    } = this._inputdata;
+    var i = vectordata.length - Math.round((y - yllcorner) / ySize);
+    var j = Math.round((x - xllcorner) / xSize);
+    if (
+      i > -1 &&
+      i < nRows &&
+      j > -1 &&
+      j < nCols &&
+      vectordata[i][j] !== null
+    ) {
+      return [i, j];
     } else {
-      par.x = null;
-      par.y = null;
-      par.u = null;
-      par.v = null;
+      return null;
     }
-    return par;
   },
 
   _prepareParticlePaths: function () {
     let paths = [];
-
     for (var i = 0; i < this.options.paths; i++) {
       let p = this._randomPosition();
-      p.age = this._randomAge();
-      paths.push(p);
+      if (p !== null) {
+        p.age = this._randomAge();
+        paths.push(p);
+      }
     }
     return paths;
   },
@@ -235,21 +242,29 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     return Math.floor(Math.random() * this.options.maxAge);
   },
   _randomPosition: function (o = {}) {
-    let i = (Math.random() * this._nCols) | 0;
-    let j = (Math.random() * this._nRows) | 0;
+    let {
+      xSize,
+      ySize,
+      xllcorner,
+      yllcorner,
+      nCols,
+      nRows,
+      vectordata,
+    } = this._inputdata;
 
-    if (this._inputdata[j][i] === null) {
-      o.x = null;
-      o.y = null;
-      o.u = null;
-      o.v = null;
-    } else {
-      o.x = this._inputdata[j][i][1];
-      o.y = this._inputdata[j][i][0];
-      o.u = this._inputdata[j][i][3];
-      o.v = this._inputdata[j][i][4];
+    var maxiter = 1000;
+    for (var k = 0; k < maxiter; k++) {
+      let i = (Math.random() * nRows) | 0;
+      let j = (Math.random() * nCols) | 0;
+      if (vectordata[i][j] !== null) {
+        o.x = xllcorner + j * xSize;
+        o.y = yllcorner + (vectordata.length - i) * ySize;
+        o.u = vectordata[i][j][0];
+        o.v = vectordata[i][j][1];
+        return o;
+      }
     }
-    return o;
+    return null;
   },
   _CHtolatlng: function (yx) {
     var y_aux = (yx[0] - 600000) / 1000000;

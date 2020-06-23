@@ -607,11 +607,11 @@ class Basemap extends Component {
       }
 
       if (vectorFlow) {
-        var vectordata = this.meteolakesParseVectorData(data);
-        //var vectors = L.vectorFieldAnim(data, {
-        //  paths: 800,
-        //}).addTo(this.map);
-        //this.raster.push(vectors);
+        var vectordata = this.meteolakesParseVectorData(data, 120);
+        var vectors = L.vectorFieldAnim(vectordata, {
+          paths: 800,
+        }).addTo(this.map);
+        this.raster.push(vectors);
       }
 
       if (!("center" in this.props) && !("zoom" in this.props)) {
@@ -620,18 +620,25 @@ class Basemap extends Component {
     }
   };
 
-  meteolakesParseVectorData = (data, x, y, radius) => {
-    var nCols = data[0].length;
-    var nRows = data.length;
+  meteolakesParseVectorData = (data, radius) => {
+    function createAndFillTwoDArray({ rows, columns, defaultValue }) {
+      return Array.from({ length: rows }, () =>
+        Array.from({ length: columns }, () => defaultValue)
+      );
+    }
+    var nCols = 200;
+    var nRows = 200;
     let flatdata = data.flat().filter((d) => d !== null);
-    let quadtreedata = flatdata.map((f) => [f[1], f[0], f[3], f[4]]);
+    let quadtreedata = flatdata.map((f) => [f[0], f[1], f[3], f[4]]);
 
-    let y_array = flatdata.map((df) => df[0]);
-    let x_array = flatdata.map((df) => df[1]);
+    let x_array = flatdata.map((df) => df[0]);
+    let y_array = flatdata.map((df) => df[1]);
+
     let min_x = Math.min(...x_array);
     let min_y = Math.min(...y_array);
     let max_x = Math.max(...x_array);
     let max_y = Math.max(...y_array);
+
     let xSize = (max_x - min_x) / nCols;
     let ySize = (max_y - min_y) / nRows;
 
@@ -643,16 +650,33 @@ class Basemap extends Component {
       ])
       .addAll(quadtreedata);
 
-    var outdata = Array(nRows).fill(Array(nCols).fill(null));
-    var dist, x, y;
-    for (var i = 0; i < nRows; i++) {
+    var outdata = createAndFillTwoDArray({
+      rows: nRows + 1,
+      columns: nCols + 1,
+      defaultValue: null,
+    });
+    var x, y;
+    for (var i = 0; i < nRows + 1; i++) {
       y = max_y - i * ySize;
-      for (var j = 0; j < nCols; j++) {
+      for (var j = 0; j < nCols + 1; j++) {
         x = min_x + j * xSize;
-        outdata[i][j] = quadtree.find(x, y, radius);
+        if (quadtree.find(x, y, radius) !== undefined) {
+          outdata[i][j] = [
+            JSON.stringify(quadtree.find(x, y, radius)[2]),
+            JSON.stringify(quadtree.find(x, y, radius)[3]),
+          ];
+        }
       }
     }
-    return outdata;
+    return {
+      nCols,
+      nRows,
+      xSize,
+      ySize,
+      xllcorner: min_x,
+      yllcorner: min_y,
+      vectordata: outdata,
+    };
   };
 
   gitPlot = async (layer, file) => {
