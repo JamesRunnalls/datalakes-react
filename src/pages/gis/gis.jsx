@@ -786,12 +786,18 @@ class GIS extends Component {
           value = [lat, lng];
         }
       } else if (["basemap"].includes(query)) {
-        if (["datalakesmap", "swisstopo", "satellite","dark"].includes(newValue)) {
+        if (
+          ["datalakesmap", "swisstopo", "satellite", "dark"].includes(newValue)
+        ) {
           value = newValue;
         }
       }
     }
     return value;
+  };
+
+  fixedEncodeURI = (str) => {
+    return str.replace(/%5b/g, "[").replace(/%5d/g, "]");
   };
 
   componentDidUpdate(prevState) {
@@ -848,6 +854,7 @@ class GIS extends Component {
     const pathname = this.props.location.pathname;
     try {
       var { search } = this.props.location;
+      search = this.fixedEncodeURI(search);
       if (search) {
         search = this.parseSearch(search);
         selected = this.updateSearch("selected", selected, search);
@@ -857,6 +864,10 @@ class GIS extends Component {
         zoom = this.updateSearch("zoom", zoom, search);
         center = this.updateSearch("center", center, search);
         basemap = this.updateSearch("basemap", basemap, search);
+        this.props.history.push({
+          pathname: pathname,
+          search: search,
+        });
       } else {
         this.props.history.push({
           pathname: pathname,

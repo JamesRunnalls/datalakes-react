@@ -8,7 +8,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     width: 0.5,
     fade: 0.97,
     duration: 10,
-    maxAge: 1000,
+    maxAge: 50,
     velocityScale: 700,
   },
   initialize: function (inputdata, options) {
