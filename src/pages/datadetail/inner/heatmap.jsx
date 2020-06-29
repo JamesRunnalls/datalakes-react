@@ -302,6 +302,24 @@ class HeatMap extends Component {
     document.addEventListener("keydown", this.handleKeyDown);
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.loading && !this.props.loading) {
+      var { data } = this.props;
+      var { minvalue, maxvalue } = this.state;
+      var dldata = data.filter((d) => d !== 0);
+      for (var i = 0; i < dldata.length; i++) {
+        var zdomain = d3.extent(
+          [].concat.apply([], data[i].z).filter((f) => {
+            return !isNaN(parseFloat(f)) && isFinite(f);
+          })
+        );
+        minvalue = Math.min(zdomain[0], minvalue);
+        maxvalue = Math.max(zdomain[1], maxvalue);
+      }
+      this.setState({ minvalue, maxvalue });
+    }
+  }
+
   render() {
     var {
       onChangeTime,
@@ -359,17 +377,29 @@ class HeatMap extends Component {
       if (datasetparameters[j]["axis"].includes("x")) {
         xoptions.push({
           value: datasetparameters[j]["axis"],
-          label: getLabel("parameters", datasetparameters[j]["parameters_id"], "name"),
+          label: getLabel(
+            "parameters",
+            datasetparameters[j]["parameters_id"],
+            "name"
+          ),
         });
       } else if (datasetparameters[j]["axis"].includes("y")) {
         yoptions.push({
           value: datasetparameters[j]["axis"],
-          label: getLabel("parameters", datasetparameters[j]["parameters_id"], "name"),
+          label: getLabel(
+            "parameters",
+            datasetparameters[j]["parameters_id"],
+            "name"
+          ),
         });
       } else if (datasetparameters[j]["axis"].includes("z")) {
         zoptions.push({
           value: datasetparameters[j]["axis"],
-          label: getLabel("parameters", datasetparameters[j]["parameters_id"], "name"),
+          label: getLabel(
+            "parameters",
+            datasetparameters[j]["parameters_id"],
+            "name"
+          ),
         });
       }
     }
