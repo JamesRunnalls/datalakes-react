@@ -880,7 +880,7 @@ class GIS extends Component {
         });
       }
     } catch (e) {
-      console.log(e);
+      console.error("Error processing search parameters.");
       this.props.history.push({
         pathname: pathname,
         search: defaultSearchLocation,

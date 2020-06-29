@@ -42,6 +42,15 @@ class SliderSingleHorizontal extends Component {
       boxSizing: "border-box",
     };
     var { value, onChange, min, max, files } = this.props;
+    if (min.getTime() === max.getTime()) {
+      min = new Date(min.getTime() - 5 * 24 * 60 * 60 * 1000);
+      max = new Date(max.getTime() + 5 * 24 * 60 * 60 * 1000);
+    } else if (min > max) {
+      var tempmin = min;
+      var tempmax = max;
+      min = tempmax;
+      max = tempmin;
+    }
     var { dt } = this.state;
     var dateTicks = scaleTime()
       .domain([min, max])
