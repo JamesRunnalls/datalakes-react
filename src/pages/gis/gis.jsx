@@ -531,8 +531,13 @@ class GIS extends Component {
             alert("Failed to add layer");
             this.setState({ loading: false });
           }));
-        ({ datetime: realdatetime, depth: realdepth, data: realdata } = data);
-        data = realdata;
+        if ("datetime" in data) {
+          ({ datetime: realdatetime, depth: realdepth, data: realdata } = data);
+          data = realdata;
+        } else {
+          realdatetime = datetime;
+          realdepth = depth;
+        }
       } else {
         filelink = filelink.replace(":datetime", datetimeunix);
         filelink = filelink.replace(":depth", depth);

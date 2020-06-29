@@ -57,7 +57,7 @@ class Basemap extends Component {
       var index = data.findIndex((d) => d.id === id);
       return data[index].d;
     }
-    var { maxdatetime, maxdepth } = file;
+    var { maxdepth } = file;
     var { datetime, depth, templates } = this.props;
     var {
       markerLabel,
@@ -93,6 +93,9 @@ class Basemap extends Component {
       }
     }
 
+    var coeff = 1000 * 60 * 10;
+    datetime = new Date(Math.round(datetime.getTime() / coeff) * coeff);
+
     var minSize = 5;
     var maxSize = 30;
     var markerGroup = L.layerGroup().addTo(this.map);
@@ -101,10 +104,7 @@ class Basemap extends Component {
     var rotation = 0;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
-      var timediff = -Math.round(
-        (datetime.getTime() / 1000 - new Date(maxdatetime).getTime() / 1000) /
-          3600
-      );
+      var timediff = 0;
       var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
       valuestring =
         String(value) +
@@ -152,7 +152,7 @@ class Basemap extends Component {
           "</td></tr>" +
           "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>MeteoSwiss</td></tr>" +
           "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-          maxdatetime.toLocaleString() +
+          datetime.toLocaleString() +
           "</td></tr>" +
           "<tr><td><strong>Value at point:</strong></td><td>" +
           String(value) +
@@ -172,7 +172,7 @@ class Basemap extends Component {
       var index = data.findIndex((d) => d.id === id);
       return data[index].v;
     }
-    var { maxdatetime, maxdepth } = file;
+    var { maxdepth } = file;
     var {
       markerLabel,
       markerSymbol,
@@ -188,6 +188,9 @@ class Basemap extends Component {
     var arr = file.filelink.split("/");
     var source = arr[arr.length - 3];
     var parameter = arr[arr.length - 2];
+
+    var coeff = 1000 * 60 * 10;
+    datetime = new Date(Math.round(datetime.getTime() / coeff) * coeff);
 
     // Merge template and data
     var template = JSON.parse(JSON.stringify(templates[source][parameter]));
@@ -210,10 +213,7 @@ class Basemap extends Component {
     var rotation = 0;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
-      var timediff = -Math.round(
-        (datetime.getTime() / 1000 - new Date(maxdatetime).getTime() / 1000) /
-          3600
-      );
+      var timediff = 0;
       var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
       valuestring =
         String(value) +
@@ -259,7 +259,7 @@ class Basemap extends Component {
           "</td></tr>" +
           "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>FOEN</td></tr>" +
           "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-          maxdatetime.toLocaleString() +
+          datetime.toLocaleString() +
           "</td></tr>" +
           "<tr><td><strong>Value at point:</strong></td><td>" +
           String(value) +
