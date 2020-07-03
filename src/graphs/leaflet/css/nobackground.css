@@ -1,0 +1,10 @@
+.leaflet-container {
+  background: none;
+}
+.leaflet-control-attribution {
+  display: none;
+}
+
+.section.lakesimulations .img {
+    background: none;
+}

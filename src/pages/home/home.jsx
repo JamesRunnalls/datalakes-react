@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import Twitter from "../../components/twitter/twitter";
 import ContactForm from "../../components/contactform/contactform";
+import HomepageMap from "../../graphs/leaflet/homepage_map";
 import epfl from "./img/epfl.svg";
 import epflc from "./img/epflc.svg";
 import eawag from "./img/eawag.svg";
@@ -259,7 +260,10 @@ class Home extends Component {
           </div>
 
           <div className="section lakesimulations" ref={this.simulation}>
-            <div className="img">
+            <div className="homepagemap">
+              <HomepageMap />
+            </div>
+            <div className="img" id="lakesim">
               <div className="outer">
                 <div className="inner">
                   <table>
