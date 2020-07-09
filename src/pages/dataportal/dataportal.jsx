@@ -215,7 +215,7 @@ class DataPortal extends Component {
     datasets: [],
     parameters: [],
     selected: [],
-    sortby: "az",
+    sortby: "recent",
     download: false,
     map: false,
     loading: true,

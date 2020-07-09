@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import * as d3 from "d3";
 import SliderDouble from "../../../components/sliders/sliderdouble";
 import SliderSingle from "../../../components/sliders/slidersingle";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
@@ -24,6 +25,7 @@ class LineGraph extends Component {
     xunits: "None",
     yunits: "None",
     download: false,
+    downsample: "None",
     mask: true,
   };
 
@@ -32,13 +34,18 @@ class LineGraph extends Component {
   };
 
   update = () => {
-    var lcolor = document.getElementById("lcolor").value;
-    var lweight = document.getElementById("lweight").value;
     var bcolor = document.getElementById("bcolor").value;
     var title = document.getElementById("title").value;
     var xscale = document.getElementById("xscale").value;
     var yscale = document.getElementById("yscale").value;
-    this.setState({ lcolor, lweight, bcolor, title, xscale, yscale });
+    var downsample = document.getElementById("downsample").value;
+    this.setState({
+      bcolor,
+      title,
+      xscale,
+      yscale,
+      downsample,
+    });
   };
 
   reset = () => {
@@ -106,6 +113,7 @@ class LineGraph extends Component {
     const yparam = datasetparameters.find((y) => y.axis === yaxis);
     var xlabel = getLabel("parameters", xparam.parameters_id, "name");
     var ylabel = getLabel("parameters", yparam.parameters_id, "name");
+    var downsample = "None";
     var xunits = xparam.unit;
     var yunits = yparam.unit;
     const title = dataset.title;
@@ -113,8 +121,14 @@ class LineGraph extends Component {
     // Set initial axis scale
     var xscale = "Linear";
     var yscale = "Linear";
-    if (xlabel === "Time") xscale = "Time";
-    if (ylabel === "TIme") yscale = "Time";
+    if (xlabel === "Time") {
+      document.getElementById("xscale").value = "Time";
+      xscale = "Time";
+    }
+    if (ylabel === "Time") {
+      document.getElementById("yscale").value = "Time";
+      yscale = "Time";
+    }
 
     // Colors and weights
     var lcolor = Array.from({ length: 20 }).map((x) => this.getRandomColor());
@@ -131,6 +145,7 @@ class LineGraph extends Component {
       xscale,
       lcolor,
       lweight,
+      downsample,
       bcolor: "#ffffff",
     });
   };
@@ -174,6 +189,37 @@ class LineGraph extends Component {
     } else {
       return { x: dataset[xaxis], y: dataset[yaxis] };
     }
+  };
+
+  downsample = (xx, yy, sample) => {
+    var x, y, t, ds;
+    var arr = {};
+    if (["Daily", "Monthly"].includes(sample)) {
+      for (var i = 0; i < xx.length; i++) {
+        t = xx[i];
+        if (sample === "Monthly") t.setDate(0);
+        t.setHours(0);
+        t.setMinutes(0);
+        t.setSeconds(0);
+        t.setMilliseconds(0);
+        ds = t.toDateString();
+        if (Object.keys(arr).includes(ds)) {
+          arr[ds].push(yy[i]);
+        } else {
+          arr[ds] = [yy[i]];
+        }
+      }
+      Object.keys(arr).forEach((key) => {
+        arr[key] = d3.mean(arr[key]);
+      });
+      y = Object.values(arr);
+      x = Object.keys(arr);
+      x = x.map((dt) => new Date(dt));
+    } else {
+      x = xx;
+      y = yy;
+    }
+    return { x, y };
   };
 
   componentDidMount() {
@@ -222,6 +268,7 @@ class LineGraph extends Component {
       xunits,
       yunits,
       mask,
+      downsample,
     } = this.state;
 
     // Default no legend and no filecontrol
@@ -232,14 +279,9 @@ class LineGraph extends Component {
     var time = datasetparameters.filter((p) => p.parameters_id === 1);
     var timeSlider = false;
     var fileSlider = false;
-    if (files.length > 1) {
-      if (time.length > 0) {
-        if (time[0].axis !== "M") {
-          timeSlider = true;
-        } else {
-          fileSlider = true;
-        }
-      }
+    if (xlabel === "Time") timeSlider = true;
+    if (files.length > 1 && time.length > 0 && time[0].axis === "M") {
+      fileSlider = true;
     }
 
     // Axis Options
@@ -255,11 +297,18 @@ class LineGraph extends Component {
       }
       if (datasetparameters[j]["axis"].includes("x")) {
         if (Number.isInteger(datasetparameters[j]["link"])) {
-          parent = this.findLink(datasetparameters, datasetparameters[j]["link"]);
+          parent = this.findLink(
+            datasetparameters,
+            datasetparameters[j]["link"]
+          );
           xoptions.push({
             value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
+              getLabel(
+                "parameters",
+                datasetparameters[j]["parameters_id"],
+                "name"
+              ) +
               " (" +
               getLabel("parameters", parent["parameters_id"], "name") +
               ")",
@@ -268,17 +317,27 @@ class LineGraph extends Component {
           xoptions.push({
             value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
-              detail,
+              getLabel(
+                "parameters",
+                datasetparameters[j]["parameters_id"],
+                "name"
+              ) + detail,
           });
         }
       } else if (datasetparameters[j]["axis"].includes("y")) {
         if (Number.isInteger(datasetparameters[j]["link"])) {
-          parent = this.findLink(datasetparameters, datasetparameters[j]["link"]);
+          parent = this.findLink(
+            datasetparameters,
+            datasetparameters[j]["link"]
+          );
           yoptions.push({
             value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
+              getLabel(
+                "parameters",
+                datasetparameters[j]["parameters_id"],
+                "name"
+              ) +
               " (" +
               getLabel("parameters", parent["parameters_id"], "name") +
               ")",
@@ -287,8 +346,11 @@ class LineGraph extends Component {
           yoptions.push({
             value: datasetparameters[j]["axis"],
             label:
-              getLabel("parameters", datasetparameters[j]["parameters_id"], "name") +
-              detail,
+              getLabel(
+                "parameters",
+                datasetparameters[j]["parameters_id"],
+                "name"
+              ) + detail,
           });
         }
       }
@@ -374,13 +436,15 @@ class LineGraph extends Component {
           dataset[d] = this.datetimeFilter(dataset[d], lower, upper, min, max);
         }
 
-        // Format data
+        // Format data && downsample
         var { x, y } = dataset[d];
         if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
         if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
         if (xlabel === "Depth") x = x.map((i) => -i);
         if (ylabel === "Depth") y = y.map((i) => -i);
-        dataset[d] = { x: x, y: y };
+        var out = { x, y };
+        if (xlabel === "Time") out = this.downsample(x, y, downsample);
+        dataset[d] = out;
 
         // Confidence
         var CI_upper, CI_lower;
@@ -612,6 +676,23 @@ class LineGraph extends Component {
                           </td>
                           <td></td>
                         </tr>
+                        {timeSlider && (
+                          <tr>
+                            <td>Downsampling</td>
+                            <td>
+                              <select
+                                id="downsample"
+                                defaultValue={downsample}
+                                className="scale-select"
+                              >
+                                <option value="None">None</option>
+                                <option value="Daily">Daily</option>
+                                <option value="Monthly">Monthly</option>
+                              </select>
+                            </td>
+                            <td></td>
+                          </tr>
+                        )}
                         {showmask && (
                           <tr>
                             <td>Show Masked Points</td>
