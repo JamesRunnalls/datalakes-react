@@ -200,15 +200,15 @@ class LineGraph extends Component {
   downsample = (xx, yy, sample) => {
     var x, y, t, ds;
     var arr = {};
-    if (["Daily", "Monthly"].includes(sample)) {
+    if (["Hourly", "Daily", "Monthly"].includes(sample)) {
       for (var i = 0; i < xx.length; i++) {
         t = xx[i];
         if (sample === "Monthly") t.setDate(0);
-        t.setHours(0);
+        if (["Daily", "Monthly"].includes(sample)) t.setHours(0);
         t.setMinutes(0);
         t.setSeconds(0);
         t.setMilliseconds(0);
-        ds = t.toDateString();
+        ds = t.toString();
         if (Object.keys(arr).includes(ds)) {
           arr[ds].push(yy[i]);
         } else {
@@ -692,6 +692,7 @@ class LineGraph extends Component {
                                 className="scale-select"
                               >
                                 <option value="None">None</option>
+                                <option value="Hourly">Hourly</option>
                                 <option value="Daily">Daily</option>
                                 <option value="Monthly">Monthly</option>
                               </select>
