@@ -105,7 +105,7 @@ class LineGraph extends Component {
   };
 
   setDefault = () => {
-    var { datasetparameters, dataset, getLabel } = this.props;
+    var { datasetparameters, dataset, getLabel, data } = this.props;
     var { xaxis, yaxis } = this.state;
 
     // Get axis labels and units
@@ -113,10 +113,16 @@ class LineGraph extends Component {
     const yparam = datasetparameters.find((y) => y.axis === yaxis);
     var xlabel = getLabel("parameters", xparam.parameters_id, "name");
     var ylabel = getLabel("parameters", yparam.parameters_id, "name");
-    var downsample = "None";
     var xunits = xparam.unit;
     var yunits = yparam.unit;
     const title = dataset.title;
+    var downsample = "None";
+    var timeperiod =
+      new Date(data[0]["x"][data[0]["x"].length - 1] * 1000).getTime() -
+      new Date(data[0]["x"][0] * 1000).getTime();
+    if (timeperiod > 2 * 30 * 24 * 60 * 60 * 1000) {
+      downsample = "Daily";
+    }
 
     // Set initial axis scale
     var xscale = "Linear";
