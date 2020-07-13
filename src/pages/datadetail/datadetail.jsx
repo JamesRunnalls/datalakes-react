@@ -494,8 +494,8 @@ class DataDetail extends Component {
         datasetparameters,
         dropdown,
         files,
-        step: "remotesensing",
-        allowedStep: ["remotesensing","external","webgis"],
+        step: "external",
+        allowedStep: ["external","webgis"],
       });
     } else {
       this.setState({

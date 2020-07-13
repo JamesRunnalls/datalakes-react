@@ -1,10 +1,10 @@
-.leaflet-container {
+.homepagemap .leaflet-container {
   background: none;
 }
-.leaflet-control-attribution {
+.homepagemap .leaflet-control-attribution {
   display: none;
 }
 
-.section.lakesimulations .img {
+.homepagemap .section.lakesimulations .img {
     background: none;
 }

@@ -513,7 +513,11 @@ class GIS extends Component {
     );
 
     if (downloaded) {
-      return downloaded.data;
+      return {
+        data: downloaded.data,
+        realdatetime: datetime,
+        realdepth: depth,
+      };
     } else {
       var data, realdatetime, realdepth, realdata;
       if (source === "internal") {
@@ -561,7 +565,7 @@ class GIS extends Component {
         realdepth,
       });
       this.setState({ downloads });
-      return data;
+      return { data, realdatetime: new Date(realdatetime * 1000), realdepth };
     }
   };
 
@@ -598,7 +602,7 @@ class GIS extends Component {
         var fileid = this.closestFile(datetime, depth, files);
         var datafile = files.find((f) => f.id === fileid);
 
-        var data = await this.downloadFile(
+        var { data, realdatetime, realdepth } = await this.downloadFile(
           datasets_id,
           fileid,
           datafile.filelink,
@@ -644,6 +648,8 @@ class GIS extends Component {
         layer["datasetparameters"] = dp;
         layer["datasets_id"] = datasets_id;
         layer["parameters_id"] = parameters_id;
+        layer["realdatetime"] = realdatetime;
+        layer["realdepth"] = realdepth;
         layer.colors = this.parseColor(layer.colors);
         layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
         layer["visible"] = this.layervisible(
@@ -678,7 +684,7 @@ class GIS extends Component {
         var datafile = findFileId(selectedlayers[i].files, fileid);
 
         // Add data from file closes to datetime and depth
-        var data = await this.downloadFile(
+        var { data, realdatetime, realdepth } = await this.downloadFile(
           selectedlayers[i].datasets_id,
           fileid,
           datafile.filelink,
@@ -699,6 +705,8 @@ class GIS extends Component {
         selectedlayers[i].max = max;
         selectedlayers[i].array = array;
         selectedlayers[i].fileid = fileid;
+        selectedlayers[i]["realdatetime"] = realdatetime;
+        selectedlayers[i]["realdepth"] = realdepth;
       }
 
       this.setState({

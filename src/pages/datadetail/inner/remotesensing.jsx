@@ -21,6 +21,8 @@ class RemoteSensingSidebar extends Component {
       updateBaseMap,
       datetime,
       onChangeDatetime,
+      layer,
+      updateLayer,
       mindatetime,
       maxdatetime,
       pixelinfo,
@@ -50,13 +52,13 @@ class RemoteSensingSidebar extends Component {
         <div className="layers">
           <div className="title">Select Products</div>
           <select
-            className="basemapselector"
-            onChange={updateBaseMap}
-            value={basemap}
+            className="layerselector"
+            onChange={updateLayer}
+            value={layer}
             title="Edit the background map style"
           >
-            <option value="datalakesmap">Chlorophyll A</option>
-            <option value="swisstopo">Turbidity</option>
+            <option value="chlorophylla">Chlorophyll A</option>
+            <option value="turbidity">Turbidity</option>
           </select>
 
           <DatePicker

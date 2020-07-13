@@ -42,6 +42,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     }
     map.on("click", this._onClick, this);
     map.on("moveend", this._reset, this);
+    map.on("mousemove", this._onMousemove, this);
 
     if (map.options.zoomAnimation && L.Browser.any3d) {
       map.on("zoomanim", this._animateZoom, this);
@@ -58,6 +59,7 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
     }
     map.off("click", this._onClick, this);
     map.off("moveend", this._reset, this);
+    map.off("mousemove", this._onMousemove, this);
 
     if (map.options.zoomAnimation) {
       map.off("zoomanim", this._animateZoom, this);
@@ -380,6 +382,11 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
       this._canvas.style[L.DomUtil.TRANSFORM] =
         L.DomUtil.getTranslateString(offset) + " scale(" + scale + ")";
     }
+  },
+
+  _onMousemove: function (t) {
+    var e = this._queryValue(t);
+    this.fire("mousemove", e);
   },
 
   _onClick: function (t) {

@@ -57,8 +57,7 @@ class Basemap extends Component {
       var index = data.findIndex((d) => d.id === id);
       return data[index].d;
     }
-    var { maxdepth } = file;
-    var { datetime, depth, templates } = this.props;
+    var { datetime, templates } = this.props;
     var {
       markerLabel,
       markerSymbol,
@@ -104,18 +103,7 @@ class Basemap extends Component {
     var rotation = 0;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
-      var timediff = 0;
-      var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-      valuestring =
-        String(value) +
-        String(unit) +
-        '<br><div class="tooltipdiff">Diff: ' +
-        (timediff > 0 ? "+" : "") +
-        String(timediff) +
-        "hrs " +
-        (depthdiff > 0 ? " +" : " ") +
-        String(depthdiff) +
-        "m</div>";
+      valuestring = String(value) + String(unit);
       color = getColor(value, min, max, colors);
       if (markerFixedSize) {
         size = markerSize;
@@ -172,7 +160,6 @@ class Basemap extends Component {
       var index = data.findIndex((d) => d.id === id);
       return data[index].v;
     }
-    var { maxdepth } = file;
     var {
       markerLabel,
       markerSymbol,
@@ -184,7 +171,7 @@ class Basemap extends Component {
       colors,
       data,
     } = layer;
-    var { datetime, depth, templates } = this.props;
+    var { datetime, templates } = this.props;
     var arr = file.filelink.split("/");
     var source = arr[arr.length - 3];
     var parameter = arr[arr.length - 2];
@@ -213,18 +200,7 @@ class Basemap extends Component {
     var rotation = 0;
     for (var j = 0; j < layerData.length; j++) {
       value = layerData[j].properties.value;
-      var timediff = 0;
-      var depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-      valuestring =
-        String(value) +
-        String(unit) +
-        '<br><div class="tooltipdiff">Diff: ' +
-        (timediff > 0 ? "+" : "") +
-        String(timediff) +
-        "hrs " +
-        (depthdiff > 0 ? " +" : " ") +
-        String(depthdiff) +
-        "m</div>";
+      valuestring = String(value) + String(unit);
       color = getColor(value, min, max, colors);
       if (markerFixedSize) {
         size = markerSize;
@@ -274,9 +250,8 @@ class Basemap extends Component {
   };
 
   remoteSensing = async (layer, file) => {
-    var { maxdatetime, maxdepth } = file;
+    var { maxdatetime } = file;
     var { min, max, unit, data } = layer;
-    var { datetime, depth } = this.props;
     var polygons = [];
     var coords;
     var x = data.lonres / 2;
@@ -289,27 +264,7 @@ class Basemap extends Component {
         [data.lat[i] - y, data.lon[i] + x],
       ];
       var value = Math.round(data.v[i] * 1000) / 1000;
-      var timediff = "";
-      if (datetime) {
-        timediff = -Math.round(
-          (datetime.getTime() / 1000 - new Date(maxdatetime).getTime() / 1000) /
-            3600
-        );
-      }
-      var depthdiff = "";
-      if (depth) {
-        depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-      }
-      var valuestring =
-        String(value) +
-        String(unit) +
-        '<br><div class="tooltipdiff">Diff: ' +
-        (timediff > 0 ? "+" : "") +
-        String(timediff) +
-        "hrs " +
-        (depthdiff > 0 ? " +" : " ") +
-        String(depthdiff) +
-        "m</div>";
+      var valuestring = String(value) + String(unit);
       var pixelcolor = getColor(data.v[i], min, max, layer.colors);
       polygons.push(
         L.polygon(coords, {
@@ -326,7 +281,7 @@ class Basemap extends Component {
               "<tr><td class='text-nowrap'><strong>Satellite</strong></td><td>Sentinal 3</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-              maxdatetime.toLocaleString() +
+              new Date(maxdatetime).toDateString() +
               "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>LatLng</strong></td><td>" +
               data.lat[i] +
@@ -402,7 +357,6 @@ class Basemap extends Component {
   };
 
   meteolakes = async (layer, file) => {
-    var { maxdatetime, maxdepth } = file;
     var { parameters_id, data } = layer;
     var {
       vectorArrows,
@@ -416,8 +370,9 @@ class Basemap extends Component {
       unit,
       title,
       datasourcelink,
+      realdatetime,
+      realdepth,
     } = layer;
-    var { depth, datetime } = this.props;
     var polygons,
       matrix,
       i,
@@ -426,8 +381,6 @@ class Basemap extends Component {
       nextRow,
       coords,
       value,
-      timediff,
-      depthdiff,
       valuestring,
       pixelcolor;
     var map = this.map;
@@ -452,29 +405,7 @@ class Basemap extends Component {
               this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
             ];
             value = Math.round(row[j][2] * 1000) / 1000;
-            timediff = "";
-            if (datetime) {
-              timediff = -Math.round(
-                (datetime.getTime() / 1000 -
-                  new Date(maxdatetime).getTime() / 1000) /
-                  3600
-              );
-            }
-            depthdiff = "";
-            if (depth) {
-              depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-            }
-
-            valuestring =
-              String(value) +
-              String(unit) +
-              '<br><div class="tooltipdiff">Diff: ' +
-              (timediff > 0 ? "+" : "") +
-              String(timediff) +
-              "hrs " +
-              (depthdiff > 0 ? " +" : " ") +
-              String(depthdiff) +
-              "m</div>";
+            valuestring = String(value) + String(unit);
             pixelcolor = getColor(row[j][2], min, max, colors);
             polygons.push(
               L.polygon(coords, {
@@ -493,6 +424,12 @@ class Basemap extends Component {
                     "</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                    "<tr><td><strong>Datetime:</strong></td><td>" +
+                    new Date(realdatetime).toLocaleString() +
+                    "</td></tr>" +
+                    "<tr><td><strong>Depth:</strong></td><td>" +
+                    realdepth +
+                    "m</td></tr>" +
                     "<tr><td><strong>Value at point:</strong></td><td>" +
                     row[j][2] +
                     unit +
@@ -538,24 +475,7 @@ class Basemap extends Component {
                 Math.sqrt(Math.pow(row[j][3], 2) + Math.pow(row[j][4], 2))
               );
               value = Math.round(magnitude * 1000) / 1000;
-              if (datetime) {
-                timediff = -Math.round(
-                  (datetime.getTime() / 1000 -
-                    new Date(maxdatetime).getTime() / 1000) /
-                    3600
-                );
-              }
-              depthdiff = -Math.round((depth - maxdepth) * 100) / 100;
-              valuestring =
-                String(value) +
-                String(unit) +
-                '<br><div class="tooltipdiff">Diff: ' +
-                (timediff > 0 ? "+" : "") +
-                String(timediff) +
-                "hrs " +
-                (depthdiff > 0 ? " +" : " ") +
-                String(depthdiff) +
-                "m</div>";
+              valuestring = String(value) + String(unit);
               pixelcolor = getColor(magnitude, min, max, colors);
               polygons.push(
                 L.polygon(coords, {
@@ -574,6 +494,12 @@ class Basemap extends Component {
                       "</td></tr>" +
                       "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                       "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                      "<tr><td><strong>Datetime:</strong></td><td>" +
+                      new Date(realdatetime).toLocaleString() +
+                      "</td></tr>" +
+                      "<tr><td><strong>Depth:</strong></td><td>" +
+                      realdepth +
+                      "m</td></tr>" +
                       "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
                       row[j][2] +
                       unit +
@@ -606,6 +532,25 @@ class Basemap extends Component {
           max,
           size: 15,
         }).addTo(this.map);
+        var arrowtooltip = arrows.bindTooltip("my tooltip text", {
+          permanent: false,
+          direction: "top",
+        });
+        arrows.on("mousemove", function (e) {
+          let { u, v } = e.value;
+          if (u && v) {
+            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+            let deg = Math.round(
+              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+            );
+            if (deg < 0) deg = 360 + deg;
+            let html = `${mag}m/s ${deg}°`;
+            arrowtooltip._tooltip._content = html;
+            arrowtooltip.openTooltip(e.latlng);
+          } else {
+            arrowtooltip.closeTooltip();
+          }
+        });
         arrows.on("click", function (e) {
           if (e.value !== null && e.value.u !== null) {
             let { u, v } = e.value;
@@ -627,6 +572,12 @@ class Basemap extends Component {
               "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              "<tr><td><strong>Datetime:</strong></td><td>" +
+              new Date(realdatetime).toLocaleString() +
+              "</td></tr>" +
+              "<tr><td><strong>Depth:</strong></td><td>" +
+              realdepth +
+              "m</td></tr>" +
               `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
               `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
               `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
@@ -654,6 +605,25 @@ class Basemap extends Component {
           paths: 5000,
           color,
         }).addTo(this.map);
+        var flowtooltip = vectors.bindTooltip("my tooltip text", {
+          permanent: false,
+          direction: "top",
+        });
+        vectors.on("mousemove", function (e) {
+          let { u, v } = e.value;
+          if (u && v) {
+            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+            let deg = Math.round(
+              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+            );
+            if (deg < 0) deg = 360 + deg;
+            let html = `${mag}m/s ${deg}°`;
+            flowtooltip._tooltip._content = html;
+            flowtooltip.openTooltip(e.latlng);
+          } else {
+            flowtooltip.closeTooltip();
+          }
+        });
         vectors.on("click", function (e) {
           if (e.value !== null && e.value.u !== null) {
             let { u, v } = e.value;
@@ -675,6 +645,12 @@ class Basemap extends Component {
               "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              "<tr><td><strong>Datetime:</strong></td><td>" +
+              new Date(realdatetime).toLocaleString() +
+              "</td></tr>" +
+              "<tr><td><strong>Depth:</strong></td><td>" +
+              realdepth +
+              "m</td></tr>" +
               `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
               `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
               `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
@@ -693,6 +669,116 @@ class Basemap extends Component {
         this.map.fitBounds(this.raster[0].getBounds());
       }
     }
+  };
+
+  gitPlot = async (layer, file) => {
+    var {
+      datasetparameters,
+      parameters_id,
+      datasets_id,
+      markerLabel,
+      min,
+      max,
+      colors,
+      markerSymbol,
+      markerFixedSize,
+      markerSize,
+      latitude,
+      longitude,
+      unit,
+      maxdepth,
+      data,
+    } = layer;
+    var datasetparameter = datasetparameters.find(
+      (dp) => dp.parameters_id === parameters_id
+    );
+    var { datetime, depth } = this.props;
+    var type = datasetparameters
+      .map((dp) => dp.axis + "&" + dp.parameters_id)
+      .join(",");
+    var index, value;
+    var size, marker, dt, dd;
+    var minSize = 5;
+    var maxSize = 30;
+    var markerGroup = L.layerGroup().addTo(this.map);
+
+    if (type.includes("M&1") && type.includes("y&2")) {
+      // Profiler
+      var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
+      var dp3 = datasetparameters.find((dp) => dp.parameters_id === 2);
+      index = this.indexClosest(depth, data.y);
+      value = this.numberformat(parseFloat(data[datasetparameter.axis][index]));
+      dt = new Date(data[dp2.axis][index] * 1000);
+      dd = data[dp3.axis][index];
+    } else if (
+      type.includes("z&") &&
+      type.includes("x&1") &&
+      type.includes("y&2")
+    ) {
+      // 2D Depth Time Dataset
+      var indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      var indexy = this.indexClosest(depth, data["y"]);
+      value = this.numberformat(data[datasetparameter.axis][indexy][indexx]);
+      dt = new Date(data["x"][indexx] * 1000);
+      dd = data["y"][indexy];
+    } else if (
+      type.includes("x&1") &&
+      type.includes("y&") &&
+      !type.includes("z&")
+    ) {
+      // 1D Parameter Time Dataset
+      index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      value = this.numberformat(data[datasetparameter.axis][index]);
+      dt = new Date(data["x"][index] * 1000);
+      dd = maxdepth;
+    } else {
+      alert("No plotting function defined");
+    }
+
+    var valuestring = String(value) + String(datasetparameter.unit);
+    var color = getColor(value, min, max, colors);
+    var shape = markerSymbol;
+    if (markerFixedSize) {
+      size = markerSize;
+    } else {
+      size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
+    }
+    marker = new L.marker([latitude, longitude], {
+      icon: L.divIcon({
+        className: "map-marker",
+        html:
+          `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
+          `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
+          `</div></div> `,
+      }),
+    })
+      .bindTooltip(valuestring, {
+        permanent: markerLabel,
+        direction: "top",
+      })
+      .addTo(markerGroup);
+    marker.bindPopup(
+      "<table><tbody>" +
+        '<tr><td colSpan="2"><strong>' +
+        layer.title +
+        "</strong></td></tr>" +
+        "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
+        dt +
+        "</td></tr>" +
+        "<tr><td><strong>Value</strong></td><td>" +
+        String(value) +
+        String(unit) +
+        "</td></tr>" +
+        "<tr><td><strong>Depth</strong></td><td>" +
+        dd +
+        "</td></tr>" +
+        '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +
+        datasets_id +
+        '">More information</a></td></tr>' +
+        "</tbody></table>"
+    );
+
+    this.marker.push(markerGroup);
   };
 
   meteolakesParseVectorData = (data, radius) => {
@@ -752,137 +838,6 @@ class Basemap extends Component {
       yllcorner: min_y,
       vectordata: outdata,
     };
-  };
-
-  gitPlot = async (layer, file) => {
-    var {
-      datasetparameters,
-      parameters_id,
-      datasets_id,
-      markerLabel,
-      min,
-      max,
-      colors,
-      markerSymbol,
-      markerFixedSize,
-      markerSize,
-      latitude,
-      longitude,
-      unit,
-      maxdepth,
-      data,
-    } = layer;
-    var datasetparameter = datasetparameters.find(
-      (dp) => dp.parameters_id === parameters_id
-    );
-    var { datetime, depth } = this.props;
-    var type = datasetparameters
-      .map((dp) => dp.axis + "&" + dp.parameters_id)
-      .join(",");
-    var index, value, timediff, depthdiff;
-    var size, marker, dt, dd;
-    var minSize = 5;
-    var maxSize = 30;
-    var markerGroup = L.layerGroup().addTo(this.map);
-
-    if (type.includes("M&1") && type.includes("y&2")) {
-      // Profiler
-      var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
-      var dp3 = datasetparameters.find((dp) => dp.parameters_id === 2);
-      index = this.indexClosest(depth, data.y);
-      value = this.numberformat(parseFloat(data[datasetparameter.axis][index]));
-      timediff = -Math.round(
-        (datetime.getTime() / 1000 - data[dp2.axis][index]) / 3600
-      );
-      depthdiff = -Math.round((depth - data[dp3.axis][index]) * 100) / 100;
-      dt = new Date(data[dp2.axis][index] * 1000);
-      dd = data[dp3.axis][index];
-    } else if (
-      type.includes("z&") &&
-      type.includes("x&1") &&
-      type.includes("y&2")
-    ) {
-      // 2D Depth Time Dataset
-      var indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
-      var indexy = this.indexClosest(depth, data["y"]);
-      value = this.numberformat(data[datasetparameter.axis][indexy][indexx]);
-      timediff = -Math.round(
-        (datetime.getTime() / 1000 - data["x"][indexx]) / 3600
-      );
-      depthdiff = depth - data["y"][indexy];
-      dt = new Date(data["x"][indexx] * 1000);
-      dd = data["y"][indexy];
-    } else if (
-      type.includes("x&1") &&
-      type.includes("y&") &&
-      !type.includes("z&")
-    ) {
-      // 1D Parameter Time Dataset
-      index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
-      value = this.numberformat(data[datasetparameter.axis][index]);
-      timediff = -Math.round(
-        (datetime.getTime() / 1000 - data["x"][index]) / 3600
-      );
-      depthdiff = maxdepth - depth;
-      dt = new Date(data["x"][index] * 1000);
-      dd = maxdepth;
-    } else {
-      alert("No plotting function defined");
-    }
-
-    var valuestring =
-      String(value) +
-      String(datasetparameter.unit) +
-      '<br><div class="tooltipdiff">Diff: ' +
-      (timediff > 0 ? "+" : "") +
-      String(Math.round(timediff * 100) / 100) +
-      "hrs " +
-      (depthdiff > 0 ? " +" : " ") +
-      String(Math.round(depthdiff * 10) / 10) +
-      "m</div>";
-    var color = getColor(value, min, max, colors);
-    var shape = markerSymbol;
-    if (markerFixedSize) {
-      size = markerSize;
-    } else {
-      size = ((value - min) / (max - min)) * (maxSize - minSize) + minSize;
-    }
-    marker = new L.marker([latitude, longitude], {
-      icon: L.divIcon({
-        className: "map-marker",
-        html:
-          `<div style="padding:10px;transform:translate(-12px, -12px);position: absolute;">` +
-          `<div class="${shape}" style="background-color:${color};height:${size}px;width:${size}px">` +
-          `</div></div> `,
-      }),
-    })
-      .bindTooltip(valuestring, {
-        permanent: markerLabel,
-        direction: "top",
-      })
-      .addTo(markerGroup);
-    marker.bindPopup(
-      "<table><tbody>" +
-        '<tr><td colSpan="2"><strong>' +
-        layer.title +
-        "</strong></td></tr>" +
-        "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-        dt +
-        "</td></tr>" +
-        "<tr><td><strong>Value</strong></td><td>" +
-        String(value) +
-        String(unit) +
-        "</td></tr>" +
-        "<tr><td><strong>Depth</strong></td><td>" +
-        dd +
-        "</td></tr>" +
-        '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +
-        datasets_id +
-        '">More information</a></td></tr>' +
-        "</tbody></table>"
-    );
-
-    this.marker.push(markerGroup);
   };
 
   numberformat = (num) => {

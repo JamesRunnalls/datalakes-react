@@ -32,6 +32,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     map.on("click", this._onClick, this);
     map.on("moveend", this._reset, this);
     map.on("movestart", this._clear, this);
+    map.on("mousemove", this._onMousemove, this);
     this._reset();
   },
 
@@ -56,6 +57,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     map.off("click", this._onClick, this);
     map.off("moveend", this._reset, this);
     map.off("movestart", this._clear, this);
+    map.off("mousemove", this._onMousemove, this);
   },
 
   addTo: function (map) {
@@ -312,6 +314,10 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     if (this.timer) {
       this.timer.stop();
     }
+  },
+  _onMousemove: function (t) {
+    var e = this._queryValue(t);
+    this.fire("mousemove", e);
   },
   _onClick: function (t) {
     var e = this._queryValue(t);
