@@ -274,7 +274,7 @@ class Home extends Component {
                           <b>hydrodynamic lake simulations</b>. Explore
                           fluctuations of temperature and velocity at incredibly
                           high spatial resolution over extended periods of time.
-                          <Link to="/map?selected=[[12,25],[11,5]]&zoom=11&center=[47.284,8.706]">
+                          <Link to="/map?selected=[[11,25],[11,5]]&zoom=11&center=[47.284,8.706]">
                             <button>Map Viewer</button>
                           </Link>
                         </td>
