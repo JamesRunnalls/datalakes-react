@@ -1116,12 +1116,15 @@ class Basemap extends Component {
       var { addPoint } = this;
       if (this.props.point) {
         this.map.on("click", addPoint);
+        document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "none";
+        document.getElementsByClassName("leaflet-popup-pane")[0].innerHTML = "";
         L.DomUtil.addClass(this.map._container, "crosshair-cursor-enabled");
       } else {
         this.map.off("click", addPoint);
         this.map.removeLayer(this.point);
         this.props.updatePoint({});
         if (!this.props.point && !this.props.line) {
+          document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "block";
           L.DomUtil.removeClass(
             this.map._container,
             "crosshair-cursor-enabled"
@@ -1133,12 +1136,15 @@ class Basemap extends Component {
       var { addLine } = this;
       if (this.props.line) {
         this.map.on("click", addLine);
+        document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "none";
+        document.getElementsByClassName("leaflet-popup-pane")[0].innerHTML = "";
         L.DomUtil.addClass(this.map._container, "crosshair-cursor-enabled");
       } else {
         this.map.off("click", addLine);
         this.line.clearLayers();
         this.props.updateLine([]);
         if (!this.props.point && !this.props.line) {
+          document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "block";
           L.DomUtil.removeClass(
             this.map._container,
             "crosshair-cursor-enabled"
