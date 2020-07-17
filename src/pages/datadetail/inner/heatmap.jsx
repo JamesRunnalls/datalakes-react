@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import * as d3 from "d3";
 import SliderDouble from "../../../components/sliders/sliderdouble";
 import SliderSingle from "../../../components/sliders/slidersingle";
+import NumberSliderDouble from "../../../components/sliders/sliderdoublenumber";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
 import DataSelect from "../../../components/dataselect/dataselect";
 import FilterBox from "../../../components/filterbox/filterbox";
@@ -147,6 +148,14 @@ class HeatMap extends Component {
     minvalue: false,
     maxvalue: false,
     download: false,
+    upperY: 1,
+    lowerY: 0,
+    maxY: 1,
+    minY: 0,
+  };
+
+  onChangeY = (event) => {
+    this.setState({ lowerY: event[0], upperY: event[1] });
   };
 
   onChangeBcolor = (event) => {
@@ -243,8 +252,15 @@ class HeatMap extends Component {
         return !isNaN(parseFloat(f)) && isFinite(f);
       })
     );
+    var ydomain = d3.extent(
+      [].concat.apply([], data[file].y).filter((f) => {
+        return !isNaN(parseFloat(f)) && isFinite(f);
+      })
+    );
     var minvalue = zdomain[0];
     var maxvalue = zdomain[1];
+    var minY = ydomain[0];
+    var maxY = ydomain[1];
 
     this.setState({
       title,
@@ -257,6 +273,10 @@ class HeatMap extends Component {
       colors,
       minvalue,
       maxvalue,
+      minY,
+      maxY,
+      upperY: maxY,
+      lowerY: minY,
     });
   };
 
@@ -270,6 +290,22 @@ class HeatMap extends Component {
         return dataout;
       } else {
         return this.sliceArray(data, lower, upper);
+      }
+    } else {
+      return data;
+    }
+  };
+
+  YFilter = (data, lower, upper, min, max) => {
+    if ((lower !== min && lower !== "") || (upper !== max && upper !== "")) {
+      if (Array.isArray(data)) {
+        var dataout = [];
+        for (var i = 0; i < data.length; i++) {
+          dataout.push(this.sliceYArray(data[i], lower, upper));
+        }
+        return dataout;
+      } else {
+        return this.sliceYArray(data, lower, upper);
       }
     } else {
       return data;
@@ -297,6 +333,29 @@ class HeatMap extends Component {
     return { x: x, y: y, z: z };
   };
 
+  sliceYArray = (data, lower, upper) => {
+    var l = 0;
+    var u = data.y.length - 1;
+    for (var i = 0; i < data.y.length; i++) {
+      if (data.y[i] < lower) {
+        l = i;
+      }
+      if (data.y[i] > upper && u === data.y.length - 1) {
+        u = i;
+      }
+    }
+    var y = data.y.slice(l, u);
+    var x = data.x;
+
+    var z = [];
+    for (var j = 0; j < data.y.length; j++) {
+      if (j >= l && j <= u) {
+        z.push(data.z[j]);
+      }
+    }
+    return { x: x, y: y, z: z };
+  };
+
   componentDidMount() {
     this.setDefault();
     document.addEventListener("keydown", this.handleKeyDown);
@@ -306,8 +365,15 @@ class HeatMap extends Component {
     if (prevProps.loading && !this.props.loading) {
       var { data } = this.props;
       var { minvalue, maxvalue } = this.state;
+      var minY = Infinity;
+      var maxY = -Infinity;
       var dldata = data.filter((d) => d !== 0);
       for (var i = 0; i < dldata.length; i++) {
+        var ydomain = d3.extent(
+          [].concat.apply([], data[i].y).filter((f) => {
+            return !isNaN(parseFloat(f)) && isFinite(f);
+          })
+        );
         var zdomain = d3.extent(
           [].concat.apply([], data[i].z).filter((f) => {
             return !isNaN(parseFloat(f)) && isFinite(f);
@@ -315,8 +381,10 @@ class HeatMap extends Component {
         );
         minvalue = Math.min(zdomain[0], minvalue);
         maxvalue = Math.max(zdomain[1], maxvalue);
+        minY = Math.min(ydomain[0], minY);
+        maxY = Math.max(ydomain[1], maxY);
       }
-      this.setState({ minvalue, maxvalue });
+      this.setState({ minvalue, maxvalue, minY, maxY });
     }
   }
 
@@ -355,6 +423,10 @@ class HeatMap extends Component {
       colors,
       minvalue,
       maxvalue,
+      maxY,
+      minY,
+      upperY,
+      lowerY,
     } = this.state;
 
     // Show time slider or multiple files
@@ -436,6 +508,10 @@ class HeatMap extends Component {
 
       if (timeSlider) {
         plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
+      }
+
+      if (minY !== lowerY || maxY !== upperY) {
+        plotdata = this.YFilter(plotdata, lowerY, upperY, minY, maxY);
       }
 
       // Format data
@@ -565,6 +641,22 @@ class HeatMap extends Component {
                   }
                 />
               )}
+              <FilterBox
+                title={ylabel + " Range"}
+                preopen="true"
+                content={
+                  <div className="side-date-slider">
+                    <NumberSliderDouble
+                      onChange={this.onChangeY}
+                      min={minY}
+                      max={maxY}
+                      lower={lowerY}
+                      upper={upperY}
+                      unit={yunits}
+                    />
+                  </div>
+                }
+              />
               <DisplayOptions
                 colors={colors}
                 title={title}
