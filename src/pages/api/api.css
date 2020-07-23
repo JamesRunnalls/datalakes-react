@@ -3,3 +3,19 @@
   margin-top: 25vh;
 }
 
+.swagger-ui .info {
+  display: none;
+}
+
+.swagger-ui .scheme-container {
+  padding: 0;
+  box-shadow: none;
+}
+
+.swagger-ui .wrapper {
+  padding: 0 10px;
+}
+
+.doc-desc {
+  padding: 0 10px;
+}
