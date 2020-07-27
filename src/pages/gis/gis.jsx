@@ -356,9 +356,9 @@ class GIS extends Component {
     }
     if (mapplotfunction === "meteolakes") {
       if (parameters_id === 25) {
-        ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(data));
+        ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(data.data));
       } else {
-        ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(data));
+        ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(data.data));
       }
     }
 
@@ -543,7 +543,7 @@ class GIS extends Component {
           realdepth = depth;
         }
       } else {
-        filelink = filelink.replace(":datetime", datetimeunix);
+        filelink = filelink.replace(":datetime", datetime.getTime());
         filelink = filelink.replace(":depth", depth);
         ({ data } = await axios
           .get(filelink, { timeout: 10000 })

@@ -154,9 +154,9 @@ class ThreeDModel extends Component {
 
         var min, max, array;
         if (selectedlayers[i].parameters_id === 25) {
-          ({ min, max, array } = this.meteolakesVectorMinMax(data));
+          ({ min, max, array } = this.meteolakesVectorMinMax(data.data));
         } else {
-          ({ min, max, array } = this.meteolakesScalarMinMax(data));
+          ({ min, max, array } = this.meteolakesScalarMinMax(data.data));
         }
 
         // Update the min and max value
@@ -624,7 +624,7 @@ class ThreeDModel extends Component {
         downloads,
       };
     } else {
-      var data, realdatetime, realdepth, realdata;
+      var data, realdatetime, realdepth;
       var datetimejs = Math.round(datetime.getTime());
       filelink = filelink.replace(":datetime", datetimejs);
       filelink = filelink.replace(":depth", depth);
@@ -635,8 +635,7 @@ class ThreeDModel extends Component {
           alert("Failed to add layer");
           this.setState({ loading: false });
         }));
-      ({ datetime: realdatetime, depth: realdepth, data: realdata } = data);
-      data = realdata;
+      ({ datetime: realdatetime, depth: realdepth } = data);
 
       downloads.push({
         data,
@@ -688,12 +687,12 @@ class ThreeDModel extends Component {
         mapplot = "field";
         unit = "m/s";
         name = "Water Velocity";
-        ({ min, max, array } = this.meteolakesVectorMinMax(data));
+        ({ min, max, array } = this.meteolakesVectorMinMax(data.data));
       } else {
         mapplot = "raster";
         unit = "°C";
         name = "Water Temperature";
-        ({ min, max, array } = this.meteolakesScalarMinMax(data));
+        ({ min, max, array } = this.meteolakesScalarMinMax(data.data));
       }
 
       let layer = {

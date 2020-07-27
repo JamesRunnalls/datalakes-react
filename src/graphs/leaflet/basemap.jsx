@@ -356,8 +356,15 @@ class Basemap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
+  matlabToJavascriptDatetime = (date) => {
+    return new Date((date - 719529) * 24 * 60 * 60 * 1000);
+  };
+
   meteolakes = async (layer, file) => {
-    var { parameters_id, data } = layer;
+    var { parameters_id, data: indata } = layer;
+    var { datetime, depth, data } = indata;
+    datetime = this.matlabToJavascriptDatetime(datetime);
+    depth = Math.abs(depth).toFixed(2);
     var {
       vectorArrows,
       vectorMagnitude,
@@ -370,8 +377,6 @@ class Basemap extends Component {
       unit,
       title,
       datasourcelink,
-      realdatetime,
-      realdepth,
     } = layer;
     var polygons,
       matrix,
@@ -425,10 +430,10 @@ class Basemap extends Component {
                     "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
                     "<tr><td><strong>Datetime:</strong></td><td>" +
-                    new Date(realdatetime).toLocaleString() +
+                    datetime.toLocaleString() +
                     "</td></tr>" +
                     "<tr><td><strong>Depth:</strong></td><td>" +
-                    realdepth +
+                    depth +
                     "m</td></tr>" +
                     "<tr><td><strong>Value at point:</strong></td><td>" +
                     row[j][2] +
@@ -495,10 +500,10 @@ class Basemap extends Component {
                       "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                       "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
                       "<tr><td><strong>Datetime:</strong></td><td>" +
-                      new Date(realdatetime).toLocaleString() +
+                      datetime.toLocaleString() +
                       "</td></tr>" +
                       "<tr><td><strong>Depth:</strong></td><td>" +
-                      realdepth +
+                      depth +
                       "m</td></tr>" +
                       "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
                       row[j][2] +
@@ -573,10 +578,10 @@ class Basemap extends Component {
               "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td><strong>Datetime:</strong></td><td>" +
-              new Date(realdatetime).toLocaleString() +
+              datetime.toLocaleString() +
               "</td></tr>" +
               "<tr><td><strong>Depth:</strong></td><td>" +
-              realdepth +
+              depth +
               "m</td></tr>" +
               `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
               `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
@@ -646,10 +651,10 @@ class Basemap extends Component {
               "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td><strong>Datetime:</strong></td><td>" +
-              new Date(realdatetime).toLocaleString() +
+              datetime.toLocaleString() +
               "</td></tr>" +
               "<tr><td><strong>Depth:</strong></td><td>" +
-              realdepth +
+              depth +
               "m</td></tr>" +
               `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
               `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
@@ -1116,7 +1121,8 @@ class Basemap extends Component {
       var { addPoint } = this;
       if (this.props.point) {
         this.map.on("click", addPoint);
-        document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "none";
+        document.getElementsByClassName("leaflet-popup-pane")[0].style.display =
+          "none";
         document.getElementsByClassName("leaflet-popup-pane")[0].innerHTML = "";
         L.DomUtil.addClass(this.map._container, "crosshair-cursor-enabled");
       } else {
@@ -1124,7 +1130,9 @@ class Basemap extends Component {
         this.map.removeLayer(this.point);
         this.props.updatePoint({});
         if (!this.props.point && !this.props.line) {
-          document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "block";
+          document.getElementsByClassName(
+            "leaflet-popup-pane"
+          )[0].style.display = "block";
           L.DomUtil.removeClass(
             this.map._container,
             "crosshair-cursor-enabled"
@@ -1136,7 +1144,8 @@ class Basemap extends Component {
       var { addLine } = this;
       if (this.props.line) {
         this.map.on("click", addLine);
-        document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "none";
+        document.getElementsByClassName("leaflet-popup-pane")[0].style.display =
+          "none";
         document.getElementsByClassName("leaflet-popup-pane")[0].innerHTML = "";
         L.DomUtil.addClass(this.map._container, "crosshair-cursor-enabled");
       } else {
@@ -1144,7 +1153,9 @@ class Basemap extends Component {
         this.line.clearLayers();
         this.props.updateLine([]);
         if (!this.props.point && !this.props.line) {
-          document.getElementsByClassName("leaflet-popup-pane")[0].style.display = "block";
+          document.getElementsByClassName(
+            "leaflet-popup-pane"
+          )[0].style.display = "block";
           L.DomUtil.removeClass(
             this.map._container,
             "crosshair-cursor-enabled"

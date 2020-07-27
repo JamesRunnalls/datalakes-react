@@ -34,9 +34,68 @@ class HomepageMap extends Component {
     return [lat, lng];
   };
 
+  getMax = (arr) => {
+    let len = arr.length;
+    let max = -Infinity;
+
+    while (len--) {
+      max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
+  };
+
+  getMin = (arr) => {
+    let len = arr.length;
+    let min = Infinity;
+
+    while (len--) {
+      min = arr[len] < min ? arr[len] : min;
+    }
+    return min;
+  };
+
+  meteolakesScalarMinMax = (inarray) => {
+    var min = Infinity;
+    var max = -Infinity;
+    var flat = inarray.flat();
+    flat = flat.filter((item) => item !== null);
+    flat = flat.map((item) => item[2]);
+    min = Math.min(min, this.getMin(flat));
+    max = Math.max(max, this.getMax(flat));
+    return { min, max, array: flat };
+  };
+
+  optimisePoints = (array, colors) => {
+    var min = Math.min(...array);
+    var max = Math.max(...array);
+    var q, val, point;
+    for (var i = 0; i < colors.length; i++) {
+      if (i === 0) colors[i].point = 0;
+      else if (i === colors.length - 1) colors[i].point = 1;
+      else {
+        q = (1 / (colors.length - 1)) * i;
+        val = this.quantile(array, q);
+        point = (val - min) / (max - min);
+        colors[i].point = point;
+      }
+    }
+    return colors;
+  };
+
+  quantile = (arr, q) => {
+    const sorted = arr.slice(0).sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+      return sorted[base];
+    }
+  };
+
   meteolakes = async (data) => {
-    var min = 6.76;
-    var max = 8.16;
+    var { min, max, array } = this.meteolakesScalarMinMax(data);
     var colors = [
       { color: "#053061", point: 0 },
       { color: "#053061", point: 0.10000000000000038 },
@@ -87,6 +146,7 @@ class HomepageMap extends Component {
       { color: "#67001f", point: 0.9285714285714288 },
       { color: "#67001f", point: 1 },
     ];
+    colors = this.optimisePoints(array, colors);
 
     var polygons, matrix, i, j, row, nextRow, coords, pixelcolor;
     polygons = [];
@@ -195,7 +255,7 @@ class HomepageMap extends Component {
       });
 
       var { data } = await axios.get(
-        "https://api.datalakes-eawag.ch/externaldata/meteolakes/zurich/1585515600/0.5?closest=true"
+        `https://api.meteolakes.ch/api/datalakes/layer/zurich/${new Date().getTime()}/0.5`
       );
 
       this.meteolakes(data.data);
