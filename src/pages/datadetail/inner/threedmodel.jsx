@@ -10,7 +10,6 @@ import sliceicon from "../img/sliceicon.svg";
 import timeicon from "../img/timeicon.svg";
 import profileicon from "../img/profileicon.svg";
 import colorlist from "../../../components/colorramp/colors";
-import { apiUrl } from "../../../../src/config.json";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
 import FilterBox from "../../../components/filterbox/filterbox";
@@ -364,15 +363,21 @@ class ThreeDModel extends Component {
     return { x, y };
   };
 
+  getLake = (id) => {
+    var lakes = { 4: "zurich", 2: "biel", 1: "geneva", 3: "greifensee" };
+    return lakes[id];
+  };
+
   updatePoint = async (pointValue) => {
     var { graph, datetime } = this.state;
+    var { lakes_id } = this.props.dataset;
+    var lake = this.getLake(lakes_id);
+    var t = datetime.getTime();
+    var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
     if (graph === "depthgraph") {
-      // Convert to meteolakes units
-      var t = this.javascriptDatetimeToMatlab(datetime);
-      var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
       axios
         .get(
-          apiUrl + `/externaldata/meteolakes/depthprofile/zurich/${t}/${x}/${y}`
+          `https://api.meteolakes.ch/api/datalakes/depthprofile/${lake}/${t}/${y}/${x}`
         )
         .then((response) => {
           var plotdata = this.removeNaN(response.data);
@@ -382,10 +387,10 @@ class ThreeDModel extends Component {
           this.setState({ pointValue, plotdata: { x: [], y: [], z: [] } });
         });
     } else if (graph === "timegraph") {
-      // Convert to meteolakes units
-      ({ x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng));
       axios
-        .get(apiUrl + `/externaldata/meteolakes/timeline/zurich/12/${x}/${y}`)
+        .get(
+          `https://api.meteolakes.ch/api/datalakes/timeline/${lake}/${t}/${y}/${x}`
+        )
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
           x = x.map((i) => new Date(i * 1000));
@@ -400,9 +405,11 @@ class ThreeDModel extends Component {
 
   updateLine = (lineValue) => {
     var { graph, datetime } = this.state;
+    var { lakes_id } = this.props.dataset;
+    var lake = this.getLake(lakes_id);
+    var t = datetime.getTime();
     if (graph === "slicegraph" && lineValue.length > 0) {
       // Convert to meteolakes units
-      var t = this.javascriptDatetimeToMatlab(datetime);
       var { x: x1, y: y1 } = this.WGSlatlngtoCH(
         lineValue[0].lat,
         lineValue[0].lng
@@ -413,8 +420,7 @@ class ThreeDModel extends Component {
       );
       axios
         .get(
-          apiUrl +
-            `/externaldata/meteolakes/transect/zurich/${t}/${x1}/${y1}/${x2}/${y2}`
+          `https://api.meteolakes.ch/api/datalakes/transect/${lake}/${t}/${y1}/${x1}/${y2}/${x2}`
         )
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
@@ -619,8 +625,8 @@ class ThreeDModel extends Component {
       };
     } else {
       var data, realdatetime, realdepth, realdata;
-      var datetimeunix = Math.round(datetime.getTime() / 1000);
-      filelink = filelink.replace(":datetime", datetimeunix);
+      var datetimejs = Math.round(datetime.getTime());
+      filelink = filelink.replace(":datetime", datetimejs);
       filelink = filelink.replace(":depth", depth);
       ({ data } = await axios
         .get(filelink, { timeout: 10000 })

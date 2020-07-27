@@ -5,8 +5,8 @@ import "../datadetail.css";
 
 class Download extends Component {
   state = {
-    upper: "NA",
-    lower: "NA",
+    upper: this.props.max,
+    lower: this.props.min,
   };
 
   onChangeTime = (values) => {
@@ -30,54 +30,62 @@ class Download extends Component {
     this.setState({ lower });
   };
 
-  fileIdSelect = (arr) => {
+  fileIdSelect = (arr, filetype) => {
     var { files } = this.props;
     var out = [];
-    for (var i = 0; i < arr.length; i++) {
-      out.push(files[arr[i]].filelineage);
+    if (filetype === "nc") {
+      for (var i = 0; i < arr.length; i++) {
+        out.push(files[arr[i]].filelineage);
+      }
+    } else {
+      for (i = 0; i < arr.length; i++) {
+        out.push(files[arr[i]].id);
+      }
     }
+
     return out;
   };
 
-  downloadFiles = (filetype, apiUrl, id, arr, title) => {
-    var { embargo, password } = this.props.dataset;
+  downloadFiles = (filetype, apiUrl, arr, title) => {
+    arr = this.fileIdSelect(arr, filetype);
+    var { embargo } = this.props.dataset;
     var { upper } = this.state;
     var embargoDate =
       new Date().getTime() - embargo * 30.4167 * 24 * 60 * 60 * 1000;
-    var userpassword;
-    if ((upper*1000) > embargoDate) {
-      userpassword = prompt(
+    var datasetpassword = "";
+    if (upper * 1000 > embargoDate) {
+      datasetpassword = prompt(
         "Selection contains embargoed data. (after " +
           new Date(embargoDate) +
           ") Please enter the password to download data."
       );
-    } else {
-      userpassword = password;
     }
-    if (password === userpassword) {
-      var url = `${apiUrl}/download/${filetype}/${id}`;
-      var name =
-        title.replace(/\s/g, "").toLowerCase() + "_datalakesdownload.zip";
-      axios({
-        method: "post",
-        url: url,
-        responseType: "blob",
-        data: { data: arr },
+    var url = `${apiUrl}/download?password=${datasetpassword}`;
+    var name =
+      title.replace(/\s/g, "").toLowerCase() + "_datalakesdownload.zip";
+    axios({
+      method: "post",
+      url: url,
+      responseType: "blob",
+      data: { ids: arr },
+    })
+      .then(({ data }) => {
+        const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute("download", name);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
       })
-        .then(({ data }) => {
-          const downloadUrl = window.URL.createObjectURL(new Blob([data]));
-          const link = document.createElement("a");
-          link.href = downloadUrl;
-          link.setAttribute("download", name);
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        })
-        .catch((error) => {
-          console.error(error);
+      .catch((error) => {
+        console.error(error);
+        if (error.response.status === 403) {
+          alert("Incorrect password provided");
+        } else {
           alert("Failed to download files");
-        });
-    }
+        }
+      });
   };
 
   render() {
@@ -92,14 +100,10 @@ class Download extends Component {
     } = this.props;
     var { upper, lower } = this.state;
 
-    if (upper === "NA") upper = max;
-    if (lower === "NA") lower = min;
-
-    var arr = [0];
+    var selectedArray = [0];
     if (files.length > 1) {
-      arr = selectedFiles(upper, lower, files, "download");
+      selectedArray = selectedFiles(upper, lower, files, "download");
     }
-    var selectedArray = this.fileIdSelect(arr);
 
     return (
       <div className="datadetail-padding">
@@ -151,13 +155,7 @@ class Download extends Component {
           <div className="subheading">Select file type for download.</div>
           <button
             onClick={() =>
-              this.downloadFiles(
-                "nc",
-                apiUrl,
-                dataset.id,
-                selectedArray,
-                dataset.title
-              )
+              this.downloadFiles("nc", apiUrl, selectedArray, dataset.title)
             }
             className="download-button"
             title="Download datasets in NetCDF format"
@@ -166,13 +164,7 @@ class Download extends Component {
           </button>
           <button
             onClick={() =>
-              this.downloadFiles(
-                "json",
-                apiUrl,
-                dataset.id,
-                selectedArray,
-                dataset.title
-              )
+              this.downloadFiles("json", apiUrl, selectedArray, dataset.title)
             }
             className="download-button"
             title="Download datasets in JSON format"
