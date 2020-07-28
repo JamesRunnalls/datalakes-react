@@ -464,7 +464,7 @@ class Basemap extends Component {
       unit,
       title,
       datasourcelink,
-      datasets_id
+      datasets_id,
     } = layer;
     var polygons,
       matrix,
@@ -690,8 +690,10 @@ class Basemap extends Component {
           return getColor(val, min, max, colors);
         }
         var color = "white";
-        if (vectorFlowColor) {
+        if (vectorFlowColor === "true") {
           color = getLineColor;
+        } else if (["white", "grey", "black"].includes(vectorFlowColor)) {
+          color = vectorFlowColor;
         }
         var radius = 150;
         if (datasets_id === 14) {

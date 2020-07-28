@@ -54,9 +54,7 @@ class EditSettings extends Component {
   };
   localVectorFlowColorChange = (event) => {
     var { display } = this.state;
-    var vectorFlowColor = false;
-    if (event.target.value === "true") vectorFlowColor = true;
-    display.vectorFlowColor = vectorFlowColor;
+    display.vectorFlowColor = event.target.value;
     this.setState({ display });
   };
   localVectorArrowsChange = () => {
@@ -205,7 +203,9 @@ class EditSettings extends Component {
                       onChange={this.localVectorFlowColorChange}
                     >
                       <option value="true">Color Ramp</option>
-                      <option value="false">Fixed Color</option>
+                      <option value="white">White</option>
+                      <option value="black">Black</option>
+                      <option value="grey">Grey</option>
                     </select>
                   </td>
                 </tr>

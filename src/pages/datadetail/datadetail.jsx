@@ -16,6 +16,7 @@ import { apiUrl } from "../../../src/config.json";
 import "./datadetail.css";
 import ThreeDModel from "./inner/threedmodel";
 import RemoteSensing from "./inner/remotesensing";
+import MeteolakesDownload from './inner/meteolakesdownload';
 
 class DataDetail extends Component {
   state = {
@@ -486,7 +487,7 @@ class DataDetail extends Component {
         files,
         loading: false,
         step: "threedmodel",
-        allowedStep: ["threedmodel","external","webgis"],
+        allowedStep: ["threedmodel","meteolakesdownload","external","webgis"],
       });
     } else if (dataset.datasource === "Eawag RS") {
       this.setState({
@@ -722,6 +723,25 @@ class DataDetail extends Component {
               link={link}
             />
             <ThreeDModel
+              dataset={dataset}
+              datasetparameters={datasetparameters}
+              getLabel={this.getLabel}
+              files={files}
+              link={link}
+            />
+          </React.Fragment>
+        );
+        case "meteolakesdownload":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
+            <MeteolakesDownload
               dataset={dataset}
               datasetparameters={datasetparameters}
               getLabel={this.getLabel}

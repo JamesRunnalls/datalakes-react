@@ -1,3 +1,16 @@
+.swagger-ui .opblock-tag {
+  font-size: 18px;
+  color: black;
+}
+
+.swagger-ui .wrapper {
+  padding: 0;
+}
+
+.swagger-ui .expand-operation {
+  display: none;
+}
+
 .info-inner {
   display: inline-block;
   width: 50%;
@@ -129,7 +142,7 @@
   margin-top: 10px;
 }
 
-.filecontrol input[type=color] {
+.filecontrol input[type="color"] {
   height: 12px;
   border-color: transparent;
   background-color: transparent;
@@ -216,7 +229,7 @@
   .detailgraph {
     margin-top: 10px;
     margin-bottom: 0;
-    height: calc(100vh - 260px)
+    height: calc(100vh - 260px);
   }
 
   .data-subnav .subnav-item .subnav-text {
