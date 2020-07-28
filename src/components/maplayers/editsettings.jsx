@@ -23,6 +23,11 @@ class EditSettings extends Component {
     display.legend = !display.legend;
     this.setState({ display });
   };
+  localMovingAverageChange = (event) => {
+    var { display } = this.state;
+    display.movingAverage = event.target.value;
+    this.setState({ display });
+  }
   localMarkerSymbolChange = (event) => {
     var { display } = this.state;
     display.markerSymbol = event.target.value;
@@ -79,6 +84,7 @@ class EditSettings extends Component {
   render() {
     var { display } = this.state;
     var {
+      movingAverage,
       colors,
       markerLabel,
       legend,
@@ -200,6 +206,32 @@ class EditSettings extends Component {
                     >
                       <option value="true">Color Ramp</option>
                       <option value="false">Fixed Color</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+        {movingAverage && (
+          <div>
+            <table>
+              <tbody>
+                <tr>
+                  <td>Moving Averge:</td>
+                  <td>
+                    <select value={movingAverage} onChange={this.localMovingAverageChange}>
+                      <option value="none">None</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
                     </select>
                   </td>
                 </tr>

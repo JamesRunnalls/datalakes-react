@@ -98,7 +98,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     this._ctx.clearRect(0, 0, this._width, this._height);
     this._paths = this._prepareParticlePaths();
     let self = this;
-    /*for (var i = 0; i < 2000; i++) {
+    /*for (var i = 0; i < 200; i++) {
       self._moveParticles();
       self._drawParticles();
     }*/

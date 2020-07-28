@@ -356,9 +356,13 @@ class GIS extends Component {
     }
     if (mapplotfunction === "meteolakes") {
       if (parameters_id === 25) {
-        ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(data.data));
+        ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(
+          data.data
+        ));
       } else {
-        ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(data.data));
+        ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(
+          data.data
+        ));
       }
     }
 
@@ -569,6 +573,35 @@ class GIS extends Component {
     }
   };
 
+  optimisePoints = (array, colors) => {
+    var min = Math.min(...array);
+    var max = Math.max(...array);
+    var q, val, point;
+    for (var i = 0; i < colors.length; i++) {
+      if (i === 0) colors[i].point = 0;
+      else if (i === colors.length - 1) colors[i].point = 1;
+      else {
+        q = (1 / (colors.length - 1)) * i;
+        val = this.quantile(array, q);
+        point = (val - min) / (max - min);
+        colors[i].point = point;
+      }
+    }
+    return colors;
+  };
+
+  quantile = (arr, q) => {
+    const sorted = arr.slice(0).sort((a, b) => a - b);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+      return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+      return sorted[base];
+    }
+  };
+
   addNewLayer = async (
     selected,
     datasets_id,
@@ -637,6 +670,15 @@ class GIS extends Component {
           layer["mapplot"] = "field";
         }
 
+        // Moving Average for Remote Sensing
+        if (dataset.mapplotfunction === "remoteSensing") {
+          layer["movingAverage"] = 4;
+        }
+
+        // Optimise colors
+        var unoptimisedcolors = this.parseColor(layer.colors);
+        var optimisedcolors = this.optimisePoints(array, unoptimisedcolors);
+
         // Add Additional Parameters
         layer["files"] = files;
         layer["data"] = data;
@@ -650,7 +692,7 @@ class GIS extends Component {
         layer["parameters_id"] = parameters_id;
         layer["realdatetime"] = realdatetime;
         layer["realdepth"] = realdepth;
-        layer.colors = this.parseColor(layer.colors);
+        layer["colors"] = optimisedcolors;
         layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
         layer["visible"] = this.layervisible(
           datasets_id,

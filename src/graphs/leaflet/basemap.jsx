@@ -10,6 +10,14 @@ import { getColor } from "../../components/gradients/gradients";
 import "./css/leaflet.css";
 
 class Basemap extends Component {
+  isInt = (value) => {
+    if (/^[-+]?(\d+|Infinity)$/.test(value)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   zoomIn = () => {
     this.map.setZoom(this.map.getZoom() + 1);
   };
@@ -249,13 +257,92 @@ class Basemap extends Component {
     this.marker.push(markerGroup);
   };
 
+  movingAverage = (data, size) => {
+    function pointsInRadius(quadtree, x, y, radius) {
+      const result = [];
+      var filter;
+      const radius2 = radius * radius;
+      const accept = filter
+        ? (d) => filter(d) && result.push(d)
+        : (d) => result.push(d);
+      quadtree.visit(function (node, x1, y1, x2, y2) {
+        if (node.length) {
+          return (
+            x1 >= x + radius ||
+            y1 >= y + radius ||
+            x2 < x - radius ||
+            y2 < y - radius
+          );
+        }
+        const dx = +quadtree._x.call(null, node.data) - x,
+          dy = +quadtree._y.call(null, node.data) - y;
+        if (dx * dx + dy * dy < radius2) {
+          do {
+            accept(node.data);
+          } while ((node = node.next));
+        }
+      });
+      return result;
+    }
+
+    function meanofpoints(points) {
+      var arr = points.map((p) => p[2]);
+      return arr.reduce((p, c) => p + c, 0) / arr.length;
+    }
+
+    var { lon, lat, lonres, latres, v } = data;
+    var radius = Math.max(lonres, latres) * size;
+    var outdata = JSON.parse(JSON.stringify(v));
+
+    let quadtreedata = [];
+    for (var j = 0; j < v.length; j++) {
+      quadtreedata.push([lat[j], lon[j], v[j]]);
+    }
+
+    let min_x = Math.min(...lat);
+    let min_y = Math.min(...lon);
+    let max_x = Math.max(...lat);
+    let max_y = Math.max(...lon);
+
+    let quadtree = d3
+      .quadtree()
+      .extent([
+        [min_x, min_y],
+        [max_x, max_y],
+      ])
+      .addAll(quadtreedata);
+
+    for (var i = 0; i < outdata.length; i++) {
+      outdata[i] = meanofpoints(
+        pointsInRadius(quadtree, lat[i], lon[i], radius)
+      );
+    }
+
+    return outdata;
+  };
+
   remoteSensing = async (layer, file) => {
     var { maxdatetime } = file;
-    var { min, max, unit, data } = layer;
+    var {
+      min,
+      max,
+      unit,
+      data,
+      movingAverage,
+      colors,
+      title,
+      datasourcelink,
+    } = layer;
     var polygons = [];
     var coords;
     var x = data.lonres / 2;
     var y = data.latres / 2;
+    var plotdata;
+    if (this.isInt(movingAverage)) {
+      plotdata = this.movingAverage(data, movingAverage);
+    } else {
+      plotdata = data.v;
+    }
     for (var i = 0; i < data.lon.length; i++) {
       coords = [
         [data.lat[i] - y, data.lon[i] - x],
@@ -263,9 +350,9 @@ class Basemap extends Component {
         [data.lat[i] + y, data.lon[i] + x],
         [data.lat[i] - y, data.lon[i] + x],
       ];
-      var value = Math.round(data.v[i] * 1000) / 1000;
+      var value = Math.round(plotdata[i] * 1000) / 1000;
       var valuestring = String(value) + String(unit);
-      var pixelcolor = getColor(data.v[i], min, max, layer.colors);
+      var pixelcolor = getColor(plotdata[i], min, max, colors);
       polygons.push(
         L.polygon(coords, {
           color: pixelcolor,
@@ -276,7 +363,7 @@ class Basemap extends Component {
           .bindPopup(
             "<table><tbody>" +
               '<tr><td colSpan="2"><strong>' +
-              layer.title +
+              title +
               "</strong></td></tr>" +
               "<tr><td class='text-nowrap'><strong>Satellite</strong></td><td>Sentinal 3</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
@@ -292,7 +379,7 @@ class Basemap extends Component {
               String(value) +
               String(unit) +
               '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-              layer.datasourcelink +
+              datasourcelink +
               '">More information</a></td></tr>' +
               "</tbody></table>"
           )
@@ -377,6 +464,7 @@ class Basemap extends Component {
       unit,
       title,
       datasourcelink,
+      datasets_id
     } = layer;
     var polygons,
       matrix,
@@ -605,7 +693,11 @@ class Basemap extends Component {
         if (vectorFlowColor) {
           color = getLineColor;
         }
-        var vectordata = this.meteolakesParseVectorData(data, 150);
+        var radius = 150;
+        if (datasets_id === 14) {
+          radius = 300;
+        }
+        var vectordata = this.meteolakesParseVectorData(data, radius);
         var vectors = L.vectorFieldAnim(vectordata, {
           paths: 5000,
           color,
@@ -1071,9 +1163,11 @@ class Basemap extends Component {
     this.marker.forEach((layer) => {
       this.map.removeLayer(layer);
     });
+    this.marker.length = 0;
     this.raster.forEach((layer) => {
       this.map.removeLayer(layer);
     });
+    this.raster.length = 0;
 
     function finddataset(fileid, files) {
       return files.find((x) => x.id === fileid);
