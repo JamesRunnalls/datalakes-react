@@ -285,9 +285,14 @@ class Basemap extends Component {
       return result;
     }
 
-    function meanofpoints(points) {
+    function medianofpoints(points) {
       var arr = points.map((p) => p[2]);
-      return arr.reduce((p, c) => p + c, 0) / arr.length;
+      arr.sort(function (a, b) {
+        return a - b;
+      });
+      var half = Math.floor(arr.length / 2);
+      if (arr.length % 2) return arr[half];
+      return (arr[half - 1] + arr[half]) / 2.0;
     }
 
     var { lon, lat, lonres, latres, v } = data;
@@ -313,7 +318,7 @@ class Basemap extends Component {
       .addAll(quadtreedata);
 
     for (var i = 0; i < outdata.length; i++) {
-      outdata[i] = meanofpoints(
+      outdata[i] = medianofpoints(
         pointsInRadius(quadtree, lat[i], lon[i], radius)
       );
     }
