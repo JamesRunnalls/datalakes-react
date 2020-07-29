@@ -22,6 +22,13 @@ class LiveParameterSummary extends Component {
             />
           );
         })}
+        <a href="https://www.pully.ch/fr/footer/webcam-medias/">
+          <img
+            src="https://www.pully.ch/media/64410/w_prieure.jpg?Cache=No&format=png"
+            alt="Webcam at Pully"
+          />
+        </a>
+        <div>Image Copywrite Ville de Pully</div>
       </div>
     );
   }
@@ -49,7 +56,7 @@ class LiveParameter extends Component {
         "Sep",
         "Oct",
         "Nov",
-        "Dec"
+        "Dec",
       ];
       var year = a.getFullYear();
       var month = months[a.getMonth()];
@@ -84,8 +91,10 @@ class WeatherStationRight extends Component {
   render() {
     var { dataset, datainfo, selected } = this.props;
     if (dataset.length > 0) {
-      var x = dataset.find(x => x.label === "Time").value.map(i => i * 1000);
-      var y = dataset[selected].value.map(i => i * 1);
+      var x = dataset
+        .find((x) => x.label === "Time")
+        .value.map((i) => i * 1000);
+      var y = dataset[selected].value.map((i) => i * 1);
       var data = { x: x, y: y };
       return (
         <div className="weatherstation-right">
@@ -124,10 +133,10 @@ class Station extends Component {
     dataset: [],
     datainfo: [],
     error: false,
-    selected: 1
+    selected: 1,
   };
 
-  setSelectedState = selected => {
+  setSelectedState = (selected) => {
     this.setState({ selected });
   };
 
@@ -135,12 +144,12 @@ class Station extends Component {
     const url = this.props.location.pathname.split("/").slice(-1)[0];
     const { data: datainfo } = await axios
       .get(apiUrl + "/externaldata/lakestations/" + url)
-      .catch(error => {
+      .catch((error) => {
         this.setState({ error: true });
       });
     const { data: dataset } = await axios
       .get(apiUrl + "/externaldata/lakestations/" + url + "?get=data")
-      .catch(error => {
+      .catch((error) => {
         this.setState({ error: true });
       });
     this.setState({ dataset, datainfo });
@@ -155,7 +164,6 @@ class Station extends Component {
       return (
         <React.Fragment>
           <h1>{datainfo.name} Live</h1>
-          <img src="https://www.pully.ch/media/64410/w_prieure.jpg" />
           <SidebarLayout
             sidebartitle="Time Series"
             left={
