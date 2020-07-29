@@ -78,6 +78,6 @@
 
 @media screen and (max-width: 500px) {
   .legend {
-    width: calc(100% - 20px);
+    max-width: calc(100% - 20px);
   }
 }

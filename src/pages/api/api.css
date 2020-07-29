@@ -19,7 +19,7 @@
   bottom: 0;
   right: 0;
   margin-right: 10px;
-  z-index: 1;
+  z-index: 999999999;
 }
 
 .swagger-ui .wrapper {
@@ -29,4 +29,11 @@
 .doc-desc {
   padding: 0 10px;
   margin-bottom: 10px;
+}
+
+@media screen and (max-width: 500px) {
+  .swagger-ui .scheme-container {
+    margin: 0;
+    bottom: 70px;
+  }
 }

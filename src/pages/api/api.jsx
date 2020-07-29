@@ -10,7 +10,7 @@ class API extends Component {
     return (
       <React.Fragment>
         <h1>Datalakes API</h1>
-        <div class="doc-desc">
+        <div className="doc-desc">
           Documentation for the Datalakes API is generated automatically using {" "}
           <a
             href="https://swagger.io/"

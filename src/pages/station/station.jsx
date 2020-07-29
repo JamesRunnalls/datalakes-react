@@ -155,6 +155,7 @@ class Station extends Component {
       return (
         <React.Fragment>
           <h1>{datainfo.name} Live</h1>
+          <img src="https://www.pully.ch/media/64410/w_prieure.jpg" />
           <SidebarLayout
             sidebartitle="Time Series"
             left={

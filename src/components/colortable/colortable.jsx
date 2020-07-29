@@ -78,7 +78,7 @@ class ColorTable extends Component {
                 var value = min + color.point * (max - min);
                 return (
                   <tr key={index}>
-                    <td style={{ width: "45%" }}>
+                    <td style={{ width: "25%" }}>
                       <input
                         type="color"
                         id={index}
@@ -86,18 +86,19 @@ class ColorTable extends Component {
                         onChange={this.updateColors}
                       ></input>
                     </td>
-                    <td style={{ width: "45%" }}>
+                    <td style={{ width: "55%" }}>
                       {index === 0 || index === colors.length - 1 ? (
-                        <div>{value}</div>
+                        <div style={{ width: "100%", overflow: "hidden" }}>{value}</div>
                       ) : (
                         <input
                           type="text"
                           defaultValue={value}
                           onChange={this.updatePoint(index, min, max)}
+                          style={{ width: "100%" }}
                         ></input>
                       )}
                     </td>
-                    <td style={{ width: "10%" }}>
+                    <td style={{ width: "20%" }}>
                       {index !== colors.length - 1 && index !== 0 && (
                         <div
                           className="colortable-deleterow"
