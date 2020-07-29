@@ -1170,7 +1170,6 @@ class Basemap extends Component {
     this.marker.forEach((layer) => {
       this.map.removeLayer(layer);
     });
-    this.marker.length = 0;
     this.raster.forEach((layer) => {
       this.map.removeLayer(layer);
     });

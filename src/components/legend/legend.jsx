@@ -5,7 +5,7 @@ import RasterLegendItem from "./rasterlegenditem";
 
 class Legend extends Component {
   state = {
-    open: false
+    open: this.props.open,
   };
   toggle = () => {
     this.setState({ open: !this.state.open });
@@ -13,7 +13,7 @@ class Legend extends Component {
   render() {
     var { open } = this.state;
     var { selectedlayers } = this.props;
-    var legendmaplayers = selectedlayers.filter(layer => layer.legend);
+    var legendmaplayers = selectedlayers.filter((layer) => layer.legend);
     var inner = [];
     var l;
     for (var i = 0; i < legendmaplayers.length; i++) {
@@ -72,7 +72,11 @@ class Legend extends Component {
     return (
       <div className={open ? "legend" : "legend hide"}>
         {inner.length > 0 && (
-          <div className="legend-title" onClick={this.toggle} title={open ? "Hide legend" : "Show legend"}>
+          <div
+            className="legend-title"
+            onClick={this.toggle}
+            title={open ? "Hide legend" : "Show legend"}
+          >
             <div className="legend-title-text">Legend</div>
           </div>
         )}

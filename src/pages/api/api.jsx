@@ -15,7 +15,7 @@ class API extends Component {
           <a href="https://swagger.io/" target="_blank" rel="noopener noreferrer">Swagger.</a>
         </div>
         <div className="api-container">
-          <SwaggerUI url={apiUrl + "/docs"} />
+          <SwaggerUI url={apiUrl + "/docs"} docExpansion="list"/>
         </div>
       </React.Fragment>
     );

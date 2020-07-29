@@ -681,6 +681,11 @@ class ThreeDModel extends Component {
         downloads
       ));
 
+      let layer = {
+        ...JSON.parse(JSON.stringify(dataset.plotproperties)),
+        ...JSON.parse(JSON.stringify(dataset)),
+      };
+
       // Get data min and max
       var min, max, array, mapplot, unit, name;
       if (parameters_id === 25) {
@@ -692,13 +697,9 @@ class ThreeDModel extends Component {
         mapplot = "raster";
         unit = "°C";
         name = "Water Temperature";
+        layer["legend"] = true;
         ({ min, max, array } = this.meteolakesScalarMinMax(data.data));
-      }
-
-      let layer = {
-        ...JSON.parse(JSON.stringify(dataset.plotproperties)),
-        ...JSON.parse(JSON.stringify(dataset)),
-      };
+      }   
 
       // Add Additional Parameters
       layer["realdatetime"] = realdatetime;
@@ -866,7 +867,7 @@ class ThreeDModel extends Component {
             />
           </div>
 
-          <Legend selectedlayers={selectedlayers} />
+          <Legend selectedlayers={selectedlayers} open={true} />
 
           {loading && (
             <div className="map-loader">
