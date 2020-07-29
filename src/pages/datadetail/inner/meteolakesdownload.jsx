@@ -37,9 +37,30 @@ class MeteolakesDownload extends Component {
     return new Date(ISOweekStart.setDate(ISOweekStart.getDate() + (day - 1)));
   };
 
+  parseDateFormat = (date) => {
+    var months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "July",
+      "Aug",
+      "Sept",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    var day = date.getDate();
+    var month = months[date.getMonth()];
+    return `${day} ${month}`;
+  };
+
   parseWeek = (week, year) => {
-    console.log(this.getDateFromIsoweek(week, year, 1), this.getDateFromIsoweek(week, year, 7));
-    return week;
+    return `${this.parseDateFormat(
+      this.getDateFromIsoweek(week, year, 1)
+    )} to ${this.parseDateFormat(this.getDateFromIsoweek(week, year, 7))}`;
   };
 
   async componentDidMount() {
@@ -118,27 +139,37 @@ class MeteolakesDownload extends Component {
         <div className="info-title">Citation</div>
         {dataset.citation}
 
+        <div className="info-title">Available Data</div>
+        <p>
+          Use the following endpoint to see available data:{" "}
+          <a href="http://meteolakes.ch/meteolac/available_data_netcdf.json" target="_blank" rel="noopener noreferrer">
+            http://meteolakes.ch/meteolac/available_data_netcdf.json
+          </a>
+        </p>
+
         <div className="info-title">Download</div>
         <p>
           Download NetCDF file containing one week of simulations (every 3hrs).
           Warning - files are around 160mb. For slices of the data please use
           the API below.
         </p>
-
-        <select value={year} onChange={this.onChangeYear}>
-          Year: {years}
-        </select>
-        <select value={week} onChange={this.onChangeWeek}>
-          Week: {weeks}
-        </select>
-        <a href={link}>
-          <button>Download</button>
-        </a>
+        <div className="meteolakesdownload">
+          <select value={year} onChange={this.onChangeYear}>
+            Year: {years}
+          </select>
+          <select value={week} onChange={this.onChangeWeek}>
+            Week: {weeks}
+          </select>
+          <a href={link}>
+            <button>Download</button>
+          </a>
+        </div>
 
         <div className="info-title">API</div>
 
-        <div className="api-container">
-          <SwaggerUI url={apiUrl + "/docs"} />
+        <div className="api-meteolakes">
+          [ Base URL: api.meteolakes.ch/api/datalakes ]
+          <SwaggerUI url={apiUrl + "/externaldata/meteolakes/api"} />
         </div>
       </div>
     );
