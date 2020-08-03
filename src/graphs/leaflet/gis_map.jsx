@@ -79,6 +79,7 @@ class GISMap extends Component {
       legend,
       timeselector,
       loading,
+      play,
       sidebar,
       updateState,
       updateLocation,
@@ -105,6 +106,7 @@ class GISMap extends Component {
         img: groupicon,
       },
     ];
+    var load = loading && !play;
     return (
       <React.Fragment>
         <div className="map full">
@@ -134,7 +136,7 @@ class GISMap extends Component {
             setZoomOut={this.setZoomOut}
           />
 
-          {loading && (
+          {load && (
             <div className="map-loader">
               <Loading />
               Downloading and plotting data

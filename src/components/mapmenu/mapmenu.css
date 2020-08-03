@@ -50,5 +50,6 @@
   .sidebar-gis {
     left: 10px;
     max-width: calc(100% - 20px);
+    top: 60px;
   }
 }

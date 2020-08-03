@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import GISMap from "../../graphs/leaflet/gis_map";
+import * as d3 from "d3";
 import axios from "axios";
 import { apiUrl } from "../../config.json";
 import FilterBox from "../../components/filterbox/filterbox";
@@ -94,15 +95,26 @@ class GIS extends Component {
     hidden: [],
     datetime: new Date(),
     depth: 0,
-    timestep: 120,
+    timestep: 180,
     center: [46.85, 7.55],
     zoom: 9,
     basemap: "datalakesmap",
     play: false,
   };
 
+  moveOneTimestep = () => {
+    var { datetime, timestep } = this.state;
+    this.onChangeDatetime(new Date(datetime.getTime() + timestep * 60 * 1000));
+  };
+
   togglePlay = () => {
-    this.setState({ play: !this.state.play });
+    var { play } = this.state;
+    if (!play) {
+      this.timer = d3.interval(this.moveOneTimestep, 2000);
+    } else {
+      this.timer.stop();
+    }
+    this.setState({ play: !play });
   };
 
   updateLocation = (zoom, center) => {
@@ -164,13 +176,7 @@ class GIS extends Component {
     }
   };
 
-  onChangeDepth = async (event) => {
-    var depth;
-    if (Array.isArray(event)) {
-      depth = parseFloat(event[0]);
-    } else {
-      depth = parseFloat(event.target.value);
-    }
+  onChangeDepth = async (depth) => {
     if (depth !== this.state.depth) {
       var { datetime } = this.state;
       this.setState({ depth }, async () => {
@@ -608,6 +614,40 @@ class GIS extends Component {
     }
   };
 
+  getColor = (selectedlayers) => {
+    var usedColors = selectedlayers.map((s) => s.color);
+    var colors = [
+      "#f0a3ff",
+      "#0075dc",
+      "#993f00",
+      "#4c005c",
+      "#191919",
+      "#005c31",
+      "#2bce48",
+      "#ffcc99",
+      "#808080",
+      "#94ffb5",
+      "#8f7c00",
+      "#9dcc00",
+      "#c20088",
+      "#003380",
+      "#ffa405",
+      "#ffa8bb",
+      "#426600",
+      "#ff0010",
+      "#5ef1f2",
+      "#00998f",
+      "#e0ff66",
+      "#740aff",
+      "#990000",
+      "#ffff80",
+      "#ffff00",
+      "#ff5005",
+    ];
+    var unusedColors = colors.filter((c) => !usedColors.includes(c));
+    return unusedColors[0];
+  };
+
   addNewLayer = async (
     selected,
     datasets_id,
@@ -698,7 +738,8 @@ class GIS extends Component {
         layer["parameters_id"] = parameters_id;
         layer["realdatetime"] = realdatetime;
         layer["realdepth"] = realdepth;
-        layer["colors"] = optimisedcolors;
+        layer["colors"] = unoptimisedcolors;
+        layer["color"] = this.getColor(selectedlayers);
         layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
         layer["visible"] = this.layervisible(
           datasets_id,
@@ -1030,6 +1071,7 @@ class GIS extends Component {
           depth={depth}
           zoom={zoom}
           center={center}
+          play={play}
           selectedlayers={selectedlayers}
           datasets={datasets}
           legend={<Legend selectedlayers={selectedlayers} />}
@@ -1039,7 +1081,7 @@ class GIS extends Component {
           updateState={this.updateState}
           timeselector={
             <DatetimeDepthSelector
-              files={files}
+              selectedlayers={selectedlayers}
               mindatetime={mindatetime}
               maxdatetime={maxdatetime}
               mindepth={mindepth}

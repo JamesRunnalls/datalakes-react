@@ -5,10 +5,11 @@ import playicon from "./img/play.svg";
 import clockicon from "./img/clock.svg";
 import depthicon from "./img/depth.svg";
 import SelectorModal from "./selectormodal";
+import TimeSelector from "./timeselector";
 
 class DatetimeDepthSelector extends Component {
   state = {
-    modal: "timestep",
+    modal: false,
   };
   toggleModal = (modal) => {
     if (this.state.modal) {
@@ -53,6 +54,9 @@ class DatetimeDepthSelector extends Component {
       onChangeDatetime,
       onChangeDepth,
       onChangeTimestep,
+      mindatetime,
+      maxdatetime,
+      selectedlayers,
     } = this.props;
     var { modal } = this.state;
     var months = [
@@ -71,12 +75,21 @@ class DatetimeDepthSelector extends Component {
     ];
     return (
       <React.Fragment>
+        <div className="shading" />
         <div className="datetimedepthselector">
-          <div className="timeselectionbar"></div>
+          <div className="timeselectionbar">
+            <TimeSelector
+              datetime={datetime}
+              onChangeDatetime={onChangeDatetime}
+              selectedlayers={selectedlayers}
+              mindatetime={mindatetime}
+              maxdatetime={maxdatetime}
+            />
+          </div>
           <div className="controlbar">
             <div className="playpause" title={play ? "Pause" : "Play"}>
               <img
-                src={play ? playicon : pauseicon}
+                src={play ? pauseicon : playicon}
                 onClick={togglePlay}
                 alt="Play/ Pause button"
               />

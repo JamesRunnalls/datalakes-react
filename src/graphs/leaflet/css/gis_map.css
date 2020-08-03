@@ -194,3 +194,9 @@
 .my-labels {
   background-color: none;
 }
+
+@media screen and (max-width: 800px) {
+  .gis-controls {
+    top: 60px;
+  }
+}

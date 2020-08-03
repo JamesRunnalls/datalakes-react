@@ -3,12 +3,14 @@ import EditSettings from "./editsettings";
 import { sortableHandle } from "react-sortable-hoc";
 import "./maplayers.css";
 
-const DragHandle = sortableHandle(({ inner }) => <div title="Drag to re-order layers">{inner}</div>);
+const DragHandle = sortableHandle(({ inner }) => (
+  <div title="Drag to re-order layers">{inner}</div>
+));
 
 class LayerObject extends Component {
   state = {
     open: this.props.defaultOpen,
-    settings: false
+    settings: false,
   };
   toggleOpen = () => {
     this.setState({ open: !this.state.open });
@@ -22,13 +24,14 @@ class LayerObject extends Component {
       id,
       title,
       parameter_name,
+      color,
       content,
       allowSettings,
       display,
       displayGroup,
       removeSelected,
       onUpdate,
-      toggleLayerView
+      toggleLayerView,
     } = this.props;
     return (
       <div className="maplayers-dropdown">
@@ -55,7 +58,9 @@ class LayerObject extends Component {
               </td>
               <td style={{ width: "100%" }} onClick={this.toggleOpen}>
                 <DragHandle inner={title} />
-                <div className="maplayers-parameter">{parameter_name}</div>
+                <div className="maplayers-parameter" style={{ color: color }}>
+                  {parameter_name}
+                </div>
               </td>
               {allowSettings && (
                 <td

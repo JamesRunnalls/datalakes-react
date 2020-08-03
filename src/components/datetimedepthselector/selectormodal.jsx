@@ -129,9 +129,51 @@ class DateSelector extends Component {
 }
 
 class DepthSelector extends Component {
-  state = {};
+  state = {
+    depth: this.props.depth,
+  };
+  close = () => {
+    var { toggleModal, onChangeDepth } = this.props;
+    var { depth } = this.state;
+    if (isNaN(depth)) {
+      alert("Depth is not a valid number");
+    } else {
+      toggleModal();
+      onChangeDepth(depth);
+    }
+  };
+  changeDepth = (event) => {
+    this.setState({ depth: event.target.value });
+  };
+
+  escFunction = (event) => {
+    if (event.keyCode === 27) {
+      this.close();
+    }
+  };
+  componentDidMount() {
+    document.addEventListener("keydown", this.escFunction, false);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.escFunction, false);
+  }
+  componentDidUpdate(prevProps) {
+    if (this.props.depth !== prevProps.depth) {
+      this.setState({ timestep: this.props.depth });
+    }
+  }
   render() {
-    return <div>Depth</div>;
+    var { depth } = this.state;
+    return (
+      <div className="selectorbox">
+        <div className="closemodal" onClick={this.close}>
+          <div className="icon">&#10005;</div>
+        </div>
+        <div className="editor depth">
+          <input type="text" value={depth} onChange={this.changeDepth} />
+        </div>
+      </div>
+    );
   }
 }
 

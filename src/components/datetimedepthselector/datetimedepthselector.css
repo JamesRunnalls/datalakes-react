@@ -1,10 +1,37 @@
-.datetimedepthselector {
-  padding-top: 200px;
+.shading {
+  height: 250px;
   background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.4));
   position: fixed;
   width: 100%;
   bottom: 0;
   left: 0;
+  pointer-events: none;
+}
+
+.datetimedepthselector {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+}
+
+.datetimedepthselector .timeselectionbar {
+  padding: 0 50px;
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 1s, opacity 1s linear;
+  cursor: pointer;
+}
+
+.datetimedepthselector:hover .timeselectionbar {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.2s linear;
+}
+
+.datetimedepthselector .timeselectionbar .timeselector .xaxis {
+  color: white;
+  font-size: 14px;
 }
 
 .datetimedepthselector .controlbar {
@@ -126,6 +153,7 @@
   flex-flow: wrap;
   align-content: flex-start;
   transform-origin: top left;
+  justify-content: center;
 }
 
 .selectormodal .selectorbox .editor.timestep .timesteplist .item {
@@ -144,6 +172,11 @@
   background-color: #006edc;
 }
 
+.selectormodal .selectorbox .editor.depth input {
+  color: white;
+  background-color: transparent;
+}
+
 .react-calendar {
   background-color: rgba(0, 0, 0, 0.4);
 }
@@ -160,4 +193,42 @@
 .react-calendar__navigation button:enabled:hover,
 .react-calendar__navigation button:enabled:focus {
   background-color: #76baff;
+}
+
+@media screen and (max-width: 800px) {
+  .datetimedepthselector .controlbar .depthtimestep {
+    font-size: 18px;
+  }
+  .datetimedepthselector .controlbar .datetime {
+    font-size: 18px;
+  }
+  .datetimedepthselector .controlbar .playpause img {
+    height: 20px;
+    margin-bottom: -2px;
+  }
+  .datetimedepthselector .controlbar .depthtimestep img {
+    height: 15px;
+  }
+  .datetimedepthselector .controlbar {
+    padding: 20px 20px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .datetimedepthselector {
+    bottom: 50px;
+  }
+  .datetimedepthselector:hover .timeselectionbar {
+    display: none;
+  }
+  .datetimedepthselector .controlbar .depthtimestep {
+    float: none;
+    margin-left: 28px;
+  }
+  .datetimedepthselector .controlbar .playpause {
+    margin-right: 10px;
+  }
+  .selectormodal .selectorbox .editor {
+    padding: 0;
+  }
 }
