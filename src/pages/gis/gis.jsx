@@ -7,7 +7,7 @@ import MapLayers from "../../components/maplayers/maplayers";
 import AddLayers from "../../components/addlayers/addlayers";
 import Legend from "../../components/legend/legend";
 import colorlist from "../../components/colorramp/colors";
-import DatetimeDepthSelector from "../../components/sliders/datetimedepthselector";
+import DatetimeDepthSelector from "../../components/datetimedepthselector/datetimedepthselector";
 import "./gis.css";
 
 class SidebarGIS extends Component {
@@ -94,9 +94,15 @@ class GIS extends Component {
     hidden: [],
     datetime: new Date(),
     depth: 0,
+    timestep: 120,
     center: [46.85, 7.55],
     zoom: 9,
     basemap: "datalakesmap",
+    play: false,
+  };
+
+  togglePlay = () => {
+    this.setState({ play: !this.state.play });
   };
 
   updateLocation = (zoom, center) => {
@@ -143,13 +149,13 @@ class GIS extends Component {
     });
   };
 
-  onChangeDatetime = async (event) => {
-    var datetime;
-    if (Array.isArray(event)) {
-      datetime = new Date(event[0]);
-    } else {
-      datetime = event;
+  onChangeTimestep = (timestep) => {
+    if (timestep !== this.state.timestep) {
+      this.setState({ timestep });
     }
+  };
+
+  onChangeDatetime = async (datetime) => {
     if (datetime.getTime() !== this.state.datetime.getTime()) {
       var { depth } = this.state;
       this.setState({ datetime }, async () => {
@@ -1005,6 +1011,8 @@ class GIS extends Component {
       basemap,
       zoom,
       center,
+      play,
+      timestep,
     } = this.state;
     var {
       files,
@@ -1038,8 +1046,12 @@ class GIS extends Component {
               maxdepth={maxdepth}
               datetime={datetime}
               depth={depth}
+              play={play}
+              timestep={timestep}
+              togglePlay={this.togglePlay}
               onChangeDatetime={this.onChangeDatetime}
               onChangeDepth={this.onChangeDepth}
+              onChangeTimestep={this.onChangeTimestep}
             />
           }
           loading={loading}

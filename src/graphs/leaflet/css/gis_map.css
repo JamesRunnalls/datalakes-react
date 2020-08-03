@@ -18,6 +18,7 @@
   width: 100%;
   position: absolute;
   left: 0;
+  z-index: 1;
 }
 
 .map.full {
@@ -27,7 +28,6 @@
   top: 0;
   left: 0;
   margin: 0 !important;
-  z-index: 999999999;
 }
 
 @media screen and (max-width: 500px) {
@@ -156,15 +156,15 @@
 .timeselector-gis {
   position: absolute;
   right: 10px;
-  top: 10px;
+  bottom: 10px;
   z-index: 9998;
 }
 
 .gis-controls {
   position: absolute;
   left: 10px;
-  top: 10px;
-  z-index: 99999999;
+  top: 120px;
+  z-index: 999;
 }
 
 .gis-datalakes-logo img {

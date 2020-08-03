@@ -11,6 +11,7 @@ import DataDetail from "./pages/datadetail/datadetail";
 import AddDataset from "./pages/adddataset/adddataset";
 import GIS from "./pages/gis/gis";
 import Footer from "./format/footer/footer";
+import ch2018Graph from './pages/datadetail/inner/ch2018graph';
 
 class App extends Component {
   render() {
@@ -30,6 +31,8 @@ class App extends Component {
             <Route path="/API" component={API} />
 
             <Route path="/adddataset" component={AddDataset} />
+
+            <Route path="/temp" component={ch2018Graph} />
 
             <Route path="/" exact component={Home} />
             <Route path="/" component={NotFound} />

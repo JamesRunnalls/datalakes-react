@@ -83,7 +83,10 @@ class D3LineGraph extends Component {
           title,
           setDownloadGraph,
           confidence,
+          user_id,
         } = this.props;
+
+        var node_id = user_id ? "#" + user_id : "#vis";
 
         if (!lcolor) lcolor = ["#000000"];
         if (!lweight) lweight = [1];
@@ -94,9 +97,9 @@ class D3LineGraph extends Component {
 
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
-          viswidth = d3.select("#vis").node().getBoundingClientRect().width,
+          viswidth = d3.select(node_id).node().getBoundingClientRect().width,
           visheight =
-            d3.select("#vis").node().getBoundingClientRect().height - 5,
+            d3.select(node_id).node().getBoundingClientRect().height - 5,
           width = viswidth - margin.left - margin.right,
           height = visheight - margin.top - margin.bottom;
 
@@ -137,7 +140,7 @@ class D3LineGraph extends Component {
 
         // Adds the svg canvas
         var svg = d3
-          .select("#vis")
+          .select(node_id)
           .append("svg")
           .attr("id", "linegraphsvg")
           .attr("width", width + margin.left + margin.right)
@@ -189,7 +192,7 @@ class D3LineGraph extends Component {
             .attr("x", 6)
             .attr("dx", "1em")
             .style("text-anchor", "middle")
-            .text(`${xlabel} (${xunits})`);
+            .text(xunits ? `${xlabel} (${xunits})` : xlabel);
         }
 
         // Add the Y Axis
@@ -207,7 +210,7 @@ class D3LineGraph extends Component {
             .attr("x", 0 - height / 2)
             .attr("dy", "1em")
             .style("text-anchor", "middle")
-            .text(`${ylabel} (${yunits})`);
+            .text(yunits ? `${ylabel} (${yunits})` : ylabel);
         }
 
         // Add title
@@ -577,6 +580,7 @@ class D3LineGraph extends Component {
   }
 
   render() {
+    var { user_id } = this.props;
     if ("legend" in this.props) {
       var { legend } = this.props;
       var legendcontent = [];
@@ -595,7 +599,11 @@ class D3LineGraph extends Component {
         <div className="vis-header">
           <div className="vis-data" id="value"></div>
         </div>
-        <div id="vis" title="Click shift to activate zoom to area">
+        <div
+          id={user_id ? user_id : "vis"}
+          title="Click shift to activate zoom to area"
+          className="vis-main"
+        >
           <div className="downloadbar">
             <button id="pngdownloadline" title="Download Image">
               PNG

@@ -29,6 +29,25 @@ class GISMap extends Component {
   };
 
   toggleFullsize = () => {
+    if (!this.state.fullsize) {
+      if (document.documentElement.requestFullScreen) {
+        document.documentElement.requestFullScreen();
+      } else if (document.documentElement.mozRequestFullScreen) {
+        document.documentElement.mozRequestFullScreen();
+      } else if (document.documentElement.webkitRequestFullScreen) {
+        document.documentElement.webkitRequestFullScreen(
+          Element.ALLOW_KEYBOARD_INPUT
+        );
+      }
+    } else {
+      if (document.cancelFullScreen) {
+        document.cancelFullScreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+      }
+    }
     this.setState({ fullsize: !this.state.fullsize });
   };
 
@@ -88,7 +107,7 @@ class GISMap extends Component {
     ];
     return (
       <React.Fragment>
-        <div className={fullsize ? "map full" : "map"}>
+        <div className="map full">
           <div className="gis-controls">
             <MapControl
               zoomIn={zoomIn}

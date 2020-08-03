@@ -11,6 +11,38 @@
   display: none;
 }
 
+.ch2018graph {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  box-sizing: border-box;
+  position: relative;
+  height: 600px;
+  max-height: calc(100vh - 100px);
+  min-height: 340px;
+}
+
+.ch2018graph .left {
+  width: 50%;
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+}
+
+.ch2018graph .right {
+  width: 50%;
+  display: inline-block;
+  height: 100%;
+  vertical-align: top;
+}
+
+.ch2018graph .right .lower {
+  height: 50%;
+}
+
+.ch2018graph .right .upper {
+  height: 50%;
+}
+
 .info-inner {
   display: inline-block;
   width: 50%;
