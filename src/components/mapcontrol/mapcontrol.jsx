@@ -1,8 +1,12 @@
 import React, { Component } from "react";
 import "./mapcontrol.css";
+import print from "./img/print.svg";
 
 class MapControl extends Component {
   state = {};
+  print = () => {
+    window.print();
+  };
   render() {
     var {
       zoomIn,
@@ -38,7 +42,8 @@ class MapControl extends Component {
         }
         othercontrol.push(
           <div key={title} className={classes.join(" ")} onClick={onClick}>
-            <img src={img} alt={title} /><span>{title}</span>
+            <img src={img} alt={title} />
+            <span>{title}</span>
           </div>
         );
       }
@@ -65,15 +70,37 @@ class MapControl extends Component {
           </div>
         </div>
         <div className="othercontrol">{othercontrol}</div>
-        {toggleHelp && (
+        {toggleHelp ? (
+          <div className="othercontrol">
+            <div
+              className="mapcontrol-item top outline"
+              onClick={this.print}
+              title="Print"
+            >
+              <img src={print} alt="print" />
+              <span>Print</span>
+            </div>
+            <div
+              className={
+                help
+                  ? "mapcontrol-item bottom active"
+                  : "mapcontrol-item bottom outline"
+              }
+              onClick={toggleHelp}
+              title="Help"
+            >
+              ?
+              <span>Help</span>
+            </div>
+          </div>
+        ) : (
           <div
-            className={
-              help ? "mapcontrol-item active" : "mapcontrol-item outline"
-            }
-            onClick={toggleHelp}
-            title="Help"
+            className="mapcontrol-item outline"
+            onClick={window.print()}
+            title="Print"
           >
-            ?
+            <img src={print} alt="print" />
+            <span>Print</span>
           </div>
         )}
       </div>

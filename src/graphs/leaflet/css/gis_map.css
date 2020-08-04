@@ -30,9 +30,20 @@
   margin: 0 !important;
 }
 
+.mapviewerlegend {
+  position: absolute;
+  top: 110px;
+  right: 10px;
+  z-index: 999;
+}
+
 @media screen and (max-width: 500px) {
   .map {
     height: calc(100% - 120px);
+  }
+  .mapviewerlegend {
+    top: 50px;
+    right: 0;
   }
 }
 
@@ -147,7 +158,7 @@
 .map-loader {
   z-index: 9999;
   position: absolute;
-  top: 220px;
+  top: calc(50% - 76px);
   left: 0;
   width: 100%;
   text-align: center;

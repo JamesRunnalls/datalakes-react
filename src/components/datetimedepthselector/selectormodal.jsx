@@ -16,6 +16,24 @@ class TimeSelector extends Component {
     datetime = new Date(datetime.getTime() + interval * 1000);
     this.setState({ datetime });
   };
+  scrollHour = (event) => {
+    var { datetime } = this.state;
+    if (event.deltaY < 0) {
+      datetime = new Date(datetime.getTime() + 3600 * 1000);
+    } else if (event.deltaY > 0) {
+      datetime = new Date(datetime.getTime() - 3600 * 1000);
+    }
+    this.setState({ datetime });
+  };
+  scrollMins = (event) => {
+    var { datetime } = this.state;
+    if (event.deltaY < 0) {
+      datetime = new Date(datetime.getTime() + 60 * 1000);
+    } else if (event.deltaY > 0) {
+      datetime = new Date(datetime.getTime() - 60 * 1000);
+    }
+    this.setState({ datetime });
+  };
   escFunction = (event) => {
     if (event.keyCode === 27) {
       this.close();
@@ -34,6 +52,10 @@ class TimeSelector extends Component {
   }
   render() {
     var { datetime } = this.state;
+    var hours = datetime.getHours();
+    var hstring = hours < 10 ? "0" + hours : hours.toString();
+    var mins = datetime.getMinutes();
+    var mstring = mins < 10 ? "0" + mins : mins.toString();
     return (
       <div className="selectorbox">
         <div className="closemodal" onClick={this.close}>
@@ -53,11 +75,13 @@ class TimeSelector extends Component {
                 <td className="modalarrow" onClick={() => this.changeTime(60)}>
                   &#9650;
                 </td>
+                <td></td>
               </tr>
               <tr>
-                <td>{datetime.getHours()}</td>
+                <td onWheel={this.scrollHour}>{hstring}</td>
                 <td>:</td>
-                <td>{datetime.getMinutes()}</td>
+                <td onWheel={this.scrollMins}>{mstring}</td>
+                <td>{hours < 12 ? "AM" : "PM"}</td>
               </tr>
               <tr>
                 <td
@@ -70,6 +94,7 @@ class TimeSelector extends Component {
                 <td className="modalarrow" onClick={() => this.changeTime(-60)}>
                   &#9660;
                 </td>
+                <td></td>
               </tr>
             </tbody>
           </table>

@@ -162,7 +162,7 @@ class GISMap extends Component {
           />
 
           <div className="timeselector-gis">{timeselector}</div>
-          {legend}
+          <div className="mapviewerlegend">{legend}</div>
         </div>
       </React.Fragment>
     );

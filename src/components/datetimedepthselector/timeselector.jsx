@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
-import { isEqual } from "lodash";
+import "./timeselector.css";
 
 class TimeSelector extends Component {
   removeErrorWarning = (x) => {
@@ -9,6 +9,7 @@ class TimeSelector extends Component {
   plotLineGraph = async () => {
     try {
       d3.select("#timeselectorsvg").remove();
+      d3.select("#tooltip").remove();
     } catch (e) {}
     var {
       selectedlayers,
@@ -20,7 +21,6 @@ class TimeSelector extends Component {
     if (selectedlayers.length && mindatetime && maxdatetime) {
       try {
         // Set graph size
-        var currentZoom = d3.zoomIdentity;
         var margin = { top: 0, right: 10, bottom: 20, left: 0 },
           viswidth = d3.select("#timeselector").node().getBoundingClientRect()
             .width,
@@ -52,6 +52,8 @@ class TimeSelector extends Component {
 
         function zoomed() {
           x.domain(d3.event.transform.rescaleX(xx).domain());
+          plotdata();
+          current.attr("cx", x(datetime));
           gX.call(xAxis);
         }
 
@@ -78,30 +80,36 @@ class TimeSelector extends Component {
           .call(xAxis);
 
         // Add the availability data
-        var array;
-        for (var i = 0; i < selectedlayers.length; i++) {
-          array = selectedlayers[i].files.map((x) => ({
-            min: new Date(x.mindatetime),
-            max: new Date(x.maxdatetime),
-          }));
-          svg
-            .selectAll("dot")
-            .data(array)
-            .enter()
-            .append("rect")
-            .attr("height", 4)
-            .attr("width", function (d) {
-              return Math.max(1, x(d.max) - x(d.min));
-            })
-            .attr("stroke", selectedlayers[i].color)
-            .attr("fill", selectedlayers[i].color)
-            .attr("x", function (d) {
-              return x(d.min);
-            })
-            .attr("y", function (d) {
-              return i * 5;
-            });
+        var bars = svg.append("g").attr("class", "bars").attr("id", "bars");
+        function plotdata() {
+          d3.select("#bars").selectAll("*").remove();
+          var array;
+          for (var i = 0; i < selectedlayers.length; i++) {
+            array = selectedlayers[i].files.map((x) => ({
+              min: new Date(x.mindatetime),
+              max: new Date(x.maxdatetime),
+            }));
+            bars
+              .selectAll("dot")
+              .data(array)
+              .enter()
+              .append("rect")
+              .attr("height", 4)
+              .attr("width", function (d) {
+                return Math.max(1, x(d.max) - x(d.min));
+              })
+              .attr("stroke", selectedlayers[i].color)
+              .attr("fill", selectedlayers[i].color)
+              .attr("x", function (d) {
+                return x(d.min);
+              })
+              .attr("y", function (d) {
+                return i * 5;
+              });
+          }
         }
+
+        plotdata();
 
         // Add Focus
         var focus = svg
@@ -111,11 +119,10 @@ class TimeSelector extends Component {
           .attr("stroke", "#F83F3F")
           .attr("r", 5)
           .attr("cy", selectedlayers.length * 5)
-          .style("opacity", 0)
-          .html("some text" + "<br/>");
+          .style("opacity", 0);
 
         // Add the current value
-        svg
+        var current = svg
           .append("g")
           .append("circle")
           .style("fill", "red")
@@ -123,6 +130,13 @@ class TimeSelector extends Component {
           .attr("r", 6)
           .attr("cy", selectedlayers.length * 5)
           .attr("cx", x(datetime));
+
+        // Add tooltip
+        var tooltip = d3
+          .select("#timeselector")
+          .append("div")
+          .attr("id", "tooltip")
+          .attr("class", "tooltip");
 
         svg
           .append("rect")
@@ -144,16 +158,81 @@ class TimeSelector extends Component {
 
         function mouseover() {
           focus.style("opacity", 1);
+          tooltip.style("visibility", "visible");
         }
 
         function mouseout() {
           focus.style("opacity", 0);
+          tooltip.style("visibility", "hidden");
         }
 
-        function mousemove() {
+        function mousemove(event) {
           try {
             focus.attr("cx", d3.mouse(this)[0]);
           } catch (e) {}
+          try {
+            tooltip
+              .style("left", d3.mouse(this)[0] - 75 + "px")
+              .html(tooltiptext(x.invert(d3.mouse(this)[0])))
+              .style(
+                "top",
+                `-${
+                  d3.select("#tooltip").node().getBoundingClientRect().height +
+                  (30 - (selectedlayers.length - 1) * 5)
+                }px`
+              );
+          } catch (e) {}
+        }
+
+        function dataAvailable(files, datetime) {
+          var color = "red";
+          var unix = datetime.getTime();
+          for (var i = 0; i < files.length; i++) {
+            if (
+              unix >= new Date(files[i].mindatetime).getTime() &&
+              unix <= new Date(files[i].maxdatetime).getTime()
+            )
+              color = "green";
+          }
+          return color;
+        }
+
+        function tooltiptext(datetime) {
+          var months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+          var datestring = `<div style="text-align:center">${datetime.toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )} ${datetime.getDate()}-${
+            months[datetime.getMonth()]
+          } ${datetime.getFullYear()}</div>`;
+          var layerstring = "<table><tbody>";
+          for (var i = 0; i < selectedlayers.length; i++) {
+            layerstring =
+              layerstring +
+              `<tr><td>${selectedlayers[i].title} <div style="color:${selectedlayers[i].color};display:inline-block">${selectedlayers[i].name}</div></td>` +
+              `<td style="color:${dataAvailable(
+                selectedlayers[i].files,
+                datetime
+              )}">&#9673;</td></tr>`;
+          }
+          layerstring = layerstring + "</tbody></table>";
+          return datestring + layerstring;
         }
       } catch (e) {
         console.error("Error plotting time selector", e);
@@ -173,7 +252,6 @@ class TimeSelector extends Component {
     this.plotLineGraph();
   }
   render() {
-    var { selectedlayers, mindatetime, maxdatetime } = this.props;
     return (
       <div className="timeselector">
         <div id="timeselector"></div>

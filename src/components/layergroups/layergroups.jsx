@@ -41,13 +41,25 @@ class LayerGroups extends Component {
         name: "Lake Zurich 3D Model",
         description: "Some description",
         img: editlayers,
-        data: { selected: [[11, 5],[11,25]], center: [47.282, 8.729], zoom: 12 },
+        data: {
+          selected: [
+            [11, 5],
+            [11, 25],
+          ],
+          center: [47.282, 8.729],
+          zoom: 12,
+        },
       },
       {
         name: "Lake Zurich Velocities",
         description: "Some description",
         img: editlayers,
-        data: { selected: [[11,25]], center: [47.274,8.761], zoom: 11, basemap: "dark" },
+        data: {
+          selected: [[11, 25]],
+          center: [47.274, 8.761],
+          zoom: 11,
+          basemap: "dark",
+        },
       },
     ];
     return (
@@ -57,7 +69,8 @@ class LayerGroups extends Component {
             Welcome to the Datalakes Map Viewer. This is an online GIS service
             for visualising geospatial data. Get started by adding one of the
             pre-prepared layer packages below or if you know what you're looking
-            for, start your map from scratch.
+            for, start your map from scratch. Time, depth and animation controls
+            are available at the bottom of the page.
           </div>
         )}
         {groups.map((g) => (

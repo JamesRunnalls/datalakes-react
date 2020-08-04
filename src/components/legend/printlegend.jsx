@@ -3,15 +3,8 @@ import "./legend.css";
 import MarkerLegendItem from "./markerlegenditem";
 import RasterLegendItem from "./rasterlegenditem";
 
-class Legend extends Component {
-  state = {
-    open: this.props.open,
-  };
-  toggle = () => {
-    this.setState({ open: !this.state.open });
-  };
+class PrintLegend extends Component {
   render() {
-    var { open } = this.state;
     var { selectedlayers } = this.props;
     var legendmaplayers = selectedlayers.filter((layer) => layer.legend);
     var inner = [];
@@ -21,8 +14,7 @@ class Legend extends Component {
       if (l.mapplot === "marker") {
         inner.push(
           <div key={i} className="legend-inner">
-            {l.title}
-            <div>{l.name}</div>
+            {l.name}
             <MarkerLegendItem
               min={l.min}
               max={l.max}
@@ -40,8 +32,7 @@ class Legend extends Component {
       if (l.mapplot === "raster") {
         inner.push(
           <div key={i} className="legend-inner">
-            {l.title}
-            <div>{l.name}</div>
+            {l.name}
             <RasterLegendItem
               min={l.min}
               max={l.max}
@@ -57,8 +48,7 @@ class Legend extends Component {
       if (l.mapplot === "field") {
         inner.push(
           <div key={i} className="legend-inner">
-            {l.title}
-            <div>{l.name}</div>
+            {l.name}
             <RasterLegendItem
               min={l.min}
               max={l.max}
@@ -73,22 +63,16 @@ class Legend extends Component {
       }
     }
     return (
-      <div className={open ? "legend" : "legend hide"}>
+      <React.Fragment>
         {inner.length > 0 && (
-          <div
-            className="legend-title"
-            onClick={this.toggle}
-            title={open ? "Hide legend" : "Show legend"}
-          >
+          <div className="printlegend">
             <div className="legend-title-text">Legend</div>
+            <div className="legend-content">{inner}</div>
           </div>
         )}
-        <div className={open ? "legend-content" : "legend-content hide"}>
-          {inner}
-        </div>
-      </div>
+      </React.Fragment>
     );
   }
 }
 
-export default Legend;
+export default PrintLegend;

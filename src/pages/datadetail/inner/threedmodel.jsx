@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import * as d3 from "d3";
 import "../datadetail.css";
 import Basemap from "../../../graphs/leaflet/basemap";
 import "../threed.css";
@@ -16,7 +17,7 @@ import FilterBox from "../../../components/filterbox/filterbox";
 import MapMenu from "../../../components/mapmenu/mapmenu";
 import MapLayers from "../../../components/maplayers/maplayers";
 import Legend from "../../../components/legend/legend";
-import DatetimeDepthSelector from "../../../components/sliders/datetimedepthselector";
+import DatetimeDepthSelector from "../../../components/datetimedepthselector/datetimedepthselector";
 
 class ThreeDMenu extends Component {
   render() {
@@ -68,6 +69,8 @@ class ThreeDModel extends Component {
   state = {
     datetime: new Date(),
     depth: 0,
+    play: false,
+    timestep: 180,
     selectedlayers: [],
     downloads: [],
     datasets: [],
@@ -94,36 +97,41 @@ class ThreeDModel extends Component {
     zoomOut: () => {},
   };
 
-  onChangeDatetime = async (event) => {
-    var { depth, pointValue, lineValue } = this.state;
-    var datetime;
-    if (Array.isArray(event)) {
-      datetime = new Date(event[0]);
+  moveOneTimestep = () => {
+    var { datetime, timestep } = this.state;
+    this.onChangeDatetime(new Date(datetime.getTime() + timestep * 60 * 1000));
+  };
+
+  togglePlay = () => {
+    var { play } = this.state;
+    if (!play) {
+      this.timer = d3.interval(this.moveOneTimestep, 1000);
     } else {
-      datetime = event;
+      this.timer.stop();
     }
+    this.setState({ play: !play });
+  };
+
+  onChangeTimestep = (timestep) => {
+    if (timestep !== this.state.timestep) {
+      this.setState({ timestep });
+    }
+  };
+
+  onChangeDatetime = async (datetime) => {
     if (datetime.getTime() !== this.state.datetime.getTime()) {
+      var { depth } = this.state;
       this.setState({ datetime }, async () => {
         this.updateVariable(datetime, depth);
-        this.updatePoint(pointValue);
-        this.updateLine(lineValue);
       });
     }
   };
 
-  onChangeDepth = async (event) => {
-    var { datetime, pointValue, lineValue } = this.state;
-    var depth;
-    if (Array.isArray(event)) {
-      depth = parseFloat(event[0]);
-    } else {
-      depth = parseFloat(event.target.value);
-    }
+  onChangeDepth = async (depth) => {
     if (depth !== this.state.depth) {
+      var { datetime } = this.state;
       this.setState({ depth }, async () => {
         this.updateVariable(datetime, depth);
-        this.updatePoint(pointValue);
-        this.updateLine(lineValue);
       });
     }
   };
@@ -590,6 +598,40 @@ class ThreeDModel extends Component {
     return { files, mindepth, maxdepth, mindatetime, maxdatetime };
   };
 
+  getColor = (selectedlayers) => {
+    var usedColors = selectedlayers.map((s) => s.color);
+    var colors = [
+      "#f0a3ff",
+      "#0075dc",
+      "#993f00",
+      "#4c005c",
+      "#191919",
+      "#005c31",
+      "#2bce48",
+      "#ffcc99",
+      "#808080",
+      "#94ffb5",
+      "#8f7c00",
+      "#9dcc00",
+      "#c20088",
+      "#003380",
+      "#ffa405",
+      "#ffa8bb",
+      "#426600",
+      "#ff0010",
+      "#5ef1f2",
+      "#00998f",
+      "#e0ff66",
+      "#740aff",
+      "#990000",
+      "#ffff80",
+      "#ffff00",
+      "#ff5005",
+    ];
+    var unusedColors = colors.filter((c) => !usedColors.includes(c));
+    return unusedColors[0];
+  };
+
   lastFile = (files) => {
     files.sort((a, b) =>
       new Date(a.maxdatetime).getTime() > new Date(b.maxdatetime).getTime()
@@ -699,7 +741,7 @@ class ThreeDModel extends Component {
         name = "Water Temperature";
         layer["legend"] = true;
         ({ min, max, array } = this.meteolakesScalarMinMax(data.data));
-      }   
+      }
 
       // Add Additional Parameters
       layer["realdatetime"] = realdatetime;
@@ -715,6 +757,7 @@ class ThreeDModel extends Component {
       layer["fileid"] = file.id;
       layer["datasets_id"] = datasets_id;
       layer["datasetparameters"] = plotparameters;
+      layer["color"] = this.getColor(selectedlayers);
       layer["parameters_id"] = parameters_id;
       layer["colors"] = this.parseColor(layer.colors);
       layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
@@ -738,6 +781,8 @@ class ThreeDModel extends Component {
     var {
       selectedlayers,
       datasets,
+      play,
+      timestep,
       menu,
       profile,
       timeline,
@@ -855,19 +900,24 @@ class ThreeDModel extends Component {
           />
           <div className="timeselector-gis">
             <DatetimeDepthSelector
-              files={files}
+              selectedlayers={selectedlayers}
               mindatetime={mindatetime}
               maxdatetime={maxdatetime}
               mindepth={mindepth}
               maxdepth={maxdepth}
               datetime={datetime}
               depth={depth}
+              play={play}
+              timestep={timestep}
+              togglePlay={this.togglePlay}
               onChangeDatetime={this.onChangeDatetime}
               onChangeDepth={this.onChangeDepth}
+              onChangeTimestep={this.onChangeTimestep}
             />
           </div>
-
-          <Legend selectedlayers={selectedlayers} open={true} />
+          <div className="threedlegend">
+            <Legend selectedlayers={selectedlayers} open={false} />
+          </div>
 
           {loading && (
             <div className="map-loader">

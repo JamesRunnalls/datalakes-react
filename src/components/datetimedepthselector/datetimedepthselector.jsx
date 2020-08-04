@@ -119,7 +119,7 @@ class DatetimeDepthSelector extends Component {
                 title="Edit depth"
                 onClick={() => this.toggleModal("depth")}
               >
-                <img src={depthicon} />
+                <img src={depthicon} alt="depth icon"/>
                 {` ${depth}m`}
               </div>
               <div
@@ -127,7 +127,7 @@ class DatetimeDepthSelector extends Component {
                 title="Edit timestep"
                 onClick={() => this.toggleModal("timestep")}
               >
-                <img src={clockicon} />
+                <img src={clockicon} alt="clock icon"/>
                 {` ${this.lableTimestep(timestep)}`}
               </div>
             </div>

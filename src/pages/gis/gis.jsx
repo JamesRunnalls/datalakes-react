@@ -10,6 +10,7 @@ import Legend from "../../components/legend/legend";
 import colorlist from "../../components/colorramp/colors";
 import DatetimeDepthSelector from "../../components/datetimedepthselector/datetimedepthselector";
 import "./gis.css";
+import PrintLegend from '../../components/legend/printlegend';
 
 class SidebarGIS extends Component {
   render() {
@@ -110,7 +111,7 @@ class GIS extends Component {
   togglePlay = () => {
     var { play } = this.state;
     if (!play) {
-      this.timer = d3.interval(this.moveOneTimestep, 2000);
+      this.timer = d3.interval(this.moveOneTimestep, 1000);
     } else {
       this.timer.stop();
     }
@@ -723,7 +724,7 @@ class GIS extends Component {
 
         // Optimise colors
         var unoptimisedcolors = this.parseColor(layer.colors);
-        var optimisedcolors = this.optimisePoints(array, unoptimisedcolors);
+        //var optimisedcolors = this.optimisePoints(array, unoptimisedcolors);
 
         // Add Additional Parameters
         layer["files"] = files;
@@ -1056,7 +1057,6 @@ class GIS extends Component {
       timestep,
     } = this.state;
     var {
-      files,
       mindatetime,
       maxdatetime,
       mindepth,
@@ -1113,6 +1113,8 @@ class GIS extends Component {
             />
           }
         />
+        <div className="printheader"><div>Map Viewer Print</div><div>{datetime.toString()} @ {depth}m</div></div>
+        <div className="printlegend"><PrintLegend selectedlayers={selectedlayers} /></div>
       </React.Fragment>
     );
   }

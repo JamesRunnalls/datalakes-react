@@ -8,7 +8,7 @@ class RasterLegendItem extends Component {
         for (var i = 0; i < colors.length; i++) {
           lineargradient.push(`${colors[i].color} ${colors[i].point * 100}%`);
         }
-        return `linear-gradient(180deg,${lineargradient.join(",")})`;
+        return `linear-gradient(0deg,${lineargradient.join(",")})`;
       }
     };
     render() {
@@ -44,7 +44,7 @@ class RasterLegendItem extends Component {
               rowSpan={6}
             ></td>
             <td className="rasterdisplay-bar">&#9472;</td>
-            <td>{Math.round(1000 * min) / 1000}</td>
+            <td>{Math.round(1000 * max) / 1000}</td>
             <td>{unit}</td>
           </tr>
         );
@@ -64,7 +64,7 @@ class RasterLegendItem extends Component {
         inner.push(
           <tr key={2}>
             <td className="rasterdisplay-bar">&#9472;</td>
-            <td>{Math.round(1000 * max) / 1000}</td>
+            <td>{Math.round(1000 * min) / 1000}</td>
           </tr>
         );
       }

@@ -46,8 +46,8 @@ class Header extends Component {
   render() {
     var { showMenu, stuck } = this.state;
     return (
-      <div className={"header" + stuck}>
-        <header className={stuck}>
+      <header className={stuck}>
+        <div className={"header" + stuck}>
           <div className="header-inner">
             <div className="logo">
               <Link to="/">
@@ -206,8 +206,8 @@ class Header extends Component {
               </div>
             </div>
           </div>
-        </header>
-      </div>
+        </div>
+      </header>
     );
   }
 }
