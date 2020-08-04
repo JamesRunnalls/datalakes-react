@@ -491,7 +491,7 @@ class GIS extends Component {
     var mindatetime = Infinity;
     var maxdatetime = -Infinity;
     var mindepth = 0;
-    var maxdepth = 1;
+    var maxdepth = 100;
     for (var i = 0; i < selectedlayers.length; i++) {
       mindatetime = new Date(
         Math.min(mindatetime, new Date(selectedlayers[i].mindatetime))

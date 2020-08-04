@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "./mapcontrol.css";
 import print from "./img/print.svg";
+import info from "./img/info.svg";
 
 class MapControl extends Component {
   state = {};
@@ -87,10 +88,10 @@ class MapControl extends Component {
                   : "mapcontrol-item bottom outline"
               }
               onClick={toggleHelp}
-              title="Help"
+              title="Info"
             >
-              ?
-              <span>Help</span>
+              <img src={info} alt="info" />
+              <span>Info</span>
             </div>
           </div>
         ) : (

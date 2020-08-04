@@ -3,7 +3,7 @@
   left: 50px;
   top: 120px;
   z-index: 999;
-  height: calc(100% - 250px);
+  height: calc(100% - 200px);
   max-width: calc(100% - 60px);
 }
 

@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import Calendar from "react-calendar";
 import "./datetimedepthselector.css";
+import DepthSelector from "./depthselector";
 
-class TimeSelector extends Component {
+class TimeModal extends Component {
   state = {
     datetime: this.props.datetime,
   };
@@ -104,7 +105,7 @@ class TimeSelector extends Component {
   }
 }
 
-class DateSelector extends Component {
+class DateModal extends Component {
   state = {
     datetime: this.props.datetime,
   };
@@ -153,7 +154,7 @@ class DateSelector extends Component {
   }
 }
 
-class DepthSelector extends Component {
+class DepthModal extends Component {
   state = {
     depth: this.props.depth,
   };
@@ -168,7 +169,7 @@ class DepthSelector extends Component {
     }
   };
   changeDepth = (event) => {
-    this.setState({ depth: event.target.value });
+    //this.setState({ depth: event.target.value });
   };
 
   escFunction = (event) => {
@@ -188,6 +189,13 @@ class DepthSelector extends Component {
     }
   }
   render() {
+    var {
+      depth,
+      onChangeDepth,
+      selectedlayers,
+      mindepth,
+      maxdepth,
+    } = this.props;
     var { depth } = this.state;
     return (
       <div className="selectorbox">
@@ -195,14 +203,20 @@ class DepthSelector extends Component {
           <div className="icon">&#10005;</div>
         </div>
         <div className="editor depth">
-          <input type="text" value={depth} onChange={this.changeDepth} />
+          <DepthSelector
+            depth={depth}
+            onChangeDepth={onChangeDepth}
+            selectedlayers={selectedlayers}
+            mindepth={mindepth}
+            maxdepth={maxdepth}
+          />
         </div>
       </div>
     );
   }
 }
 
-class TimestepSelector extends Component {
+class TimestepModal extends Component {
   state = {
     timestep: this.props.timestep,
   };
@@ -286,6 +300,9 @@ class SelectorModal extends Component {
       modal,
       toggleModal,
       lableTimestep,
+      mindepth,
+      maxdepth,
+      selectedlayers,
     } = this.props;
     return (
       <div className="selectormodal">
@@ -294,28 +311,31 @@ class SelectorModal extends Component {
             <tr>
               <td className="modalfull">
                 {modal === "time" && (
-                  <TimeSelector
+                  <TimeModal
                     datetime={datetime}
                     toggleModal={toggleModal}
                     onChangeDatetime={onChangeDatetime}
                   />
                 )}
                 {modal === "date" && (
-                  <DateSelector
+                  <DateModal
                     datetime={datetime}
                     toggleModal={toggleModal}
                     onChangeDatetime={onChangeDatetime}
                   />
                 )}
                 {modal === "depth" && (
-                  <DepthSelector
+                  <DepthModal
                     depth={depth}
                     toggleModal={toggleModal}
                     onChangeDepth={onChangeDepth}
+                    mindepth={mindepth}
+                    maxdepth={maxdepth}
+                    selectedlayers={selectedlayers}
                   />
                 )}
                 {modal === "timestep" && (
-                  <TimestepSelector
+                  <TimestepModal
                     timestep={timestep}
                     toggleModal={toggleModal}
                     onChangeTimestep={onChangeTimestep}

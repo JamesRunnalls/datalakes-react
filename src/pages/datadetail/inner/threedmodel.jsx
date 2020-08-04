@@ -18,6 +18,7 @@ import MapMenu from "../../../components/mapmenu/mapmenu";
 import MapLayers from "../../../components/maplayers/maplayers";
 import Legend from "../../../components/legend/legend";
 import DatetimeDepthSelector from "../../../components/datetimedepthselector/datetimedepthselector";
+import PrintLegend from '../../../components/legend/printlegend';
 
 class ThreeDMenu extends Component {
   render() {
@@ -1010,6 +1011,15 @@ class ThreeDModel extends Component {
             </select>
           </div>
         )}
+        <div className="printheader">
+          <div>Datalakes Print</div>
+          <div>
+            {datetime.toString()} @ {depth}m
+          </div>
+        </div>
+        <div className="printlegend">
+          <PrintLegend selectedlayers={selectedlayers} />
+        </div>
       </div>
     );
   }

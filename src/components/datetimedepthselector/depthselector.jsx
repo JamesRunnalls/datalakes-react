@@ -1,42 +1,42 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
-import "./timeselector.css";
+import "./datetimedepthselector.css";
 
-class TimeSelector extends Component {
+class DepthSelector extends Component {
   plotLineGraph = async () => {
     try {
-      d3.select("#timeselectorsvg").remove();
+      d3.select("#depthselectorsvg").remove();
       d3.select("#tooltip").remove();
     } catch (e) {}
     var {
       selectedlayers,
-      datetime,
-      mindatetime,
-      maxdatetime,
-      onChangeDatetime,
+      depth,
+      mindepth,
+      maxdepth,
+      onChangeDepth,
     } = this.props;
-    if (selectedlayers.length && mindatetime && maxdatetime) {
+    if (selectedlayers.length > 0 && !isNaN(mindepth) && !isNaN(maxdepth)) {
       try {
         // Set graph size
         var margin = { top: 0, right: 10, bottom: 20, left: 0 },
-          viswidth = d3.select("#timeselector").node().getBoundingClientRect()
-            .width,
-          visheight = margin.bottom + selectedlayers.length * 5,
+          visheight = d3.select("#depthselector").node().getBoundingClientRect()
+            .height,
+          viswidth = margin.bottom + selectedlayers.length * 5,
           width = viswidth - margin.left - margin.right,
           height = visheight - margin.top - margin.bottom;
 
-        // Format X-axis
-        var x = d3
-          .scaleTime()
-          .range([0, width])
-          .domain([mindatetime, maxdatetime]);
-        var xx = d3
-          .scaleTime()
-          .range([0, width])
-          .domain([mindatetime, maxdatetime]);
+        // Format Y-axis
+        var y = d3
+          .scaleLinear()
+          .range([0, height])
+          .domain([mindepth, maxdepth]);
+        var yy = d3
+          .scaleLinear()
+          .range([0, height])
+          .domain([mindepth, maxdepth]);
 
         // Define the axes
-        var xAxis = d3.axisBottom(x).ticks(5);
+        var yAxis = d3.axisLeft(y).ticks(5);
 
         var zoom = d3
           .zoom()
@@ -48,17 +48,17 @@ class TimeSelector extends Component {
           .on("zoom", zoomed);
 
         function zoomed() {
-          x.domain(d3.event.transform.rescaleX(xx).domain());
+          y.domain(d3.event.transform.rescaleX(yy).domain());
           plotdata();
-          current.attr("cx", x(datetime));
-          gX.call(xAxis);
+          current.attr("cy", y(depth));
+          gY.call(yAxis);
         }
 
         // Adds the svg canvas
         var svg = d3
-          .select("#timeselector")
+          .select("#depthselector")
           .append("svg")
-          .attr("id", "timeselectorsvg")
+          .attr("id", "depthselectorsvg")
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
@@ -68,13 +68,12 @@ class TimeSelector extends Component {
           )
           .call(zoom);
 
-        // Add the X Axis
-        var gX = svg
+        // Add the Y Axis
+        var gY = svg
           .append("g")
-          .attr("class", "xaxis")
-          .attr("id", "axis--x")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
+          .attr("class", "yaxis")
+          .attr("id", "axis--y")
+          .call(yAxis);
 
         // Add the availability data
         var bars = svg.append("g").attr("class", "bars").attr("id", "bars");
@@ -83,24 +82,24 @@ class TimeSelector extends Component {
           var array;
           for (var i = 0; i < selectedlayers.length; i++) {
             array = selectedlayers[i].files.map((x) => ({
-              min: new Date(x.mindatetime),
-              max: new Date(x.maxdatetime),
+              min: new Date(x.mindepth),
+              max: new Date(x.maxdepth),
             }));
             bars
               .selectAll("dot")
               .data(array)
               .enter()
               .append("rect")
-              .attr("height", 4)
-              .attr("width", function (d) {
-                return Math.max(1, x(d.max) - x(d.min));
+              .attr("width", 4)
+              .attr("height", function (d) {
+                return Math.max(1, y(d.max) - y(d.min));
               })
               .attr("stroke", selectedlayers[i].color)
               .attr("fill", selectedlayers[i].color)
-              .attr("x", function (d) {
-                return x(d.min);
-              })
               .attr("y", function (d) {
+                return y(d.min);
+              })
+              .attr("x", function (d) {
                 return i * 5;
               });
           }
@@ -115,7 +114,7 @@ class TimeSelector extends Component {
           .style("fill", "#F83F3F")
           .attr("stroke", "#F83F3F")
           .attr("r", 5)
-          .attr("cy", selectedlayers.length * 5)
+          .attr("cx", selectedlayers.length * 5)
           .style("opacity", 0);
 
         // Add the current value
@@ -125,12 +124,12 @@ class TimeSelector extends Component {
           .style("fill", "red")
           .attr("stroke", "red")
           .attr("r", 6)
-          .attr("cy", selectedlayers.length * 5)
-          .attr("cx", x(datetime));
+          .attr("cx", selectedlayers.length * 5)
+          .attr("cy", y(depth));
 
         // Add tooltip
         var tooltip = d3
-          .select("#timeselector")
+          .select("#depthselector")
           .append("div")
           .attr("id", "tooltip")
           .attr("class", "tooltip");
@@ -147,10 +146,8 @@ class TimeSelector extends Component {
           .on("click", onClick);
 
         function onClick() {
-          var date = x.invert(d3.mouse(this)[0]);
-          if (typeof date.getMonth === "function") {
-            onChangeDatetime(date);
-          }
+          var depth = y.invert(d3.mouse(this)[1]);
+          onChangeDepth(depth);
         }
 
         function mouseover() {
@@ -165,59 +162,32 @@ class TimeSelector extends Component {
 
         function mousemove(event) {
           try {
-            focus.attr("cx", d3.mouse(this)[0]);
+            focus.attr("cy", d3.mouse(this)[1]);
           } catch (e) {}
           try {
             tooltip
-              .style("left", d3.mouse(this)[0] - 75 + "px")
-              .html(tooltiptext(x.invert(d3.mouse(this)[0])))
+              .style("top", d3.mouse(this)[1] - 75 + "px")
+              .html(tooltiptext(y.invert(d3.mouse(this)[1])))
               .style(
-                "top",
+                "left",
                 `-${
-                  d3.select("#tooltip").node().getBoundingClientRect().height +
+                  d3.select("#tooltip").node().getBoundingClientRect().width +
                   (30 - (selectedlayers.length - 1) * 5)
                 }px`
               );
           } catch (e) {}
         }
 
-        function dataAvailable(files, datetime) {
+        function dataAvailable(files, depth) {
           var color = "red";
-          var unix = datetime.getTime();
           for (var i = 0; i < files.length; i++) {
-            if (
-              unix >= new Date(files[i].mindatetime).getTime() &&
-              unix <= new Date(files[i].maxdatetime).getTime()
-            )
+            if (depth >= files[i].mindepth && depth <= files[i].maxdepth)
               color = "green";
           }
           return color;
         }
 
-        function tooltiptext(datetime) {
-          var months = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December",
-          ];
-          var datestring = `<div style="text-align:center">${datetime.toLocaleTimeString(
-            [],
-            {
-              hour: "2-digit",
-              minute: "2-digit",
-            }
-          )} ${datetime.getDate()}-${
-            months[datetime.getMonth()]
-          } ${datetime.getFullYear()}</div>`;
+        function tooltiptext(depth) {
           var layerstring = "<table><tbody>";
           for (var i = 0; i < selectedlayers.length; i++) {
             layerstring =
@@ -225,11 +195,11 @@ class TimeSelector extends Component {
               `<tr><td>${selectedlayers[i].title} <div style="color:${selectedlayers[i].color};display:inline-block">${selectedlayers[i].name}</div></td>` +
               `<td style="color:${dataAvailable(
                 selectedlayers[i].files,
-                datetime
+                depth
               )}">&#9673;</td></tr>`;
           }
           layerstring = layerstring + "</tbody></table>";
-          return datestring + layerstring;
+          return depth + "m " + layerstring;
         }
       } catch (e) {
         console.error("Error plotting time selector", e);
@@ -250,11 +220,11 @@ class TimeSelector extends Component {
   }
   render() {
     return (
-      <div className="timeselector">
-        <div id="timeselector"></div>
+      <div className="depthselector">
+        <div id="depthselector"></div>
       </div>
     );
   }
 }
 
-export default TimeSelector;
+export default DepthSelector;

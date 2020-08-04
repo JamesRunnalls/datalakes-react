@@ -56,6 +56,8 @@ class DatetimeDepthSelector extends Component {
       onChangeTimestep,
       mindatetime,
       maxdatetime,
+      mindepth,
+      maxdepth,
       selectedlayers,
     } = this.props;
     var { modal } = this.state;
@@ -119,7 +121,7 @@ class DatetimeDepthSelector extends Component {
                 title="Edit depth"
                 onClick={() => this.toggleModal("depth")}
               >
-                <img src={depthicon} alt="depth icon"/>
+                <img src={depthicon} alt="depth icon" />
                 {` ${depth}m`}
               </div>
               <div
@@ -127,7 +129,7 @@ class DatetimeDepthSelector extends Component {
                 title="Edit timestep"
                 onClick={() => this.toggleModal("timestep")}
               >
-                <img src={clockicon} alt="clock icon"/>
+                <img src={clockicon} alt="clock icon" />
                 {` ${this.lableTimestep(timestep)}`}
               </div>
             </div>
@@ -139,7 +141,10 @@ class DatetimeDepthSelector extends Component {
             toggleModal={this.toggleModal}
             datetime={datetime}
             depth={depth}
+            mindepth={mindepth}
+            maxdepth={maxdepth}
             timestep={timestep}
+            selectedlayers={selectedlayers}
             onChangeDatetime={onChangeDatetime}
             onChangeDepth={onChangeDepth}
             onChangeTimestep={onChangeTimestep}

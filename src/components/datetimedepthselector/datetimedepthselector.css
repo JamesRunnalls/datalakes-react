@@ -196,6 +196,16 @@
   background-color: #76baff;
 }
 
+.depthselector {
+  height: 300px;
+  width: 100px;
+}
+
+#depthselector {
+  height: 300px;
+  width: 100px;
+}
+
 @media screen and (max-width: 800px) {
   .datetimedepthselector .controlbar .depthtimestep {
     font-size: 18px;
