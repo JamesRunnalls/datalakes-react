@@ -32,12 +32,6 @@ class LayerGroups extends Component {
         data: { selected: [] },
       },
       {
-        name: "Live Wind Speed",
-        description: "Some description",
-        img: editlayers,
-        data: { selected: [[9, 7]] },
-      },
-      {
         name: "Lake Zurich 3D Model",
         description: "Some description",
         img: editlayers,
@@ -51,14 +45,42 @@ class LayerGroups extends Component {
         },
       },
       {
-        name: "Lake Zurich Velocities",
+        name: "Lake Geneva 3D Model",
         description: "Some description",
         img: editlayers,
         data: {
-          selected: [[11, 25]],
-          center: [47.274, 8.761],
+          selected: [
+            [14, 5],
+            [14, 25],
+          ],
+          center: [46.405, 6.578],
           zoom: 11,
-          basemap: "dark",
+        },
+      },
+      {
+        name: "Lake Griefen 3D Model",
+        description: "Some description",
+        img: editlayers,
+        data: {
+          selected: [
+            [15, 5],
+            [15, 25],
+          ],
+          center: [47.347, 8.683],
+          zoom: 13,
+        },
+      },
+      {
+        name: "Lake Geneva Chlorophyll",
+        description: "Some description",
+        img: editlayers,
+        data: {
+          selected: [
+            [1, 15],
+            [14, 25],
+          ],
+          center: [46.405, 6.578],
+          zoom: 11,
         },
       },
     ];

@@ -850,7 +850,6 @@ class ThreeDModel extends Component {
     }
 
     var {
-      files,
       mindatetime,
       maxdatetime,
       mindepth,

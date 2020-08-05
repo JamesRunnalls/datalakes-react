@@ -4,40 +4,25 @@ import "./datetimedepthselector.css";
 import DepthSelector from "./depthselector";
 
 class TimeModal extends Component {
-  state = {
-    datetime: this.props.datetime,
-  };
-  close = () => {
-    var { toggleModal, onChangeDatetime } = this.props;
-    toggleModal();
-    onChangeDatetime(this.state.datetime);
-  };
-  changeTime = (interval) => {
-    var { datetime } = this.state;
-    datetime = new Date(datetime.getTime() + interval * 1000);
-    this.setState({ datetime });
-  };
   scrollHour = (event) => {
-    var { datetime } = this.state;
+    var { changeTime } = this.props;
     if (event.deltaY < 0) {
-      datetime = new Date(datetime.getTime() + 3600 * 1000);
+      changeTime(3600);
     } else if (event.deltaY > 0) {
-      datetime = new Date(datetime.getTime() - 3600 * 1000);
+      changeTime(-3600);
     }
-    this.setState({ datetime });
   };
   scrollMins = (event) => {
-    var { datetime } = this.state;
+    var { changeTime } = this.props;
     if (event.deltaY < 0) {
-      datetime = new Date(datetime.getTime() + 60 * 1000);
+      changeTime(60);
     } else if (event.deltaY > 0) {
-      datetime = new Date(datetime.getTime() - 60 * 1000);
+      changeTime(-60);
     }
-    this.setState({ datetime });
   };
   escFunction = (event) => {
     if (event.keyCode === 27) {
-      this.close();
+      this.props.closeTime();
     }
   };
   componentDidMount() {
@@ -46,34 +31,26 @@ class TimeModal extends Component {
   componentWillUnmount() {
     document.removeEventListener("keydown", this.escFunction, false);
   }
-  componentDidUpdate(prevProps) {
-    if (this.props.datetime !== prevProps.datetime) {
-      this.setState({ datetime: this.props.datetime });
-    }
-  }
   render() {
-    var { datetime } = this.state;
+    var { datetime, changeTime, closeTime } = this.props;
     var hours = datetime.getHours();
     var hstring = hours < 10 ? "0" + hours : hours.toString();
     var mins = datetime.getMinutes();
     var mstring = mins < 10 ? "0" + mins : mins.toString();
     return (
       <div className="selectorbox">
-        <div className="closemodal" onClick={this.close}>
+        <div className="closemodal" onClick={closeTime}>
           <div className="icon">&#10005;</div>
         </div>
         <div className="editor time">
           <table>
             <tbody>
               <tr>
-                <td
-                  className="modalarrow"
-                  onClick={() => this.changeTime(3600)}
-                >
+                <td className="modalarrow" onClick={() => changeTime(3600)}>
                   &#9650;
                 </td>
                 <td></td>
-                <td className="modalarrow" onClick={() => this.changeTime(60)}>
+                <td className="modalarrow" onClick={() => changeTime(60)}>
                   &#9650;
                 </td>
                 <td></td>
@@ -85,14 +62,11 @@ class TimeModal extends Component {
                 <td>{hours < 12 ? "AM" : "PM"}</td>
               </tr>
               <tr>
-                <td
-                  className="modalarrow"
-                  onClick={() => this.changeTime(-3600)}
-                >
+                <td className="modalarrow" onClick={() => changeTime(-3600)}>
                   &#9660;
                 </td>
                 <td></td>
-                <td className="modalarrow" onClick={() => this.changeTime(-60)}>
+                <td className="modalarrow" onClick={() => changeTime(-60)}>
                   &#9660;
                 </td>
                 <td></td>
@@ -106,26 +80,18 @@ class TimeModal extends Component {
 }
 
 class DateModal extends Component {
-  state = {
-    datetime: this.props.datetime,
-  };
-  close = () => {
-    var { toggleModal, onChangeDatetime } = this.props;
-    toggleModal();
-    onChangeDatetime(this.state.datetime);
-  };
   changeDate = (datetime) => {
-    var { datetime: datetimeold } = this.state;
+    var { toggleModal, onChangeDatetime, datetime: datetimeold } = this.props;
     var hours = datetimeold.getHours();
     var mins = datetimeold.getMinutes();
     datetime = new Date(datetime.getTime() + (hours * 3600 + mins * 60) * 1000);
-    this.setState({ datetime }, () => {
-      this.close();
-    });
+    toggleModal();
+    onChangeDatetime(datetime);
   };
   escFunction = (event) => {
+    var { toggleModal } = this.props;
     if (event.keyCode === 27) {
-      this.close();
+      toggleModal();
     }
   };
   componentDidMount() {
@@ -134,16 +100,11 @@ class DateModal extends Component {
   componentWillUnmount() {
     document.removeEventListener("keydown", this.escFunction, false);
   }
-  componentDidUpdate(prevProps) {
-    if (this.props.datetime !== prevProps.datetime) {
-      this.setState({ datetime: this.props.datetime });
-    }
-  }
   render() {
-    var { datetime } = this.state;
+    var { datetime, toggleModal } = this.props;
     return (
       <div className="selectorbox">
-        <div className="closemodal" onClick={this.close}>
+        <div className="closemodal" onClick={toggleModal}>
           <div className="icon">&#10005;</div>
         </div>
         <div className="editor date">
@@ -155,23 +116,11 @@ class DateModal extends Component {
 }
 
 class DepthModal extends Component {
-  state = {
-    depth: this.props.depth,
-  };
-  close = () => {
+  changeDepth = (depth) => {
     var { toggleModal, onChangeDepth } = this.props;
-    var { depth } = this.state;
-    if (isNaN(depth)) {
-      alert("Depth is not a valid number");
-    } else {
-      toggleModal();
-      onChangeDepth(depth);
-    }
+    toggleModal();
+    onChangeDepth(depth);
   };
-  changeDepth = (event) => {
-    //this.setState({ depth: event.target.value });
-  };
-
   escFunction = (event) => {
     if (event.keyCode === 27) {
       this.close();
@@ -183,29 +132,17 @@ class DepthModal extends Component {
   componentWillUnmount() {
     document.removeEventListener("keydown", this.escFunction, false);
   }
-  componentDidUpdate(prevProps) {
-    if (this.props.depth !== prevProps.depth) {
-      this.setState({ timestep: this.props.depth });
-    }
-  }
   render() {
-    var {
-      depth,
-      onChangeDepth,
-      selectedlayers,
-      mindepth,
-      maxdepth,
-    } = this.props;
-    var { depth } = this.state;
+    var { depth, selectedlayers, mindepth, maxdepth, toggleModal } = this.props;
     return (
       <div className="selectorbox">
-        <div className="closemodal" onClick={this.close}>
+        <div className="closemodal" onClick={toggleModal}>
           <div className="icon">&#10005;</div>
         </div>
         <div className="editor depth">
           <DepthSelector
             depth={depth}
-            onChangeDepth={onChangeDepth}
+            onChangeDepth={this.changeDepth}
             selectedlayers={selectedlayers}
             mindepth={mindepth}
             maxdepth={maxdepth}
@@ -217,18 +154,10 @@ class DepthModal extends Component {
 }
 
 class TimestepModal extends Component {
-  state = {
-    timestep: this.props.timestep,
-  };
-  close = () => {
+  changeTimestep = (timestep) => {
     var { toggleModal, onChangeTimestep } = this.props;
     toggleModal();
-    onChangeTimestep(this.state.timestep);
-  };
-  changeTimestep = (timestep) => {
-    this.setState({ timestep }, () => {
-      this.close();
-    });
+    onChangeTimestep(timestep);
   };
 
   escFunction = (event) => {
@@ -242,14 +171,8 @@ class TimestepModal extends Component {
   componentWillUnmount() {
     document.removeEventListener("keydown", this.escFunction, false);
   }
-  componentDidUpdate(prevProps) {
-    if (this.props.timestep !== prevProps.timestep) {
-      this.setState({ timestep: this.props.timestep });
-    }
-  }
   render() {
-    var { timestep } = this.state;
-    var { lableTimestep } = this.props;
+    var { lableTimestep, timestep, toggleModal } = this.props;
     var timesteps = [
       5,
       10,
@@ -266,7 +189,7 @@ class TimestepModal extends Component {
     ];
     return (
       <div className="selectorbox">
-        <div className="closemodal" onClick={this.close}>
+        <div className="closemodal" onClick={toggleModal}>
           <div className="icon">&#10005;</div>
         </div>
         <div className="editor timestep">
@@ -289,6 +212,28 @@ class TimestepModal extends Component {
 }
 
 class SelectorModal extends Component {
+  state = {
+    datetime: this.props.datetime,
+  };
+  changeTime = (interval) => {
+    var { datetime } = this.state;
+    datetime = new Date(datetime.getTime() + interval * 1000);
+    this.setState({ datetime });
+  };
+  closeModal = (event) => {
+    var { toggleModal, onChangeDatetime } = this.props;
+    if (event.target.className === "modalfull") {
+      toggleModal();
+      if (this.state.datetime.getTime() !== this.props.datetime.getTime()) {
+        onChangeDatetime(this.state.datetime);
+      }
+    }
+  };
+  closeTime = () => {
+    var { toggleModal, onChangeDatetime } = this.props;
+    toggleModal();
+    onChangeDatetime(this.state.datetime);
+  };
   render() {
     var {
       datetime,
@@ -304,17 +249,19 @@ class SelectorModal extends Component {
       maxdepth,
       selectedlayers,
     } = this.props;
+    var { datetime: time } = this.state;
     return (
-      <div className="selectormodal">
+      <div className="selectormodal" onClick={this.closeModal}>
         <table>
           <tbody>
             <tr>
               <td className="modalfull">
                 {modal === "time" && (
                   <TimeModal
-                    datetime={datetime}
+                    datetime={time}
                     toggleModal={toggleModal}
-                    onChangeDatetime={onChangeDatetime}
+                    changeTime={this.changeTime}
+                    closeTime={this.closeTime}
                   />
                 )}
                 {modal === "date" && (

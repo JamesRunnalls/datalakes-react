@@ -12,3 +12,7 @@ main {
     margin-bottom: 70px;
   }
 }
+
+#root {
+  overflow: hidden;
+}

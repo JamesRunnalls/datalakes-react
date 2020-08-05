@@ -180,6 +180,7 @@ class GIS extends Component {
   onChangeDepth = async (depth) => {
     if (depth !== this.state.depth) {
       var { datetime } = this.state;
+      console.log("firing",depth)
       this.setState({ depth }, async () => {
         this.updateVariable(datetime, depth);
       });
@@ -618,6 +619,12 @@ class GIS extends Component {
   getColor = (selectedlayers) => {
     var usedColors = selectedlayers.map((s) => s.color);
     var colors = [
+      "#28B5F5",
+      "#FB0000",
+      "#0B3954",
+      "#8F0000",
+      "#8AD6F9",
+      "#FF4747",
       "#f0a3ff",
       "#0075dc",
       "#993f00",

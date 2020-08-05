@@ -81,7 +81,7 @@ class TimeSelector extends Component {
         function plotdata() {
           d3.select("#bars").selectAll("*").remove();
           var array;
-          for (var i = 0; i < selectedlayers.length; i++) {
+          for (let i = 0; i < selectedlayers.length; i++) {
             array = selectedlayers[i].files.map((x) => ({
               min: new Date(x.mindatetime),
               max: new Date(x.maxdatetime),
@@ -147,6 +147,8 @@ class TimeSelector extends Component {
           .on("click", onClick);
 
         function onClick() {
+          tooltip.style("visibility", "hidden");
+          focus.style("opacity", 0);
           var date = x.invert(d3.mouse(this)[0]);
           if (typeof date.getMonth === "function") {
             onChangeDatetime(date);
@@ -209,7 +211,7 @@ class TimeSelector extends Component {
             "November",
             "December",
           ];
-          var datestring = `<div style="text-align:center">${datetime.toLocaleTimeString(
+          var datestring = `<div class="tooltip-title">${datetime.toLocaleTimeString(
             [],
             {
               hour: "2-digit",

@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
-import "./datetimedepthselector.css";
+import "./depthselector.css";
 
 class DepthSelector extends Component {
   plotLineGraph = async () => {
     try {
       d3.select("#depthselectorsvg").remove();
-      d3.select("#tooltip").remove();
+      d3.select("#tooltipdepth").remove();
     } catch (e) {}
     var {
       selectedlayers,
@@ -18,10 +18,10 @@ class DepthSelector extends Component {
     if (selectedlayers.length > 0 && !isNaN(mindepth) && !isNaN(maxdepth)) {
       try {
         // Set graph size
-        var margin = { top: 0, right: 10, bottom: 20, left: 0 },
+        var margin = { top: 10, right: 40, bottom: 10, left: 40 },
           visheight = d3.select("#depthselector").node().getBoundingClientRect()
             .height,
-          viswidth = margin.bottom + selectedlayers.length * 5,
+          viswidth = margin.left + margin.right + selectedlayers.length * 5,
           width = viswidth - margin.left - margin.right,
           height = visheight - margin.top - margin.bottom;
 
@@ -48,7 +48,7 @@ class DepthSelector extends Component {
           .on("zoom", zoomed);
 
         function zoomed() {
-          y.domain(d3.event.transform.rescaleX(yy).domain());
+          y.domain(d3.event.transform.rescaleY(yy).domain());
           plotdata();
           current.attr("cy", y(depth));
           gY.call(yAxis);
@@ -76,14 +76,18 @@ class DepthSelector extends Component {
           .call(yAxis);
 
         // Add the availability data
-        var bars = svg.append("g").attr("class", "bars").attr("id", "bars");
+        var bars = svg
+          .append("g")
+          .attr("class", "bars")
+          .attr("id", "verticalbars");
+
         function plotdata() {
-          d3.select("#bars").selectAll("*").remove();
+          d3.select("#verticalbars").selectAll("*").remove();
           var array;
-          for (var i = 0; i < selectedlayers.length; i++) {
+          for (let i = 0; i < selectedlayers.length; i++) {
             array = selectedlayers[i].files.map((x) => ({
-              min: new Date(x.mindepth),
-              max: new Date(x.maxdepth),
+              min: x.mindepth,
+              max: x.maxdepth,
             }));
             bars
               .selectAll("dot")
@@ -100,7 +104,7 @@ class DepthSelector extends Component {
                 return y(d.min);
               })
               .attr("x", function (d) {
-                return i * 5;
+                return i * 5 + 2;
               });
           }
         }
@@ -114,7 +118,7 @@ class DepthSelector extends Component {
           .style("fill", "#F83F3F")
           .attr("stroke", "#F83F3F")
           .attr("r", 5)
-          .attr("cx", selectedlayers.length * 5)
+          .attr("cx", 0)
           .style("opacity", 0);
 
         // Add the current value
@@ -124,22 +128,23 @@ class DepthSelector extends Component {
           .style("fill", "red")
           .attr("stroke", "red")
           .attr("r", 6)
-          .attr("cx", selectedlayers.length * 5)
+          .attr("cx", 0)
           .attr("cy", y(depth));
 
         // Add tooltip
         var tooltip = d3
           .select("#depthselector")
           .append("div")
-          .attr("id", "tooltip")
-          .attr("class", "tooltip");
+          .attr("id", "tooltipdepth")
+          .attr("class", "tooltipdepth");
 
         svg
           .append("rect")
           .style("fill", "none")
           .style("pointer-events", "all")
-          .attr("width", width)
-          .attr("height", height + margin.bottom)
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height)
+          .attr("transform", "translate(-" + margin.left + "," + 0 + ")")
           .on("mouseover", mouseover)
           .on("mousemove", mousemove)
           .on("mouseout", mouseout)
@@ -147,6 +152,8 @@ class DepthSelector extends Component {
 
         function onClick() {
           var depth = y.invert(d3.mouse(this)[1]);
+          depth = Math.round(depth * 100) / 100;
+          current.attr("cy", d3.mouse(this)[1]);
           onChangeDepth(depth);
         }
 
@@ -166,15 +173,9 @@ class DepthSelector extends Component {
           } catch (e) {}
           try {
             tooltip
-              .style("top", d3.mouse(this)[1] - 75 + "px")
+              .style("top", d3.mouse(this)[1] - 30 + "px")
               .html(tooltiptext(y.invert(d3.mouse(this)[1])))
-              .style(
-                "left",
-                `-${
-                  d3.select("#tooltip").node().getBoundingClientRect().width +
-                  (30 - (selectedlayers.length - 1) * 5)
-                }px`
-              );
+              .style("left", "75px");
           } catch (e) {}
         }
 
@@ -188,6 +189,9 @@ class DepthSelector extends Component {
         }
 
         function tooltiptext(depth) {
+          var depthstring = `<div class="tooltip-title">${
+            Math.round(depth * 100) / 100
+          }m below surface</div>`;
           var layerstring = "<table><tbody>";
           for (var i = 0; i < selectedlayers.length; i++) {
             layerstring =
@@ -199,7 +203,7 @@ class DepthSelector extends Component {
               )}">&#9673;</td></tr>`;
           }
           layerstring = layerstring + "</tbody></table>";
-          return depth + "m " + layerstring;
+          return depthstring + layerstring;
         }
       } catch (e) {
         console.error("Error plotting time selector", e);
