@@ -16,7 +16,8 @@ import { apiUrl } from "../../../src/config.json";
 import "./datadetail.css";
 import ThreeDModel from "./inner/threedmodel";
 import RemoteSensing from "./inner/remotesensing";
-import MeteolakesDownload from './inner/meteolakesdownload';
+import MeteolakesDownload from "./inner/meteolakesdownload";
+import Ch2018Graph from './inner/ch2018graph';
 
 class DataDetail extends Component {
   state = {
@@ -398,9 +399,12 @@ class DataDetail extends Component {
       }
 
       // Logic for graphs
-      var x = datasetparameters.filter((param) => param.axis === "x").length > 0;
-      var y = datasetparameters.filter((param) => param.axis === "y").length > 0;
-      var z = datasetparameters.filter((param) => param.axis === "z").length > 0;
+      var x =
+        datasetparameters.filter((param) => param.axis === "x").length > 0;
+      var y =
+        datasetparameters.filter((param) => param.axis === "y").length > 0;
+      var z =
+        datasetparameters.filter((param) => param.axis === "z").length > 0;
 
       if (x && y && z) {
         allowedStep.push("heatmap");
@@ -487,7 +491,12 @@ class DataDetail extends Component {
         files,
         loading: false,
         step: "threedmodel",
-        allowedStep: ["threedmodel","meteolakesdownload","external","webgis"],
+        allowedStep: [
+          "threedmodel",
+          "meteolakesdownload",
+          "external",
+          "webgis",
+        ],
       });
     } else if (dataset.datasource === "Eawag RS") {
       this.setState({
@@ -496,7 +505,16 @@ class DataDetail extends Component {
         dropdown,
         files,
         step: "external",
-        allowedStep: ["external","webgis"],
+        allowedStep: ["external", "webgis"],
+      });
+    } else if (dataset.id === 16) {
+      this.setState({
+        dataset,
+        datasetparameters,
+        dropdown,
+        files,
+        step: "ch2018",
+        allowedStep: ["ch2018", "external"],
       });
     } else {
       this.setState({
@@ -505,7 +523,7 @@ class DataDetail extends Component {
         dropdown,
         files,
         step: "external",
-        allowedStep: ["external","webgis"],
+        allowedStep: ["external", "webgis"],
       });
     }
   }
@@ -731,7 +749,7 @@ class DataDetail extends Component {
             />
           </React.Fragment>
         );
-        case "meteolakesdownload":
+      case "meteolakesdownload":
         return (
           <React.Fragment>
             <h1>{dataset.title}</h1>
@@ -761,6 +779,25 @@ class DataDetail extends Component {
               link={link}
             />
             <RemoteSensing
+              dataset={dataset}
+              datasetparameters={datasetparameters}
+              getLabel={this.getLabel}
+              files={files}
+              link={link}
+            />
+          </React.Fragment>
+        );
+      case "ch2018":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
+            <Ch2018Graph
               dataset={dataset}
               datasetparameters={datasetparameters}
               getLabel={this.getLabel}

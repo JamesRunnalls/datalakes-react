@@ -33,6 +33,15 @@ class DataSubMenu extends Component {
               <div className="subnav-text">3D Model</div>
             </div>
             <div
+              title="Interact with ch2018 data"
+              className={this.active("ch2018",step) ? "subnav-item active" : "subnav-item"}
+              style={{display: this.hide("ch2018",allowedStep) && 'none'}}
+              onClick={() => updateSelectedState("ch2018")}
+            >
+              <img src={line} className="subnav-img" alt="ch2018" />
+              <div className="subnav-text">Graph</div>
+            </div>
+            <div
               title="Download Meteolakes Data"
               className={this.active("meteolakesdownload",step) ? "subnav-item active" : "subnav-item"}
               style={{display: this.hide("meteolakesdownload",allowedStep) && 'none'}}

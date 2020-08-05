@@ -2,23 +2,9 @@ import React, { Component } from "react";
 import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import "../datadetail.css";
-import Basemap from "../../../graphs/leaflet/basemap";
-import Loading from "../../../components/loading/loading";
-import MapControl from "../../../components/mapcontrol/mapcontrol";
-import menuicon from "../img/menuicon.svg";
-import sliceicon from "../img/sliceicon.svg";
-import timeicon from "../img/timeicon.svg";
-import profileicon from "../img/profileicon.svg";
-import colorlist from "../../../components/colorramp/colors";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
-import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
-import FilterBox from "../../../components/filterbox/filterbox";
-import MapMenu from "../../../components/mapmenu/mapmenu";
-import MapLayers from "../../../components/maplayers/maplayers";
-import Legend from "../../../components/legend/legend";
-import DatetimeDepthSelector from "../../../components/sliders/datetimedepthselector";
 
-class ch2018Graph extends Component {
+class Ch2018Graph extends Component {
   state = {
     lakes: [],
     data: [],
@@ -49,6 +35,10 @@ class ch2018Graph extends Component {
     this.setState({ depth: event.target.value });
   };
 
+  updatePeriod = (event) => {
+    this.setState({ period: event.target.value });
+  };
+
   async componentDidMount() {
     var { data: lakes } = await axios
       .get(apiUrl + "/externaldata/ch2018/lakes", {
@@ -71,7 +61,6 @@ class ch2018Graph extends Component {
   }
 
   render() {
-    var { dataset } = this.props;
     var { lakes, depth, lake, data, period } = this.state;
     var lake_options = [];
     for (var listlake of lakes) {
@@ -85,8 +74,14 @@ class ch2018Graph extends Component {
     var lweight = [];
     var yearly = [];
     var seasonal = [];
+    var legend = [];
     if (Object.keys(data).length > 0) {
       lcolor = ["green", "orange", "red"];
+      legend = [
+        { color: "green", text: "RCP 2.6" },
+        { color: "orange", text: "RCP 4.5" },
+        { color: "red", text: "RCP 8.5" },
+      ];
       lweight = [1, 1, 1];
       yearly = [
         {
@@ -130,53 +125,78 @@ class ch2018Graph extends Component {
       ];
     }
 
+    var perioddict = {
+      p1: "1980 - 2011",
+      p2: "2012 - 2040",
+      p3: "2041 - 2070",
+      p4: "2071 - 2100",
+    };
+
+    var depthdict = { surface: "Surface", bottom: "Bottom" };
+
     return (
       <div className="ch2018graph">
+        <div className="selections">
+          <table>
+            <tbody>
+              <tr>
+                <td>Lake</td>
+                <td>Surface/ Bottom</td>
+                <td>Time Period</td>
+              </tr>
+              <tr>
+                <td>
+                  <select value={lake} onChange={this.updateLake}>
+                    {lake_options}
+                  </select>
+                </td>
+                <td>
+                  <select value={depth} onChange={this.updateDepth}>
+                    <option value="surface">Surface</option>
+                    <option value="bottom">Bottom</option>
+                  </select>
+                </td>
+                <td>
+                  <select value={period} onChange={this.updatePeriod}>
+                    <option value="p1">1980 - 2011</option>
+                    <option value="p2">2012 - 2040</option>
+                    <option value="p3">2041 - 2070</option>
+                    <option value="p4">2071 - 2100</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div className="left">
           <D3LineGraph
             data={yearly}
-            title={`Average Yearly ${depth} Temperature for Lake ${lake}`}
+            title={`Average Yearly ${depthdict[depth]} Temperature for Lake ${lake}`}
             xlabel={"Year"}
-            ylabel={`${depth} Temperature`}
+            ylabel={`${depthdict[depth]} Temperature`}
             yunits={"°C"}
             lcolor={lcolor}
             lweight={lweight}
-            bcolor={"white"}
             xscale={"linear"}
             yscale={"linear"}
-            user_id={"yearly"}
+            legend={legend}
           />
         </div>
         <div className="right">
-          <div className="upper">Stratification Graph</div>
+          <div className="upper"></div>
           <div className="lower">
             <D3LineGraph
               data={seasonal}
-              title={`Seasonal ${depth} Temperature for Lake ${lake}`}
+              title={`Seasonal ${depthdict[depth]} Temperature for Lake ${lake} (${perioddict[period]})`}
               xlabel={"Day of Year"}
-              ylabel={`${depth} Temperature`}
+              ylabel={`${depthdict[depth]} Temperature`}
               yunits={"°C"}
               lcolor={lcolor}
               lweight={lweight}
-              bcolor={"white"}
               xscale={"linear"}
               yscale={"linear"}
+              legend={legend}
             />
-          </div>
-        </div>
-        <div className="selections">
-          <div className="lake">
-            Selected Lake:{" "}
-            <select value={lake} onChange={this.updateLake}>
-              {lake_options}
-            </select>
-          </div>
-          <div className="depth">
-            Selected Depth:{" "}
-            <select value={depth} onChange={this.updateDepth}>
-              <option value="surface">Surface</option>
-              <option value="bottom">Bottom</option>
-            </select>
           </div>
         </div>
       </div>
@@ -184,4 +204,4 @@ class ch2018Graph extends Component {
   }
 }
 
-export default ch2018Graph;
+export default Ch2018Graph;

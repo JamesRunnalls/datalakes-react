@@ -2,9 +2,19 @@ import React, { Component } from "react";
 import * as d3 from "d3";
 import { isEqual } from "lodash";
 import { format } from "date-fns";
+import download from "./img/download.svg";
 import "./linegraph.css";
 
 class D3LineGraph extends Component {
+  state = {
+    graphid: Math.round(Math.random() * 100000),
+    downloadgraph: false,
+  };
+
+  toggleDownload = () => {
+    this.setState({ downloadgraph: !this.state.downloadgraph });
+  };
+
   getMax = (arr, param) => {
     let max = -Infinity;
     for (var i = 0; i < arr.length; i++) {
@@ -36,18 +46,23 @@ class D3LineGraph extends Component {
   };
 
   downloadCSV = () => {
-    var { data, xlabel, xunits, ylabel, yunits, title } = this.props;
-    var csvContent = `data:text/csv;charset=utf-8,${xlabel} (${xunits}),${ylabel} (${yunits})\n`;
-    for (var i = 0; i < data.x.length; i++) {
-      csvContent = csvContent + `${data.x[i]},${data.y[i]}\n`;
+    try {
+      var { data, xlabel, xunits, ylabel, yunits, title } = this.props;
+      var csvContent = `data:text/csv;charset=utf-8,${xlabel} (${xunits}),${ylabel} (${yunits})\n`;
+      for (var i = 0; i < data.x.length; i++) {
+        csvContent = csvContent + `${data.x[i]},${data.y[i]}\n`;
+      }
+      var name = title.split(" ").join("_") + ".csv";
+      var encodedUri = encodeURI(csvContent);
+      var link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", name);
+      document.body.appendChild(link);
+      link.click();
+      this.setState({ downloadgraph: false });
+    } catch (e) {
+      alert("Failed to convert data to .csv, please download in .json format.");
     }
-    var name = title.split(" ").join("_") + ".csv";
-    var encodedUri = encodeURI(csvContent);
-    var link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", name);
-    document.body.appendChild(link);
-    link.click();
   };
 
   downloadJSON = () => {
@@ -61,11 +76,13 @@ class D3LineGraph extends Component {
     link.setAttribute("download", name);
     document.body.appendChild(link);
     link.click();
+    this.setState({ downloadgraph: false });
   };
 
   plotLineGraph = async () => {
+    var { graphid } = this.state;
     try {
-      d3.select("#linegraphsvg").remove();
+      d3.select("#linegraphsvg" + graphid).remove();
     } catch (e) {}
     if (this.props.data) {
       try {
@@ -81,12 +98,10 @@ class D3LineGraph extends Component {
           lcolor,
           lweight,
           title,
+          legend,
           setDownloadGraph,
           confidence,
-          user_id,
         } = this.props;
-
-        var node_id = user_id ? "#" + user_id : "#vis";
 
         if (!lcolor) lcolor = ["#000000"];
         if (!lweight) lweight = [1];
@@ -97,9 +112,15 @@ class D3LineGraph extends Component {
 
         // Set graph size
         var margin = { top: 20, right: 20, bottom: 50, left: 50 },
-          viswidth = d3.select(node_id).node().getBoundingClientRect().width,
+          viswidth = d3
+            .select("#vis" + graphid)
+            .node()
+            .getBoundingClientRect().width,
           visheight =
-            d3.select(node_id).node().getBoundingClientRect().height - 5,
+            d3
+              .select("#vis" + graphid)
+              .node()
+              .getBoundingClientRect().height - 5,
           width = viswidth - margin.left - margin.right,
           height = visheight - margin.top - margin.bottom;
 
@@ -140,9 +161,9 @@ class D3LineGraph extends Component {
 
         // Adds the svg canvas
         var svg = d3
-          .select(node_id)
+          .select("#vis" + graphid)
           .append("svg")
-          .attr("id", "linegraphsvg")
+          .attr("id", "linegraphsvg" + graphid)
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
@@ -152,17 +173,19 @@ class D3LineGraph extends Component {
           );
 
         // Background color
-        svg
-          .append("rect")
-          .attr("width", width)
-          .attr("height", height)
-          .attr("fill", bcolor);
+        if (bcolor) {
+          svg
+            .append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", bcolor);
+        }
 
         // Set clip
         var clip = svg
           .append("defs")
           .append("svg:clipPath")
-          .attr("id", "clip")
+          .attr("id", "clip" + graphid)
           .append("svg:rect")
           .attr("width", width)
           .attr("height", height)
@@ -214,29 +237,15 @@ class D3LineGraph extends Component {
         }
 
         // Add title
-        svg
+        var titlesvg = svg
           .append("text")
           .attr("x", width / 2)
           .attr("y", 2 - margin.top / 2)
           .attr("text-anchor", "middle")
           .style("font-size", "14px")
           .style("text-decoration", "underline")
+          .style("opacity", "0")
           .text(title);
-
-        // Add legend
-        if ("legend" in this.props) {
-          let div = d3.select("#legend").call(
-            d3
-              .drag()
-              .on("start.interrupt", function () {
-                div.interrupt();
-              })
-              .on("start drag", function () {
-                div.style("top", d3.event.y + "px");
-                div.style("left", d3.event.x + "px");
-              })
-          );
-        }
 
         main();
 
@@ -308,13 +317,13 @@ class D3LineGraph extends Component {
           var confInt = svg
             .append("g")
             .attr("id", "confidenceinterval")
-            .attr("clip-path", "url(#clip)");
+            .attr("clip-path", "url(#clip" + graphid + ")");
 
           // Add the line
           var line = svg
             .append("g")
             .attr("id", "plotlines")
-            .attr("clip-path", "url(#clip)");
+            .attr("clip-path", "url(#clip" + graphid + ")");
 
           //
 
@@ -407,13 +416,46 @@ class D3LineGraph extends Component {
           line.append("g").attr("class", "brush").call(brush);
 
           // Add Focus
-          var focus = svg
-            .append("g")
-            .append("circle")
-            .style("fill", "red")
-            .attr("stroke", "red")
-            .attr("r", 4)
-            .style("opacity", 0);
+          var focus = [];
+          for (let f = 0; f < data.length; f++) {
+            focus.push(
+              svg
+                .append("g")
+                .append("circle")
+                .style("fill", lcolor[f])
+                .attr("stroke", lcolor[f])
+                .attr("r", 4)
+                .style("opacity", 0)
+            );
+          }
+
+          // Add legend
+          if (legend) {
+            var legendblock = svg
+              .append("g")
+              .attr("id", "legendbox")
+              .attr("pointer-events", "none");
+
+            // Add one dot in the legend for each name.
+            legendblock
+              .selectAll("legendtext")
+              .data(legend)
+              .enter()
+              .append("text")
+              .attr("x", width)
+              .attr("y", function (d, i) {
+                return height - 10 - i * 18;
+              })
+              .style("fill", function (d) {
+                return d.color;
+              })
+              .style("font-size", "12")
+              .text(function (d) {
+                return "--- " + d.text;
+              })
+              .attr("text-anchor", "end")
+              .style("alignment-baseline", "middle");
+          }
 
           // Add cursor catcher
           svg
@@ -462,12 +504,16 @@ class D3LineGraph extends Component {
           });
 
           function mouseover() {
-            focus.style("opacity", 1);
+            for (let f = 0; f < focus.length; f++) {
+              focus[f].style("opacity", 1);
+            }
           }
 
           function mouseout() {
-            focus.style("opacity", 0);
-            document.getElementById("value").innerHTML = "";
+            for (let f = 0; f < focus.length; f++) {
+              focus[f].style("opacity", 0);
+            }
+            document.getElementById("value" + graphid).innerHTML = "";
           }
 
           function closestCoordinates(x0, y0, xy) {
@@ -491,19 +537,34 @@ class D3LineGraph extends Component {
             try {
               var y0 = y.invert(d3.mouse(this)[1]);
               var x0 = x.invert(d3.mouse(this)[0]);
-              var selectedData = closestCoordinates(x0, y0, xy[0]);
-              focus.attr("cx", x(selectedData.x)).attr("cy", y(selectedData.y));
-              if (xlabel === "Time") {
-                document.getElementById("value").innerHTML =
-                  format(new Date(selectedData.x), "hh:mm dd MMM yy") +
-                  " | " +
-                  numberformat(selectedData.y) +
-                  yunits;
-              } else {
-                document.getElementById("value").innerHTML = `${numberformat(
-                  selectedData.x
-                )} ${xunits} | ${numberformat(selectedData.y)} ${yunits}`;
+              var selectedData;
+              var inner = `<tr><td>${
+                xunits ? xlabel + " (" + xunits + ")" : xlabel
+              }</td><td>${
+                yunits ? ylabel + " (" + yunits + ")" : ylabel
+              }</td></tr>`;
+              for (let f = 0; f < focus.length; f++) {
+                selectedData = closestCoordinates(x0, y0, xy[f]);
+                focus[f]
+                  .attr("cx", x(selectedData.x))
+                  .attr("cy", y(selectedData.y));
+                var xtext;
+                if (xlabel === "Time") {
+                  xtext = format(new Date(selectedData.x), "hh:mm dd MMM yy");
+                } else {
+                  xtext = numberformat(selectedData.x);
+                }
+                var ytext;
+                if (ylabel === "Time") {
+                  ytext = format(new Date(selectedData.y), "hh:mm dd MMM yy");
+                } else {
+                  ytext = numberformat(selectedData.y);
+                }
+                inner =
+                  inner +
+                  `<tr style="color:${lcolor[f]}"><td>${xtext}</td><td>${ytext}</td></tr>`;
               }
+              document.getElementById("value" + graphid).innerHTML = inner;
             } catch (e) {}
           }
 
@@ -521,14 +582,15 @@ class D3LineGraph extends Component {
             idleTimeout = null;
           }
 
-          d3.select("#pngdownloadline").on("click", function () {
+          d3.select("#pngdownloadline" + graphid).on("click", function () {
             downloadGraph();
           });
 
           function downloadGraph() {
+            titlesvg.style("opacity", "1");
             var s = new XMLSerializer();
             var str = s.serializeToString(
-              document.getElementById("linegraphsvg")
+              document.getElementById("linegraphsvg" + graphid)
             );
 
             var canvas = document.createElement("canvas"),
@@ -552,6 +614,7 @@ class D3LineGraph extends Component {
             };
             image.src =
               "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
+            titlesvg.style("opacity", "0");
           }
 
           if (setDownloadGraph) {
@@ -580,58 +643,62 @@ class D3LineGraph extends Component {
   }
 
   render() {
-    var { user_id } = this.props;
-    if ("legend" in this.props) {
-      var { legend } = this.props;
-      var legendcontent = [];
-      for (var i = 0; i < legend.length; i++) {
-        legendcontent.push(
-          <tr key={i}>
-            <td style={{ color: legend[i].color }}>––</td>
-            <td>{legend[i].text}</td>
-          </tr>
-        );
-      }
-    }
-
+    var { graphid, downloadgraph } = this.state;
+    var { title } = this.props;
     return (
       <React.Fragment>
-        <div className="vis-header">
-          <div className="vis-data" id="value"></div>
-        </div>
         <div
-          id={user_id ? user_id : "vis"}
+          id={"vis" + graphid}
           title="Click shift to activate zoom to area"
           className="vis-main"
         >
-          <div className="downloadbar">
-            <button id="pngdownloadline" title="Download Image">
-              PNG
-            </button>
-            <button
-              className="blue"
-              onClick={this.downloadJSON}
-              title="Download as JSON"
-            >
-              JSON
-            </button>
-            <button
-              className="red"
-              onClick={this.downloadCSV}
-              title="Download as CSV"
-            >
-              CSV
-            </button>
-          </div>
-        </div>
-
-        {"legend" in this.props && (
-          <div id="legend">
-            <table>
-              <tbody>{legendcontent}</tbody>
+          <div className="vis-header">
+            <table className="downloadtable">
+              <tbody>
+                <tr>
+                  <td>{title}</td>
+                  <td>
+                    <img
+                      src={download}
+                      alt="download"
+                      onClick={this.toggleDownload}
+                      title="Download"
+                    />
+                    <div
+                      className={
+                        downloadgraph ? "downloadbar" : "downloadbar hide"
+                      }
+                    >
+                      <button
+                        id={"pngdownloadline" + graphid}
+                        title="Download PNG"
+                      >
+                        PNG
+                      </button>
+                      <button
+                        className="blue"
+                        onClick={this.downloadJSON}
+                        title="Download as JSON"
+                      >
+                        JSON
+                      </button>
+                      <button
+                        className="red"
+                        onClick={this.downloadCSV}
+                        title="Download as CSV"
+                      >
+                        CSV
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table className="vis-data">
+              <tbody id={"value" + graphid}></tbody>
             </table>
           </div>
-        )}
+        </div>
       </React.Fragment>
     );
   }

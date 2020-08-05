@@ -36,9 +36,9 @@ class Header extends Component {
 
   handleScroll = () => {
     var { stuck } = this.state;
-    if (window.pageYOffset > 40 && stuck === "") {
+    if (window.pageYOffset > 35 && stuck === "") {
       this.setState({ stuck: "scroll" });
-    } else if (window.pageYOffset < 40 && stuck === "scroll") {
+    } else if (window.pageYOffset < 35 && stuck === "scroll") {
       this.setState({ stuck: "" });
     }
   };
@@ -46,7 +46,7 @@ class Header extends Component {
   render() {
     var { showMenu, stuck } = this.state;
     return (
-      <header className={stuck}>
+      <header>
         <div className={"header" + stuck}>
           <div className="header-inner">
             <div className="logo">
