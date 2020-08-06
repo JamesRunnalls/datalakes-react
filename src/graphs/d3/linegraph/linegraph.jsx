@@ -8,11 +8,11 @@ import "./linegraph.css";
 class D3LineGraph extends Component {
   state = {
     graphid: Math.round(Math.random() * 100000),
-    downloadgraph: false,
+    linegraphdownload: false,
   };
 
   toggleDownload = () => {
-    this.setState({ downloadgraph: !this.state.downloadgraph });
+    this.setState({ linegraphdownload: !this.state.linegraphdownload });
   };
 
   getMax = (arr, param) => {
@@ -59,7 +59,7 @@ class D3LineGraph extends Component {
       link.setAttribute("download", name);
       document.body.appendChild(link);
       link.click();
-      this.setState({ downloadgraph: false });
+      this.setState({ linegraphdownload: false });
     } catch (e) {
       alert("Failed to convert data to .csv, please download in .json format.");
     }
@@ -76,7 +76,7 @@ class D3LineGraph extends Component {
     link.setAttribute("download", name);
     document.body.appendChild(link);
     link.click();
-    this.setState({ downloadgraph: false });
+    this.setState({ linegraphdownload: false });
   };
 
   plotLineGraph = async () => {
@@ -125,35 +125,32 @@ class D3LineGraph extends Component {
           height = visheight - margin.top - margin.bottom;
 
         // Format X-axis
-        var x, xx;
+        var x;
         var minx = this.getMin(data, "x");
         var maxx = this.getMax(data, "x");
-
         if (xscale === "Time") {
           x = d3.scaleTime().range([0, width]).domain([minx, maxx]);
-          xx = d3.scaleTime().range([0, width]).domain([minx, maxx]);
         } else if (xscale === "Log") {
           x = d3.scaleLog().range([0, width]).domain([minx, maxx]);
-          xx = d3.scaleLog().range([0, width]).domain([minx, maxx]);
         } else {
           x = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
-          xx = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
         }
+        var xref = x.copy();
+        var xbase = x.copy();
 
         // Format Y-axis
-        var y, yy;
+        var y;
         var miny = this.getMin(data, "y");
         var maxy = this.getMax(data, "y");
         if (yscale === "Time") {
           y = d3.scaleTime().range([height, 0]).domain([miny, maxy]);
-          yy = d3.scaleTime().range([height, 0]).domain([miny, maxy]);
         } else if (yscale === "Log") {
           y = d3.scaleLog().range([height, 0]).domain([miny, maxy]);
-          yy = d3.scaleLog().range([height, 0]).domain([miny, maxy]);
         } else {
           y = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
-          yy = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
         }
+        var yref = y.copy();
+        var ybase = y.copy();
 
         // Define the axes
         var xAxis = d3.axisBottom(x).ticks(5);
@@ -195,7 +192,8 @@ class D3LineGraph extends Component {
         this.removeErrorWarning(clip);
 
         // Add the X Axis
-        svg
+
+        var gX = svg
           .append("g")
           .attr("class", "x axis")
           .attr("id", "axis--x")
@@ -219,7 +217,7 @@ class D3LineGraph extends Component {
         }
 
         // Add the Y Axis
-        svg
+        var gY = svg
           .append("g")
           .attr("class", "y axis")
           .attr("id", "axis--y")
@@ -383,9 +381,25 @@ class D3LineGraph extends Component {
             ])
             .on("zoom", normalzoom);
 
+          var zoomx = d3
+            .zoom()
+            .extent([
+              [0, 0],
+              [width, height],
+            ])
+            .on("zoom", normalzoomx);
+
+          var zoomy = d3
+            .zoom()
+            .extent([
+              [0, 0],
+              [width, height],
+            ])
+            .on("zoom", normalzoomy);
+
           var zoombox = svg
             .append("rect")
-            .attr("id", "zoombox")
+            .attr("id", "zoombox" + graphid)
             .attr("width", width)
             .attr("height", height)
             .style("fill", "none")
@@ -393,27 +407,89 @@ class D3LineGraph extends Component {
             .attr("pointer-events", "all")
             .call(zoom);
 
+          var zoomboxx = svg
+            .append("rect")
+            .attr("id", "zoomboxx" + graphid)
+            .attr("width", width)
+            .attr("height", margin.bottom)
+            .style("fill", "none")
+            .style("cursor", "col-resize")
+            .attr("pointer-events", "all")
+            .attr("y", height)
+            .call(zoomx);
+
+          var zoomboxy = svg
+            .append("rect")
+            .attr("id", "zoomboxy" + graphid)
+            .attr("width", margin.left)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("cursor", "row-resize")
+            .attr("pointer-events", "all")
+            .attr("x", -margin.left)
+            .call(zoomy);
+
           function normalzoom() {
-            x.domain(d3.event.transform.rescaleX(xx).domain());
-            y.domain(d3.event.transform.rescaleY(yy).domain());
-            svg.select("#axis--x").call(xAxis);
-            svg.select("#axis--y").call(yAxis);
+            let t = d3.event.transform;
+            if (t !== d3.zoomIdentity) {
+              x = t.rescaleX(xref);
+              y = t.rescaleY(yref);
+              xAxis.scale(x);
+              gX.call(xAxis);
+              yAxis.scale(y);
+              gY.call(yAxis);
+              line.selectAll("path").remove();
+              confInt.selectAll("path").remove();
+              plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+              yref = y;
+              xref = x;
+              zoombox.call(zoom.transform, d3.zoomIdentity);
+            }
+          }
+
+          function normalzoomx() {
+            let t = d3.event.transform;
+            if (t !== d3.zoomIdentity) {
+              x = t.rescaleX(xref);
+              xAxis.scale(x);
+              gX.call(xAxis);
+              line.selectAll("path").remove();
+              confInt.selectAll("path").remove();
+              plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+              xref = x;
+              zoomboxx.call(zoom.transform, d3.zoomIdentity);
+            }
+          }
+
+          function normalzoomy() {
+            let t = d3.event.transform;
+            if (t !== d3.zoomIdentity) {
+              y = t.rescaleX(yref);
+              yAxis.scale(y);
+              gY.call(yAxis);
+              line.selectAll("path").remove();
+              confInt.selectAll("path").remove();
+              plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+              yref = y;
+              zoomboxy.call(zoom.transform, d3.zoomIdentity);
+            }
+          }
+
+          zoombox.on("dblclick.zoom", null).on("dblclick", () => {
+            x = xbase;
+            y = ybase;
+            xref = xbase;
+            yref = ybase;
+            yAxis.scale(ybase);
+            gY.call(yAxis);
+            xAxis.scale(xbase);
+            gX.call(xAxis);
             line.selectAll("path").remove();
             confInt.selectAll("path").remove();
             plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
-          }
-
-          var brush = d3
-              .brush()
-              .extent([
-                [0, 0],
-                [width, height],
-              ])
-              .on("end", brushended),
-            idleTimeout,
-            idleDelay = 350;
-
-          line.append("g").attr("class", "brush").call(brush);
+          });
+          zoomboxx.on("dblclick.zoom", null);
+          zoomboxy.on("dblclick.zoom", null);
 
           // Add Focus
           var focus = [];
@@ -459,49 +535,10 @@ class D3LineGraph extends Component {
 
           // Add cursor catcher
           svg
-            .select(".overlay")
+            .select("#zoombox" + graphid)
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
             .on("mouseout", mouseout);
-          svg
-            .select("#zoombox")
-            .on("mouseover", mouseover)
-            .on("mousemove", mousemove)
-            .on("mouseout", mouseout);
-
-          function brushended() {
-            mouseout();
-            var s = d3.event.selection;
-            if (!s) {
-              if (!idleTimeout)
-                return (idleTimeout = setTimeout(idled, idleDelay));
-              x.domain(
-                d3.extent(xy, function (d) {
-                  return d.x;
-                })
-              );
-              y.domain(
-                d3.extent(xy, function (d) {
-                  d.y = parseFloat(d.y);
-                  return d.y;
-                })
-              );
-            } else {
-              xx.domain([s[0][0], s[1][0]].map(x.invert, x));
-              yy.domain([s[1][1], s[0][1]].map(y.invert, y));
-              line.select(".brush").call(brush.move, null);
-              svg.call(zoom.transform, d3.zoomIdentity);
-            }
-            zoombox = zoombox.style("pointer-events", "all");
-          }
-
-          d3.select(window).on("keydown", function () {
-            if (d3.event.shiftKey || d3.event.metaKey) {
-              zoombox = zoombox.style("pointer-events", "none");
-            } else if (d3.event.keyCode === 27) {
-              zoombox = zoombox.style("pointer-events", "all");
-            }
-          });
 
           function mouseover() {
             for (let f = 0; f < focus.length; f++) {
@@ -578,10 +615,6 @@ class D3LineGraph extends Component {
             return num;
           }
 
-          function idled() {
-            idleTimeout = null;
-          }
-
           d3.select("#pngdownloadline" + graphid).on("click", function () {
             downloadGraph();
           });
@@ -643,20 +676,16 @@ class D3LineGraph extends Component {
   }
 
   render() {
-    var { graphid, downloadgraph } = this.state;
+    var { graphid, linegraphdownload } = this.state;
     var { title } = this.props;
     return (
       <React.Fragment>
-        <div
-          id={"vis" + graphid}
-          title="Click shift to activate zoom to area"
-          className="vis-main"
-        >
+        <div id={"vis" + graphid} className="vis-main">
           <div className="vis-header">
             <table className="downloadtable">
               <tbody>
                 <tr>
-                  <td>{title}</td>
+                  <td className="title">{title}</td>
                   <td>
                     <img
                       src={download}
@@ -666,7 +695,7 @@ class D3LineGraph extends Component {
                     />
                     <div
                       className={
-                        downloadgraph ? "downloadbar" : "downloadbar hide"
+                        linegraphdownload ? "downloadbar" : "downloadbar hide"
                       }
                     >
                       <button
@@ -689,6 +718,33 @@ class D3LineGraph extends Component {
                       >
                         CSV
                       </button>
+                    </div>
+                  </td>
+                  <td>
+                    <div title="Help" className="linegraphhelpbar">
+                      ?
+                      <div className="linegraphhelp">
+                        <table>
+                          <tbody>
+                            <tr>
+                              <th>Zoom X & Y</th>
+                              <td>Scroll with mouse over plot area</td>
+                            </tr>
+                            <tr>
+                              <th>Zoom X axis</th>
+                              <td>Scroll with mouse over X axis</td>
+                            </tr>
+                            <tr>
+                              <th>Zoom Y axis</th>
+                              <td>Scroll with mouse over Y axis</td>
+                            </tr>
+                            <tr>
+                              <th>Reset</th>
+                              <td>Double click on plot area</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </td>
                 </tr>

@@ -30,8 +30,11 @@
 
 .vis-header table.downloadtable {
   width: 100%;
-  text-decoration: underline;
   text-align: center;
+}
+
+.vis-header table.downloadtable td.title {
+  text-decoration: underline;
 }
 
 .vis-header table.vis-data {
@@ -64,6 +67,32 @@
 
 .vis-header .downloadbar.hide {
   display: none;
+}
+
+.linegraphhelpbar {
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.linegraphhelpbar table {
+  font-size: 14px;
+  text-align: left;
+}
+
+.linegraphhelpbar:hover .linegraphhelp {
+  display: block;
+}
+
+.linegraphhelp {
+  display: none;
+  position: absolute;
+  top: 30px;
+  right: 0;
+  width: 300px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  padding: 10px;
 }
 
 .vis-header .downloadbar button {

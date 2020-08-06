@@ -3,6 +3,7 @@ import axios from "axios";
 import { apiUrl } from "../../../config.json";
 import "../datadetail.css";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
+import D3StackedBarGraph from "../../../graphs/d3/horizontalstackedbar/horizontalstackedbar";
 
 class Ch2018Graph extends Component {
   state = {
@@ -75,12 +76,72 @@ class Ch2018Graph extends Component {
     var yearly = [];
     var seasonal = [];
     var legend = [];
+    var barlegend = [];
+    var barcolors = [];
+    var barkeys = [];
+    var stratification = [];
     if (Object.keys(data).length > 0) {
       lcolor = ["green", "orange", "red"];
       legend = [
         { color: "green", text: "RCP 2.6" },
         { color: "orange", text: "RCP 4.5" },
         { color: "red", text: "RCP 8.5" },
+      ];
+      barlegend = [
+        { color: "#ADD8E6", text: "Ice Cover", offset: 0 },
+        { color: "#87CEFA", text: "Winter Stagnation", offset: 80 },
+        { color: "#8FBC8F", text: "Mixed", offset: 200 },
+        { color: "#F4A460", text: "Summer Stagnation", offset: 260 },
+      ];
+      barcolors = [
+        "#ADD8E6",
+        "#87CEFA",
+        "#8FBC8F",
+        "#F4A460",
+        "#8FBC8F",
+        "#87CEFA",
+        "#ADD8E6",
+      ];
+      barkeys = [
+        "Ice",
+        "Winter Stagnation",
+        "Mixed",
+        "Summer Stagnation",
+        "Mixed1",
+        "Winter Stagnation1",
+        "Ice1",
+      ];
+      stratification = [
+        {
+          name: "RCP2.5",
+          Ice: 50,
+          "Winter Stagnation": 32,
+          Mixed: 26,
+          "Summer Stagnation": 174,
+          Mixed1: 28,
+          "Winter Stagnation1": 14,
+          Ice1: 41,
+        },
+        {
+          name: "RCP4.5",
+          Ice: 30,
+          "Winter Stagnation": 26,
+          Mixed: 24,
+          "Summer Stagnation": 209,
+          Mixed1: 33,
+          "Winter Stagnation1": 14,
+          Ice1: 29,
+        },
+        {
+          name: "RCP8.5",
+          Ice: 0,
+          "Winter Stagnation": 24,
+          Mixed: 41,
+          "Summer Stagnation": 256,
+          Mixed1: 8,
+          "Winter Stagnation1": 36,
+          Ice1: 0,
+        },
       ];
       lweight = [1, 1, 1];
       yearly = [
@@ -183,7 +244,17 @@ class Ch2018Graph extends Component {
           />
         </div>
         <div className="right">
-          <div className="upper"></div>
+          <div className="upper">
+            <D3StackedBarGraph
+              title={`Seasonal Stratification for Lake ${lake} (${perioddict[period]})`}
+              xlabel={"Day of Year"}
+              data={stratification}
+              keys={barkeys}
+              colors={barcolors}
+              xunits={"days"}
+              legend={barlegend}
+            />
+          </div>
           <div className="lower">
             <D3LineGraph
               data={seasonal}
