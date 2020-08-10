@@ -151,7 +151,33 @@ class GISMap extends Component {
             toggleHelp={this.toggleHelp}
             toggleGroup={this.toggleGroup}
             menucontent={sidebar}
-            helpcontent={help}
+            helpcontent={
+              <div>
+                <p>
+                  <b>Welcome to the Datalakes Map Viewer</b>
+                </p>
+                <p>
+                  This viewer is designed to facilitate the visualisation of
+                  multiple geospatial datasets from the Datalakes data portal.
+                </p>
+                <p>
+                  Layers can be added using the "Edit Layers" menu or, a
+                  pre-prepared layer group can be selected from the "Layer
+                  Groups" menu.
+                </p>
+                <p>
+                  Layers have a number of customisation options that allow the
+                  user to alter how they visualise the data, just click on the
+                  settings icon next to any added datasets to explore the
+                  customisation options.
+                </p>
+                <p>
+                  Time and date settings are available at the bottom of the
+                  viewer, and the possibility to animate the time transition is
+                  also available.
+                </p>
+              </div>
+            }
             groupcontent={
               <LayerGroups
                 toggleMenu={this.toggleMenu}

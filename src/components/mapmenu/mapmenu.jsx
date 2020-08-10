@@ -46,7 +46,7 @@ class MapMenu extends Component {
 
         <div className={help ? "sidebar-gis-inner" : "sidebar-gis-inner hide"}>
           <div className="sidebar-title" onClick={toggleHelp} title="Hide help">
-            Help
+            Information
             <div className="sidebar-symbol">{"\u2715"}</div>
           </div>
           <div className="sidebar-content">{helpcontent}</div>

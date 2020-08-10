@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import GISMap from "../../graphs/leaflet/gis_map";
-import * as d3 from "d3";
+import { setIntervalAsync } from "set-interval-async/dynamic";
+import { clearIntervalAsync } from "set-interval-async";
+//import * as d3 from "d3";
 import axios from "axios";
 import { apiUrl } from "../../config.json";
 import FilterBox from "../../components/filterbox/filterbox";
@@ -10,7 +12,7 @@ import Legend from "../../components/legend/legend";
 import colorlist from "../../components/colorramp/colors";
 import DatetimeDepthSelector from "../../components/datetimedepthselector/datetimedepthselector";
 import "./gis.css";
-import PrintLegend from '../../components/legend/printlegend';
+import PrintLegend from "../../components/legend/printlegend";
 
 class SidebarGIS extends Component {
   render() {
@@ -103,17 +105,23 @@ class GIS extends Component {
     play: false,
   };
 
-  moveOneTimestep = () => {
+  moveOneTimestep = async () => {
     var { datetime, timestep } = this.state;
-    this.onChangeDatetime(new Date(datetime.getTime() + timestep * 60 * 1000));
+    await this.onChangeDatetime(
+      new Date(datetime.getTime() + timestep * 60 * 1000)
+    );
   };
 
   togglePlay = () => {
     var { play } = this.state;
     if (!play) {
-      this.timer = d3.interval(this.moveOneTimestep, 1000);
+      //this.timer = d3.interval(this.moveOneTimestep, 3000);
+      this.timer = setIntervalAsync(async () => {
+        await this.moveOneTimestep();
+      }, 1500);
     } else {
-      this.timer.stop();
+      //this.timer.stop();
+      clearIntervalAsync(this.timer);
     }
     this.setState({ play: !play });
   };
@@ -171,16 +179,14 @@ class GIS extends Component {
   onChangeDatetime = async (datetime) => {
     if (datetime.getTime() !== this.state.datetime.getTime()) {
       var { depth } = this.state;
-      this.setState({ datetime }, async () => {
-        this.updateVariable(datetime, depth);
-      });
+      await this.updateVariable(datetime, depth);
     }
   };
 
   onChangeDepth = async (depth) => {
     if (depth !== this.state.depth) {
       var { datetime } = this.state;
-      console.log("firing",depth)
+      console.log("firing", depth);
       this.setState({ depth }, async () => {
         this.updateVariable(datetime, depth);
       });
@@ -738,6 +744,8 @@ class GIS extends Component {
         layer["data"] = data;
         layer["min"] = min;
         layer["max"] = max;
+        layer["datamin"] = min;
+        layer["datamax"] = max;
         layer["unit"] = unit;
         layer["array"] = array;
         layer["fileid"] = fileid;
@@ -772,7 +780,7 @@ class GIS extends Component {
     function findFileId(files, fileid) {
       return files.find((f) => f.id === fileid);
     }
-    this.setState({ loading: true }, async () => {
+    this.setState({ loading: true, datetime, depth }, async () => {
       var { selectedlayers, datasets } = this.state;
 
       for (var i = 0; i < selectedlayers.length; i++) {
@@ -797,18 +805,18 @@ class GIS extends Component {
           selectedlayers[i].datasetparameters,
           selectedlayers[i].mapplotfunction
         );
+        var newMax = Math.max(max, selectedlayers[i].datamax);
+        var newMin = Math.min(min, selectedlayers[i].datamin);
         selectedlayers[i].data = data;
-        selectedlayers[i].min = min;
-        selectedlayers[i].max = max;
-        selectedlayers[i].array = array;
+        selectedlayers[i].datamin = newMin;
+        selectedlayers[i].datamax = newMax;
+        selectedlayers[i].array = selectedlayers[i].array.concat(array);
         selectedlayers[i].fileid = fileid;
         selectedlayers[i]["realdatetime"] = realdatetime;
         selectedlayers[i]["realdepth"] = realdepth;
       }
 
       this.setState({
-        datetime,
-        depth,
         datasets,
         selectedlayers,
         loading: false,
@@ -1120,8 +1128,15 @@ class GIS extends Component {
             />
           }
         />
-        <div className="printheader"><div>Map Viewer Print</div><div>{datetime.toString()} @ {depth}m</div></div>
-        <div className="printlegend"><PrintLegend selectedlayers={selectedlayers} /></div>
+        <div className="printheader">
+          <div>Map Viewer Print</div>
+          <div>
+            {datetime.toString()} @ {depth}m
+          </div>
+        </div>
+        <div className="printlegend">
+          <PrintLegend selectedlayers={selectedlayers} />
+        </div>
       </React.Fragment>
     );
   }

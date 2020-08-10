@@ -453,7 +453,7 @@ class Basemap extends Component {
   };
 
   meteolakes = async (layer, file) => {
-    var { parameters_id, data: indata } = layer;
+    var { parameters_id, data: indata, id } = layer;
     var { datetime, depth, data } = indata;
     datetime = this.matlabToJavascriptDatetime(datetime);
     depth = Math.abs(depth).toFixed(2);
@@ -517,9 +517,6 @@ class Basemap extends Component {
                     '<tr><td colSpan="2"><strong>' +
                     layer.title +
                     "</strong></td></tr>" +
-                    "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-                    "Lake Zurich" +
-                    "</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
                     "<tr><td><strong>Datetime:</strong></td><td>" +
@@ -585,10 +582,8 @@ class Basemap extends Component {
                   .bindPopup(
                     "<table><tbody>" +
                       '<tr><td colSpan="2"><strong>' +
-                      layer.name +
-                      "</strong></td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
                       title +
+                      "</strong></td></tr>" +
                       "</td></tr>" +
                       "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
                       "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
@@ -665,9 +660,6 @@ class Basemap extends Component {
               '<tr><td colSpan="2"><strong>' +
               layer.title +
               "</strong></td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-              "Lake Zurich" +
-              "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td><strong>Datetime:</strong></td><td>" +
@@ -691,86 +683,91 @@ class Basemap extends Component {
       }
 
       if (vectorFlow) {
-        function getLineColor(val) {
-          return getColor(val, min, max, colors);
-        }
-        var color = "white";
-        if (vectorFlowColor === "true") {
-          color = getLineColor;
-        } else if (["white", "grey", "black"].includes(vectorFlowColor)) {
-          color = vectorFlowColor;
-        }
         var radius = 150;
         if (datasets_id === 14) {
           radius = 300;
         }
         var vectordata = this.meteolakesParseVectorData(data, radius);
-        var vectors = L.vectorFieldAnim(vectordata, {
-          paths: 5000,
-          color,
-        }).addTo(this.map);
-        var flowtooltip = vectors.bindTooltip("my tooltip text", {
-          permanent: false,
-          direction: "top",
-        });
-        vectors.on("mousemove", function (e) {
-          let { u, v } = e.value;
-          if (u && v) {
-            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
-            let deg = Math.round(
-              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
-            );
-            if (deg < 0) deg = 360 + deg;
-            let html = `${mag}m/s ${deg}°`;
-            flowtooltip._tooltip._content = html;
-            flowtooltip.openTooltip(e.latlng);
-          } else {
-            flowtooltip.closeTooltip();
+        if (Object.keys(this.vectorfieldanim).includes(id)) {
+          this.vectorfieldanim[id].updateInputdata(vectordata);
+          this.vectorfieldtime = this.props.datetime;
+        } else {
+          function getLineColor(val) {
+            return getColor(val, min, max, colors);
           }
-        });
-        vectors.on("click", function (e) {
-          if (e.value !== null && e.value.u !== null) {
+          var color = "white";
+          if (vectorFlowColor === "true") {
+            color = getLineColor;
+          } else if (["white", "grey", "black"].includes(vectorFlowColor)) {
+            color = vectorFlowColor;
+          }
+          var vectors = L.vectorFieldAnim(vectordata, {
+            paths: 5000,
+            color,
+          }).addTo(this.map);
+          var flowtooltip = vectors.bindTooltip("my tooltip text", {
+            permanent: false,
+            direction: "top",
+          });
+          vectors.on("mousemove", function (e) {
             let { u, v } = e.value;
-            let { lat, lng } = e.latlng;
-            lat = Math.round(lat * 1000) / 1000;
-            lng = Math.round(lng * 1000) / 1000;
-            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
-            let deg = Math.round(
-              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
-            );
-            if (deg < 0) deg = 360 + deg;
-            let html =
-              "<table><tbody>" +
-              '<tr><td colSpan="2"><strong>' +
-              layer.title +
-              "</strong></td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Lake name</strong></td><td>" +
-              "Lake Zurich" +
-              "</td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-              "<tr><td><strong>Datetime:</strong></td><td>" +
-              datetime.toLocaleString() +
-              "</td></tr>" +
-              "<tr><td><strong>Depth:</strong></td><td>" +
-              depth +
-              "m</td></tr>" +
-              `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
-              `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
-              `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
-              `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
-              `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
-              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
-              ">More information</a></td></tr>" +
-              "</tbody></table>";
-            L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
-          }
-        });
-        this.raster.push(vectors);
+            if (u && v) {
+              let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+              let deg = Math.round(
+                (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+              );
+              if (deg < 0) deg = 360 + deg;
+              let html = `${mag}m/s ${deg}°`;
+              flowtooltip._tooltip._content = html;
+              flowtooltip.openTooltip(e.latlng);
+            } else {
+              flowtooltip.closeTooltip();
+            }
+          });
+          vectors.on("click", function (e) {
+            if (e.value !== null && e.value.u !== null) {
+              let { u, v } = e.value;
+              let { lat, lng } = e.latlng;
+              lat = Math.round(lat * 1000) / 1000;
+              lng = Math.round(lng * 1000) / 1000;
+              let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+              let deg = Math.round(
+                (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+              );
+              if (deg < 0) deg = 360 + deg;
+              let html =
+                "<table><tbody>" +
+                '<tr><td colSpan="2"><strong>' +
+                layer.title +
+                "</strong></td></tr>" +
+                "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+                "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                "<tr><td><strong>Datetime:</strong></td><td>" +
+                datetime.toLocaleString() +
+                "</td></tr>" +
+                "<tr><td><strong>Depth:</strong></td><td>" +
+                depth +
+                "m</td></tr>" +
+                `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
+                `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
+                `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
+                `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
+                `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
+                '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
+                ">More information</a></td></tr>" +
+                "</tbody></table>";
+              L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
+            }
+          });
+          this.vectorfieldtime = this.props.datetime;
+          this.vectorfieldanim[id] = vectors;
+        }
       }
 
       if (!("center" in this.props) && !("zoom" in this.props)) {
-        this.map.fitBounds(this.raster[0].getBounds());
+        try {
+          this.map.fitBounds(this.raster[0].getBounds());
+        } catch (e) {}
       }
     }
   };
@@ -967,7 +964,6 @@ class Basemap extends Component {
     return index;
   };
 
-  
   addPoint = (e) => {
     this.map.removeLayer(this.point);
     var lat = Math.round(e.latlng.lat * 100) / 100;
@@ -1024,8 +1020,22 @@ class Basemap extends Component {
     }
   };
 
-  updatePlot = () => {
-    var { selectedlayers, center, zoom } = this.props;
+  arraysEqual = (a, b) => {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  };
+
+  findDataset = (fileid, files) => {
+    return files.find((x) => x.id === fileid);
+  };
+
+  updatePlot = (prevProps) => {
+    var { selectedlayers, datetime } = this.props;
 
     // Remove old layers
     this.marker.forEach((layer) => {
@@ -1036,8 +1046,11 @@ class Basemap extends Component {
     });
     this.raster.length = 0;
 
-    function finddataset(fileid, files) {
-      return files.find((x) => x.id === fileid);
+    if (this.vectorfieldtime === datetime) {
+      Object.values(this.vectorfieldanim).forEach((layer) => {
+        this.map.removeLayer(layer);
+      });
+      this.vectorfieldanim = {};
     }
 
     // Add new layers
@@ -1045,7 +1058,7 @@ class Basemap extends Component {
       var layer = selectedlayers[i];
       if (layer.visible) {
         var { fileid, files, mapplotfunction } = layer;
-        var file = finddataset(fileid, files);
+        var file = this.findDataset(fileid, files);
         mapplotfunction === "gitPlot" && this.gitPlot(layer, file);
         mapplotfunction === "foenMarkers" && this.foenMarkers(layer, file);
         mapplotfunction === "meteoSwissMarkers" &&
@@ -1055,24 +1068,24 @@ class Basemap extends Component {
         mapplotfunction === "meteolakes" && this.meteolakes(layer, file);
       }
     }
-    // Set zoom
-    if (center && zoom) {
-      window.setTimeout(() => {
-        this.map.flyTo(center, zoom, {
-          animate: true,
-          duration: 1,
-        });
-      }, 500);
-    }
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.loading && !this.props.loading) {
       var updatePlot = this.updatePlot;
       window.setTimeout(() => {
-        updatePlot();
+        updatePlot(prevProps);
+        if (prevProps.zoom !== this.props.zoom) {
+          window.setTimeout(() => {
+            this.map.flyTo(this.props.center, this.props.zoom, {
+              animate: true,
+              duration: 1,
+            });
+          }, 500);
+        }
       }, 0);
     }
+
     if (prevProps.basemap !== this.props.basemap) {
       this.map.removeLayer(this.layer);
       this.layer = this.baseMaps[this.props.basemap];
@@ -1250,23 +1263,11 @@ class Basemap extends Component {
       });
     }
 
-    // Datalakes logo
-    /*L.control
-      .custom({
-        position: "bottomright",
-        content: '<img src="/img/logo.svg">',
-        classes: "gis-datalakes-logo",
-      })
-      .addTo(this.map);
-
-    L.control
-      .scale({ position: "bottomright", imperial: false })
-      .addTo(this.map);*/
-
     this.marker = [];
     this.raster = [];
+    this.vectorfieldanim = {};
+    this.vectorfieldtime = this.props.datetime;
   }
-
 
   render() {
     return (

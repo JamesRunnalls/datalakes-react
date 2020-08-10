@@ -97,3 +97,12 @@ ul.maplayers-list {
 .editsettings-button button {
   margin: 10px;
 }
+
+.editsettings table.min-max {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.editsettings table.min-max input {
+  width: 100%;
+}

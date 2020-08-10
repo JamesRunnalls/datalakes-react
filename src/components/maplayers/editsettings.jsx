@@ -13,6 +13,26 @@ class EditSettings extends Component {
     display.colors = colors;
     this.setState({ display });
   };
+  resetMin = () => {
+    var { display } = this.state;
+    display.min = display.datamin;
+    this.setState({ display });
+  };
+  resetMax = () => {
+    var { display } = this.state;
+    display.max = display.datamax;
+    this.setState({ display });
+  };
+  localMinChange = (event) => {
+    var { display } = this.state;
+    display.min = event.target.value;
+    this.setState({ display });
+  };
+  localMaxChange = (event) => {
+    var { display } = this.state;
+    display.max = event.target.value;
+    this.setState({ display });
+  };
   localMarkerLabelChange = () => {
     var { display } = this.state;
     display.markerLabel = !display.markerLabel;
@@ -27,7 +47,7 @@ class EditSettings extends Component {
     var { display } = this.state;
     display.movingAverage = event.target.value;
     this.setState({ display });
-  }
+  };
   localMarkerSymbolChange = (event) => {
     var { display } = this.state;
     display.markerSymbol = event.target.value;
@@ -73,12 +93,29 @@ class EditSettings extends Component {
     this.setState({ display });
   };
   updateDisplay = () => {
-    var { onUpdate, displayGroup } = this.props;
     var { display } = this.state;
-    var index = displayGroup.findIndex((x) => x.id === display.id);
-    displayGroup[index] = display;
-    onUpdate(displayGroup);
+    if (!isNaN(Number(display.min)) && !isNaN(Number(display.max))) {
+      display.min = Number(display.min);
+      display.max = Number(display.max);
+      var { onUpdate, displayGroup } = this.props;
+      var index = displayGroup.findIndex((x) => x.id === display.id);
+      displayGroup[index] = display;
+      onUpdate(displayGroup);
+    } else {
+      alert("Min & Max values must be a valid number.");
+    }
   };
+  componentDidUpdate() {
+    var { display } = this.state;
+    if (
+      display.datamax !== this.props.display.datamax ||
+      display.datamin !== this.props.display.datamin
+    ) {
+      display.datamin = this.props.display.datamin;
+      display.datamax = this.props.display.datamax;
+      this.setState({ display });
+    }
+  }
   render() {
     var { display } = this.state;
     var {
@@ -95,11 +132,45 @@ class EditSettings extends Component {
       vectorFlow,
       vectorArrowColor,
       vectorFlowColor,
+      min,
+      max,
     } = display;
     var { removeSelected, id, display: displayProps } = this.props;
     var { array } = displayProps;
     return (
       <div className="editsettings">
+        <div>
+          <table className="min-max">
+            <tbody>
+              <tr>
+                <td style={{ width: "35px" }}>Min:</td>
+                <td>
+                  <input value={min} onChange={this.localMinChange} />
+                </td>
+                <td style={{ width: "70px" }}>
+                  <div className="editsettings-button">
+                    <button type="button" onClick={this.resetMin}>
+                      Reset
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Max:</td>
+                <td>
+                  <input value={max} onChange={this.localMaxChange} />
+                </td>
+                <td>
+                  <div className="editsettings-button">
+                    <button type="button" onClick={this.resetMax}>
+                      Reset
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         {["marker", "group"].includes(mapplot) && (
           <div className="editsettings-markeroptions">
             <div className="editsettings-title">Marker Options</div>
@@ -202,8 +273,8 @@ class EditSettings extends Component {
                       value={vectorFlowColor}
                       onChange={this.localVectorFlowColorChange}
                     >
-                      <option value="true">Color Ramp</option>
                       <option value="white">White</option>
+                      <option value="true">Color Ramp</option>
                       <option value="black">Black</option>
                       <option value="grey">Grey</option>
                     </select>
@@ -220,7 +291,10 @@ class EditSettings extends Component {
                 <tr>
                   <td>Moving Averge:</td>
                   <td>
-                    <select value={movingAverage} onChange={this.localMovingAverageChange}>
+                    <select
+                      value={movingAverage}
+                      onChange={this.localMovingAverageChange}
+                    >
                       <option value="none">None</option>
                       <option value="1">1</option>
                       <option value="2">2</option>

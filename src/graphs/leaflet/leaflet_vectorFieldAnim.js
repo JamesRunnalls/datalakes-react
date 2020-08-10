@@ -36,14 +36,18 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     this._reset();
   },
 
-  _reset: function () {
+  updateInputdata: function (inputdata) {
+    this._inputdata = inputdata;
+  },
+
+  _reset: function (event) {
     this._stopAnimation();
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this._canvas, topLeft);
     this._drawLayer();
   },
 
-  _clear: function () {
+  _clear: function (event) {
     this._ctx.clearRect(0, 0, this._width, this._height);
     this._stopAnimation();
   },
