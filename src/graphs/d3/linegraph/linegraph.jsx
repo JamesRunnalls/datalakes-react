@@ -153,7 +153,17 @@ class D3LineGraph extends Component {
         var ybase = y.copy();
 
         // Define the axes
-        var xAxis = d3.axisBottom(x).ticks(5);
+        const axisNumberFormat = {
+          decimal: ".",
+          thousands: " ",
+          grouping: [3],
+          currency: ["", ""],
+        };
+        const axisFormatLocale = d3.formatDefaultLocale(axisNumberFormat);
+        var xAxis = d3
+          .axisBottom(x)
+          .ticks(5)
+          .tickFormat(axisFormatLocale.format(""));
         var yAxis = d3.axisLeft(y).ticks(5);
 
         // Adds the svg canvas
@@ -343,9 +353,11 @@ class D3LineGraph extends Component {
                   try {
                     var confplot = valueconfy;
                     if (confidence[k].axis === "x") confplot = valueconfx;
+                    let color = "#DCDCDC";
+                    if (lcolor) color = lcolor[k];
                     confInt
                       .append("path")
-                      .attr("style", "fill:#DCDCDC;stroke:none")
+                      .attr("style", `fill:${color};stroke:none;opacity:0.15`)
                       .attr("d", confplot(value[k]));
                   } catch (e) {
                     console.error("Failed to plot confidence interval " + k);

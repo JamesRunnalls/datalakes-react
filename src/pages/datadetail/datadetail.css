@@ -22,17 +22,19 @@
 }
 
 .ch2018graph .left {
-  width: 50%;
+  width: calc(50% - 30px);
   display: inline-block;
   height: 100%;
   vertical-align: top;
+  margin-right: 30px;
 }
 
 .ch2018graph .right {
-  width: 50%;
+  width: calc(50% - 30px);
   display: inline-block;
   height: 100%;
   vertical-align: top;
+  margin-left: 30px;
 }
 
 .ch2018graph .right .lower {
@@ -292,11 +294,13 @@
   .ch2018graph .left {
     width: 100%;
     height: 400px;
+    margin: 0;
   }
 
   .ch2018graph .right {
     width: 100%;
     height: 400px;
+    margin: 0;
   }
 
   .ch2018graph .right .lower {

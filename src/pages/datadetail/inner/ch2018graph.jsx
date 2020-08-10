@@ -49,7 +49,7 @@ class Ch2018Graph extends Component {
         console.error(error);
       });
     var { data: lakedata } = await axios
-      .get(apiUrl + "/externaldata/ch2018/" + lakes[0], {
+      .get(apiUrl + "/externaldata/ch2018/" + lakes[0].id, {
         timeout: 10000,
       })
       .catch((error) => {
@@ -57,8 +57,8 @@ class Ch2018Graph extends Component {
       });
 
     var data = {};
-    data[lakes[0]] = lakedata;
-    this.setState({ lakes, data, lake: lakes[0] });
+    data[lakes[0].id] = lakedata;
+    this.setState({ lakes, data, lake: lakes[0].id });
   }
 
   render() {
@@ -66,11 +66,14 @@ class Ch2018Graph extends Component {
     var lake_options = [];
     for (var listlake of lakes) {
       lake_options.push(
-        <option value={listlake} key={listlake}>
-          {listlake}
+        <option value={listlake.id} key={listlake.id}>
+          {listlake.name}
         </option>
       );
     }
+    var lakeproperties = {};
+    if (lakes.length > 0) lakeproperties = lakes.find((l) => l.id === lake);
+    var { name, altitude, area, volume } = lakeproperties;
     var lcolor = [];
     var lweight = [];
     var yearly = [];
@@ -80,11 +83,14 @@ class Ch2018Graph extends Component {
     var barcolors = [];
     var barkeys = [];
     var stratification = [];
+    var yearlyConfidence = [];
+    var seasonalConfidence = [];
     if (Object.keys(data).length > 0) {
-      lcolor = ["green", "orange", "red"];
+      lcolor = ["green", "#FF8C00", "red"];
+      lweight = [1, 1, 1];
       legend = [
         { color: "green", text: "RCP 2.6" },
-        { color: "orange", text: "RCP 4.5" },
+        { color: "#FF8C00", text: "RCP 4.5" },
         { color: "red", text: "RCP 8.5" },
       ];
       barlegend = [
@@ -143,7 +149,7 @@ class Ch2018Graph extends Component {
           Ice1: 0,
         },
       ];
-      lweight = [1, 1, 1];
+
       yearly = [
         {
           x: data[lake]["yearly"][depth]["RCP26"]["x"],
@@ -156,6 +162,20 @@ class Ch2018Graph extends Component {
         {
           x: data[lake]["yearly"][depth]["RCP85"]["x"],
           y: data[lake]["yearly"][depth]["RCP85"]["y_ave"],
+        },
+      ];
+      yearlyConfidence = [
+        {
+          CI_upper: data[lake]["yearly"][depth]["RCP26"]["y_max"],
+          CI_lower: data[lake]["yearly"][depth]["RCP26"]["y_min"],
+        },
+        {
+          CI_upper: data[lake]["yearly"][depth]["RCP45"]["y_max"],
+          CI_lower: data[lake]["yearly"][depth]["RCP45"]["y_min"],
+        },
+        {
+          CI_upper: data[lake]["yearly"][depth]["RCP85"]["y_max"],
+          CI_lower: data[lake]["yearly"][depth]["RCP85"]["y_min"],
         },
       ];
       seasonal = [
@@ -184,6 +204,20 @@ class Ch2018Graph extends Component {
           ],
         },
       ];
+      seasonalConfidence = [
+        {
+          CI_upper: data[lake]["seasonal"][depth][period]["RCP26"]["max"],
+          CI_lower: data[lake]["seasonal"][depth][period]["RCP26"]["min"],
+        },
+        {
+          CI_upper: data[lake]["seasonal"][depth][period]["RCP45"]["max"],
+          CI_lower: data[lake]["seasonal"][depth][period]["RCP45"]["min"],
+        },
+        {
+          CI_upper: data[lake]["seasonal"][depth][period]["RCP85"]["max"],
+          CI_lower: data[lake]["seasonal"][depth][period]["RCP85"]["min"],
+        },
+      ];
     }
 
     var perioddict = {
@@ -204,6 +238,9 @@ class Ch2018Graph extends Component {
                 <td>Lake</td>
                 <td>Surface/ Bottom</td>
                 <td>Time Period</td>
+                <td>Altitude</td>
+                <td>Area</td>
+                <td>Volume</td>
               </tr>
               <tr>
                 <td>
@@ -225,6 +262,9 @@ class Ch2018Graph extends Component {
                     <option value="p4">2071 - 2100</option>
                   </select>
                 </td>
+                <td>{altitude} m a.s.l.</td>
+                <td>{area} km&sup2;</td>
+                <td>{volume} km&sup3;</td>
               </tr>
             </tbody>
           </table>
@@ -232,7 +272,7 @@ class Ch2018Graph extends Component {
         <div className="left">
           <D3LineGraph
             data={yearly}
-            title={`Average Yearly ${depthdict[depth]} Temperature for Lake ${lake}`}
+            title={`Average Yearly ${depthdict[depth]} Temperature for ${name}`}
             xlabel={"Year"}
             ylabel={`${depthdict[depth]} Temperature`}
             yunits={"°C"}
@@ -240,13 +280,14 @@ class Ch2018Graph extends Component {
             lweight={lweight}
             xscale={"linear"}
             yscale={"linear"}
+            confidence={yearlyConfidence}
             legend={legend}
           />
         </div>
         <div className="right">
           <div className="upper">
             <D3StackedBarGraph
-              title={`Seasonal Stratification for Lake ${lake} (${perioddict[period]})`}
+              title={`Seasonal Stratification for ${name} (${perioddict[period]})`}
               xlabel={"Day of Year"}
               data={stratification}
               keys={barkeys}
@@ -258,7 +299,7 @@ class Ch2018Graph extends Component {
           <div className="lower">
             <D3LineGraph
               data={seasonal}
-              title={`Seasonal ${depthdict[depth]} Temperature for Lake ${lake} (${perioddict[period]})`}
+              title={`Seasonal ${depthdict[depth]} Temperature for ${name} (${perioddict[period]})`}
               xlabel={"Day of Year"}
               ylabel={`${depthdict[depth]} Temperature`}
               yunits={"°C"}
@@ -266,6 +307,7 @@ class Ch2018Graph extends Component {
               lweight={lweight}
               xscale={"linear"}
               yscale={"linear"}
+              confidence={seasonalConfidence}
               legend={legend}
             />
           </div>
