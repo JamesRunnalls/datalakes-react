@@ -106,10 +106,18 @@ class GIS extends Component {
   };
 
   moveOneTimestep = async () => {
-    var { datetime, timestep } = this.state;
-    await this.onChangeDatetime(
-      new Date(datetime.getTime() + timestep * 60 * 1000)
-    );
+    var { datetime, timestep, maxdatetime, mindatetime } = this.state;
+    if (
+      datetime.getTime() >= mindatetime.getTime() &&
+      datetime.getTime() <= maxdatetime.getTime()
+    ) {
+      await this.onChangeDatetime(
+        new Date(datetime.getTime() + timestep * 60 * 1000)
+      );
+    } else {
+      clearIntervalAsync(this.timer);
+      this.setState({ play: !this.state.play });
+    }
   };
 
   togglePlay = () => {
@@ -162,10 +170,17 @@ class GIS extends Component {
             hidden
           ));
         }
+        var {
+          mindatetime,
+          maxdatetime,
+          mindepth,
+          maxdepth,
+        } = this.getSliderParameters(selectedlayers);
         newState["selectedlayers"] = selectedlayers;
         newState["datasets"] = datasets;
       }
       newState["loading"] = false;
+      this.setState({ mindatetime, maxdatetime, mindepth, maxdepth });
       this.setState(newState);
     });
   };
@@ -234,7 +249,22 @@ class GIS extends Component {
           hidden
         ));
       }
-      this.setState({ selectedlayers, selected, datasets, loading: false });
+      var {
+        mindatetime,
+        maxdatetime,
+        mindepth,
+        maxdepth,
+      } = this.getSliderParameters(selectedlayers);
+      this.setState({
+        selectedlayers,
+        selected,
+        datasets,
+        loading: false,
+        mindatetime,
+        maxdatetime,
+        mindepth,
+        maxdepth,
+      });
     });
   };
 
@@ -1038,6 +1068,13 @@ class GIS extends Component {
       ));
     }
 
+    var {
+      mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
+    } = this.getSliderParameters(selectedlayers);
+
     this.setState({
       selectedlayers,
       parameters,
@@ -1052,6 +1089,10 @@ class GIS extends Component {
       zoom,
       center,
       basemap,
+      mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
     });
   }
 
@@ -1070,13 +1111,11 @@ class GIS extends Component {
       center,
       play,
       timestep,
-    } = this.state;
-    var {
       mindatetime,
       maxdatetime,
       mindepth,
       maxdepth,
-    } = this.getSliderParameters(selectedlayers);
+    } = this.state;
     document.title = "Map Viewer - Datalakes";
     return (
       <React.Fragment>

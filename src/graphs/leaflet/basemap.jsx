@@ -542,8 +542,13 @@ class Basemap extends Component {
         }
       }
       this.raster.push(L.featureGroup(polygons).addTo(this.map));
-      if (!("center" in this.props) && !("zoom" in this.props)) {
+      if (
+        !("center" in this.props) &&
+        !("zoom" in this.props) &&
+        !this.zoomedtolayer
+      ) {
         this.map.fitBounds(this.raster[0].getBounds());
+        this.zoomedtolayer = true;
       }
     } else if (parameters_id === 25) {
       if (vectorMagnitude) {
@@ -762,12 +767,6 @@ class Basemap extends Component {
           this.vectorfieldtime = this.props.datetime;
           this.vectorfieldanim[id] = vectors;
         }
-      }
-
-      if (!("center" in this.props) && !("zoom" in this.props)) {
-        try {
-          this.map.fitBounds(this.raster[0].getBounds());
-        } catch (e) {}
       }
     }
   };
@@ -1267,6 +1266,7 @@ class Basemap extends Component {
     this.raster = [];
     this.vectorfieldanim = {};
     this.vectorfieldtime = this.props.datetime;
+    this.zoomedtolayer = false;
   }
 
   render() {
