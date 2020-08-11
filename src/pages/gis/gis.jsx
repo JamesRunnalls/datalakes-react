@@ -1,8 +1,5 @@
 import React, { Component } from "react";
 import GISMap from "../../graphs/leaflet/gis_map";
-import { setIntervalAsync } from "set-interval-async/dynamic";
-import { clearIntervalAsync } from "set-interval-async";
-//import * as d3 from "d3";
 import axios from "axios";
 import { apiUrl } from "../../config.json";
 import FilterBox from "../../components/filterbox/filterbox";
@@ -102,36 +99,6 @@ class GIS extends Component {
     center: [46.85, 7.55],
     zoom: 9,
     basemap: "datalakesmap",
-    play: false,
-  };
-
-  moveOneTimestep = async () => {
-    var { datetime, timestep, maxdatetime, mindatetime } = this.state;
-    if (
-      datetime.getTime() >= mindatetime.getTime() &&
-      datetime.getTime() <= maxdatetime.getTime()
-    ) {
-      await this.onChangeDatetime(
-        new Date(datetime.getTime() + timestep * 60 * 1000)
-      );
-    } else {
-      clearIntervalAsync(this.timer);
-      this.setState({ play: !this.state.play });
-    }
-  };
-
-  togglePlay = () => {
-    var { play } = this.state;
-    if (!play) {
-      //this.timer = d3.interval(this.moveOneTimestep, 3000);
-      this.timer = setIntervalAsync(async () => {
-        await this.moveOneTimestep();
-      }, 1500);
-    } else {
-      //this.timer.stop();
-      clearIntervalAsync(this.timer);
-    }
-    this.setState({ play: !play });
   };
 
   updateLocation = (zoom, center) => {
@@ -1109,7 +1076,6 @@ class GIS extends Component {
       basemap,
       zoom,
       center,
-      play,
       timestep,
       mindatetime,
       maxdatetime,
@@ -1125,7 +1091,6 @@ class GIS extends Component {
           depth={depth}
           zoom={zoom}
           center={center}
-          play={play}
           selectedlayers={selectedlayers}
           datasets={datasets}
           legend={<Legend selectedlayers={selectedlayers} />}
@@ -1142,9 +1107,7 @@ class GIS extends Component {
               maxdepth={maxdepth}
               datetime={datetime}
               depth={depth}
-              play={play}
               timestep={timestep}
-              togglePlay={this.togglePlay}
               onChangeDatetime={this.onChangeDatetime}
               onChangeDepth={this.onChangeDepth}
               onChangeTimestep={this.onChangeTimestep}

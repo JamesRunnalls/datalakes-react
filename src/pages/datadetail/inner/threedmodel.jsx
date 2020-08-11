@@ -1,8 +1,5 @@
 import React, { Component } from "react";
 import axios from "axios";
-//import * as d3 from "d3";
-import { setIntervalAsync } from "set-interval-async/dynamic";
-import { clearIntervalAsync } from "set-interval-async";
 import "../datadetail.css";
 import Basemap from "../../../graphs/leaflet/basemap";
 import "../threed.css";
@@ -72,7 +69,6 @@ class ThreeDModel extends Component {
   state = {
     datetime: new Date(),
     depth: 0,
-    play: false,
     timestep: 180,
     selectedlayers: [],
     downloads: [],
@@ -98,35 +94,6 @@ class ThreeDModel extends Component {
     plotdata: { x: [], y: [], z: [] },
     zoomIn: () => {},
     zoomOut: () => {},
-  };
-
-  moveOneTimestep = async () => {
-    var { datetime, timestep, maxdatetime, mindatetime } = this.state;
-    if (
-      datetime.getTime() >= mindatetime.getTime() &&
-      datetime.getTime() <= maxdatetime.getTime()
-    ) {
-      await this.onChangeDatetime(
-        new Date(datetime.getTime() + timestep * 60 * 1000)
-      );
-    } else {
-      clearIntervalAsync(this.timer);
-      this.setState({ play: !this.state.play });
-    }
-  };
-
-  togglePlay = () => {
-    var { play } = this.state;
-    if (!play) {
-      //this.timer = d3.interval(this.moveOneTimestep, 3000);
-      this.timer = setIntervalAsync(async () => {
-        await this.moveOneTimestep();
-      }, 1500);
-    } else {
-      //this.timer.stop();
-      clearIntervalAsync(this.timer);
-    }
-    this.setState({ play: !play });
   };
 
   onChangeTimestep = (timestep) => {
@@ -654,6 +621,12 @@ class ThreeDModel extends Component {
     return files[0];
   };
 
+  roundDate = (date) => {
+    let hours =
+      Math.round((date.getHours() - 2 + date.getMinutes() / 60) / 3) * 3 + 2;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours);
+  };
+
   downloadFile = async (
     datasets_id,
     fileid,
@@ -721,7 +694,7 @@ class ThreeDModel extends Component {
 
       // Find file with most recent data
       var file = this.lastFile(files);
-      var datetime = new Date();
+      var datetime = this.roundDate(new Date());
       var depth = Math.round(file.mindepth * 10) / 10;
 
       // Download data
@@ -807,7 +780,6 @@ class ThreeDModel extends Component {
     var {
       selectedlayers,
       datasets,
-      play,
       timestep,
       menu,
       profile,
@@ -878,7 +850,7 @@ class ThreeDModel extends Component {
       }
     }
 
-    var load = loading && !play;
+    var load = loading && false;
     return (
       <div className={fullsize ? "threed full" : "threed"}>
         <div className="basemapwrapper">
@@ -932,9 +904,7 @@ class ThreeDModel extends Component {
               maxdepth={maxdepth}
               datetime={datetime}
               depth={depth}
-              play={play}
               timestep={timestep}
-              togglePlay={this.togglePlay}
               onChangeDatetime={this.onChangeDatetime}
               onChangeDepth={this.onChangeDepth}
               onChangeTimestep={this.onChangeTimestep}

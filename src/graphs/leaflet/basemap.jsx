@@ -693,9 +693,12 @@ class Basemap extends Component {
           radius = 300;
         }
         var vectordata = this.meteolakesParseVectorData(data, radius);
+
+        var vectors;
         if (Object.keys(this.vectorfieldanim).includes(id)) {
           this.vectorfieldanim[id].updateInputdata(vectordata);
           this.vectorfieldtime = this.props.datetime;
+          vectors = this.vectorfieldanim[id];
         } else {
           function getLineColor(val) {
             return getColor(val, min, max, colors);
@@ -706,67 +709,73 @@ class Basemap extends Component {
           } else if (["white", "grey", "black"].includes(vectorFlowColor)) {
             color = vectorFlowColor;
           }
-          var vectors = L.vectorFieldAnim(vectordata, {
+          vectors = L.vectorFieldAnim(vectordata, {
             paths: 5000,
             color,
           }).addTo(this.map);
-          var flowtooltip = vectors.bindTooltip("my tooltip text", {
-            permanent: false,
-            direction: "top",
-          });
-          vectors.on("mousemove", function (e) {
-            let { u, v } = e.value;
-            if (u && v) {
-              let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
-              let deg = Math.round(
-                (Math.atan2(u / mag, v / mag) * 180) / Math.PI
-              );
-              if (deg < 0) deg = 360 + deg;
-              let html = `${mag}m/s ${deg}°`;
-              flowtooltip._tooltip._content = html;
-              flowtooltip.openTooltip(e.latlng);
-            } else {
-              flowtooltip.closeTooltip();
-            }
-          });
-          vectors.on("click", function (e) {
-            if (e.value !== null && e.value.u !== null) {
-              let { u, v } = e.value;
-              let { lat, lng } = e.latlng;
-              lat = Math.round(lat * 1000) / 1000;
-              lng = Math.round(lng * 1000) / 1000;
-              let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
-              let deg = Math.round(
-                (Math.atan2(u / mag, v / mag) * 180) / Math.PI
-              );
-              if (deg < 0) deg = 360 + deg;
-              let html =
-                "<table><tbody>" +
-                '<tr><td colSpan="2"><strong>' +
-                layer.title +
-                "</strong></td></tr>" +
-                "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
-                "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                "<tr><td><strong>Datetime:</strong></td><td>" +
-                datetime.toLocaleString() +
-                "</td></tr>" +
-                "<tr><td><strong>Depth:</strong></td><td>" +
-                depth +
-                "m</td></tr>" +
-                `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
-                `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
-                `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
-                `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
-                `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
-                '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
-                ">More information</a></td></tr>" +
-                "</tbody></table>";
-              L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
-            }
-          });
           this.vectorfieldtime = this.props.datetime;
           this.vectorfieldanim[id] = vectors;
         }
+
+        try {
+          this.flowtooltip.closeTooltip();
+        } catch (e) {}
+
+        this.flowtooltip = vectors.bindTooltip("", {
+          permanent: false,
+          direction: "top",
+        });
+        var flowtooltip = this.flowtooltip;
+        vectors.on("mousemove", function (e) {
+          let { u, v } = e.value;
+          if (u && v) {
+            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+            let deg = Math.round(
+              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+            );
+            if (deg < 0) deg = 360 + deg;
+            let html = `${mag}m/s ${deg}°`;
+            flowtooltip._tooltip._content = html;
+            flowtooltip.openTooltip(e.latlng);
+          } else {
+            flowtooltip.closeTooltip();
+          }
+        });
+        vectors.on("click", function (e) {
+          if (e.value !== null && e.value.u !== null) {
+            let { u, v } = e.value;
+            let { lat, lng } = e.latlng;
+            lat = Math.round(lat * 1000) / 1000;
+            lng = Math.round(lng * 1000) / 1000;
+            let mag = Math.round(Math.sqrt(u ** 2 + v ** 2) * 1000) / 1000;
+            let deg = Math.round(
+              (Math.atan2(u / mag, v / mag) * 180) / Math.PI
+            );
+            if (deg < 0) deg = 360 + deg;
+            let html =
+              "<table><tbody>" +
+              '<tr><td colSpan="2"><strong>' +
+              layer.title +
+              "</strong></td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              "<tr><td><strong>Datetime:</strong></td><td>" +
+              datetime.toLocaleString() +
+              "</td></tr>" +
+              "<tr><td><strong>Depth:</strong></td><td>" +
+              depth +
+              "m</td></tr>" +
+              `<tr><td><strong>Eastern Velocity:</strong></td><td>${u}${unit}</td></tr>` +
+              `<tr><td><strong>Northern Velocity:</strong></td><td>${v}${unit}</td></tr>` +
+              `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
+              `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
+              `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
+              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
+              ">More information</a></td></tr>" +
+              "</tbody></table>";
+            L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
+          }
+        });
       }
     }
   };

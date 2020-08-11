@@ -79,7 +79,6 @@ class GISMap extends Component {
       legend,
       timeselector,
       loading,
-      play,
       sidebar,
       updateState,
       updateLocation,
@@ -106,7 +105,7 @@ class GISMap extends Component {
         img: groupicon,
       },
     ];
-    var load = loading && !play;
+    var load = loading && false;
     return (
       <React.Fragment>
         <div className="map full">

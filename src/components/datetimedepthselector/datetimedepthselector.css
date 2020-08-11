@@ -46,12 +46,43 @@
 }
 
 .datetimedepthselector .controlbar .playpause:hover {
-  transform: scale(1.1);
+  transform: scale(1.2);
 }
 
 .datetimedepthselector .controlbar .playpause img {
-  height: 25px;
-  margin-bottom: -2px;
+  height: 30px;
+  margin-bottom: -4px;
+}
+
+.datetimedepthselector .controlbar .skip {
+  display: inline-block;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-right: 20px;
+  position: relative;
+  margin: 0 20px;
+}
+
+.datetimedepthselector .controlbar .skip.right {
+  width: 80px;
+}
+
+.datetimedepthselector .controlbar .skip .timestep-text.right {
+  position: absolute;
+  top: 12px;
+  width: 100%;
+  left: 10px;
+  color: white;
+  font-size: 18px;
+}
+
+.datetimedepthselector .controlbar .skip:hover {
+  transform: scale(1.1);
+}
+
+.datetimedepthselector .controlbar .skip img {
+  height: 35px;
+  margin-bottom: -5px;
 }
 
 .datetimedepthselector .controlbar .datetime {
@@ -59,6 +90,8 @@
   color: white;
   font-size: 25px;
   padding-bottom: 3px;
+  width: calc(100% - 450px);
+  text-align: center;
 }
 
 .datetimedepthselector .controlbar .datetime .text {
@@ -87,11 +120,16 @@
 }
 
 .datetimedepthselector .controlbar .depthtimestep .text:hover {
-  transform: scale(1.02);
+  transform: scale(1.1);
 }
 
 .datetimedepthselector .controlbar .depthtimestep img {
   height: 20px;
+}
+
+.datetimedepthselector .controlbar .depthtimestep img.clock {
+  height: 28px;
+  margin-bottom: -4px;
 }
 
 .selectormodal {
@@ -207,6 +245,7 @@
   }
   .datetimedepthselector .controlbar .datetime {
     font-size: 18px;
+    width: 150px;
   }
   .datetimedepthselector .controlbar .playpause img {
     height: 20px;
@@ -218,23 +257,37 @@
   .datetimedepthselector .controlbar {
     padding: 20px 20px;
   }
+  .datetimedepthselector .controlbar .skip {
+    margin: 0 10px;
+  }
 }
 
 @media screen and (max-width: 500px) {
   .datetimedepthselector {
-    bottom: 50px;
+    bottom: 65px;
   }
-  .datetimedepthselector:hover .timeselectionbar {
+  .datetimedepthselector .controlbar  {
+    padding: 10px;
+  }
+  .datetimedepthselector .controlbar .datetime {
+    position: absolute;
+    top: -15px;
+    width: 100%;
+    left: 0;
+  }
+  .datetimedepthselector .controlbar .skip img {
+    height: 22px;
+  }
+  .datetimedepthselector .controlbar .skip img {
+    margin-bottom: 0 10px;
+  }
+  .datetimedepthselector .controlbar .skip .timestep-text.right {
     display: none;
   }
-  .datetimedepthselector .controlbar .depthtimestep {
-    float: none;
-    margin-left: 28px;
+  .datetimedepthselector .controlbar .skip.right {
+    width: auto;
   }
-  .datetimedepthselector .controlbar .playpause {
-    margin-right: 10px;
-  }
-  .selectormodal .selectorbox .editor {
-    padding: 0;
+  .datetimedepthselector .controlbar .depthtimestep img.clock {
+    height: 22px;
   }
 }
