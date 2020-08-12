@@ -28,7 +28,8 @@
     "react-sortable-hoc": "^1.11.0",
     "react-syntax-highlighter": "^12.2.1",
     "set-interval-async": "1.0.33",
-    "swagger-ui-react": "^3.30.2"
+    "swagger-ui-react": "^3.30.2",
+    "three": "^0.119.1"
   },
   "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
   "devDependencies": {},

@@ -266,21 +266,32 @@
   .datetimedepthselector {
     bottom: 65px;
   }
-  .datetimedepthselector .controlbar  {
-    padding: 10px;
-  }
   .datetimedepthselector .controlbar .datetime {
     position: absolute;
-    top: -15px;
+    top: 10px;
     width: 100%;
     left: 0;
   }
   .datetimedepthselector .controlbar .skip img {
-    height: 22px;
+    height: 35px;
   }
-  .datetimedepthselector .controlbar .skip img {
-    margin-bottom: 0 10px;
+  .datetimedepthselector .controlbar .playpause {
+    margin-right: 15px;
   }
+  .datetimedepthselector .controlbar .playpause img {
+    height: 35px;
+    margin-bottom: -5px;
+  }
+
+  .datetimedepthselector .controlbar .depthtimestep img {
+    height: 25px;
+    margin-bottom: -5px;
+  }
+
+  .datetimedepthselector .controlbar .depthtimestep {
+    padding-top: 3px;
+  }
+
   .datetimedepthselector .controlbar .skip .timestep-text.right {
     display: none;
   }
@@ -288,6 +299,6 @@
     width: auto;
   }
   .datetimedepthselector .controlbar .depthtimestep img.clock {
-    height: 22px;
+    height: 30px;
   }
 }
