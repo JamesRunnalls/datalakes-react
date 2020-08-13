@@ -31,6 +31,8 @@ class Legend extends Component {
               markerFixedSize={l.markerFixedSize}
               markerSymbol={l.markerSymbol}
             />
+            <div>{l.realdatetime.toString()}</div>
+            <div>Depth: {Math.round(l.realdepth * 100) / 100}m</div>
             <a href={l.datasourcelink} title="Data source">
               {l.datasource}
             </a>
@@ -48,6 +50,8 @@ class Legend extends Component {
               unit={l.unit}
               colors={l.colors}
             />
+            <div>{l.realdatetime.toString()}</div>
+            <div>Depth: {Math.round(l.realdepth * 100) / 100}m</div>
             <a href={l.datasourcelink} title="Data source">
               {l.datasource}
             </a>
@@ -65,6 +69,8 @@ class Legend extends Component {
               unit={l.unit}
               colors={l.colors}
             />
+            <div>{l.realdatetime.toString()}</div>
+            <div>Depth: {Math.round(l.realdepth * 100) / 100}m</div>
             <a href={l.datasourcelink} title="Data source">
               {l.datasource}
             </a>

@@ -470,6 +470,7 @@ class Basemap extends Component {
       title,
       datasourcelink,
       datasets_id,
+      opacity,
     } = layer;
     var polygons,
       matrix,
@@ -712,6 +713,7 @@ class Basemap extends Component {
           vectors = L.vectorFieldAnim(vectordata, {
             paths: 5000,
             color,
+            opacity,
           }).addTo(this.map);
           this.vectorfieldtime = this.props.datetime;
           this.vectorfieldanim[id] = vectors;

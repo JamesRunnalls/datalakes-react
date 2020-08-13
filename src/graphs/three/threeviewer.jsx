@@ -55,24 +55,21 @@ class ThreeViewer extends Component {
       this.loadModelError
     );
 
-    this.positions = [];
-
-    for (var i = 0; i < 100; i++) {
-      this.positions.push(
-        Math.random() * 30,
-        Math.random() * 30,
-        Math.random() * 30
-      );
+    var x = 100;
+    var y = 100;
+    var geometry = new THREE.Geometry();
+    for (var i = 0; i < x; i++) {
+      for (var j = 0; j < y; j++) {
+        var v = new THREE.Vector3();
+        v.x = i * 10;
+        v.y =
+          Math.sin((i / 100) * Math.PI * 2) + Math.cos((j / 100) * Math.PI) * 2;
+        v.z = j * 10;
+        geometry.vertices.push(v);
+      }
     }
-
-    var geometry = new THREE.BufferGeometry();
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(this.positions, 3)
-    );
-
     this.points = new THREE.Points(geometry);
-    //this.scene.add(this.points);
+    this.scene.add(this.points);
 
     const lights = [];
     lights[0] = new THREE.PointLight(0xffffff, 1, 0);
@@ -80,12 +77,14 @@ class ThreeViewer extends Component {
   };
 
   startAnimationLoop = () => {
-    //this.positions = this.positions + 0.00001
-    this.points.geometry.attributes.position = new THREE.Float32BufferAttribute(
-      this.positions,
-      3
-    );
-    this.points.geometry.attributes.position.needsUpdate = true;
+    var geometry = this.points.geometry;
+    geometry.vertices.forEach(function (v) {
+      v.y = v.y + Math.random() - 0.5
+      v.x = v.x + Math.random() - 0.5
+      v.z = v.z + Math.random() - 0.5
+    });
+    geometry.verticesNeedUpdate = true;
+    //geometry.colorsNeedUpdate = true;
     this.renderer.render(this.scene, this.camera);
     this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
   };

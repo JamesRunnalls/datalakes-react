@@ -20,6 +20,8 @@ class MarkerLegendItem extends Component {
       markerFixedSize,
       markerSymbol,
     } = this.props;
+    if (min === null || min === Infinity) min = 0;
+    if (max === null || max === -Infinity) max = 0;
     var minSize = 10,
       maxSize = 40,
       inner = [],

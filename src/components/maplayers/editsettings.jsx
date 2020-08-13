@@ -8,6 +8,11 @@ class EditSettings extends Component {
       JSON.stringify(this.props.display ? this.props.display : [])
     ),
   };
+  localOpacityChange = (event) => {
+    var { display } = this.state;
+    display.opacity = event.target.value / 100;
+    this.setState({ display });
+  };
   localColorChange = (colors) => {
     var { display } = this.state;
     display.colors = colors;
@@ -134,7 +139,10 @@ class EditSettings extends Component {
       vectorFlowColor,
       min,
       max,
+      opacity,
     } = display;
+    if (min === null) min = 0;
+    if (max === null) max = 0;
     var { removeSelected, id, display: displayProps } = this.props;
     var { array } = displayProps;
     return (
@@ -278,6 +286,20 @@ class EditSettings extends Component {
                       <option value="black">Black</option>
                       <option value="grey">Grey</option>
                     </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Opacity</td>
+                  <td>
+                    <input
+                      type="number"
+                      value={opacity * 100}
+                      onChange={this.localOpacityChange}
+                      min="0"
+                      max="100"
+                      step="10"
+                    />
+                    %
                   </td>
                 </tr>
               </tbody>

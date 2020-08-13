@@ -738,6 +738,7 @@ class ThreeDModel extends Component {
       layer["data"] = data;
       layer["min"] = min;
       layer["max"] = max;
+      layer["opacity"] = 1;
       layer["datamin"] = min;
       layer["datamax"] = max;
       layer["unit"] = unit;

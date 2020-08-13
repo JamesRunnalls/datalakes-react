@@ -168,7 +168,6 @@ class GIS extends Component {
   onChangeDepth = async (depth) => {
     if (depth !== this.state.depth) {
       var { datetime } = this.state;
-      console.log("firing", depth);
       this.setState({ depth }, async () => {
         this.updateVariable(datetime, depth);
       });
@@ -516,14 +515,95 @@ class GIS extends Component {
     return { files, mindepth, maxdepth, mindatetime, maxdatetime };
   };
 
+  indexClosest = (num, arr) => {
+    var index = 0;
+    var diff = Math.abs(num - arr[0]);
+    for (var val = 0; val < arr.length; val++) {
+      var newdiff = Math.abs(num - arr[val]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = val;
+      }
+    }
+    return index;
+  };
+
+  matlabToJavascriptDatetime = (date) => {
+    return new Date((date - 719529) * 24 * 60 * 60 * 1000);
+  };
+
+  getInternalDatetimeAndDepth = (
+    data,
+    datasetparameters,
+    datetime,
+    depth,
+    maxdepth
+  ) => {
+    var type = datasetparameters
+      .map((dp) => dp.axis + "&" + dp.parameters_id)
+      .join(",");
+    var realdatetime = datetime;
+    var realdepth = depth;
+    var index;
+    if (type.includes("M&1") && type.includes("y&2")) {
+      // Profiler
+      var dp2 = datasetparameters.find((dp) => dp.parameters_id === 1);
+      var dp3 = datasetparameters.find((dp) => dp.parameters_id === 2);
+      index = this.indexClosest(depth, data.y);
+      realdatetime = new Date(data[dp2.axis][index] * 1000);
+      realdepth = data[dp3.axis][index];
+    } else if (
+      type.includes("z&") &&
+      type.includes("x&1") &&
+      type.includes("y&2")
+    ) {
+      // 2D Depth Time Dataset
+      var indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      var indexy = this.indexClosest(depth, data["y"]);
+      realdatetime = new Date(data["x"][indexx] * 1000);
+      realdepth = data["y"][indexy];
+    } else if (
+      type.includes("x&1") &&
+      type.includes("y&") &&
+      !type.includes("z&")
+    ) {
+      // 1D Parameter Time Dataset
+      index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      realdatetime = new Date(data["x"][index] * 1000);
+      realdepth = parseFloat(maxdepth);
+    }
+    return { realdatetime, realdepth };
+  };
+
+  getExternalDatetimeAndDepth = (data, datetime, depth, datasource, file) => {
+    var realdatetime = datetime;
+    var realdepth = depth;
+    if (datasource === "Meteolakes") {
+      ({ datetime: realdatetime, depth: realdepth } = data);
+      realdepth = Math.abs(realdepth);
+      realdatetime = this.matlabToJavascriptDatetime(realdatetime);
+    } else if (datasource === "Eawag RS") {
+      realdepth = 0;
+      realdatetime = new Date(file.maxdatetime);
+    } else if (["MeteoSwiss", "FOEN"].includes(datasource)) {
+      var coeff = 1000 * 60 * 10;
+      realdepth = 0;
+      realdatetime = new Date(Math.round(datetime.getTime() / coeff) * coeff);
+    }
+    return { realdatetime, realdepth };
+  };
+
   downloadFile = async (
     datasets_id,
     fileid,
-    filelink,
+    file,
     source,
     datetime,
-    depth
+    depth,
+    datasetparameters,
+    dataset
   ) => {
+    var { filelink } = file;
     var { downloads } = this.state;
     var downloaded = downloads.find(
       (d) =>
@@ -536,35 +616,26 @@ class GIS extends Component {
     if (downloaded) {
       return {
         data: downloaded.data,
-        realdatetime: datetime,
-        realdepth: depth,
+        realdatetime: downloaded.realdatetime,
+        realdepth: downloaded.realdepth,
       };
     } else {
-      var data, realdatetime, realdepth, realdata;
+      var data, realdatetime, realdepth;
       if (source === "internal") {
         ({ data } = await axios.get(apiUrl + "/files/" + fileid + "?get=raw"));
-        realdatetime = datetime;
-        realdepth = depth;
-      } else if (filelink.includes("?closest")) {
-        var datetimeunix = Math.round(datetime.getTime() / 1000);
-        filelink = filelink.replace(":datetime", datetimeunix);
-        filelink = filelink.replace(":depth", depth);
-        ({ data } = await axios
-          .get(filelink, { timeout: 10000 })
-          .catch((error) => {
-            console.error(error);
-            alert("Failed to add layer");
-            this.setState({ loading: false });
-          }));
-        if ("datetime" in data) {
-          ({ datetime: realdatetime, depth: realdepth, data: realdata } = data);
-          data = realdata;
-        } else {
-          realdatetime = datetime;
-          realdepth = depth;
-        }
+        ({ realdatetime, realdepth } = this.getInternalDatetimeAndDepth(
+          data,
+          datasetparameters,
+          datetime,
+          depth,
+          dataset.maxdepth
+        ));
       } else {
-        filelink = filelink.replace(":datetime", datetime.getTime());
+        if (dataset.datasource === "Meteolakes") {
+          filelink = filelink.replace(":datetime", datetime.getTime());
+        } else {
+          filelink = filelink.replace(":datetime", datetime.getTime() / 1000);
+        }
         filelink = filelink.replace(":depth", depth);
         ({ data } = await axios
           .get(filelink, { timeout: 10000 })
@@ -573,8 +644,13 @@ class GIS extends Component {
             alert("Failed to add layer");
             this.setState({ loading: false });
           }));
-        realdatetime = datetime;
-        realdepth = depth;
+        ({ realdatetime, realdepth } = this.getExternalDatetimeAndDepth(
+          data,
+          datetime,
+          depth,
+          dataset.datasource,
+          file
+        ));
       }
       downloads.push({
         data,
@@ -586,7 +662,7 @@ class GIS extends Component {
         realdepth,
       });
       this.setState({ downloads });
-      return { data, realdatetime: new Date(realdatetime * 1000), realdepth };
+      return { data, realdatetime, realdepth };
     }
   };
 
@@ -692,17 +768,19 @@ class GIS extends Component {
         var fileid = this.closestFile(datetime, depth, files);
         var datafile = files.find((f) => f.id === fileid);
 
+        // Get the dataset parameter
+        var dp = datasetparameters.filter((d) => d.datasets_id === datasets_id);
+
         var { data, realdatetime, realdepth } = await this.downloadFile(
           datasets_id,
           fileid,
-          datafile.filelink,
+          datafile,
           dataset.datasource,
           datetime,
-          depth
+          depth,
+          dp,
+          dataset
         );
-
-        // Get the dataset parameter
-        var dp = datasetparameters.filter((d) => d.datasets_id === datasets_id);
 
         // Update the parameter min and max value
         var { min, max, array } = this.getMinMax(
@@ -744,6 +822,7 @@ class GIS extends Component {
         layer["datamin"] = min;
         layer["datamax"] = max;
         layer["unit"] = unit;
+        layer["opacity"] = 1;
         layer["array"] = array;
         layer["fileid"] = fileid;
         layer["datasetparameters"] = dp;
@@ -789,10 +868,12 @@ class GIS extends Component {
         var { data, realdatetime, realdepth } = await this.downloadFile(
           selectedlayers[i].datasets_id,
           fileid,
-          datafile.filelink,
+          datafile,
           selectedlayers[i].datasource,
           datetime,
-          depth
+          depth,
+          selectedlayers[i].datasetparameters,
+          selectedlayers[i]
         );
 
         // Update the min and max value
@@ -802,6 +883,7 @@ class GIS extends Component {
           selectedlayers[i].datasetparameters,
           selectedlayers[i].mapplotfunction
         );
+
         var newMax = Math.max(max, selectedlayers[i].datamax);
         var newMin = Math.min(min, selectedlayers[i].datamin);
         selectedlayers[i].data = data;

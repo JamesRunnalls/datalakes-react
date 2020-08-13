@@ -10,6 +10,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     duration: 10,
     maxAge: 50,
     velocityScale: 700,
+    opacity: 1,
   },
   initialize: function (inputdata, options) {
     this._inputdata = inputdata;
@@ -81,6 +82,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
       "msTransformOrigin",
     ]);
     canvas.style[originProp] = "50% 50%";
+    canvas.style["opacity"] = this.options.opacity;
 
     var size = this._map.getSize();
     canvas.width = size.x;
