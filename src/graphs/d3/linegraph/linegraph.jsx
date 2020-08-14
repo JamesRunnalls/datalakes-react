@@ -79,6 +79,17 @@ class D3LineGraph extends Component {
     this.setState({ linegraphdownload: false });
   };
 
+  removeCommaFromLabels = (gX) => {
+    var labels = gX._groups[0][0].children;
+    for (var i = 0; i < labels.length; i++) {
+      if (labels[i].children.length > 1) {
+        labels[i].children[1].innerHTML = labels[
+          i
+        ].children[1].innerHTML.replace(",", "");
+      }
+    }
+  };
+
   plotLineGraph = async () => {
     var { graphid } = this.state;
     try {
@@ -153,18 +164,8 @@ class D3LineGraph extends Component {
         var ybase = y.copy();
 
         // Define the axes
-        const axisNumberFormat = {
-          decimal: ".",
-          thousands: " ",
-          grouping: [3],
-          currency: ["", ""],
-        };
-        const axisFormatLocale = d3.formatDefaultLocale(axisNumberFormat);
-        var xAxis = d3
-          .axisBottom(x)
-          .ticks(5)
-          .tickFormat(axisFormatLocale.format(""));
-        var yAxis = d3.axisLeft(y).ticks(5);
+        var xAxis = d3.axisBottom(x);
+        var yAxis = d3.axisLeft(y);
 
         // Adds the svg canvas
         var svg = d3
@@ -225,6 +226,9 @@ class D3LineGraph extends Component {
             .style("text-anchor", "middle")
             .text(xunits ? `${xlabel} (${xunits})` : xlabel);
         }
+
+        this.removeCommaFromLabels(gX)
+        var removeCommaFromLabels = this.removeCommaFromLabels
 
         // Add the Y Axis
         var gY = svg
@@ -450,6 +454,7 @@ class D3LineGraph extends Component {
               gX.call(xAxis);
               yAxis.scale(y);
               gY.call(yAxis);
+              removeCommaFromLabels(gX)
               line.selectAll("path").remove();
               confInt.selectAll("path").remove();
               plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
@@ -465,6 +470,7 @@ class D3LineGraph extends Component {
               x = t.rescaleX(xref);
               xAxis.scale(x);
               gX.call(xAxis);
+              removeCommaFromLabels(gX)
               line.selectAll("path").remove();
               confInt.selectAll("path").remove();
               plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
@@ -479,6 +485,7 @@ class D3LineGraph extends Component {
               y = t.rescaleX(yref);
               yAxis.scale(y);
               gY.call(yAxis);
+              removeCommaFromLabels(gX)
               line.selectAll("path").remove();
               confInt.selectAll("path").remove();
               plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
@@ -496,6 +503,7 @@ class D3LineGraph extends Component {
             gY.call(yAxis);
             xAxis.scale(xbase);
             gX.call(xAxis);
+            removeCommaFromLabels(gX)
             line.selectAll("path").remove();
             confInt.selectAll("path").remove();
             plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
