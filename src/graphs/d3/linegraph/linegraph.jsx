@@ -164,8 +164,8 @@ class D3LineGraph extends Component {
         var ybase = y.copy();
 
         // Define the axes
-        var xAxis = d3.axisBottom(x);
-        var yAxis = d3.axisLeft(y);
+        var xAxis = d3.axisBottom(x).ticks(5);
+        var yAxis = d3.axisLeft(y).ticks(5);
 
         // Adds the svg canvas
         var svg = d3

@@ -21,8 +21,11 @@ class ThreeViewer extends Component {
   sceneSetup = () => {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
+    this.maxAge = 200;
+    this.noParticles = 2000;
 
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x535470);
     this.camera = new THREE.PerspectiveCamera(
       75, // fov = field of view
       width / height, // aspect ratio
@@ -33,7 +36,7 @@ class ThreeViewer extends Component {
     this.camera.position.x = 5;
     this.camera.position.y = 15;
     this.controls = new OrbitControls(this.camera, this.mount);
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({ alpha: true });
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement);
   };
@@ -46,7 +49,65 @@ class ThreeViewer extends Component {
     console.error(error);
   };
 
+  initialPositions = () => {
+    this.lines.forEach((line) => {
+      let positions = line.data.geometry.attributes.position.array;
+      positions[0] = (Math.random() - 0.5) * 50;
+      positions[1] = (Math.random() - 0.5) * 50;
+      positions[2] = (Math.random() - 0.5) * 50;
+      positions[3] = positions[0] + 0.1;
+      positions[4] = positions[1] + 0.1;
+      positions[5] = positions[2] + 0.1;
+      line.data.geometry.setDrawRange(0, line.age);
+      line.data.geometry.attributes.position.needsUpdate = true;
+    });
+  };
+
+  updatePositions = () => {
+    this.lines.forEach((line) => {
+      line.age++;
+      let positions = line.data.geometry.attributes.position.array;
+      positions[line.age * 3] =
+        positions[(line.age - 1) * 3] + Math.random() / 10;
+      positions[line.age * 3 + 1] =
+        positions[(line.age - 1) * 3 + 1] + (Math.random() - 0.5) / 10;
+      positions[line.age * 3 + 2] =
+        positions[(line.age - 1) * 3 + 2] + Math.random() / 10;
+      line.data.geometry.setDrawRange(0, line.age);
+      line.data.geometry.attributes.position.needsUpdate = true;
+    });
+  };
+
   addCustomSceneObjects = () => {
+    var vertexShader = `
+      precision mediump float;
+      precision mediump int;
+
+      attribute vec4 color;
+      varying vec4 vColor;
+
+      void main()    {
+
+        vColor = color;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+      }
+    `;
+    var fragmentShader = `
+      precision mediump float;
+      precision mediump int;
+
+      varying vec4 vColor;
+
+      void main()    {
+
+        vec4 color = vec4( vColor );
+        gl_FragColor = color;
+
+      }
+    `;
+
     var loader = new GLTFLoader();
     loader.load(
       "./models/lakegeneva.glb",
@@ -55,21 +116,49 @@ class ThreeViewer extends Component {
       this.loadModelError
     );
 
-    var x = 100;
-    var y = 100;
-    var geometry = new THREE.Geometry();
-    for (var i = 0; i < x; i++) {
-      for (var j = 0; j < y; j++) {
-        var v = new THREE.Vector3();
-        v.x = i * 10;
-        v.y =
-          Math.sin((i / 100) * Math.PI * 2) + Math.cos((j / 100) * Math.PI) * 2;
-        v.z = j * 10;
-        geometry.vertices.push(v);
-      }
+    // geometry
+    var geometry = new THREE.BufferGeometry();
+    var colors = [];
+    for (var i = 0; i < this.maxAge; i++) {
+      colors.push(1);
+      colors.push(1);
+      colors.push(1);
+      colors.push(i / this.maxAge);
+      colors.push(1);
+      colors.push(1);
+      colors.push(1);
+      colors.push(i / this.maxAge);
     }
-    this.points = new THREE.Points(geometry);
-    this.scene.add(this.points);
+
+    geometry.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(colors, 4, true)
+    );
+
+    var positions = new Float32Array(this.maxAge * 3); // 3 vertices per point
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+    // Set draw range
+    geometry.setDrawRange(0, 0);
+
+    // Material
+    var material = new THREE.ShaderMaterial({
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
+    });
+    this.lines = [];
+
+    for (var p = 0; p < this.noParticles; p++) {
+      let line = new THREE.Line(geometry.clone(), material);
+      this.lines.push({ data: line, age: 0 });
+      this.scene.add(line);
+    }
+
+    // update positions
+    this.initialPositions();
 
     const lights = [];
     lights[0] = new THREE.PointLight(0xffffff, 1, 0);
@@ -77,14 +166,7 @@ class ThreeViewer extends Component {
   };
 
   startAnimationLoop = () => {
-    var geometry = this.points.geometry;
-    geometry.vertices.forEach(function (v) {
-      v.y = v.y + Math.random() - 0.5
-      v.x = v.x + Math.random() - 0.5
-      v.z = v.z + Math.random() - 0.5
-    });
-    geometry.verticesNeedUpdate = true;
-    //geometry.colorsNeedUpdate = true;
+    this.updatePositions();
     this.renderer.render(this.scene, this.camera);
     this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
   };

@@ -95,9 +95,9 @@ class Ch2018Graph extends Component {
       ];
       barlegend = [
         { color: "#ADD8E6", text: "Ice Cover", offset: 0 },
-        { color: "#87CEFA", text: "Winter Stagnation", offset: 80 },
-        { color: "#8FBC8F", text: "Mixed", offset: 200 },
-        { color: "#F4A460", text: "Summer Stagnation", offset: 260 },
+        { color: "#87CEFA", text: "Winter Stratification", offset: 80 },
+        { color: "#8FBC8F", text: "Mixed", offset: 210 },
+        { color: "#F4A460", text: "Summer Stratification", offset: 270 },
       ];
       barcolors = [
         "#ADD8E6",
@@ -110,42 +110,42 @@ class Ch2018Graph extends Component {
       ];
       barkeys = [
         "Ice",
-        "Winter Stagnation",
+        "Winter Stratification",
         "Mixed",
-        "Summer Stagnation",
+        "Summer Stratification",
         "Mixed1",
-        "Winter Stagnation1",
+        "Winter Stratification1",
         "Ice1",
       ];
       stratification = [
         {
           name: "RCP2.5",
           Ice: 50,
-          "Winter Stagnation": 32,
+          "Winter Stratification": 32,
           Mixed: 26,
-          "Summer Stagnation": 174,
+          "Summer Stratification": 174,
           Mixed1: 28,
-          "Winter Stagnation1": 14,
+          "Winter Stratification1": 14,
           Ice1: 41,
         },
         {
           name: "RCP4.5",
           Ice: 30,
-          "Winter Stagnation": 26,
+          "Winter Stratification": 26,
           Mixed: 24,
-          "Summer Stagnation": 209,
+          "Summer Stratification": 209,
           Mixed1: 33,
-          "Winter Stagnation1": 14,
+          "Winter Stratification1": 14,
           Ice1: 29,
         },
         {
           name: "RCP8.5",
           Ice: 0,
-          "Winter Stagnation": 24,
+          "Winter Stratification": 24,
           Mixed: 41,
-          "Summer Stagnation": 256,
+          "Summer Stratification": 256,
           Mixed1: 8,
-          "Winter Stagnation1": 36,
+          "Winter Stratification1": 36,
           Ice1: 0,
         },
       ];

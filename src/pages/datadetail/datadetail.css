@@ -163,8 +163,12 @@
 
 .detailgraph {
   height: 500px;
-  margin-top: 30px;
+  padding-top: 25px;
   max-height: 100vh;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  box-shadow: 0 0 4px black;
+  padding: 25px 10px 5px 10px;
 }
 
 .separator {
