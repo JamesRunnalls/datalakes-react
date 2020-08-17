@@ -18,10 +18,20 @@
   height: 100%;
 }
 
+.vis-main.full {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  z-index: 999999;
+}
+
 .vis-header {
   position: absolute;
   left: 0;
-  top: -15px;
+  top: 0;
   padding: 3px;
   width: 100%;
   padding-left: 50px;
@@ -52,6 +62,11 @@
 
 .vis-header table td {
   position: relative;
+  vertical-align: top;
+}
+
+.vis-header table td div {
+  cursor: pointer;
 }
 
 .vis-header img {
@@ -62,28 +77,57 @@
 .vis-header .downloadbar {
   position: absolute;
   top: 21px;
-  right: 6px;
+  right: -5px;
+  z-index: 99;
+  background-color: white;
+  padding: 10px;
 }
 
 .vis-header .downloadbar.hide {
   display: none;
 }
 
-.linegraphhelpbar {
+.graphtooltip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 5px;
+  font-size: 12px;
+}
+
+.graphtooltip:after {
+  content: " ";
+  position: absolute;
+  left: -10px;
+  top: 10px;
+  border-top: 10px solid transparent;
+  border-right: 10px solid rgba(255, 255, 255, 0.7);
+  border-left: none;
+  border-bottom: 10px solid transparent;
+}
+
+.graphtooltip tr {
+  height: 1px;
+}
+
+.graphhelpbar {
   font-size: 18px;
   cursor: pointer;
 }
 
-.linegraphhelpbar table {
+.graphhelpbar table {
   font-size: 14px;
   text-align: left;
 }
 
-.linegraphhelpbar:hover .linegraphhelp {
+.graphhelpbar:hover .graphhelp {
   display: block;
 }
 
-.linegraphhelp {
+.graphhelp {
+  z-index: 1;
   display: none;
   position: absolute;
   top: 30px;
@@ -93,6 +137,8 @@
   border-radius: 4px;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
   padding: 10px;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 .vis-header .downloadbar button {

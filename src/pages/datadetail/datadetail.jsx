@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import * as d3 from "d3";
-import { mergeWith } from "lodash";
+import { mergeWith, isEqual } from "lodash";
 import HeatMap from "./inner/heatmap";
 import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
@@ -17,7 +17,7 @@ import "./datadetail.css";
 import ThreeDModel from "./inner/threedmodel";
 import RemoteSensing from "./inner/remotesensing";
 import MeteolakesDownload from "./inner/meteolakesdownload";
-import Ch2018Graph from './inner/ch2018graph';
+import Ch2018Graph from "./inner/ch2018graph";
 
 class DataDetail extends Component {
   state = {
@@ -337,21 +337,49 @@ class DataDetail extends Component {
   };
 
   combineTimeseries = (arr) => {
-    var arrCopy = Object.values(Object.assign({}, arr));
-    arrCopy = arrCopy.filter(function (value) {
+    var inArray = JSON.parse(JSON.stringify(arr));
+    inArray = inArray.filter((value) => {
       return value !== 0;
     });
-    arrCopy.sort((a, b) => {
+    inArray.sort((a, b) => {
       return this.getAve(a.x) - this.getAve(b.x);
     });
-    if (Object.keys(arrCopy[0]).includes("z")) {
-      return arrCopy;
+    if (Object.keys(inArray[0]).includes("z")) {
+      if (isEqual(inArray[0].y, inArray[1].y)) {
+        try {
+          var combinedthree = {};
+          combinedthree["y"] = inArray[0].y;
+          combinedthree["x"] = inArray.map((i) => i.x).flat();
+          var zKeys = Object.keys(inArray[0]).filter((k) => k.includes("z"));
+          for (let zKey of zKeys) {
+            combinedthree[zKey] = this.merge2DArray(
+              inArray.map((i) => i[zKey])
+            );
+          }
+          return combinedthree;
+        } catch (e) {
+          return inArray;
+        }
+      } else {
+        return inArray;
+      }
     } else {
-      var combinedArr = Object.assign({}, arrCopy[0]);
-      for (var i = 1; i < arrCopy.length; i++) {
-        combinedArr = mergeWith(combinedArr, arrCopy[i], this.customizer);
+      var combinedArr = Object.assign({}, inArray[0]);
+      for (var i = 1; i < inArray.length; i++) {
+        combinedArr = mergeWith(combinedArr, inArray[i], this.customizer);
       }
       return combinedArr;
+    }
+  };
+
+  merge2DArray = (arr) => {
+    let merged = [];
+    for (var i = 0; i < arr[0].length; i++) {
+      merged.push(innerMerge(i, arr));
+    }
+    return merged;
+    function innerMerge(i, arr) {
+      return arr.map((a) => a[i]).flat();
     }
   };
 
@@ -441,7 +469,7 @@ class DataDetail extends Component {
         });
 
       dataArray[0] = data;
-      var combined = data;
+      var combined = JSON.parse(JSON.stringify(data));
       var { lower, upper } = this.dataBounds(dataArray);
 
       // Get Pipeline Data

@@ -2,17 +2,23 @@ import React, { Component } from "react";
 import * as d3 from "d3";
 import { isEqual } from "lodash";
 import { format } from "date-fns";
-import download from "./img/download.svg";
-import "./linegraph.css";
+import GraphHeader from "../graphheader/graphheader";
 
 class D3LineGraph extends Component {
   state = {
     graphid: Math.round(Math.random() * 100000),
-    linegraphdownload: false,
+    download: false,
+    fullscreen: false,
   };
 
   toggleDownload = () => {
-    this.setState({ linegraphdownload: !this.state.linegraphdownload });
+    this.setState({ download: !this.state.download });
+  };
+
+  toggleFullscreen = () => {
+    this.setState({ fullscreen: !this.state.fullscreen }, () => {
+      window.dispatchEvent(new Event("resize"));
+    });
   };
 
   getMax = (arr, param) => {
@@ -59,7 +65,7 @@ class D3LineGraph extends Component {
       link.setAttribute("download", name);
       document.body.appendChild(link);
       link.click();
-      this.setState({ linegraphdownload: false });
+      this.setState({ download: false });
     } catch (e) {
       alert("Failed to convert data to .csv, please download in .json format.");
     }
@@ -76,7 +82,7 @@ class D3LineGraph extends Component {
     link.setAttribute("download", name);
     document.body.appendChild(link);
     link.click();
-    this.setState({ linegraphdownload: false });
+    this.setState({ download: false });
   };
 
   removeCommaFromLabels = (gX) => {
@@ -93,7 +99,7 @@ class D3LineGraph extends Component {
   plotLineGraph = async () => {
     var { graphid } = this.state;
     try {
-      d3.select("#linegraphsvg" + graphid).remove();
+      d3.select("#svg" + graphid).remove();
     } catch (e) {}
     if (this.props.data) {
       try {
@@ -122,7 +128,7 @@ class D3LineGraph extends Component {
         if (!Array.isArray(lweight)) lweight = [lweight];
 
         // Set graph size
-        var margin = { top: 20, right: 20, bottom: 50, left: 50 },
+        var margin = { top: 40, right: 20, bottom: 50, left: 50 },
           viswidth = d3
             .select("#vis" + graphid)
             .node()
@@ -171,7 +177,7 @@ class D3LineGraph extends Component {
         var svg = d3
           .select("#vis" + graphid)
           .append("svg")
-          .attr("id", "linegraphsvg" + graphid)
+          .attr("id", "svg" + graphid)
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
@@ -227,8 +233,8 @@ class D3LineGraph extends Component {
             .text(xunits ? `${xlabel} (${xunits})` : xlabel);
         }
 
-        this.removeCommaFromLabels(gX)
-        var removeCommaFromLabels = this.removeCommaFromLabels
+        this.removeCommaFromLabels(gX);
+        var removeCommaFromLabels = this.removeCommaFromLabels;
 
         // Add the Y Axis
         var gY = svg
@@ -454,7 +460,7 @@ class D3LineGraph extends Component {
               gX.call(xAxis);
               yAxis.scale(y);
               gY.call(yAxis);
-              removeCommaFromLabels(gX)
+              removeCommaFromLabels(gX);
               line.selectAll("path").remove();
               confInt.selectAll("path").remove();
               plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
@@ -470,7 +476,7 @@ class D3LineGraph extends Component {
               x = t.rescaleX(xref);
               xAxis.scale(x);
               gX.call(xAxis);
-              removeCommaFromLabels(gX)
+              removeCommaFromLabels(gX);
               line.selectAll("path").remove();
               confInt.selectAll("path").remove();
               plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
@@ -485,7 +491,7 @@ class D3LineGraph extends Component {
               y = t.rescaleX(yref);
               yAxis.scale(y);
               gY.call(yAxis);
-              removeCommaFromLabels(gX)
+              removeCommaFromLabels(gX);
               line.selectAll("path").remove();
               confInt.selectAll("path").remove();
               plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
@@ -503,7 +509,7 @@ class D3LineGraph extends Component {
             gY.call(yAxis);
             xAxis.scale(xbase);
             gX.call(xAxis);
-            removeCommaFromLabels(gX)
+            removeCommaFromLabels(gX);
             line.selectAll("path").remove();
             confInt.selectAll("path").remove();
             plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
@@ -635,7 +641,7 @@ class D3LineGraph extends Component {
             return num;
           }
 
-          d3.select("#pngdownloadline" + graphid).on("click", function () {
+          d3.select("#png" + graphid).on("click", function () {
             downloadGraph();
           });
 
@@ -643,7 +649,7 @@ class D3LineGraph extends Component {
             titlesvg.style("opacity", "1");
             var s = new XMLSerializer();
             var str = s.serializeToString(
-              document.getElementById("linegraphsvg" + graphid)
+              document.getElementById("svg" + graphid)
             );
 
             var canvas = document.createElement("canvas"),
@@ -681,12 +687,20 @@ class D3LineGraph extends Component {
   };
 
   componentDidMount() {
+    var { graphid } = this.state;
     this.plotLineGraph();
     window.addEventListener("resize", this.plotLineGraph, false);
+    document
+      .getElementById("vis" + graphid)
+      .addEventListener("resize", this.plotLineGraph, false);
   }
 
   componentWillUnmount() {
+    var { graphid } = this.state;
     window.removeEventListener("resize", this.plotLineGraph, false);
+    document
+      .getElementById("vis" + graphid)
+      .removeEventListener("resize", this.plotLineGraph, false);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -696,83 +710,25 @@ class D3LineGraph extends Component {
   }
 
   render() {
-    var { graphid, linegraphdownload } = this.state;
+    var { graphid, download, fullscreen } = this.state;
     var { title } = this.props;
     return (
       <React.Fragment>
-        <div id={"vis" + graphid} className="vis-main">
+        <div
+          id={"vis" + graphid}
+          className={fullscreen ? "vis-main full" : "vis-main"}
+        >
           <div className="vis-header">
-            <table className="downloadtable">
-              <tbody>
-                <tr>
-                  <td className="title">{title}</td>
-                  <td>
-                    <img
-                      src={download}
-                      alt="download"
-                      onClick={this.toggleDownload}
-                      title="Download"
-                    />
-                    <div
-                      className={
-                        linegraphdownload ? "downloadbar" : "downloadbar hide"
-                      }
-                    >
-                      <button
-                        id={"pngdownloadline" + graphid}
-                        title="Download PNG"
-                      >
-                        PNG
-                      </button>
-                      <button
-                        className="blue"
-                        onClick={this.downloadJSON}
-                        title="Download as JSON"
-                      >
-                        JSON
-                      </button>
-                      <button
-                        className="red"
-                        onClick={this.downloadCSV}
-                        title="Download as CSV"
-                      >
-                        CSV
-                      </button>
-                    </div>
-                  </td>
-                  <td>
-                    <div title="Help" className="linegraphhelpbar">
-                      ?
-                      <div className="linegraphhelp">
-                        <table>
-                          <tbody>
-                            <tr>
-                              <th>Zoom X & Y</th>
-                              <td>Scroll with mouse over plot area</td>
-                            </tr>
-                            <tr>
-                              <th>Zoom X axis</th>
-                              <td>Scroll with mouse over X axis</td>
-                            </tr>
-                            <tr>
-                              <th>Zoom Y axis</th>
-                              <td>Scroll with mouse over Y axis</td>
-                            </tr>
-                            <tr>
-                              <th>Reset</th>
-                              <td>Double click on plot area</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table className="vis-data">
-              <tbody id={"value" + graphid}></tbody>
-            </table>
+            <GraphHeader
+              id={graphid}
+              title={title}
+              download={download}
+              fullscreen={fullscreen}
+              toggleDownload={this.toggleDownload}
+              toggleFullscreen={this.toggleFullscreen}
+              downloadJSON={this.downloadJSON}
+              downloadCSV={this.downloadCSV}
+            />
           </div>
         </div>
       </React.Fragment>

@@ -725,18 +725,6 @@ class LineGraph extends Component {
                   </div>
                 }
               />
-              <FilterBox
-                title="Download"
-                content={
-                  <button
-                    id="linegraph-download"
-                    className="download-button"
-                    onClick={() => this.downloadGraph()}
-                  >
-                    Download as PNG
-                  </button>
-                }
-              />
             </React.Fragment>
           }
           //open="False"

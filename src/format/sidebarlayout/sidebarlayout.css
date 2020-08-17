@@ -1,9 +1,5 @@
 /* -------------- Side Bar -------------------------  */
 
-.sidebarlayout {
-  overflow: auto;
-}
-
 /* Right Side */
 
 .sidebarlayout .rightcontainer {
@@ -97,17 +93,13 @@
 /* Media Queries */
 
 @media screen and (max-width: 960px) {
-  .sidebarlayout .rightcontainer {
-    width: 250px;
-  }
-
   .sidebarlayout .rightcontainer.hide {
     right: 10px;
     height: auto;
   }
 
   .sidebarlayout .leftcontainer {
-    width: calc(100vw - 255px);
+    width: calc(100vw - 323px);
   }
 }
 

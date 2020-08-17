@@ -216,21 +216,21 @@
   background-color: transparent;
 }
 
-.react-calendar {
+.editor .react-calendar {
   background-color: rgba(0, 0, 0, 0.4);
 }
 
-.react-calendar button {
+.editor .react-calendar button {
   color: white;
 }
 
-.react-calendar__tile:enabled:hover,
+.editor .react-calendar__tile:enabled:hover,
 .react-calendar__tile:enabled:focus {
   background-color: #006edc;
 }
 
-.react-calendar__navigation button:enabled:hover,
-.react-calendar__navigation button:enabled:focus {
+.editor .react-calendar__navigation button:enabled:hover,
+.editor .react-calendar__navigation button:enabled:focus {
   background-color: #76baff;
 }
 

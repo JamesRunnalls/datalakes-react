@@ -19,6 +19,7 @@ class DisplayOptions extends Component {
     bcolor: this.props.bcolor,
     minvalue: this.props.minvalue,
     maxvalue: this.props.maxvalue,
+    thresholdStep: this.props.thresholdStep,
   };
   onChangeLocalColors = (colors) => {
     this.setState({ colors });
@@ -26,6 +27,10 @@ class DisplayOptions extends Component {
   onChangeLocalTitle = (event) => {
     var title = event.target.value;
     this.setState({ title });
+  };
+  onChangeLocalThreshold = (event) => {
+    var thresholdStep = event.target.value;
+    this.setState({ thresholdStep });
   };
   onChangeLocalMin = (event) => {
     var minvalue = event.target.value;
@@ -47,14 +52,36 @@ class DisplayOptions extends Component {
       prevProps.title !== this.props.title ||
       prevProps.colors !== this.props.colors ||
       prevProps.minvalue !== this.props.minvalue ||
-      prevProps.maxvalue !== this.props.maxvalue
+      prevProps.maxvalue !== this.props.maxvalue ||
+      prevProps.thresholdStep !== this.props.thresholdStep
     ) {
-      var { colors, title, bcolor, minvalue, maxvalue } = this.props;
-      this.setState({ colors, title, bcolor, minvalue, maxvalue });
+      var {
+        colors,
+        title,
+        bcolor,
+        minvalue,
+        maxvalue,
+        thresholdStep,
+      } = this.props;
+      this.setState({
+        colors,
+        title,
+        bcolor,
+        minvalue,
+        maxvalue,
+        thresholdStep,
+      });
     }
   }
   render() {
-    var { colors, title, bcolor, minvalue, maxvalue } = this.state;
+    var {
+      colors,
+      title,
+      bcolor,
+      minvalue,
+      maxvalue,
+      thresholdStep,
+    } = this.state;
     return (
       <FilterBox
         title="Display Options"
@@ -105,6 +132,18 @@ class DisplayOptions extends Component {
                     />
                   </td>
                 </tr>
+                <tr>
+                  <td>Threshold Step</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="threshold"
+                      step="0.1"
+                      value={thresholdStep}
+                      onChange={this.onChangeLocalThreshold}
+                    />
+                  </td>
+                </tr>
               </tbody>
             </table>
 
@@ -139,12 +178,13 @@ class HeatMap extends Component {
     xaxis: "x",
     yaxis: "y",
     zaxis: "z",
-    xlabel: "None",
+    xlabel: "Time",
     ylabel: "None",
     zlabel: "None",
     xunits: "None",
     yunits: "None",
     zunits: "None",
+    thresholdStep: 1,
     minvalue: false,
     maxvalue: false,
     download: false,
@@ -261,6 +301,7 @@ class HeatMap extends Component {
     var maxvalue = zdomain[1];
     var minY = ydomain[0];
     var maxY = ydomain[1];
+    var thresholdStep = Math.min(1, (maxvalue - minvalue) / 10);
 
     this.setState({
       title,
@@ -275,6 +316,7 @@ class HeatMap extends Component {
       maxvalue,
       minY,
       maxY,
+      thresholdStep,
       upperY: maxY,
       lowerY: minY,
     });
@@ -285,7 +327,8 @@ class HeatMap extends Component {
       if (Array.isArray(data)) {
         var dataout = [];
         for (var i = 0; i < data.length; i++) {
-          dataout.push(this.sliceArray(data[i], lower, upper));
+          let slice = this.sliceArray(data[i], lower, upper);
+          if (slice) dataout.push(slice);
         }
         return dataout;
       } else {
@@ -330,7 +373,11 @@ class HeatMap extends Component {
     for (var j = 0; j < data.y.length; j++) {
       z.push(data.z[j].slice(l, u));
     }
-    return { x: x, y: y, z: z };
+    if (x.length > 0) {
+      return { x: x, y: y, z: z };
+    } else {
+      return false;
+    }
   };
 
   sliceYArray = (data, lower, upper) => {
@@ -427,6 +474,7 @@ class HeatMap extends Component {
       minY,
       upperY,
       lowerY,
+      thresholdStep,
     } = this.state;
 
     // Show time slider or multiple files
@@ -554,6 +602,7 @@ class HeatMap extends Component {
                 zunits={zunits}
                 bcolor={bcolor}
                 colors={colors}
+                thresholdStep={thresholdStep}
                 minvalue={minvalue}
                 maxvalue={maxvalue}
               />
@@ -643,7 +692,6 @@ class HeatMap extends Component {
               )}
               <FilterBox
                 title={ylabel + " Range"}
-                preopen="true"
                 content={
                   <div className="side-date-slider">
                     <NumberSliderDouble
@@ -661,21 +709,10 @@ class HeatMap extends Component {
                 colors={colors}
                 title={title}
                 bcolor={bcolor}
+                thresholdStep={thresholdStep}
                 minvalue={minvalue}
                 maxvalue={maxvalue}
                 onChange={this.onChangeDisplay}
-              />
-              <FilterBox
-                title="Download"
-                content={
-                  <button
-                    id="heatmap-download"
-                    className="download-button"
-                    onClick={this.download}
-                  >
-                    Download as PNG
-                  </button>
-                }
               />
             </React.Fragment>
           }
