@@ -362,6 +362,8 @@ class ThreeDModel extends Component {
     var lake = this.getLake(lakes_id);
     var t = datetime.getTime();
     var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
+    var oldStyle = document.getElementById("map").style.cursor;
+    document.getElementById("map").style.cursor = "wait";
     if (graph === "depthgraph") {
       axios
         .get(
@@ -370,9 +372,12 @@ class ThreeDModel extends Component {
         .then((response) => {
           var plotdata = this.removeNaN(response.data);
           this.setState({ pointValue, plotdata });
+          document.getElementById("map").style.cursor = oldStyle;
         })
         .catch((error) => {
           this.setState({ pointValue, plotdata: { x: [], y: [], z: [] } });
+          document.getElementById("map").style.cursor = oldStyle;
+          alert("Failed to collect data please try another location.");
         });
     } else if (graph === "timegraph") {
       axios
@@ -384,9 +389,12 @@ class ThreeDModel extends Component {
           x = x.map((i) => new Date(i * 1000));
           var plotdata = { x, y, z, z1 };
           this.setState({ pointValue, plotdata });
+          document.getElementById("map").style.cursor = oldStyle;
         })
         .catch((error) => {
           this.setState({ pointValue, plotdata: { x: [], y: [], z: [] } });
+          document.getElementById("map").style.cursor = oldStyle;
+          alert("Failed to collect data please try another location.");
         });
     }
   };
@@ -397,6 +405,9 @@ class ThreeDModel extends Component {
     var lake = this.getLake(lakes_id);
     var t = datetime.getTime();
     if (graph === "slicegraph" && lineValue.length > 0) {
+      var oldStyle = document.getElementById("map").style.cursor;
+      document.getElementById("map").style.cursor = "wait";
+
       // Convert to meteolakes units
       var { x: x1, y: y1 } = this.WGSlatlngtoCH(
         lineValue[0].lat,
@@ -414,9 +425,12 @@ class ThreeDModel extends Component {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
           var plotdata = { x, y, z, z1 };
           this.setState({ lineValue, plotdata });
+          document.getElementById("map").style.cursor = oldStyle;
         })
         .catch((error) => {
           this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
+          document.getElementById("map").style.cursor = oldStyle;
+          alert("Failed to plot transect");
         });
     } else {
       this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
@@ -967,6 +981,7 @@ class ThreeDModel extends Component {
               zunits={punit}
               bcolor={"white"}
               colors={colors}
+              display={"heatmap"}
             />
             <select
               className="parameter-select"
@@ -995,6 +1010,7 @@ class ThreeDModel extends Component {
               zunits={punit}
               bcolor={"white"}
               colors={colors}
+              display={"heatmap"}
             />
             <select
               className="parameter-select"

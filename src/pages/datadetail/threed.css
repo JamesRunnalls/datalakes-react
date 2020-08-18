@@ -77,8 +77,9 @@
   display: inline-block;
   z-index: 999;
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 20px 0;
+  padding: 30px 0;
   top: 70px;
+  box-shadow: 0 0 4px black;
 }
 
 .threed .graphwrapper.hide {
@@ -129,21 +130,18 @@
     width: calc(100% - 80px);
     box-sizing: border-box;
     position: absolute;
-    right: 0;
+    right: 10px;
     background-color: white;
     z-index: 9999;
-    padding-top: 20px;
-    top: 0;
-  }
-  .threed .close {
-    top: -30px;
+    top: 10px;
   }
 }
 
 @media screen and (max-width: 500px) {
   .threed .graphwrapper {
     width: 100%;
-    height: calc(100vh - 153px);
+    height: calc(100vh - 170px);
+    right: 0;
   }
   .threed .basemapwrapper {
     height: calc(100vh - 150px);

@@ -244,7 +244,7 @@
     font-size: 18px;
   }
   .datetimedepthselector .controlbar .datetime {
-    font-size: 18px;
+    font-size: 22px;
     width: 150px;
   }
   .datetimedepthselector .controlbar .playpause img {
@@ -268,9 +268,12 @@
   }
   .datetimedepthselector .controlbar .datetime {
     position: absolute;
-    top: 10px;
+    top: -20px;
     width: 100%;
     left: 0;
+  }
+  .datetimedepthselector .timeselectionbar {
+    display: none;
   }
   .datetimedepthselector .controlbar .skip img {
     height: 35px;

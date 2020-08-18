@@ -169,7 +169,7 @@ class D3HeatMap extends Component {
           setDownloadGraph,
         } = this.props;
 
-        const { closest, indexOfClosest } = this;
+        const { closest, indexOfClosest, props } = this;
 
         // Set graph size
         var margin = { top: 40, right: 80, bottom: 50, left: 50 },
@@ -228,7 +228,7 @@ class D3HeatMap extends Component {
         // Set default color threshhold step
         if (thresholdStep) {
         } else {
-          thresholdStep = 1;
+          thresholdStep = 20;
         }
 
         // Format X-axis
@@ -673,14 +673,22 @@ class D3HeatMap extends Component {
 
         function getXfromIndex(index, plotdata) {
           if (index <= plotdata.x.length - 1) {
-            return new Date(
-              (plotdata.x[Math.ceil(index)].getTime() -
-                plotdata.x[Math.floor(index)].getTime()) *
-                (index - Math.floor(index)) +
-                plotdata.x[Math.floor(index)].getTime()
-            );
+            if ("xlinear" in props) {
+              return (
+                (plotdata.x[Math.ceil(index)] - plotdata.x[Math.floor(index)]) *
+                  (index - Math.floor(index)) +
+                plotdata.x[Math.floor(index)]
+              );
+            } else {
+              return new Date(
+                (plotdata.x[Math.ceil(index)].getTime() -
+                  plotdata.x[Math.floor(index)].getTime()) *
+                  (index - Math.floor(index)) +
+                  plotdata.x[Math.floor(index)].getTime()
+              );
+            }
           } else {
-            return NaN;
+            return plotdata.x[plotdata.x.length - 1];
           }
         }
 
@@ -692,7 +700,7 @@ class D3HeatMap extends Component {
               plotdata.y[Math.floor(index)]
             );
           } else {
-            return NaN;
+            return plotdata.y[plotdata.y.length - 1];
           }
         }
 
@@ -784,7 +792,11 @@ class D3HeatMap extends Component {
         }
 
         function fillCanvasContour(scaleX, scaleY) {
-          var thresholds = d3.range(zdomain[0], zdomain[1], thresholdStep);
+          var thresholds = d3.range(
+            zdomain[0],
+            zdomain[1],
+            (zdomain[1] - zdomain[0]) / thresholdStep
+          );
           var contours, values;
           if (Array.isArray(data)) {
             data.forEach((d) => {
@@ -797,6 +809,7 @@ class D3HeatMap extends Component {
           } else {
             contours = d3.contours().size([data.z[0].length, data.z.length]);
             values = data.z.flat();
+            fill(contours.thresholds(thresholds)(values)[0], data);
             contours
               .thresholds(thresholds)(values)
               .forEach((contour) => fill(contour, data));
@@ -870,6 +883,9 @@ class D3HeatMap extends Component {
   };
 
   componentDidMount() {
+    if ("display" in this.props) {
+      this.setState({ display: this.props.display });
+    }
     this.plotHeatMap();
     window.addEventListener("resize", this.plotHeatMap);
   }

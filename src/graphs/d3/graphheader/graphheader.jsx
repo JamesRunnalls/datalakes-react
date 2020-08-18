@@ -8,7 +8,21 @@ import fullscreenIcon from "./img/fullscreen.svg";
 import "./graphheader.css";
 
 class GraphHeader extends Component {
-  state = {};
+  componentDidMount() {
+    window.addEventListener("keydown", this.exitFullscreen, false);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this.exitFullscreen, false);
+  }
+
+  exitFullscreen = (e) => {
+    var { fullscreen, toggleFullscreen } = this.props;
+    if (e.key === "Escape" && fullscreen) {
+      toggleFullscreen();
+    }
+  };
+
   render() {
     var {
       id,

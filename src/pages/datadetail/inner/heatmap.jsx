@@ -133,12 +133,12 @@ class DisplayOptions extends Component {
                   </td>
                 </tr>
                 <tr>
-                  <td>Threshold Step</td>
+                  <td>Number of Thresholds</td>
                   <td>
                     <input
                       type="number"
                       id="threshold"
-                      step="0.1"
+                      step="1"
                       value={thresholdStep}
                       onChange={this.onChangeLocalThreshold}
                     />
@@ -184,7 +184,7 @@ class HeatMap extends Component {
     xunits: "None",
     yunits: "None",
     zunits: "None",
-    thresholdStep: 1,
+    thresholdStep: 20,
     minvalue: false,
     maxvalue: false,
     download: false,
@@ -301,7 +301,7 @@ class HeatMap extends Component {
     var maxvalue = zdomain[1];
     var minY = ydomain[0];
     var maxY = ydomain[1];
-    var thresholdStep = Math.min(1, (maxvalue - minvalue) / 10);
+    var thresholdStep = 20;
 
     this.setState({
       title,

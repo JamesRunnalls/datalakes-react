@@ -51,5 +51,7 @@
     left: 10px;
     max-width: calc(100% - 20px);
     top: 60px;
+    z-index: 99999;
+    height: calc(100% - 140px);
   }
 }
