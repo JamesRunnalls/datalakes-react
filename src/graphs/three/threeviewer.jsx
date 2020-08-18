@@ -21,9 +21,10 @@ class ThreeViewer extends Component {
   sceneSetup = () => {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
-    this.maxAge = 200;
+    this.maxAge = 500;
     this.noParticles = 2000;
 
+    this.fadeOut = Math.round(this.maxAge * 0.1);
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x535470);
     this.camera = new THREE.PerspectiveCamera(
@@ -58,21 +59,33 @@ class ThreeViewer extends Component {
       positions[3] = positions[0] + 0.1;
       positions[4] = positions[1] + 0.1;
       positions[5] = positions[2] + 0.1;
-      line.data.geometry.setDrawRange(0, line.age);
       line.data.geometry.attributes.position.needsUpdate = true;
     });
   };
 
   updatePositions = () => {
     this.lines.forEach((line) => {
-      line.age++;
       let positions = line.data.geometry.attributes.position.array;
-      positions[line.age * 3] =
-        positions[(line.age - 1) * 3] + Math.random() / 10;
-      positions[line.age * 3 + 1] =
-        positions[(line.age - 1) * 3 + 1] + (Math.random() - 0.5) / 10;
-      positions[line.age * 3 + 2] =
-        positions[(line.age - 1) * 3 + 2] + Math.random() / 10;
+      if (line.age < line.maxAge) {
+        line.age++;
+        positions[line.age * 3] =
+          positions[(line.age - 1) * 3] + Math.random() / 10;
+        positions[line.age * 3 + 1] =
+          positions[(line.age - 1) * 3 + 1] + (Math.random() - 0.5) / 10;
+        positions[line.age * 3 + 2] =
+          positions[(line.age - 1) * 3 + 2] + Math.random() / 10;
+      } else {
+        line.age = 0;
+        line.maxAge =
+          Math.round((this.maxAge - this.fadeOut) * Math.random()) +
+          this.fadeOut;
+        positions[0] = (Math.random() - 0.5) * 50;
+        positions[1] = (Math.random() - 0.5) * 50;
+        positions[2] = (Math.random() - 0.5) * 50;
+        positions[3] = positions[0] + 0.1;
+        positions[4] = positions[1] + 0.1;
+        positions[5] = positions[2] + 0.1;
+      }
       line.data.geometry.setDrawRange(0, line.age);
       line.data.geometry.attributes.position.needsUpdate = true;
     });
@@ -118,18 +131,8 @@ class ThreeViewer extends Component {
 
     // geometry
     var geometry = new THREE.BufferGeometry();
-    var colors = [];
-    for (var i = 0; i < this.maxAge; i++) {
-      colors.push(1);
-      colors.push(1);
-      colors.push(1);
-      colors.push(i / this.maxAge);
-      colors.push(1);
-      colors.push(1);
-      colors.push(1);
-      colors.push(i / this.maxAge);
-    }
 
+    var colors = new Array(this.maxAge * 4).fill(1);
     geometry.setAttribute(
       "color",
       new THREE.Float32BufferAttribute(colors, 4, true)
@@ -152,8 +155,14 @@ class ThreeViewer extends Component {
     this.lines = [];
 
     for (var p = 0; p < this.noParticles; p++) {
-      let line = new THREE.Line(geometry.clone(), material);
-      this.lines.push({ data: line, age: 0 });
+      let line = new THREE.Line(geometry.clone(), material.clone());
+      this.lines.push({
+        data: line,
+        age: 0,
+        maxAge:
+          Math.round((this.maxAge - this.fadeOut) * Math.random()) +
+          this.fadeOut,
+      });
       this.scene.add(line);
     }
 
