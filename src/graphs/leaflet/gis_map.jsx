@@ -105,7 +105,7 @@ class GISMap extends Component {
         img: groupicon,
       },
     ];
-    var load = loading && false;
+    var load = loading;
     return (
       <React.Fragment>
         <div className="map full">

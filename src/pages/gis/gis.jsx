@@ -10,6 +10,7 @@ import colorlist from "../../components/colorramp/colors";
 import DatetimeDepthSelector from "../../components/datetimedepthselector/datetimedepthselector";
 import "./gis.css";
 import PrintLegend from "../../components/legend/printlegend";
+import ErrorModal from "../../components/errormodal/errormodal";
 
 class SidebarGIS extends Component {
   render() {
@@ -99,6 +100,13 @@ class GIS extends Component {
     center: [46.85, 7.55],
     zoom: 9,
     basemap: "datalakesmap",
+    modal: false,
+    modaltext: "",
+    modaldetail: "",
+  };
+
+  closeModal = () => {
+    this.setState({ modal: false, modaltext: "" });
   };
 
   updateLocation = (zoom, center) => {
@@ -638,11 +646,16 @@ class GIS extends Component {
         }
         filelink = filelink.replace(":depth", depth);
         ({ data } = await axios
-          .get(filelink, { timeout: 10000 })
+          .get(filelink, { timeout: 5000 })
           .catch((error) => {
             console.error(error);
-            alert("Failed to add layer");
-            this.setState({ loading: false });
+            let modaltext = `Failed to retrieve data from the ${dataset.datasource} API. Datalakes has no control over the availability of data from external API's, please try again later to see if the API is back online.`;
+            this.setState({
+              loading: false,
+              modal: true,
+              modaltext,
+              modaldetail: error.message,
+            });
           }));
         ({ realdatetime, realdepth } = this.getExternalDatetimeAndDepth(
           data,
@@ -1163,11 +1176,20 @@ class GIS extends Component {
       maxdatetime,
       mindepth,
       maxdepth,
+      modal,
+      modaltext,
+      modaldetail,
     } = this.state;
     document.title = "Map Viewer - Datalakes";
     return (
       <React.Fragment>
         <h1>Map Viewer</h1>
+        <ErrorModal
+          visible={modal}
+          text={modaltext}
+          details={modaldetail}
+          closeModal={this.closeModal}
+        />
         <GISMap
           datetime={datetime}
           depth={depth}

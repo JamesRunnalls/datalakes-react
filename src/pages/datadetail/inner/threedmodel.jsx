@@ -18,6 +18,7 @@ import MapLayers from "../../../components/maplayers/maplayers";
 import Legend from "../../../components/legend/legend";
 import DatetimeDepthSelector from "../../../components/datetimedepthselector/datetimedepthselector";
 import PrintLegend from "../../../components/legend/printlegend";
+import ErrorModal from "../../../components/errormodal/errormodal";
 
 class ThreeDMenu extends Component {
   render() {
@@ -94,6 +95,9 @@ class ThreeDModel extends Component {
     plotdata: { x: [], y: [], z: [] },
     zoomIn: () => {},
     zoomOut: () => {},
+    modal: false,
+    modaltext: "",
+    modaldetail: "",
   };
 
   onChangeTimestep = (timestep) => {
@@ -641,6 +645,10 @@ class ThreeDModel extends Component {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours);
   };
 
+  closeModal = () => {
+    this.setState({ modal: false, modaltext: "" });
+  };
+
   downloadFile = async (
     datasets_id,
     fileid,
@@ -671,11 +679,16 @@ class ThreeDModel extends Component {
       filelink = filelink.replace(":datetime", datetimejs);
       filelink = filelink.replace(":depth", depth);
       ({ data } = await axios
-        .get(filelink, { timeout: 10000 })
+        .get(filelink, { timeout: 5000 })
         .catch((error) => {
           console.error(error);
-          alert("Failed to add layer");
-          this.setState({ loading: false });
+          let modaltext = `Failed to retrieve data from the Meteolakes API. Datalakes has no control over the availability of data from external API's, please try again later to see if the API is back online.`;
+          this.setState({
+            loading: false,
+            modal: true,
+            modaltext,
+            modaldetail: error.message,
+          });
         }));
       ({ datetime: realdatetime, depth: realdepth } = data);
 
@@ -818,6 +831,9 @@ class ThreeDModel extends Component {
       maxdatetime,
       mindepth,
       maxdepth,
+      modal,
+      modaltext,
+      modaldetail,
     } = this.state;
     var { dataset } = this.props;
     var controls = [
@@ -868,6 +884,12 @@ class ThreeDModel extends Component {
     var load = loading && false;
     return (
       <div className={fullsize ? "threed full" : "threed"}>
+        <ErrorModal
+          visible={modal}
+          text={modaltext}
+          details={modaldetail}
+          closeModal={this.closeModal}
+        />
         <div className="basemapwrapper">
           <div className="controls">
             <MapControl

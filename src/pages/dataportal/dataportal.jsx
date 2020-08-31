@@ -154,7 +154,7 @@ class PopupBox extends Component {
 class FilterBoxInner extends Component {
   capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+  };
   state = {};
   render() {
     var { params, checkbox, cat, filters, table } = this.props;
@@ -168,7 +168,7 @@ class FilterBoxInner extends Component {
         <div id="filterboxinner" className="">
           {params.map((param) => (
             <div
-              key={param.name}
+              key={param.id + "_" + param.name}
               onClick={() => checkbox(param.id, param.name, cat, table)}
               className="filterboxinner"
             >

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import * as THREE from "three";
+import Delaunator from "delaunator";
 import axios from "axios";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -57,9 +58,24 @@ class ThreeViewer extends Component {
     var randomPick = [];
     for (let i = 0; i < arr.length; i++) {
       for (let j = 0; j < arr[i][2].length; j++) {
-        randomPick.push([i, j]);
+        if (arr[i][2][j] !== -999 || arr[i][3][j] !== -999) {
+          randomPick.push([i, j]);
+        }
       }
     }
+
+    console.log(arr);
+
+    var bottomSurface = arr.map((a) => {
+      var depth = 0;
+      for (var i = 0; i < depths.length; i++) {
+        if (a[2][i] === -999 && a[3][i] === -999) {
+          break;
+        }
+        depth = depths[i];
+      }
+      return { x: a[0], y: a[1], z: depth };
+    });
 
     var {
       nCols,
@@ -70,9 +86,6 @@ class ThreeViewer extends Component {
       yllcorner,
       griddata,
     } = this.dataToGrid(arr, 0.5);
-
-    console.log(griddata);
-    console.log(randomPick);
 
     this.setState(
       {
@@ -86,8 +99,9 @@ class ThreeViewer extends Component {
         arr,
         depths,
         randomPick,
+        bottomSurface,
         loaded: true,
-        velocityFactor: 1,
+        velocityFactor: 2,
       },
       () => {
         this.sceneSetup();
@@ -107,10 +121,11 @@ class ThreeViewer extends Component {
   sceneSetup = () => {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
-    this.maxAge = 1000;
-    this.noParticles = 5000;
 
-    this.fadeOut = Math.round(this.maxAge * 0.2);
+    this.maxAge = 1000;
+    this.noParticles = 7000;
+    this.fadeOut = Math.round(this.maxAge * 0.1);
+
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x747474);
     this.camera = new THREE.PerspectiveCamera(
@@ -136,7 +151,6 @@ class ThreeViewer extends Component {
       let positions = line.data.geometry.attributes.position.array;
       positions[0] = arr[pick[0]][0]; // x
       positions[1] = depths[pick[1]]; // z
-      //positions[1] = 0; // z
       positions[2] = -arr[pick[0]][1]; // -y
       positions[3] = positions[0];
       positions[4] = positions[1];
@@ -155,14 +169,18 @@ class ThreeViewer extends Component {
       nRows,
       griddata,
       velocityFactor,
+      depths,
     } = this.state;
+    var zi = this.indexOfClosest(zin, depths);
     var i = Math.round((yin - yllcorner) / ySize);
     var j = Math.round((xin - xllcorner) / xSize);
     if (i > -1 && i < nRows && j > -1 && j < nCols && griddata[i][j] !== null) {
       var u = 0;
       var v = 0;
-      if (griddata[i][j][0].length > 0) u = griddata[i][j][0][0];
-      if (griddata[i][j][1].length > 0) v = griddata[i][j][1][0];
+      if (griddata[i][j][0].length > 0 && griddata[i][j][0][zi] !== -999)
+        u = griddata[i][j][0][zi];
+      if (griddata[i][j][1].length > 0 && griddata[i][j][1][zi] !== -999)
+        v = griddata[i][j][1][zi];
       var x = xin + v * velocityFactor;
       var y = yin + u * velocityFactor;
       //var x = xin + (Math.random() - 0.5) / 10;
@@ -171,6 +189,19 @@ class ThreeViewer extends Component {
     } else {
       return false;
     }
+  };
+
+  indexOfClosest = (num, arr) => {
+    var index = 0;
+    var diff = Math.abs(num - arr[0]);
+    for (var val = 0; val < arr.length; val++) {
+      var newdiff = Math.abs(num - arr[val]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = val;
+      }
+    }
+    return index;
   };
 
   dataToGrid = (arr, radius) => {
@@ -259,7 +290,7 @@ class ThreeViewer extends Component {
           line.data.geometry.setDrawRange(0, line.age);
           line.data.geometry.attributes.position.needsUpdate = true;
         } else {
-          line.age = line.maxAge;
+          line.age = line.maxAge - this.fadeOut;
         }
       } else if (line.age < line.maxAge) {
         // Fade out line
@@ -296,6 +327,7 @@ class ThreeViewer extends Component {
   };
 
   addCustomSceneObjects = () => {
+    var { bottomSurface } = this.state;
     var vertexShader = `
       precision mediump float;
       precision mediump int;
@@ -331,10 +363,47 @@ class ThreeViewer extends Component {
         child.material.opacity = 0.2;
       }
     });
-    this.scene.add(this.model.scene);
+    //this.scene.add(this.model.scene);
 
-    var box = new THREE.BoxHelper(this.model.scene, 0xffff00);
+    /*var box = new THREE.BoxHelper(this.model.scene, 0xffff00);
     this.scene.add(box);
+    
+    var axesHelper = new THREE.AxesHelper(5);
+    this.scene.add(axesHelper);*/
+
+    // Lake Mesh
+    var points3d = [];
+    for (let i = 0; i < bottomSurface.length; i++) {
+      points3d.push(
+        new THREE.Vector3(
+          bottomSurface[i].x,
+          bottomSurface[i].z,
+          -bottomSurface[i].y
+        )
+      );
+    }
+
+    var lakegeometry = new THREE.BufferGeometry().setFromPoints(points3d);
+
+    var indexDelaunay = Delaunator.from(
+      points3d.map((v) => {
+        return [v.x, v.z];
+      })
+    );
+
+    var meshIndex = []; // delaunay index => three.js index
+    for (let i = 0; i < indexDelaunay.triangles.length; i++) {
+      console.log(indexDelaunay.triangles[i])
+      meshIndex.push(indexDelaunay.triangles[i]);
+    }
+
+    lakegeometry.setIndex(meshIndex); // add three.js index to the existing geometry
+    lakegeometry.computeVertexNormals();
+    var mesh = new THREE.Mesh(
+      lakegeometry, // re-use the existing geometry
+      new THREE.MeshLambertMaterial({ color: "purple", wireframe: true })
+    );
+    this.scene.add(mesh);
 
     // geometry
     var geometry = new THREE.BufferGeometry();
@@ -372,9 +441,6 @@ class ThreeViewer extends Component {
       });
       this.scene.add(line);
     }
-
-    var axesHelper = new THREE.AxesHelper(5);
-    this.scene.add(axesHelper);
 
     // update positions
     this.initialPositions();
