@@ -3,7 +3,6 @@ import * as THREE from "three";
 import Delaunator from "delaunator";
 import axios from "axios";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { apiUrl } from "../../config.json";
 import * as d3 from "d3";
 import "./threeviewer.css";
@@ -12,38 +11,54 @@ import Loading from "../../components/loading/loading";
 class ThreeViewer extends Component {
   state = {
     loaded: false,
-  };
-  modelLoader = async (url) => {
-    var loader = new GLTFLoader();
-    return new Promise((resolve, reject) => {
-      loader.load(url, (data) => resolve(data), null, reject);
-    });
+    bounds: 45,
+    zScale: 40,
+    xScale: 1,
+    yScale: 1,
+    quadtreeSensitivity: 0.5,
+    velocityFactor: 2,
+    maxAge: 100,
+    noParticles: 7000,
+    fadeOutPercentage: 0.1,
   };
 
   async componentDidMount() {
-    this.model = await this.modelLoader("./models/lakegeneva.glb");
+    var { bounds, zScale, xScale, yScale, quadtreeSensitivity } = this.state;
     var { data } = await axios.get(
       apiUrl + "/externaldata/meteolakes/threed/geneva/velocity/737873"
     );
     var { depths, arr } = data;
 
     // Map global go-ordinate to grid co-ordinates
-    var min, max;
-    this.model.scene.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        ({ min, max } = new THREE.Box3().setFromObject(child));
-      }
-    });
-
     let x_array = arr.map((q) => q[0]);
     let y_array = arr.map((q) => q[1]);
 
     let min_x = Math.min(...x_array);
     let min_y = Math.min(...y_array);
+    let min_z = Math.min(...depths);
     let max_x = Math.max(...x_array);
     let max_y = Math.max(...y_array);
     let max_z = Math.max(...depths);
-    let min_z = Math.min(...depths);
+    let dif_x = max_x - min_x;
+    let dif_y = max_y - min_y;
+
+    var ybound, xbound, zbound;
+    if (dif_x > dif_y) {
+      xbound = bounds * xScale;
+      ybound = bounds * ((max_y - min_y) / (max_x - min_x)) * yScale;
+      zbound = bounds * ((max_z - min_z) / (max_x - min_x)) * zScale;
+    } else {
+      ybound = bounds * yScale;
+      xbound = bounds * ((max_x - min_x) / (max_y - min_y)) * xScale;
+      zbound = bounds * ((max_z - min_z) / (max_y - min_y)) * zScale;
+    }
+
+    var min = {
+      x: -xbound,
+      y: -ybound,
+      z: -zbound,
+    };
+    var max = { x: xbound, y: ybound, z: 0 };
 
     depths = depths.map(
       (d) => min.z + ((d - min_z) / (max_z - min_z)) * (max.z - min.z)
@@ -64,8 +79,6 @@ class ThreeViewer extends Component {
       }
     }
 
-    console.log(arr);
-
     var bottomSurface = arr.map((a) => {
       var depth = 0;
       for (var i = 0; i < depths.length; i++) {
@@ -85,7 +98,8 @@ class ThreeViewer extends Component {
       xllcorner,
       yllcorner,
       griddata,
-    } = this.dataToGrid(arr, 0.5);
+      quadtree,
+    } = this.dataToGrid(arr, quadtreeSensitivity);
 
     this.setState(
       {
@@ -101,7 +115,7 @@ class ThreeViewer extends Component {
         randomPick,
         bottomSurface,
         loaded: true,
-        velocityFactor: 2,
+        quadtree,
       },
       () => {
         this.sceneSetup();
@@ -119,12 +133,13 @@ class ThreeViewer extends Component {
   }
 
   sceneSetup = () => {
+    var { maxAge, noParticles, fadeOutPercentage } = this.state;
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
 
-    this.maxAge = 1000;
-    this.noParticles = 7000;
-    this.fadeOut = Math.round(this.maxAge * 0.1);
+    this.maxAge = maxAge;
+    this.noParticles = noParticles;
+    this.fadeOut = Math.round(this.maxAge * fadeOutPercentage);
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x747474);
@@ -145,7 +160,7 @@ class ThreeViewer extends Component {
 
   initialPositions = () => {
     var { arr, randomPick, depths } = this.state;
-    var pl = randomPick.length;
+    var pl = randomPick.length - 1;
     this.lines.forEach((line) => {
       let pick = randomPick[Math.round(pl * Math.random())];
       let positions = line.data.geometry.attributes.position.array;
@@ -183,8 +198,6 @@ class ThreeViewer extends Component {
         v = griddata[i][j][1][zi];
       var x = xin + v * velocityFactor;
       var y = yin + u * velocityFactor;
-      //var x = xin + (Math.random() - 0.5) / 10;
-      //var y = yin + (Math.random() - 0.5) / 10;
       return { x, y, z: zin };
     } else {
       return false;
@@ -262,12 +275,13 @@ class ThreeViewer extends Component {
       xllcorner: min_x,
       yllcorner: min_y,
       griddata: outdata,
+      quadtree,
     };
   };
 
   updatePositions = () => {
     var { arr, randomPick, depths } = this.state;
-    var pl = randomPick.length;
+    var pl = randomPick.length - 1;
     this.lines.forEach((line) => {
       let positions = line.data.geometry.attributes.position.array;
       let colors = line.data.geometry.attributes.color.array;
@@ -326,6 +340,34 @@ class ThreeViewer extends Component {
     });
   };
 
+  removeOuterTriangles(indexDelaunay, maxVertex) {
+    let newTriangles = [];
+    for (let k = 0; k < indexDelaunay.triangles.length; k += 3) {
+      let t0 = indexDelaunay.triangles[k];
+      let t1 = indexDelaunay.triangles[k + 1];
+      let t2 = indexDelaunay.triangles[k + 2];
+
+      let x0 = indexDelaunay.coords[2 * t0];
+      let y0 = indexDelaunay.coords[2 * t0 + 1];
+
+      let x1 = indexDelaunay.coords[2 * t1];
+      let y1 = indexDelaunay.coords[2 * t1 + 1];
+
+      let x2 = indexDelaunay.coords[2 * t2];
+      let y2 = indexDelaunay.coords[2 * t2 + 1];
+
+      let va = Math.abs(Math.sqrt((y1 - y0) ** 2 + (x1 - x0) ** 2));
+      let vb = Math.abs(Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2));
+      let vc = Math.abs(Math.sqrt((y2 - y0) ** 2 + (x2 - x0) ** 2));
+
+      if (va < maxVertex && vb < maxVertex && vc < maxVertex) {
+        newTriangles.push(t0, t1, t2);
+      }
+    }
+    indexDelaunay.triangles = newTriangles;
+    return indexDelaunay;
+  }
+
   addCustomSceneObjects = () => {
     var { bottomSurface } = this.state;
     var vertexShader = `
@@ -357,20 +399,6 @@ class ThreeViewer extends Component {
       }
     `;
 
-    this.model.scene.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.material.color.setHex(0x808080);
-        child.material.opacity = 0.2;
-      }
-    });
-    //this.scene.add(this.model.scene);
-
-    /*var box = new THREE.BoxHelper(this.model.scene, 0xffff00);
-    this.scene.add(box);
-    
-    var axesHelper = new THREE.AxesHelper(5);
-    this.scene.add(axesHelper);*/
-
     // Lake Mesh
     var points3d = [];
     for (let i = 0; i < bottomSurface.length; i++) {
@@ -391,17 +419,24 @@ class ThreeViewer extends Component {
       })
     );
 
+    // Remove triangle with vertex over certain length
+    indexDelaunay = this.removeOuterTriangles(indexDelaunay, 2);
+
     var meshIndex = []; // delaunay index => three.js index
     for (let i = 0; i < indexDelaunay.triangles.length; i++) {
-      console.log(indexDelaunay.triangles[i])
       meshIndex.push(indexDelaunay.triangles[i]);
     }
 
-    lakegeometry.setIndex(meshIndex); // add three.js index to the existing geometry
-    lakegeometry.computeVertexNormals();
+    lakegeometry.setIndex(meshIndex);
     var mesh = new THREE.Mesh(
       lakegeometry, // re-use the existing geometry
-      new THREE.MeshLambertMaterial({ color: "purple", wireframe: true })
+      new THREE.MeshLambertMaterial({
+        color: "grey",
+        wireframe: false,
+        transparent: true,
+        opacity: 0.2,
+        depthWrite: false,
+      })
     );
     this.scene.add(mesh);
 
