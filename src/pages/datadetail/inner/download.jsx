@@ -172,6 +172,107 @@ class Download extends Component {
             JSON
           </button>
         </div>
+        <div className="info-title">Parse Data</div>
+        <div className="parsedata">
+          <p>
+            Data is provided as a Zip file containing the files (in the format
+            you have specified) for the selected time period.
+          </p>
+          <b>Date and Time</b>
+          <p>
+            Datetime is in Unix time format (
+            <a
+              href="https://www.unixtimestamp.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              details
+            </a>
+            ). Most languages have a function for parsing this format to a
+            datetime object.
+          </p>
+          <table>
+            <tbody>
+              <tr>
+                <th>Python</th>
+                <td></td>
+                <td>
+                  from datetime import datetime <br /> dt =
+                  datetime.utcfromtimestamp(unixdatetime)
+                </td>
+              </tr>
+              <tr>
+                <th>R</th>
+                <td></td>
+                <td>
+                  library(anytime) <br /> dt {"<"}- anytime(unixdatetime)
+                </td>
+              </tr>
+              <tr>
+                <th>Javascript</th>
+                <td></td>
+                <td>var dt = new Date(unixdatetime * 1000)</td>
+              </tr>
+            </tbody>
+          </table>
+          <b>Reading from NetCDF</b>
+          <p>
+            There are a number of resources that give detailed information on
+            how to read and interact with NetCDF files. Linked below are some
+            suggested resources.
+          </p>
+          <table>
+            <tbody>
+              <tr>
+                <th>Python</th>
+                <td></td>
+                <td>
+                  <a
+                    href="https://unidata.github.io/netcdf4-python/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://unidata.github.io/netcdf4-python/
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <th>R</th>
+                <td></td>
+                <td>
+                  <a
+                    href="https://cran.r-project.org/web/packages/ncdf4/ncdf4.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://cran.r-project.org/web/packages/ncdf4/ncdf4.pdf
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <th>Javascript</th>
+                <td></td>
+                <td>
+                  <a
+                    href="https://github.com/cheminfo/netcdfjs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    https://github.com/cheminfo/netcdfjs
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <b>Reading from JSON</b>
+          <p>
+            JSON is the native format of Javascript, data is stored in this
+            format to allow fast access to the data for visualistion on the web
+            platform. Significantly more metadata is available in the NetCDF
+            file. As with datetime, most languages have a native import
+            function for JSON.
+          </p>
+        </div>
       </div>
     );
   }
