@@ -60,7 +60,12 @@ class Download extends Component {
           ") Please enter the password to download data."
       );
     }
-    var url = `${apiUrl}/download?password=${datasetpassword}`;
+    var url;
+    if (filetype === "csv"){
+      url = `${apiUrl}/download/csv?password=${datasetpassword}`;
+    } else {
+      url = `${apiUrl}/download?password=${datasetpassword}`;
+    } 
     var name =
       title.replace(/\s/g, "").toLowerCase() + "_datalakesdownload.zip";
     axios({
@@ -170,6 +175,15 @@ class Download extends Component {
             title="Download datasets in JSON format"
           >
             JSON
+          </button>
+          <button
+            onClick={() =>
+              this.downloadFiles("csv", apiUrl, selectedArray, dataset.title)
+            }
+            className="download-button"
+            title="Download datasets in CSV format"
+          >
+            CSV (Beta)
           </button>
         </div>
         <div className="info-title">Parse Data</div>
