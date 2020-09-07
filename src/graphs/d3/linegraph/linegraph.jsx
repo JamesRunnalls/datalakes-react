@@ -26,7 +26,9 @@ class D3LineGraph extends Component {
     for (var i = 0; i < arr.length; i++) {
       let len = arr[i][param].length;
       while (len--) {
-        max = arr[i][param][len] > max ? arr[i][param][len] : max;
+        if (arr[i][param][len] !== null) {
+          max = arr[i][param][len] > max ? arr[i][param][len] : max;
+        }
       }
     }
     return max;
@@ -37,7 +39,9 @@ class D3LineGraph extends Component {
     for (var i = 0; i < arr.length; i++) {
       let len = arr[i][param].length;
       while (len--) {
-        min = arr[i][param][len] < min ? arr[i][param][len] : min;
+        if (arr[i][param][len] !== null) {
+          min = arr[i][param][len] < min ? arr[i][param][len] : min;
+        }
       }
     }
     return min;
@@ -304,6 +308,9 @@ class D3LineGraph extends Component {
             })
             .y(function (d) {
               return y(d.y);
+            })
+            .defined(function (d) {
+              return d.x && d.y;
             });
 
           // Define confidence interval

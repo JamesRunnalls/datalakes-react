@@ -12,6 +12,11 @@ class Ch2018Graph extends Component {
     lake: "",
     depth: "surface",
     period: "p1",
+    smoothing: 5,
+  };
+
+  updateSmoothing = (event) => {
+    this.setState({ smoothing: parseInt(event.target.value) });
   };
 
   updateLake = async (event) => {
@@ -40,6 +45,42 @@ class Ch2018Graph extends Component {
     this.setState({ period: event.target.value });
   };
 
+  movingAvg = (array, count, qualifier) => {
+    if (count === 0) {
+      return array;
+    }
+    // calculate average for subarray
+    var avg = function (array, qualifier) {
+      var sum = 0,
+        count = 0,
+        val;
+      for (var i in array) {
+        val = array[i];
+        if (!qualifier || qualifier(val)) {
+          sum += val;
+          count++;
+        }
+      }
+
+      return sum / count;
+    };
+
+    var result = [],
+      val;
+
+    // pad beginning of result with null values
+    for (var i = 0; i < count - 1; i++) result.push(null);
+
+    // calculate average for each subarray and add to result
+    for (var j = 0, len = array.length - count; j <= len; j++) {
+      val = avg(array.slice(j, j + count), qualifier);
+      if (isNaN(val)) result.push(null);
+      else result.push(val);
+    }
+
+    return result;
+  };
+
   async componentDidMount() {
     var { data: lakes } = await axios
       .get(apiUrl + "/externaldata/ch2018/lakes", {
@@ -62,8 +103,9 @@ class Ch2018Graph extends Component {
   }
 
   render() {
-    var { lakes, depth, lake, data, period } = this.state;
+    var { lakes, depth, lake, data: inData, period, smoothing } = this.state;
     var lake_options = [];
+    var data = JSON.parse(JSON.stringify(inData));
     for (var listlake of lakes) {
       lake_options.push(
         <option value={listlake.id} key={listlake.id}>
@@ -153,15 +195,24 @@ class Ch2018Graph extends Component {
       yearly = [
         {
           x: data[lake]["yearly"][depth]["RCP26"]["x"],
-          y: data[lake]["yearly"][depth]["RCP26"]["y_ave"],
+          y: this.movingAvg(
+            data[lake]["yearly"][depth]["RCP26"]["y_ave"],
+            smoothing
+          ),
         },
         {
           x: data[lake]["yearly"][depth]["RCP45"]["x"],
-          y: data[lake]["yearly"][depth]["RCP45"]["y_ave"],
+          y: this.movingAvg(
+            data[lake]["yearly"][depth]["RCP45"]["y_ave"],
+            smoothing
+          ),
         },
         {
           x: data[lake]["yearly"][depth]["RCP85"]["x"],
-          y: data[lake]["yearly"][depth]["RCP85"]["y_ave"],
+          y: this.movingAvg(
+            data[lake]["yearly"][depth]["RCP85"]["y_ave"],
+            smoothing
+          ),
         },
       ];
       yearlyConfidence = [
@@ -238,6 +289,7 @@ class Ch2018Graph extends Component {
                 <td>Lake</td>
                 <td>Surface/ Bottom</td>
                 <td>Time Period</td>
+                <td>Smoothing</td>
                 <td>Altitude</td>
                 <td>Area</td>
                 <td>Volume</td>
@@ -260,6 +312,15 @@ class Ch2018Graph extends Component {
                     <option value="p2">2012 - 2040</option>
                     <option value="p3">2041 - 2070</option>
                     <option value="p4">2071 - 2100</option>
+                  </select>
+                </td>
+                <td>
+                  <select value={smoothing} onChange={this.updateSmoothing}>
+                    <option value="0">None</option>
+                    <option value="2">2Yr Moving Ave</option>
+                    <option value="3">3Yr Moving Ave</option>
+                    <option value="5">5Yr Moving Ave</option>
+                    <option value="10">10Yr Moving Ave</option>
                   </select>
                 </td>
                 <td>{altitude} m a.s.l.</td>
