@@ -1,0 +1,18 @@
+{
+    "identityPoolName": "frontend_identitypool_b696d547",
+    "allowUnauthenticatedIdentities": true,
+    "authSelections": "identityPoolOnly",
+    "resourceName": "cognitoe01d6cbb",
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    },
+    "unauthRoleArn": {
+        "Fn::GetAtt": [
+            "UnauthRole",
+            "Arn"
+        ]
+    }
+}
