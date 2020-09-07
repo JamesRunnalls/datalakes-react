@@ -142,7 +142,7 @@ class ThreeViewer extends Component {
     this.fadeOut = Math.round(this.maxAge * fadeOutPercentage);
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x747474);
+    this.scene.background = new THREE.Color(0x000000);
     this.camera = new THREE.PerspectiveCamera(
       75, // fov = field of view
       width / height, // aspect ratio
@@ -431,10 +431,10 @@ class ThreeViewer extends Component {
     var mesh = new THREE.Mesh(
       lakegeometry, // re-use the existing geometry
       new THREE.MeshLambertMaterial({
-        color: "grey",
+        color: "white",
         wireframe: false,
         transparent: true,
-        opacity: 0.2,
+        opacity: 0.8,
         depthWrite: false,
       })
     );
