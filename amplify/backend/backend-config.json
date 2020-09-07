@@ -1,12 +1,12 @@
 {
   "auth": {
-    "cognitoe01d6cbb": {
+    "cognito2f41d7e2": {
       "service": "Cognito",
       "providerPlugin": "awscloudformation"
     }
   },
   "analytics": {
-    "frontend": {
+    "analytics": {
       "service": "Pinpoint",
       "providerPlugin": "awscloudformation"
     }
