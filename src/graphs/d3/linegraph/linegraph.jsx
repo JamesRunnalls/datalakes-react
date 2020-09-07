@@ -220,15 +220,17 @@ class D3LineGraph extends Component {
           .attr("id", "axis--x")
           .attr("transform", "translate(0," + height + ")")
           .call(xAxis);
+
+        var gXl;
         if (xlabel !== "Time") {
-          svg
+          gXl = svg
             .append("text")
             .attr(
               "transform",
               "translate(" +
                 width / 2 +
                 " ," +
-                (height + margin.bottom / 1.5) +
+                (height + margin.bottom / 1.2) +
                 ")"
             )
             .attr("x", 6)
@@ -247,8 +249,10 @@ class D3LineGraph extends Component {
           .attr("id", "axis--y")
           .call(yAxis);
 
+        var gYl;
+
         if (ylabel !== "Time") {
-          svg
+          gYl = svg
             .append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - margin.left)
@@ -654,10 +658,15 @@ class D3LineGraph extends Component {
 
           function downloadGraph() {
             titlesvg.style("opacity", "1");
+            gX.style("font", "18px sans-serif");
+            gY.style("font", "18px sans-serif");
+            gXl.style("font", "18px sans-serif");
+            gYl.style("font", "18px sans-serif");
             var s = new XMLSerializer();
             var str = s.serializeToString(
               document.getElementById("svg" + graphid)
             );
+            console.log(str);
 
             var canvas = document.createElement("canvas"),
               context = canvas.getContext("2d");
@@ -681,6 +690,10 @@ class D3LineGraph extends Component {
             image.src =
               "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
             titlesvg.style("opacity", "0");
+            gX.style("font", "0.7em sans-serif");
+            gY.style("font", "0.7em sans-serif");
+            gXl.style("font", "1em sans-serif");
+            gYl.style("font", "1em sans-serif");
           }
 
           if (setDownloadGraph) {

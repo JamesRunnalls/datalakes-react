@@ -284,7 +284,7 @@ class D3HeatMap extends Component {
           .text(title);
 
         // Add the X Axis
-        var gX;
+        var gX, gXl;
         if (xlabel === "Time") {
           gX = svg
             .append("g")
@@ -311,7 +311,7 @@ class D3HeatMap extends Component {
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
-          svg
+          gXl = svg
             .append("text")
             .attr(
               "transform",
@@ -353,7 +353,7 @@ class D3HeatMap extends Component {
           .attr("id", "axis--y")
           .call(yAxis);
 
-        svg
+        var gYl = svg
           .append("text")
           .attr("transform", "rotate(-90)")
           .attr("y", 0 - margin.left)
@@ -706,6 +706,9 @@ class D3HeatMap extends Component {
 
         function downloadGraph() {
           titlesvg.style("opacity", "1");
+          gX.style("font", "18px sans-serif");
+          gY.style("font", "18px sans-serif");
+          gYl.style("font", "18px sans-serif");
           var s = new XMLSerializer();
           var str = s.serializeToString(
             document.getElementById("svg" + graphid)
@@ -736,6 +739,9 @@ class D3HeatMap extends Component {
           image.src =
             "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
           titlesvg.style("opacity", "0");
+          gX.style("font", "0.7em sans-serif");
+          gY.style("font", "0.7em sans-serif");
+          gYl.style("font", "1em sans-serif");
           if (setDownloadGraph) {
             setDownloadGraph(downloadGraph);
           }
