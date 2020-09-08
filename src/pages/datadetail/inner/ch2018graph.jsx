@@ -136,12 +136,12 @@ class Ch2018Graph extends Component {
         { color: "red", text: "RCP 8.5" },
       ];
       barlegend = [
-        { color: "#ADD8E6", text: "Ice Cover", offset: 330 },
-        { color: "#87CEFA", text: "Winter Stratification", offset: 200 },
-        { color: "#8FBC8F", text: "Mixed", offset: 140 },
         { color: "#F4A460", text: "Summer Stratification", offset: 0 },
+        { color: "#8FBC8F", text: "Mixed", offset: 140 },
+        { color: "#87CEFA", text: "Winter Stratification", offset: 200 },
+        { color: "#ADD8E6", text: "Ice Cover", offset: 330 },
       ];
-      barcolors = ["#F4A460", "#87CEFA", "#8FBC8F"];
+      barcolors = ["#F4A460", "#8FBC8F", "#87CEFA", "#ADD8E6"];
 
       stratification = data[lake].stratification[period];
 
