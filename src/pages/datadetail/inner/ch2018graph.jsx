@@ -302,7 +302,7 @@ class Ch2018Graph extends Component {
           <div className="upper">
             <D3GroupedBarGraph
               title={`Seasonal Stratification for ${name} (${perioddict[period]})`}
-              xlabel={"Day of Year"}
+              xlabel={"Average Days per Year"}
               data={stratification}
               colors={barcolors}
               xunits={"days"}

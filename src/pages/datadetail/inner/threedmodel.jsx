@@ -148,9 +148,9 @@ class ThreeDModel extends Component {
 
         var min, max, array;
         if (selectedlayers[i].parameters_id === 25) {
-          ({ min, max, array } = this.meteolakesVectorMinMax(data.data));
+          ({ min, max, array } = this.threeDmodelVectorMinMax(data.data));
         } else {
-          ({ min, max, array } = this.meteolakesScalarMinMax(data.data));
+          ({ min, max, array } = this.threeDmodelScalarMinMax(data.data));
         }
 
         // Update the min and max value
@@ -363,6 +363,7 @@ class ThreeDModel extends Component {
   updatePoint = async (pointValue) => {
     var { graph, datetime } = this.state;
     var { lakes_id } = this.props.dataset;
+    var apistem = this.props.files[0].filelink.split("/layer")[0];
     var lake = this.getLake(lakes_id);
     var t = datetime.getTime();
     var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
@@ -370,9 +371,7 @@ class ThreeDModel extends Component {
     document.getElementById("map").style.cursor = "wait";
     if (graph === "depthgraph") {
       axios
-        .get(
-          `https://api.meteolakes.ch/api/datalakes/depthprofile/${lake}/${t}/${y}/${x}`
-        )
+        .get(`${apistem}/depthprofile/${lake}/${t}/${y}/${x}`)
         .then((response) => {
           var plotdata = this.removeNaN(response.data);
           this.setState({ pointValue, plotdata });
@@ -385,9 +384,7 @@ class ThreeDModel extends Component {
         });
     } else if (graph === "timegraph") {
       axios
-        .get(
-          `https://api.meteolakes.ch/api/datalakes/timeline/${lake}/${t}/${y}/${x}`
-        )
+        .get(`${apistem}/timeline/${lake}/${t}/${y}/${x}`)
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
           x = x.map((i) => new Date(i * 1000));
@@ -406,6 +403,7 @@ class ThreeDModel extends Component {
   updateLine = (lineValue) => {
     var { graph, datetime } = this.state;
     var { lakes_id } = this.props.dataset;
+    var apistem = this.props.files[0].filelink.split("/layer")[0];
     var lake = this.getLake(lakes_id);
     var t = datetime.getTime();
     if (graph === "slicegraph" && lineValue.length > 0) {
@@ -422,9 +420,7 @@ class ThreeDModel extends Component {
         lineValue[1].lng
       );
       axios
-        .get(
-          `https://api.meteolakes.ch/api/datalakes/transect/${lake}/${t}/${y1}/${x1}/${y2}/${x2}`
-        )
+        .get(`${apistem}/transect/${lake}/${t}/${y1}/${x1}/${y2}/${x2}`)
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
           var plotdata = { x, y, z, z1 };
@@ -437,11 +433,12 @@ class ThreeDModel extends Component {
           alert("Failed to plot transect");
         });
     } else {
+      document.getElementById("map").style.cursor = oldStyle;
       this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
     }
   };
 
-  meteolakesScalarMinMax = (inarray) => {
+  threeDmodelScalarMinMax = (inarray) => {
     var min = Infinity;
     var max = -Infinity;
     var flat = inarray.flat();
@@ -452,7 +449,7 @@ class ThreeDModel extends Component {
     return { min, max, array: flat };
   };
 
-  meteolakesVectorMinMax = (inarray) => {
+  threeDmodelVectorMinMax = (inarray) => {
     var min = Infinity;
     var max = -Infinity;
     var flat = inarray.flat();
@@ -682,7 +679,7 @@ class ThreeDModel extends Component {
         .get(filelink, { timeout: 5000 })
         .catch((error) => {
           console.error(error);
-          let modaltext = `Failed to retrieve data from the Meteolakes API. Datalakes has no control over the availability of data from external API's, please try again later to see if the API is back online.`;
+          let modaltext = `Failed to retrieve data from API. Datalakes has no control over the availability of data from external API's, please try again later to see if the API is back online.`;
           this.setState({
             loading: false,
             modal: true,
@@ -722,6 +719,10 @@ class ThreeDModel extends Component {
       // Find file with most recent data
       var file = this.lastFile(files);
       var datetime = this.roundDate(new Date());
+      if (new Date(file.maxdatetime).getTime() < datetime.getTime()) {
+        datetime = new Date(file.maxdatetime);
+      }
+      
       var depth = Math.round(file.mindepth * 10) / 10;
 
       // Download data
@@ -747,13 +748,13 @@ class ThreeDModel extends Component {
         mapplot = "field";
         unit = "m/s";
         name = "Water Velocity";
-        ({ min, max, array } = this.meteolakesVectorMinMax(data.data));
+        ({ min, max, array } = this.threeDmodelVectorMinMax(data.data));
       } else {
         mapplot = "raster";
         unit = "°C";
         name = "Water Temperature";
         layer["legend"] = true;
-        ({ min, max, array } = this.meteolakesScalarMinMax(data.data));
+        ({ min, max, array } = this.threeDmodelScalarMinMax(data.data));
       }
 
       // Add Additional Parameters

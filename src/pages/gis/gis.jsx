@@ -320,7 +320,7 @@ class GIS extends Component {
     return { filemin: min, filemax: max, filearray: array };
   };
 
-  meteolakesScalarMinMax = (inarray) => {
+  threeDmodelScalarMinMax = (inarray) => {
     var min = Infinity;
     var max = -Infinity;
     var flat = inarray.flat();
@@ -331,7 +331,7 @@ class GIS extends Component {
     return { filemin: min, filemax: max, filearray: flat };
   };
 
-  meteolakesVectorMinMax = (inarray) => {
+  threeDmodelVectorMinMax = (inarray) => {
     var min = Infinity;
     var max = -Infinity;
     var flat = inarray.flat();
@@ -378,13 +378,13 @@ class GIS extends Component {
     if (mapplotfunction === "remoteSensing") {
       ({ filemin, filemax, filearray } = this.remoteSensingMinMax(data));
     }
-    if (mapplotfunction === "meteolakes") {
+    if (mapplotfunction === "meteolakes" || mapplotfunction === "datalakes") {
       if (parameters_id === 25) {
-        ({ filemin, filemax, filearray } = this.meteolakesVectorMinMax(
+        ({ filemin, filemax, filearray } = this.threeDmodelVectorMinMax(
           data.data
         ));
       } else {
-        ({ filemin, filemax, filearray } = this.meteolakesScalarMinMax(
+        ({ filemin, filemax, filearray } = this.threeDmodelScalarMinMax(
           data.data
         ));
       }

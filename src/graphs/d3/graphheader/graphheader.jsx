@@ -72,6 +72,7 @@ class GraphHeader extends Component {
                   title="Download"
                 />
                 <div className={download ? "downloadbar" : "downloadbar hide"}>
+                  <div>Download Graph</div>
                   <button id={"png" + id} title="Download PNG">
                     PNG
                   </button>

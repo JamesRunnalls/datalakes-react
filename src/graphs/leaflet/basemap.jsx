@@ -452,10 +452,16 @@ class Basemap extends Component {
     return new Date((date - 719529) * 24 * 60 * 60 * 1000);
   };
 
-  meteolakes = async (layer, file) => {
+  threeDmodel = async (layer, file, timeformat, locationformat) => {
     var { parameters_id, data: indata, id } = layer;
     var { datetime, depth, data } = indata;
-    datetime = this.matlabToJavascriptDatetime(datetime);
+
+    if (timeformat === "matlab") {
+      datetime = this.matlabToJavascriptDatetime(datetime);
+    } else if (timeformat === "unix") {
+      datetime = new Date(datetime * 1000);
+    }
+
     depth = Math.abs(depth).toFixed(2);
     var {
       vectorArrows,
@@ -468,9 +474,9 @@ class Basemap extends Component {
       colors,
       unit,
       title,
-      datasourcelink,
       datasets_id,
       opacity,
+      datasource,
     } = layer;
     var polygons,
       matrix,
@@ -497,12 +503,22 @@ class Basemap extends Component {
             nextRow[j + 1] === null
           ) {
           } else {
-            coords = [
-              this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
-              this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
-              this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-              this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
-            ];
+            if (locationformat === "CH1903") {
+              coords = [
+                this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
+                this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
+                this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
+                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
+              ];
+            } else {
+              coords = [
+                [row[j][0], [row[j][1]]],
+                [nextRow[j][0], [nextRow[j][1]]],
+                [nextRow[j + 1][0], [nextRow[j + 1][1]]],
+                [row[j + 1][0], [row[j + 1][1]]],
+              ];
+            }
+
             value = Math.round(row[j][2] * 1000) / 1000;
             valuestring = String(value) + String(unit);
             pixelcolor = getColor(row[j][2], min, max, colors);
@@ -518,7 +534,9 @@ class Basemap extends Component {
                     '<tr><td colSpan="2"><strong>' +
                     layer.title +
                     "</strong></td></tr>" +
-                    "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+                    "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+                    datasource +
+                    "</td></tr>" +
                     "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
                     "<tr><td><strong>Datetime:</strong></td><td>" +
                     datetime.toLocaleString() +
@@ -529,8 +547,7 @@ class Basemap extends Component {
                     "<tr><td><strong>Value at point:</strong></td><td>" +
                     row[j][2] +
                     unit +
-                    '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-                    layer.datasourcelink +
+                    `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
                     '">More information</a></td></tr>' +
                     "</tbody></table>"
                 )
@@ -566,12 +583,21 @@ class Basemap extends Component {
               nextRow[j + 1] === null
             ) {
             } else {
-              coords = [
-                this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
-                this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
-                this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
-              ];
+              if (locationformat === "CH1903") {
+                coords = [
+                  this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
+                  this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
+                  this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
+                  this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
+                ];
+              } else {
+                coords = [
+                  [row[j][0], [row[j][1]]],
+                  [nextRow[j][0], [nextRow[j][1]]],
+                  [nextRow[j + 1][0], [nextRow[j + 1][1]]],
+                  [row[j + 1][0], [row[j + 1][1]]],
+                ];
+              }
               var magnitude = Math.abs(
                 Math.sqrt(Math.pow(row[j][3], 2) + Math.pow(row[j][4], 2))
               );
@@ -591,7 +617,9 @@ class Basemap extends Component {
                       title +
                       "</strong></td></tr>" +
                       "</td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+                      datasource +
+                      "</td></tr>" +
                       "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
                       "<tr><td><strong>Datetime:</strong></td><td>" +
                       datetime.toLocaleString() +
@@ -607,8 +635,7 @@ class Basemap extends Component {
                       unit +
                       "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
                       valuestring +
-                      '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-                      datasourcelink +
+                      `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
                       '">More information</a></td></tr>' +
                       "</tbody></table>"
                   )
@@ -666,7 +693,9 @@ class Basemap extends Component {
               '<tr><td colSpan="2"><strong>' +
               layer.title +
               "</strong></td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+              datasource +
+              "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td><strong>Datetime:</strong></td><td>" +
               datetime.toLocaleString() +
@@ -679,7 +708,7 @@ class Basemap extends Component {
               `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
               `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
               `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
-              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
+              `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
               ">More information</a></td></tr>" +
               "</tbody></table>";
             L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
@@ -692,8 +721,10 @@ class Basemap extends Component {
         var radius = 150;
         if (datasets_id === 14) {
           radius = 300;
+        } else if (datasets_id === 17) {
+          radius = 1000;
         }
-        var vectordata = this.meteolakesParseVectorData(data, radius);
+        var vectordata = this.parseVectorData(data, radius);
 
         var vectors;
         if (Object.keys(this.vectorfieldanim).includes(id)) {
@@ -759,7 +790,9 @@ class Basemap extends Component {
               '<tr><td colSpan="2"><strong>' +
               layer.title +
               "</strong></td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Meteolakes</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+              datasource +
+              "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td><strong>Datetime:</strong></td><td>" +
               datetime.toLocaleString() +
@@ -772,7 +805,7 @@ class Basemap extends Component {
               `<tr><td><strong>Magnitude:</strong></td><td>${mag}${unit}</td></tr>` +
               `<tr><td><strong>Direction:</strong></td><td>${deg}°</td></tr>` +
               `<tr><td><strong>LatLng:</strong></td><td>${lat},${lng}</td></tr>` +
-              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/11"' +
+              `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
               ">More information</a></td></tr>" +
               "</tbody></table>";
             L.popup().setLatLng(e.latlng).setContent(html).openOn(map);
@@ -892,7 +925,7 @@ class Basemap extends Component {
     this.marker.push(markerGroup);
   };
 
-  meteolakesParseVectorData = (data, radius) => {
+  parseVectorData = (data, radius) => {
     function createAndFillTwoDArray({ rows, columns, defaultValue }) {
       return Array.from({ length: rows }, () =>
         Array.from({ length: columns }, () => defaultValue)
@@ -1075,7 +1108,10 @@ class Basemap extends Component {
           this.meteoSwissMarkers(layer, file);
         mapplotfunction === "remoteSensing" && this.remoteSensing(layer, file);
         mapplotfunction === "simstrat" && this.simstrat(layer, file);
-        mapplotfunction === "meteolakes" && this.meteolakes(layer, file);
+        mapplotfunction === "meteolakes" &&
+          this.threeDmodel(layer, file, "matlab", "CH1903");
+        mapplotfunction === "datalakes" &&
+          this.threeDmodel(layer, file, "unix", "CH1903");
       }
     }
   };

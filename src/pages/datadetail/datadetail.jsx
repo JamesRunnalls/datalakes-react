@@ -16,7 +16,7 @@ import { apiUrl } from "../../../src/config.json";
 import "./datadetail.css";
 import ThreeDModel from "./inner/threedmodel";
 import RemoteSensing from "./inner/remotesensing";
-import MeteolakesDownload from "./inner/meteolakesdownload";
+import ThreeDModelDownload from "./inner/threedmodeldownload";
 import Ch2018Graph from "./inner/ch2018graph";
 
 class DataDetail extends Component {
@@ -407,12 +407,13 @@ class DataDetail extends Component {
     });
 
     var dataset = server[0].data;
+    var { datasource } = dataset;
     var files = server[1].data;
     var datasetparameters = server[2].data;
     var dropdown = server[3].data;
 
     // Internal vs External Data source
-    if (dataset.datasource === "internal") {
+    if (datasource === "internal") {
       // Add parameter details
       var details;
       for (var p in datasetparameters) {
@@ -511,7 +512,7 @@ class DataDetail extends Component {
         combined,
         scripts,
       });
-    } else if (dataset.datasource === "Meteolakes") {
+    } else if (datasource === "Meteolakes" || datasource === "Datalakes 3D") {
       this.setState({
         dataset,
         datasetparameters,
@@ -521,12 +522,12 @@ class DataDetail extends Component {
         step: "threedmodel",
         allowedStep: [
           "threedmodel",
-          "meteolakesdownload",
+          "threedmodeldownload",
           "external",
           "webgis",
         ],
       });
-    } else if (dataset.datasource === "Eawag RS") {
+    } else if (datasource === "Eawag RS") {
       this.setState({
         dataset,
         datasetparameters,
@@ -777,7 +778,7 @@ class DataDetail extends Component {
             />
           </React.Fragment>
         );
-      case "meteolakesdownload":
+      case "threedmodeldownload":
         return (
           <React.Fragment>
             <h1>{dataset.title}</h1>
@@ -787,7 +788,7 @@ class DataDetail extends Component {
               updateSelectedState={this.updateSelectedState}
               link={link}
             />
-            <MeteolakesDownload
+            <ThreeDModelDownload
               dataset={dataset}
               datasetparameters={datasetparameters}
               getLabel={this.getLabel}

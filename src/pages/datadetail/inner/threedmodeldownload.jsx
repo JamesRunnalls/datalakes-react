@@ -5,7 +5,7 @@ import SwaggerUI from "swagger-ui-react";
 import "swagger-ui-react/swagger-ui.css";
 import "../datadetail.css";
 
-class MeteolakesDownload extends Component {
+class ThreeDModelDownload extends Component {
   state = {
     year: 2020,
     week: 0,
@@ -106,6 +106,9 @@ class MeteolakesDownload extends Component {
 
   render() {
     const { getLabel, dataset } = this.props;
+    var { mindatetime, maxdatetime } = dataset;
+    mindatetime = new Date(mindatetime);
+    maxdatetime = new Date(maxdatetime);
     var { lake, week, dates, year, yearlist } = this.state;
 
     var years = [];
@@ -141,10 +144,8 @@ class MeteolakesDownload extends Component {
 
         <div className="info-title">Available Data</div>
         <p>
-          Use the following endpoint to see available data:{" "}
-          <a href="http://meteolakes.ch/meteolac/available_data_netcdf.json" target="_blank" rel="noopener noreferrer">
-            http://meteolakes.ch/meteolac/available_data_netcdf.json
-          </a>
+          Data available from {mindatetime.toLocaleDateString()} to{" "}
+          {maxdatetime.toLocaleDateString()}
         </p>
 
         <div className="info-title">Download</div>
@@ -176,4 +177,4 @@ class MeteolakesDownload extends Component {
   }
 }
 
-export default MeteolakesDownload;
+export default ThreeDModelDownload;
