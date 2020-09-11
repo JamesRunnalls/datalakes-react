@@ -125,6 +125,7 @@ class D3HeatMap extends Component {
     link.setAttribute("download", name);
     document.body.appendChild(link);
     link.click();
+    this.setState({ download: false });
   };
 
   getDomain = (domain) => {
@@ -284,7 +285,7 @@ class D3HeatMap extends Component {
           .text(title);
 
         // Add the X Axis
-        var gX, gXl;
+        var gX;
         if (xlabel === "Time") {
           gX = svg
             .append("g")
@@ -311,7 +312,7 @@ class D3HeatMap extends Component {
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
-          gXl = svg
+          svg
             .append("text")
             .attr(
               "transform",

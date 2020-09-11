@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import Twitter from "../../components/twitter/twitter";
 import ContactForm from "../../components/contactform/contactform";
 import HomepageMap from "../../graphs/leaflet/homepage_map";
 import epfl from "./img/epfl.svg";
@@ -210,7 +209,7 @@ class Home extends Component {
           </div>
 
           <PartnerBanner />
-          <Twitter />
+          
 
           <div className="sectiontitle" ref={this.ourdata}>
             Datalakes is a collaboration between a number of Swiss institutions

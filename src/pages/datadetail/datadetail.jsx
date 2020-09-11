@@ -512,7 +512,8 @@ class DataDetail extends Component {
         combined,
         scripts,
       });
-    } else if (datasource === "Meteolakes" || datasource === "Datalakes 3D") {
+    } else if (datasource === "Meteolakes") {
+      // } else if (datasource === "Meteolakes" || datasource === "Datalakes 3D") {
       this.setState({
         dataset,
         datasetparameters,

@@ -10,11 +10,20 @@ import "./graphheader.css";
 class GraphHeader extends Component {
   componentDidMount() {
     window.addEventListener("keydown", this.exitFullscreen, false);
+    window.addEventListener("click", this.closeDownload, false);
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.exitFullscreen, false);
+    window.removeEventListener("click", this.closeDownload, false);
   }
+
+  closeDownload = (e) => {
+    console.log()
+    if (!document.getElementById("graphdownload").contains(e.target)) {
+      this.props.toggleDownload();
+    }
+  };
 
   exitFullscreen = (e) => {
     var { fullscreen, toggleFullscreen } = this.props;
@@ -64,14 +73,16 @@ class GraphHeader extends Component {
                   />
                 </td>
               )}
-              <td style={{ width: "25px" }}>
+              <td id="graphdownload" style={{ width: "25px" }}>
                 <img
                   src={downloadIcon}
                   alt="download"
                   onClick={toggleDownload}
                   title="Download"
                 />
-                <div className={download ? "downloadbar" : "downloadbar hide"}>
+                <div
+                  className={download ? "downloadbar" : "downloadbar hide"}
+                >
                   <div>Download Graph</div>
                   <button id={"png" + id} title="Download PNG">
                     PNG
