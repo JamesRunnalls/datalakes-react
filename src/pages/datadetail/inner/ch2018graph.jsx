@@ -127,7 +127,6 @@ class Ch2018Graph extends Component {
     var yearlyConfidence = [];
     var seasonalConfidence = [];
     if (Object.keys(data).length > 0) {
-      console.log(data[lake].stratification[period]);
       lcolor = ["green", "#FF8C00", "red"];
       lweight = [1, 1, 1];
       legend = [

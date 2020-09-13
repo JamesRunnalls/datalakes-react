@@ -19,8 +19,11 @@ class GraphHeader extends Component {
   }
 
   closeDownload = (e) => {
-    console.log()
-    if (!document.getElementById("graphdownload").contains(e.target)) {
+    var { id, download } = this.props;
+    if (
+      download &&
+      !document.getElementById("graphdownload" + id).contains(e.target)
+    ) {
       this.props.toggleDownload();
     }
   };
@@ -73,16 +76,14 @@ class GraphHeader extends Component {
                   />
                 </td>
               )}
-              <td id="graphdownload" style={{ width: "25px" }}>
+              <td id={"graphdownload" + id} style={{ width: "25px" }}>
                 <img
                   src={downloadIcon}
                   alt="download"
                   onClick={toggleDownload}
                   title="Download"
                 />
-                <div
-                  className={download ? "downloadbar" : "downloadbar hide"}
-                >
+                <div className={download ? "downloadbar" : "downloadbar hide"}>
                   <div>Download Graph</div>
                   <button id={"png" + id} title="Download PNG">
                     PNG
