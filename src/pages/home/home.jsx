@@ -359,8 +359,44 @@ class Home extends Component {
                 forecasting of Swiss lakes
               </b>
             </div>
-            <p>Developer: James Runnalls</p>
-            <p>Principle Investigators: Damien Bouffard & Jonas Šukys</p>
+            <p>
+              Developer:{" "}
+              <a
+                href="https://www.eawag.ch/en/aboutus/portrait/organisation/staff/profile/james-runnalls/show/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                James Runnalls
+              </a>
+            </p>
+            <p>
+              Principle Investigators:{" "}
+              <a
+                href="https://www.eawag.ch/en/aboutus/portrait/organisation/staff/profile/damien-bouffard/show/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Damien Bouffard
+              </a>{" "}
+              &{" "}
+              <a
+                href="https://www.eawag.ch/en/aboutus/portrait/organisation/staff/profile/jonas-sukys/show/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Jonas Šukys
+              </a>
+            </p>
+            <p>
+              Remote Sensing:{" "}
+              <a
+                href="https://www.eawag.ch/en/aboutus/portrait/organisation/staff/profile/daniel-odermatt/show/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Daniel Odermatt
+              </a>
+            </p>
             <p>
               This project is a collaboration between Eawag and the Swiss Data
               Science Center (SDSC)
