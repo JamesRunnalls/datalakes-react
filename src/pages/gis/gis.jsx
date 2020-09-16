@@ -642,7 +642,7 @@ class GIS extends Component {
         if (dataset.datasource === "Meteolakes") {
           filelink = filelink.replace(":datetime", datetime.getTime());
         } else {
-          filelink = filelink.replace(":datetime", datetime.getTime() / 1000);
+          filelink = filelink.replace(":datetime", datetime.getTime());
         }
         filelink = filelink.replace(":depth", depth);
         ({ data } = await axios

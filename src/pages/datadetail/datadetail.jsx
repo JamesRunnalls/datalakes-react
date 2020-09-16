@@ -407,13 +407,13 @@ class DataDetail extends Component {
     });
 
     var dataset = server[0].data;
-    var { datasource } = dataset;
+    var { mapplotfunction } = dataset;
     var files = server[1].data;
     var datasetparameters = server[2].data;
     var dropdown = server[3].data;
 
     // Internal vs External Data source
-    if (datasource === "internal") {
+    if (mapplotfunction === "gitPlot") {
       // Add parameter details
       var details;
       for (var p in datasetparameters) {
@@ -512,8 +512,8 @@ class DataDetail extends Component {
         combined,
         scripts,
       });
-    } else if (datasource === "Meteolakes") {
-      // } else if (datasource === "Meteolakes" || datasource === "Datalakes 3D") {
+      //} else if (datasource === "Meteolakes") {
+    } else if (mapplotfunction === "meteolakes") {
       this.setState({
         dataset,
         datasetparameters,
@@ -528,7 +528,17 @@ class DataDetail extends Component {
           "webgis",
         ],
       });
-    } else if (datasource === "Eawag RS") {
+    } else if (mapplotfunction === "datalakes") {
+      this.setState({
+        dataset,
+        datasetparameters,
+        dropdown,
+        files,
+        loading: false,
+        step: "threedmodel",
+        allowedStep: ["threedmodel", "external", "webgis"],
+      });
+    } else if (mapplotfunction === "remoteSensing") {
       this.setState({
         dataset,
         datasetparameters,
@@ -537,7 +547,7 @@ class DataDetail extends Component {
         step: "external",
         allowedStep: ["external", "webgis"],
       });
-    } else if (dataset.id === 16) {
+    } else if (mapplotfunction === "ch2018") {
       this.setState({
         dataset,
         datasetparameters,
