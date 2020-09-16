@@ -209,7 +209,6 @@ class Home extends Component {
           </div>
 
           <PartnerBanner />
-          
 
           <div className="sectiontitle" ref={this.ourdata}>
             Datalakes is a collaboration between a number of Swiss institutions
@@ -360,21 +359,44 @@ class Home extends Component {
                 forecasting of Swiss lakes
               </b>
             </div>
-            The objective of this project is to advance the forecasting
-            capabilities of the data-driven hydrological and ecological lake
-            modeling algorithms using methodologies inspired by data science and
-            accelerated by high performance computing. We aim to develop a
-            parallel framework interfacing high resolution 3D numerical solvers
-            for the underlying lake dynamics with modern numerical Markov Chain
-            Monte Carlo sampling methods for Bayesian inference, with particular
-            interest in investigating particle filtering and multi-level
-            variance reduction methodologies. The resulting framework aims at
-            accurate data assimilation and uncertainty quantification in both
-            model parameters and the associated forecasts. DATALAKES project is
-            a collaboration with the Swiss Data Science Center (SDSC), EPF
-            Lausanne and ETH Zurich, aiming at a sensor-to -frontend data
-            platform providing and analyzing the dynamics of lake ecosystems at
-            high spatial and temporal resolutions.
+            <p>Developer: James Runnalls</p>
+            <p>Principle Investigators: Damien Bouffard & Jonas Šukys</p>
+            <p>
+              This project is a collaboration between Eawag and the Swiss Data
+              Science Center (SDSC)
+            </p>
+            <p>
+              Predicting the evolution of freshwater systems is the impetus of
+              many limnologists. Technological developments have opened
+              countless ways to investigate these systems, with the drawback
+              that scientists are today overwhelmed by data. Efficiently
+              utilizing the benefits of present-day data and technology requires
+              optimizing the way data is shared and reused. The means of
+              acquisition and computational processing of third-party data are
+              often non transparent, and hence irreproducible after the end of
+              the project’s timeframe.
+            </p>
+            <p>
+              With the recent development of an operational interdisciplinary
+              in-situ floating laboratory (LéXPLORE, https://lexplore.info/) on
+              Lake Geneva, we identified the need for a user-friendly web based
+              open access data platform to foster scientific data exchange:
+              https://www.datalakes-eawag.ch/. The main objective was to provide
+              a fully open access sensor-to-front end platform for scientific
+              data in Swiss lakes. The Datalakes platform incorporates
+              continuous in-situ acquisition, storage, curation, patching,
+              visualization, and extraction frameworks of environmental data and
+              model output, together with an accessible online interface for
+              visualization of historical data, future predictions, and
+              user-friendly online data extraction.
+            </p>
+            <p>
+              We invite interested scientists to use Datalakes, and to visualize
+              and download our initial datasets. We also welcome feedback and
+              the inclusion of new data, products or models that will be of use
+              to the Swiss freshwater community via this newly developed open
+              access data infrastructure.
+            </p>
           </div>
           <div className="sectiontitlemin" ref={this.contact}>
             <h2>Get in Touch</h2>
