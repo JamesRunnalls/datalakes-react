@@ -102,6 +102,11 @@ L.VectorField = (L.Layer ? L.Layer : L.Class).extend({
 
   _reset: function () {
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
+    var size = this._map.getSize();
+    this._canvas.width = size.x;
+    this._canvas.height = size.y;
+    this._width = size.x;
+    this._height = size.y;
     L.DomUtil.setPosition(this._canvas, topLeft);
     this._redraw();
   },

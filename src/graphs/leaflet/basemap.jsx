@@ -452,6 +452,110 @@ class Basemap extends Component {
     return new Date((date - 719529) * 24 * 60 * 60 * 1000);
   };
 
+  getCellCorners = (data, i, j, locationformat) => {
+    function cellCorner(center, opposite, left, right, data, i, j) {
+      if (center === null) {
+        return false;
+      } else if (opposite !== null && left !== null && right !== null) {
+        // All corner points
+        var m1 = (center[1] - opposite[1]) / (center[0] - opposite[0]);
+        var m2 = (left[1] - right[1]) / (left[0] - right[0]);
+        var c1 = opposite[1] - m1 * opposite[0];
+        var c2 = right[1] - m2 * right[0];
+        let x = (c2 - c1) / (m1 - m2);
+        let y = m1 * x + c1;
+        return [x, y];
+      } else if (opposite !== null) {
+        let x = center[0] + (opposite[0] - center[0]) / 2;
+        let y = center[1] + (opposite[1] - center[1]) / 2;
+        return [x, y];
+      } else if (left !== null && right !== null) {
+        let x = left[0] + (right[0] - left[0]) / 2;
+        let y = left[1] + (right[1] - left[1]) / 2;
+        return [x, y];
+      } else if (right !== null) {
+        let x =
+          center[0] + (right[0] - center[0]) / 2 + (right[1] - center[1]) / 2;
+        let y =
+          center[1] + (right[1] - center[1]) / 2 - (right[0] - center[0]) / 2;
+        return [x, y];
+      } else if (left !== null) {
+        let x =
+          center[0] + (left[0] - center[0]) / 2 - (left[1] - center[1]) / 2;
+        let y =
+          center[1] + (left[1] - center[1]) / 2 + (left[0] - center[0]) / 2;
+        return [x, y];
+      } else {
+        return false;
+      }
+    }
+
+    function oppositePoint(center, corner) {
+      let x = center[0] + center[0] - corner[0];
+      let y = center[1] + center[1] - corner[1];
+      return [x, y];
+    }
+    // TopLeft
+    var tl = cellCorner(
+      data[i][j],
+      data[i - 1][j - 1],
+      data[i][j - 1],
+      data[i - 1][j],
+      data,
+      i,
+      j
+    );
+    // BottomLeft
+    var bl = cellCorner(
+      data[i][j],
+      data[i + 1][j - 1],
+      data[i + 1][j],
+      data[i][j - 1],
+      data,
+      i,
+      j
+    );
+    // BottomRight
+    var br = cellCorner(
+      data[i][j],
+      data[i + 1][j + 1],
+      data[i][j + 1],
+      data[i + 1][j],
+      data,
+      i,
+      j
+    );
+    // TopRight
+    var tr = cellCorner(
+      data[i][j],
+      data[i - 1][j + 1],
+      data[i - 1][j],
+      data[i][j + 1],
+      data,
+      i,
+      j
+    );
+
+    if (!tl && br) tl = oppositePoint(data[i][j], br);
+    if (!bl && tr) bl = oppositePoint(data[i][j], tr);
+    if (!br && tl) br = oppositePoint(data[i][j], tl);
+    if (!tr && bl) tr = oppositePoint(data[i][j], bl);
+    if (tl && bl && br && tr) {
+      if (locationformat === "CH1903") {
+        return [
+          this.CHtoWGSlatlng(tl),
+          this.CHtoWGSlatlng(bl),
+          this.CHtoWGSlatlng(br),
+          this.CHtoWGSlatlng(tr),
+        ];
+      } else {
+        return [tl, bl, br, tr];
+      }
+    } else {
+      return false;
+    }
+  };
+
   threeDmodel = async (layer, file, timeformat, locationformat) => {
     var { parameters_id, data: indata, id } = layer;
     var { datetime, depth, data } = indata;
@@ -478,84 +582,53 @@ class Basemap extends Component {
       opacity,
       datasource,
     } = layer;
-    var polygons,
-      matrix,
-      i,
-      j,
-      row,
-      nextRow,
-      coords,
-      value,
-      valuestring,
-      pixelcolor;
+    var polygons, i, j, coords, value, valuestring, pixelcolor;
     var map = this.map;
     if (parameters_id === 5) {
       polygons = [];
-      matrix = data;
-      for (i = 0; i < matrix.length - 1; i++) {
-        row = matrix[i];
-        nextRow = matrix[i + 1];
-        for (j = 0; j < row.length - 1; j++) {
-          if (
-            row[j] === null ||
-            nextRow[j] === null ||
-            row[j + 1] === null ||
-            nextRow[j + 1] === null
-          ) {
-          } else {
-            if (locationformat === "CH1903") {
-              coords = [
-                this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
-                this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
-                this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-                this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
-              ];
-            } else {
-              coords = [
-                [row[j][0], [row[j][1]]],
-                [nextRow[j][0], [nextRow[j][1]]],
-                [nextRow[j + 1][0], [nextRow[j + 1][1]]],
-                [row[j + 1][0], [row[j + 1][1]]],
-              ];
-            }
-
-            value = Math.round(row[j][2] * 1000) / 1000;
-            valuestring = String(value) + String(unit);
-            pixelcolor = getColor(row[j][2], min, max, colors);
-            polygons.push(
-              L.polygon(coords, {
-                color: pixelcolor,
-                fillColor: pixelcolor,
-                fillOpacity: 1,
-                title: row[j][2],
-              })
-                .bindPopup(
-                  "<table><tbody>" +
-                    '<tr><td colSpan="2"><strong>' +
-                    layer.title +
-                    "</strong></td></tr>" +
-                    "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
-                    datasource +
-                    "</td></tr>" +
-                    "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                    "<tr><td><strong>Datetime:</strong></td><td>" +
-                    datetime.toLocaleString() +
-                    "</td></tr>" +
-                    "<tr><td><strong>Depth:</strong></td><td>" +
-                    depth +
-                    "m</td></tr>" +
-                    "<tr><td><strong>Value at point:</strong></td><td>" +
-                    row[j][2] +
-                    unit +
-                    `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
-                    '">More information</a></td></tr>' +
-                    "</tbody></table>"
-                )
-                .bindTooltip(valuestring, {
-                  permanent: false,
-                  direction: "top",
+      for (i = 1; i < data.length - 1; i++) {
+        for (j = 1; j < data[i].length - 1; j++) {
+          if (data[i][j] !== null) {
+            coords = this.getCellCorners(data, i, j, locationformat);
+            if (coords) {
+              value = Math.round(data[i][j][2] * 1000) / 1000;
+              valuestring = String(value) + String(unit);
+              pixelcolor = getColor(data[i][j][2], min, max, colors);
+              polygons.push(
+                L.polygon(coords, {
+                  color: pixelcolor,
+                  fillColor: pixelcolor,
+                  fillOpacity: 1,
+                  title: data[i][j][2],
                 })
-            );
+                  .bindPopup(
+                    "<table><tbody>" +
+                      '<tr><td colSpan="2"><strong>' +
+                      layer.title +
+                      "</strong></td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+                      datasource +
+                      "</td></tr>" +
+                      "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                      "<tr><td><strong>Datetime:</strong></td><td>" +
+                      datetime.toLocaleString() +
+                      "</td></tr>" +
+                      "<tr><td><strong>Depth:</strong></td><td>" +
+                      depth +
+                      "m</td></tr>" +
+                      "<tr><td><strong>Value at point:</strong></td><td>" +
+                      data[i][j][2] +
+                      unit +
+                      `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
+                      '">More information</a></td></tr>' +
+                      "</tbody></table>"
+                  )
+                  .bindTooltip(valuestring, {
+                    permanent: false,
+                    direction: "top",
+                  })
+              );
+            }
           }
         }
       }
@@ -571,79 +644,58 @@ class Basemap extends Component {
     } else if (parameters_id === 25) {
       if (vectorMagnitude) {
         polygons = [];
-        matrix = data;
-        for (i = 0; i < matrix.length - 1; i++) {
-          row = matrix[i];
-          nextRow = matrix[i + 1];
-          for (j = 0; j < row.length - 1; j++) {
-            if (
-              row[j] === null ||
-              nextRow[j] === null ||
-              row[j + 1] === null ||
-              nextRow[j + 1] === null
-            ) {
-            } else {
-              if (locationformat === "CH1903") {
-                coords = [
-                  this.CHtoWGSlatlng([row[j][0], [row[j][1]]]),
-                  this.CHtoWGSlatlng([nextRow[j][0], [nextRow[j][1]]]),
-                  this.CHtoWGSlatlng([nextRow[j + 1][0], [nextRow[j + 1][1]]]),
-                  this.CHtoWGSlatlng([row[j + 1][0], [row[j + 1][1]]]),
-                ];
-              } else {
-                coords = [
-                  [row[j][0], [row[j][1]]],
-                  [nextRow[j][0], [nextRow[j][1]]],
-                  [nextRow[j + 1][0], [nextRow[j + 1][1]]],
-                  [row[j + 1][0], [row[j + 1][1]]],
-                ];
-              }
-              var magnitude = Math.abs(
-                Math.sqrt(Math.pow(row[j][3], 2) + Math.pow(row[j][4], 2))
-              );
-              value = Math.round(magnitude * 1000) / 1000;
-              valuestring = String(value) + String(unit);
-              pixelcolor = getColor(magnitude, min, max, colors);
-              polygons.push(
-                L.polygon(coords, {
-                  color: pixelcolor,
-                  fillColor: pixelcolor,
-                  fillOpacity: 1,
-                  title: magnitude,
-                })
-                  .bindPopup(
-                    "<table><tbody>" +
-                      '<tr><td colSpan="2"><strong>' +
-                      title +
-                      "</strong></td></tr>" +
-                      "</td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
-                      datasource +
-                      "</td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                      "<tr><td><strong>Datetime:</strong></td><td>" +
-                      datetime.toLocaleString() +
-                      "</td></tr>" +
-                      "<tr><td><strong>Depth:</strong></td><td>" +
-                      depth +
-                      "m</td></tr>" +
-                      "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
-                      row[j][2] +
-                      unit +
-                      "<tr><td><strong>Eastern Water Velocity:</strong></td><td>" +
-                      row[j][3] +
-                      unit +
-                      "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
-                      valuestring +
-                      `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
-                      '">More information</a></td></tr>' +
-                      "</tbody></table>"
-                  )
-                  .bindTooltip(valuestring, {
-                    permanent: false,
-                    direction: "top",
+        for (i = 0; i < data.length - 1; i++) {
+          for (j = 0; j < data[i].length - 1; j++) {
+            if (data[i][j] !== null) {
+              coords = this.getCellCorners(data, i, j, locationformat);
+              if (coords) {
+                var magnitude = Math.abs(
+                  Math.sqrt(Math.pow(data[i][j][3], 2) + Math.pow(data[i][j][4], 2))
+                );
+                value = Math.round(magnitude * 1000) / 1000;
+                valuestring = String(value) + String(unit);
+                pixelcolor = getColor(magnitude, min, max, colors);
+                polygons.push(
+                  L.polygon(coords, {
+                    color: pixelcolor,
+                    fillColor: pixelcolor,
+                    fillOpacity: 1,
+                    title: magnitude,
                   })
-              );
+                    .bindPopup(
+                      "<table><tbody>" +
+                        '<tr><td colSpan="2"><strong>' +
+                        title +
+                        "</strong></td></tr>" +
+                        "</td></tr>" +
+                        "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+                        datasource +
+                        "</td></tr>" +
+                        "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                        "<tr><td><strong>Datetime:</strong></td><td>" +
+                        datetime.toLocaleString() +
+                        "</td></tr>" +
+                        "<tr><td><strong>Depth:</strong></td><td>" +
+                        depth +
+                        "m</td></tr>" +
+                        "<tr><td><strong>Northern Water Velocity:</strong></td><td>" +
+                        data[i][j][2] +
+                        unit +
+                        "<tr><td><strong>Eastern Water Velocity:</strong></td><td>" +
+                        data[i][j][3] +
+                        unit +
+                        "<tr><td><strong>Magnitude Water Velocity:</strong></td><td>" +
+                        valuestring +
+                        `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
+                        '">More information</a></td></tr>' +
+                        "</tbody></table>"
+                    )
+                    .bindTooltip(valuestring, {
+                      permanent: false,
+                      direction: "top",
+                    })
+                );
+              }
             }
           }
         }

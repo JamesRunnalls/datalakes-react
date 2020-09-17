@@ -44,13 +44,18 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
   _reset: function (event) {
     this._stopAnimation();
     var topLeft = this._map.containerPointToLayerPoint([0, 0]);
+    var size = this._map.getSize();
+    this._canvas.width = size.x;
+    this._canvas.height = size.y;
+    this._width = size.x;
+    this._height = size.y;
     L.DomUtil.setPosition(this._canvas, topLeft);
     this._drawLayer();
   },
 
   _clear: function (event) {
-    this._ctx.clearRect(0, 0, this._width, this._height);
     this._stopAnimation();
+    this._ctx.clearRect(0, 0, this._width, this._height);
   },
 
   onRemove: function (map) {

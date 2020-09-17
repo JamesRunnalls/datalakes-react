@@ -116,6 +116,10 @@ class EditSettings extends Component {
       display.datamax !== this.props.display.datamax ||
       display.datamin !== this.props.display.datamin
     ) {
+      if (display.datamax === display.max && display.datamin === display.min) {
+        display.min = this.props.display.datamin;
+        display.max = this.props.display.datamax;
+      }
       display.datamin = this.props.display.datamin;
       display.datamax = this.props.display.datamax;
       this.setState({ display });

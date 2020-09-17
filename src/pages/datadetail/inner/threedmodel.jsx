@@ -135,8 +135,15 @@ class ThreeDModel extends Component {
         var datafile = findFileId(selectedlayers[i].files, fileid);
 
         // Add data from file closes to datetime and depth
-        var data, realdatetime, realdepth;
-        ({ data, realdatetime, realdepth, downloads } = await this.downloadFile(
+        var data, realdatetime, realdepth, min, max, array;
+        ({
+          data,
+          realdatetime,
+          realdepth,
+          downloads,
+          min,
+          max,
+        } = await this.downloadFile(
           selectedlayers[i].datasets_id,
           fileid,
           datafile.filelink,
@@ -146,11 +153,14 @@ class ThreeDModel extends Component {
           downloads
         ));
 
-        var min, max, array;
         if (selectedlayers[i].parameters_id === 25) {
           ({ min, max, array } = this.threeDmodelVectorMinMax(data.data));
         } else {
-          ({ min, max, array } = this.threeDmodelScalarMinMax(data.data));
+          if (!isNaN(min) || !isNaN(max)) {
+            ({ array } = this.threeDmodelScalarMinMax(data.data));
+          } else {
+            ({ min, max, array } = this.threeDmodelScalarMinMax(data.data));
+          }
         }
 
         // Update the min and max value
@@ -159,6 +169,8 @@ class ThreeDModel extends Component {
         selectedlayers[i].data = data;
         selectedlayers[i].min = min;
         selectedlayers[i].max = max;
+        selectedlayers[i].datamin = min;
+        selectedlayers[i].datamax = max;
         selectedlayers[i].array = array;
         selectedlayers[i].fileid = fileid;
       }
@@ -306,7 +318,6 @@ class ThreeDModel extends Component {
   };
 
   javascriptDatetimeToMatlab = (date) => {
-    console.log(date);
     return 719529 + date.getTime() / (24 * 60 * 60 * 1000);
   };
 
@@ -662,6 +673,7 @@ class ThreeDModel extends Component {
         d.datetime.getTime() === datetime.getTime() &&
         parseFloat(d.depth) === parseFloat(depth)
     );
+    var data, realdatetime, realdepth, min, max;
 
     if (downloaded) {
       return {
@@ -669,9 +681,10 @@ class ThreeDModel extends Component {
         realdatetime: downloaded.realdatetime,
         realdepth: downloaded.realdepth,
         downloads,
+        max: downloaded.max,
+        min: downloaded.min,
       };
     } else {
-      var data, realdatetime, realdepth;
       var datetimejs = Math.round(datetime.getTime());
       filelink = filelink.replace(":datetime", datetimejs);
       filelink = filelink.replace(":depth", depth);
@@ -688,7 +701,10 @@ class ThreeDModel extends Component {
           });
         }));
       ({ datetime: realdatetime, depth: realdepth } = data);
-
+      if ("maxTemp" in data && "minTemp" in data) {
+        max = data.maxTemp;
+        min = data.minTemp;
+      }
       downloads.push({
         data,
         datetime,
@@ -697,8 +713,11 @@ class ThreeDModel extends Component {
         fileid,
         realdatetime,
         realdepth,
+        min,
+        max,
       });
-      return { data, realdatetime, realdepth, downloads };
+
+      return { data, realdatetime, realdepth, downloads, max, min };
     }
   };
 
@@ -722,12 +741,19 @@ class ThreeDModel extends Component {
       if (new Date(file.maxdatetime).getTime() < datetime.getTime()) {
         datetime = new Date(file.maxdatetime);
       }
-      
+
       var depth = Math.round(file.mindepth * 10) / 10;
 
       // Download data
-      var data, realdatetime, realdepth;
-      ({ data, realdatetime, realdepth, downloads } = await this.downloadFile(
+      var data, realdatetime, realdepth, min, max;
+      ({
+        data,
+        realdatetime,
+        realdepth,
+        downloads,
+        min,
+        max,
+      } = await this.downloadFile(
         datasets_id,
         file.id,
         file.filelink,
@@ -743,7 +769,7 @@ class ThreeDModel extends Component {
       };
 
       // Get data min and max
-      var min, max, array, mapplot, unit, name;
+      var array, mapplot, unit, name;
       if (parameters_id === 25) {
         mapplot = "field";
         unit = "m/s";
@@ -754,7 +780,11 @@ class ThreeDModel extends Component {
         unit = "°C";
         name = "Water Temperature";
         layer["legend"] = true;
-        ({ min, max, array } = this.threeDmodelScalarMinMax(data.data));
+        if (!isNaN(min) || !isNaN(max)) {
+          ({ array } = this.threeDmodelScalarMinMax(data.data));
+        } else {
+          ({ min, max, array } = this.threeDmodelScalarMinMax(data.data));
+        }
       }
 
       // Add Additional Parameters

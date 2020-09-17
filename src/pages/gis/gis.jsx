@@ -639,11 +639,7 @@ class GIS extends Component {
           dataset.maxdepth
         ));
       } else {
-        if (dataset.datasource === "Meteolakes") {
-          filelink = filelink.replace(":datetime", datetime.getTime());
-        } else {
-          filelink = filelink.replace(":datetime", datetime.getTime());
-        }
+        filelink = filelink.replace(":datetime", datetime.getTime());
         filelink = filelink.replace(":depth", depth);
         ({ data } = await axios
           .get(filelink, { timeout: 5000 })
