@@ -65,8 +65,14 @@ class ThreeDModelDownload extends Component {
 
   async componentDidMount() {
     var { id } = this.props.dataset;
+    var url;
+    if (id === 17) {
+      url = "/datalakesmodel/available";
+    } else {
+      url = "/externaldata/meteolakes/available";
+    }
     var { data } = await axios
-      .get(apiUrl + "/externaldata/meteolakes/available", {
+      .get(apiUrl + url, {
         timeout: 10000,
       })
       .catch((error) => {
@@ -76,18 +82,21 @@ class ThreeDModelDownload extends Component {
     if (id === 11) {
       dates = data.find((d) => d.name === "Lake Zürich").data;
       lake = "zurich";
-    } else if (id === 14) {
+    } else if (id === 14 || id === 17) {
       dates = data.find((d) => d.name === "Lake Geneva").data;
       lake = "geneva";
     } else if (id === 15) {
       dates = data.find((d) => d.name === "Lake Greifen").data;
       lake = "greifensee";
     }
+
     var new_key;
     for (var key in dates) {
-      new_key = parseInt(key.replace("Y", ""));
-      dates[new_key] = dates[key];
-      delete dates[key];
+      if (key.includes("Y")) {
+        new_key = parseInt(key.replace("Y", ""));
+        dates[new_key] = dates[key];
+        delete dates[key];
+      }
     }
 
     var yearlist = Object.keys(dates);
@@ -106,7 +115,7 @@ class ThreeDModelDownload extends Component {
 
   render() {
     const { getLabel, dataset } = this.props;
-    var { mindatetime, maxdatetime } = dataset;
+    var { mindatetime, maxdatetime, id } = dataset;
     mindatetime = new Date(mindatetime);
     maxdatetime = new Date(maxdatetime);
     var { lake, week, dates, year, yearlist } = this.state;
@@ -127,8 +136,18 @@ class ThreeDModelDownload extends Component {
         </option>
       );
     }
+    var url, swagger, git;
+    if (id === 17) {
+      url = apiUrl + "/datalakesmodel";
+      swagger = url + "/api";
+      git = "https://gitlab.com/siam-sc/spux/tree/Datalakes-Spux";
+    } else {
+      url = "https://api.meteolakes.ch/api/datalakes";
+      swagger = apiUrl + "/externaldata/meteolakes/api";
+      git = "https://github.com/rkaravia/meteolakes";
+    }
 
-    var link = `https://api.meteolakes.ch/api/datalakes/nc/${lake}/${year}/${week}`;
+    var link = `${url}/nc/${lake}/${year}/${week}`;
 
     return (
       <div className="datadetail-padding">
@@ -141,6 +160,11 @@ class ThreeDModelDownload extends Component {
         </a>
         <div className="info-title">Citation</div>
         {dataset.citation}
+
+        <div className="info-title">Git Repository</div>
+        <a href={git} target="_blank" rel="noopener noreferrer">
+          {git}
+        </a>
 
         <div className="info-title">Available Data</div>
         <p>
@@ -169,8 +193,8 @@ class ThreeDModelDownload extends Component {
         <div className="info-title">API</div>
 
         <div className="api-meteolakes">
-          [ Base URL: api.meteolakes.ch/api/datalakes ]
-          <SwaggerUI url={apiUrl + "/externaldata/meteolakes/api"} />
+          [ Base URL: {url} ]
+          <SwaggerUI url={swagger} />
         </div>
       </div>
     );

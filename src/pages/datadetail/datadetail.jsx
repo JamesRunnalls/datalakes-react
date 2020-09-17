@@ -536,7 +536,7 @@ class DataDetail extends Component {
         files,
         loading: false,
         step: "threedmodel",
-        allowedStep: ["threedmodel", "external", "webgis"],
+        allowedStep: ["threedmodel", "threedmodeldownload", "external", "webgis"],
       });
     } else if (mapplotfunction === "remoteSensing") {
       this.setState({

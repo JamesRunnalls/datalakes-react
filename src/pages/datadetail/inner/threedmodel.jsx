@@ -378,10 +378,10 @@ class ThreeDModel extends Component {
     var lake = this.getLake(lakes_id);
     var t = datetime.getTime();
     var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
-    var oldStyle = document.getElementById("map").style.cursor;
-    document.getElementById("map").style.cursor = "wait";
+    var oldStyle = document.getElementById("map").style.cursor;    
     if (graph === "depthgraph") {
-      axios
+      document.getElementById("map").style.cursor = "wait";
+      await axios
         .get(`${apistem}/depthprofile/${lake}/${t}/${y}/${x}`)
         .then((response) => {
           var plotdata = this.removeNaN(response.data);
@@ -394,7 +394,8 @@ class ThreeDModel extends Component {
           alert("Failed to collect data please try another location.");
         });
     } else if (graph === "timegraph") {
-      axios
+      document.getElementById("map").style.cursor = "wait";
+      await axios
         .get(`${apistem}/timeline/${lake}/${t}/${y}/${x}`)
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
@@ -411,7 +412,7 @@ class ThreeDModel extends Component {
     }
   };
 
-  updateLine = (lineValue) => {
+  updateLine = async (lineValue) => {
     var { graph, datetime } = this.state;
     var { lakes_id } = this.props.dataset;
     var apistem = this.props.files[0].filelink.split("/layer")[0];
@@ -420,7 +421,6 @@ class ThreeDModel extends Component {
     if (graph === "slicegraph" && lineValue.length > 0) {
       var oldStyle = document.getElementById("map").style.cursor;
       document.getElementById("map").style.cursor = "wait";
-
       // Convert to meteolakes units
       var { x: x1, y: y1 } = this.WGSlatlngtoCH(
         lineValue[0].lat,
@@ -430,7 +430,7 @@ class ThreeDModel extends Component {
         lineValue[1].lat,
         lineValue[1].lng
       );
-      axios
+      await axios
         .get(`${apistem}/transect/${lake}/${t}/${y1}/${x1}/${y2}/${x2}`)
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
