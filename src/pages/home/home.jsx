@@ -333,7 +333,7 @@ class Home extends Component {
               datasets in our data portal or get direct access through our API.
             </div>
             <div className="scroll">
-              Keep scrolling to find our more about access options.
+              Keep scrolling to find out more about access options.
             </div>
           </div>
 

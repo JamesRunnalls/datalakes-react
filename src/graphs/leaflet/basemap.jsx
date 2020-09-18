@@ -650,7 +650,9 @@ class Basemap extends Component {
               coords = this.getCellCorners(data, i, j, locationformat);
               if (coords) {
                 var magnitude = Math.abs(
-                  Math.sqrt(Math.pow(data[i][j][3], 2) + Math.pow(data[i][j][4], 2))
+                  Math.sqrt(
+                    Math.pow(data[i][j][3], 2) + Math.pow(data[i][j][4], 2)
+                  )
                 );
                 value = Math.round(magnitude * 1000) / 1000;
                 valuestring = String(value) + String(unit);

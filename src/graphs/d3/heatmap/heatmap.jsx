@@ -12,6 +12,11 @@ class D3HeatMap extends Component {
     fullscreen: false,
     display: "contour",
     zoom: false,
+    fontSize: 12,
+  };
+
+  editFontSize = (fontSize) => {
+    this.setState({ fontSize });
   };
 
   toggleDownload = () => {
@@ -146,7 +151,7 @@ class D3HeatMap extends Component {
   };
 
   plotHeatMap = () => {
-    var { display, graphid } = this.state;
+    var { display, graphid, fontSize } = this.state;
     try {
       d3.select("#svg" + graphid).remove();
       d3.select("#canvas" + graphid).remove();
@@ -173,7 +178,12 @@ class D3HeatMap extends Component {
         const { closest, indexOfClosest, props } = this;
 
         // Set graph size
-        var margin = { top: 40, right: 80, bottom: 50, left: 50 },
+        var margin = {
+            top: 40,
+            right: fontSize * 5 + 10,
+            bottom: fontSize * 3 + 10,
+            left: fontSize * 3 + 10,
+          },
           viswidth = d3
             .select("#vis" + graphid)
             .node()
@@ -279,7 +289,7 @@ class D3HeatMap extends Component {
           .attr("x", width / 2)
           .attr("y", 2 - margin.top / 2)
           .attr("text-anchor", "middle")
-          .style("font-size", "14px")
+          .style("font-size", `${fontSize}px`)
           .style("text-decoration", "underline")
           .style("opacity", "0")
           .text(title);
@@ -292,6 +302,7 @@ class D3HeatMap extends Component {
             .attr("class", "x axis")
             .attr("id", "axis--x")
             .attr("transform", "translate(0," + height + ")")
+            .style("font-size", `${fontSize}px`)
             .call(xAxis);
         } else {
           var xLabel = "";
@@ -310,6 +321,7 @@ class D3HeatMap extends Component {
             .attr("class", "x axis")
             .attr("id", "axis--x")
             .attr("transform", "translate(0," + height + ")")
+            .style("font-size", `${fontSize}px`)
             .call(xAxis);
 
           svg
@@ -323,7 +335,8 @@ class D3HeatMap extends Component {
                 ")"
             )
             .attr("x", 6)
-            .attr("dx", "1em")
+            .attr("dx", `${fontSize}px`)
+            .style("font-size", `${fontSize}px`)
             .style("text-anchor", "end")
             .text(xLabel);
         }
@@ -352,14 +365,16 @@ class D3HeatMap extends Component {
           .append("g")
           .attr("class", "y axis")
           .attr("id", "axis--y")
+          .style("font-size", `${fontSize}px`)
           .call(yAxis);
 
-        var gYl = svg
+        svg
           .append("text")
           .attr("transform", "rotate(-90)")
           .attr("y", 0 - margin.left)
           .attr("x", 0 - height / 2)
-          .attr("dy", "1em")
+          .attr("dy", `${fontSize}px`)
+          .style("font-size", `${fontSize}px`)
           .style("text-anchor", "middle")
           .text(yLabel);
 
@@ -402,14 +417,14 @@ class D3HeatMap extends Component {
           .append("text")
           .attr("x", width + 2 + margin.right / 3)
           .attr("y", 10)
-          .style("font-size", "12px")
+          .style("font-size", `${fontSize}px`)
           .text(t1);
 
         svg
           .append("text")
           .attr("x", width + 2 + margin.right / 3)
           .attr("y", height * 0.25 + 3)
-          .style("font-size", "12px")
+          .style("font-size", `${fontSize}px`)
           .text(t2);
 
         svg
@@ -419,21 +434,21 @@ class D3HeatMap extends Component {
           .attr("x", 0 - height / 2)
           .attr("dz", "1em")
           .style("text-anchor", "middle")
-          .style("font-size", "12px")
+          .style("font-size", `${fontSize}px`)
           .text(zlabel + " (" + zunits + ")");
 
         svg
           .append("text")
           .attr("x", width + 2 + margin.right / 3)
           .attr("y", height * 0.75 + 3)
-          .style("font-size", "12px")
+          .style("font-size", `${fontSize}px`)
           .text(t4);
 
         svg
           .append("text")
           .attr("x", width + 2 + margin.right / 3)
           .attr("y", height)
-          .style("font-size", "12px")
+          .style("font-size", `${fontSize}px`)
           .text(t5);
 
         // Adds the canvas
@@ -707,9 +722,6 @@ class D3HeatMap extends Component {
 
         function downloadGraph() {
           titlesvg.style("opacity", "1");
-          gX.style("font", "18px sans-serif");
-          gY.style("font", "18px sans-serif");
-          gYl.style("font", "18px sans-serif");
           var s = new XMLSerializer();
           var str = s.serializeToString(
             document.getElementById("svg" + graphid)
@@ -740,9 +752,6 @@ class D3HeatMap extends Component {
           image.src =
             "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
           titlesvg.style("opacity", "0");
-          gX.style("font", "0.7em sans-serif");
-          gY.style("font", "0.7em sans-serif");
-          gYl.style("font", "1em sans-serif");
           if (setDownloadGraph) {
             setDownloadGraph(downloadGraph);
           }
@@ -906,7 +915,7 @@ class D3HeatMap extends Component {
   }
 
   render() {
-    var { graphid, download, fullscreen, display } = this.state;
+    var { graphid, download, fullscreen, display, fontSize } = this.state;
     var { title } = this.props;
     return (
       <React.Fragment>
@@ -920,8 +929,10 @@ class D3HeatMap extends Component {
               title={title}
               download={download}
               display={display}
+              fontSize={fontSize}
               fullscreen={fullscreen}
               toggleDownload={this.toggleDownload}
+              editFontSize={this.editFontSize}
               toggleDisplay={this.toggleDisplay}
               toggleFullscreen={this.toggleFullscreen}
               downloadJSON={this.downloadJSON}

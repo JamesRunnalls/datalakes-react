@@ -5,6 +5,7 @@ import contourIcon from "./img/contour.svg";
 import helpIcon from "./img/info.svg";
 import shrinkIcon from "./img/shrink.svg";
 import fullscreenIcon from "./img/fullscreen.svg";
+import fontsizeIcon from "./img/fontsize.svg";
 import "./graphheader.css";
 
 class GraphHeader extends Component {
@@ -42,6 +43,8 @@ class GraphHeader extends Component {
       download,
       fullscreen,
       display,
+      fontSize,
+      editFontSize,
       toggleDownload,
       toggleFullscreen,
       toggleDisplay,
@@ -104,6 +107,27 @@ class GraphHeader extends Component {
                   </button>
                 </div>
               </td>
+              {fontSize && (
+                <td className="fontsize" style={{ width: "25px" }}>
+                  <img
+                    src={fontsizeIcon}
+                    alt="Font Size"
+                    onClick={toggleDisplay}
+                    title="Edit font size"
+                  />
+                  <div className="fontsize-dropdown">
+                    {[8, 10, 12, 14, 16, 18, 20, 22, 24].map((item) => (
+                      <div
+                        key={"fontsize" + item}
+                        className={fontSize === item ? "sel" : ""}
+                        onClick={() => editFontSize(item)}
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </td>
+              )}
               <td style={{ width: "25px" }}>
                 <img
                   src={fullicon}

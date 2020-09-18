@@ -9,6 +9,11 @@ class D3LineGraph extends Component {
     graphid: Math.round(Math.random() * 100000),
     download: false,
     fullscreen: false,
+    fontSize: 12,
+  };
+
+  editFontSize = (fontSize) => {
+    this.setState({ fontSize });
   };
 
   toggleDownload = () => {
@@ -101,7 +106,7 @@ class D3LineGraph extends Component {
   };
 
   plotLineGraph = async () => {
-    var { graphid } = this.state;
+    var { graphid, fontSize } = this.state;
     try {
       d3.select("#svg" + graphid).remove();
     } catch (e) {}
@@ -132,7 +137,12 @@ class D3LineGraph extends Component {
         if (!Array.isArray(lweight)) lweight = [lweight];
 
         // Set graph size
-        var margin = { top: 40, right: 20, bottom: 50, left: 50 },
+        var margin = {
+            top: 40,
+            right: 20,
+            bottom: fontSize * 3 + 10,
+            left: fontSize * 3 + 10,
+          },
           viswidth = d3
             .select("#vis" + graphid)
             .node()
@@ -218,12 +228,12 @@ class D3LineGraph extends Component {
           .append("g")
           .attr("class", "x axis")
           .attr("id", "axis--x")
+          .style("font-size", `${fontSize}px`)
           .attr("transform", "translate(0," + height + ")")
           .call(xAxis);
 
-        var gXl;
         if (xlabel !== "Time") {
-          gXl = svg
+          svg
             .append("text")
             .attr(
               "transform",
@@ -234,7 +244,8 @@ class D3LineGraph extends Component {
                 ")"
             )
             .attr("x", 6)
-            .attr("dx", "1em")
+            .attr("dx", `${fontSize}px`)
+            .style("font-size", `${fontSize}px`)
             .style("text-anchor", "middle")
             .text(xunits ? `${xlabel} (${xunits})` : xlabel);
         }
@@ -247,17 +258,17 @@ class D3LineGraph extends Component {
           .append("g")
           .attr("class", "y axis")
           .attr("id", "axis--y")
+          .style("font-size", `${fontSize}px`)
           .call(yAxis);
 
-        var gYl;
-
         if (ylabel !== "Time") {
-          gYl = svg
+          svg
             .append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - margin.left)
             .attr("x", 0 - height / 2)
-            .attr("dy", "1em")
+            .attr("dy", `${fontSize}px`)
+            .style("font-size", `${fontSize}px`)
             .style("text-anchor", "middle")
             .text(yunits ? `${ylabel} (${yunits})` : ylabel);
         }
@@ -268,7 +279,7 @@ class D3LineGraph extends Component {
           .attr("x", width / 2)
           .attr("y", 2 - margin.top / 2)
           .attr("text-anchor", "middle")
-          .style("font-size", "14px")
+          .style("font-size", `${fontSize}px`)
           .style("text-decoration", "underline")
           .style("opacity", "0")
           .text(title);
@@ -562,11 +573,11 @@ class D3LineGraph extends Component {
               .style("fill", function (d) {
                 return d.color;
               })
-              .style("font-size", "12")
               .text(function (d) {
                 return "--- " + d.text;
               })
               .attr("text-anchor", "end")
+              .style("font-size", `${fontSize}px`)
               .style("alignment-baseline", "middle");
           }
 
@@ -658,15 +669,10 @@ class D3LineGraph extends Component {
 
           function downloadGraph() {
             titlesvg.style("opacity", "1");
-            gX.style("font", "18px sans-serif");
-            gY.style("font", "18px sans-serif");
-            gXl.style("font", "18px sans-serif");
-            gYl.style("font", "18px sans-serif");
             var s = new XMLSerializer();
             var str = s.serializeToString(
               document.getElementById("svg" + graphid)
             );
-            console.log(str);
 
             var canvas = document.createElement("canvas"),
               context = canvas.getContext("2d");
@@ -690,10 +696,6 @@ class D3LineGraph extends Component {
             image.src =
               "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
             titlesvg.style("opacity", "0");
-            gX.style("font", "0.7em sans-serif");
-            gY.style("font", "0.7em sans-serif");
-            gXl.style("font", "1em sans-serif");
-            gYl.style("font", "1em sans-serif");
           }
 
           if (setDownloadGraph) {
@@ -727,10 +729,13 @@ class D3LineGraph extends Component {
     if (!isEqual(prevProps, this.props)) {
       this.plotLineGraph();
     }
+    if (prevState.fontSize !== this.state.fontSize) {
+      this.plotLineGraph();
+    }
   }
 
   render() {
-    var { graphid, download, fullscreen } = this.state;
+    var { graphid, download, fullscreen, fontSize } = this.state;
     var { title } = this.props;
     return (
       <React.Fragment>
@@ -744,8 +749,10 @@ class D3LineGraph extends Component {
               title={title}
               download={download}
               fullscreen={fullscreen}
+              fontSize={fontSize}
               toggleDownload={this.toggleDownload}
               toggleFullscreen={this.toggleFullscreen}
+              editFontSize={this.editFontSize}
               downloadJSON={this.downloadJSON}
               downloadCSV={this.downloadCSV}
             />
