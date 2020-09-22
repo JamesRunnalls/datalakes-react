@@ -6,8 +6,10 @@ import "../threed.css";
 import Loading from "../../../components/loading/loading";
 import MapControl from "../../../components/mapcontrol/mapcontrol";
 import menuicon from "../img/menuicon.svg";
+import sliceicon from "../img/sliceicon.svg";
+import calcicon from "../img/calcicon.svg";
 import colorlist from "../../../components/colorramp/colors";
-import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
+import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import FilterBox from "../../../components/filterbox/filterbox";
 import MapMenu from "../../../components/mapmenu/mapmenu";
 import MapLayers from "../../../components/maplayers/maplayers";
@@ -15,6 +17,47 @@ import Legend from "../../../components/legend/legend";
 import DatetimeDepthSelector from "../../../components/datetimedepthselector/datetimedepthselector";
 import PrintLegend from "../../../components/legend/printlegend";
 import ErrorModal from "../../../components/errormodal/errormodal";
+import { cloneDeep } from "lodash";
+import { evaluate } from "mathjs";
+
+class RasterCalculator extends Component {
+  state = { text: "", alphabet: ["a", "b", "c", "d", "e", "f", "g"] };
+  updateText = (event) => {
+    this.setState({ text: event.target.value });
+  };
+  calculate = () => {
+    var { text, alphabet } = this.state;
+    var { selectedlayers } = this.props;
+    try {
+      var test = text;
+      console.log(selectedlayers)
+      for (var i = 0; i < selectedlayers.length; i++) {
+        console.log(test.replace(alphabet[i], "1"), test, alphabet[i]);
+        test = test.replace(alphabet[i], "1");
+      }
+      console.log(test);
+      evaluate(test);
+    } catch (error) {
+      alert("Badly formatted calculation string.");
+      return;
+    }
+  };
+  render() {
+    var { text, alphabet } = this.state;
+    return (
+      <div className="raster-calculator">
+        <div className="inner">
+          <div className="title">Raster Calculator</div>
+          <div className=""></div>
+          <div className="">
+            <textarea value={text} onChange={this.updateText} />
+          </div>
+          <button onClick={this.calculate}>Create</button>
+        </div>
+      </div>
+    );
+  }
+}
 
 class RemoteSensingMenu extends Component {
   render() {
@@ -73,6 +116,7 @@ class RemoteSensing extends Component {
     profile: false,
     timeline: false,
     slice: false,
+    calc: false,
     menu: false,
     fullsize: false,
     help: false,
@@ -83,7 +127,6 @@ class RemoteSensing extends Component {
     loading: true,
     basemap: "datalakesmap",
     graph: "none",
-    parameter: "Temperature",
     colors: [
       { color: "#0000ff", point: 0 },
       { color: "#ff0000", point: 1 },
@@ -230,6 +273,21 @@ class RemoteSensing extends Component {
     });
   };
 
+  toggleCalc = () => {
+    var plotdata = { x: [], y: [], z: [] };
+    this.setState({
+      plotdata,
+      calc: !this.state.calc,
+      timeline: false,
+      menu: false,
+      help: false,
+      profile: false,
+      point: false,
+      slice: false,
+      line: false,
+    });
+  };
+
   removeNaN = (data) => {
     var keys = Object.keys(data);
     var var1 = [];
@@ -359,39 +417,69 @@ class RemoteSensing extends Component {
   };
 
   updateLine = async (lineValue) => {
-    var { graph, datetime } = this.state;
-    var { lakes_id } = this.props.dataset;
-    var apistem = this.props.files[0].filelink.split("/layer")[0];
-    var lake = this.getLake(lakes_id);
-    var t = datetime.getTime();
+    var { graph, selectedlayers } = this.state;
+    var { data } = selectedlayers[0];
     if (graph === "slicegraph" && lineValue.length > 0) {
       var oldStyle = document.getElementById("map").style.cursor;
       document.getElementById("map").style.cursor = "wait";
-      // Convert to meteolakes units
-      var { x: x1, y: y1 } = this.WGSlatlngtoCH(
-        lineValue[0].lat,
-        lineValue[0].lng
-      );
-      var { x: x2, y: y2 } = this.WGSlatlngtoCH(
-        lineValue[1].lat,
-        lineValue[1].lng
-      );
-      await axios
-        .get(`${apistem}/transect/${lake}/${t}/${y1}/${x1}/${y2}/${x2}`)
-        .then((response) => {
-          var { x, y, z, z1 } = this.fillNaN2D(response.data);
-          var plotdata = { x, y, z, z1 };
-          this.setState({ lineValue, plotdata });
-          document.getElementById("map").style.cursor = oldStyle;
-        })
-        .catch((error) => {
-          this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
-          document.getElementById("map").style.cursor = oldStyle;
-          alert("Failed to plot transect");
-        });
+      var x1 = lineValue[0].lat;
+      var y1 = lineValue[0].lng;
+      var x2 = lineValue[1].lat;
+      var y2 = lineValue[1].lng;
+      var n = 100;
+      var len = Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+      var arr = [...Array(n + 1).keys()];
+      var x = arr.map((x) => x * (len / n));
+      var y = [];
+      var index, xin, yin;
+      for (var i = 0; i < x.length; i++) {
+        ({ x: xin, y: yin } = this.coordsAlongLine(x[i], len, x1, y1, x2, y2));
+        index = this.findClosest(
+          data.lat,
+          data.lon,
+          xin,
+          yin,
+          data.latres,
+          data.lonres
+        );
+        if (index) {
+          y.push(data.v[index]);
+        } else {
+          y.push(null);
+        }
+      }
+      var plotdata = { x, y };
+      this.setState({ lineValue, plotdata });
+      document.getElementById("map").style.cursor = oldStyle;
     } else {
       document.getElementById("map").style.cursor = oldStyle;
       this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
+    }
+  };
+
+  coordsAlongLine = (seg, len, x1, y1, x2, y2) => {
+    var perc = seg / len;
+    var x = x1 + (x2 - x1) * perc;
+    var y = y1 + (y2 - y1) * perc;
+    return { x, y };
+  };
+
+  findClosest = (x, y, xin, yin, latres, lonres) => {
+    var diff = Infinity;
+    var index = 0;
+    for (var k = 0; k < x.length; k++) {
+      var newdiff = Math.sqrt(
+        Math.abs(xin - x[k]) ** 2 + Math.abs(yin - y[k]) ** 2
+      );
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = k;
+      }
+    }
+    if (diff < Math.max(latres, lonres)) {
+      return index;
+    } else {
+      return false;
     }
   };
 
@@ -694,6 +782,7 @@ class RemoteSensing extends Component {
       layer["opacity"] = 1;
       layer["datamin"] = filemin;
       layer["datamax"] = filemax;
+      layer["movingAverage"] = 4;
       layer["unit"] = unit;
       layer["array"] = filearray;
       layer["fileid"] = file.id;
@@ -740,11 +829,12 @@ class RemoteSensing extends Component {
       help,
       point,
       line,
+      slice,
+      calc,
       colors,
       loading,
       graph,
       plotdata,
-      parameter,
       basemap,
       depth,
       datetime,
@@ -761,21 +851,26 @@ class RemoteSensing extends Component {
     var { dataset } = this.props;
     var controls = [
       { title: "Menu", active: menu, onClick: this.toggleMenu, img: menuicon },
-    ];
-    /*var controls = [
-      { title: "Menu", active: menu, onClick: this.toggleMenu, img: menuicon },
       {
         title: "Transect",
         active: slice,
         onClick: this.toggleSlice,
         img: sliceicon,
       },
-    ];*/
+      {
+        title: "Raster Calculator",
+        active: calc,
+        onClick: this.toggleCalc,
+        img: calcicon,
+      },
+    ];
 
     var graphclass = "graphwrapper hide";
     if (graph !== "none" && plotdata.x.length > 0) graphclass = "graphwrapper";
     var punit = "";
+    var pname = "";
     if (selectedlayers.length > 0) punit = selectedlayers[0].unit;
+    if (selectedlayers.length > 0) pname = selectedlayers[0].name;
     var load = loading && false;
     return (
       <div className={fullsize ? "threed full" : "threed"}>
@@ -858,30 +953,22 @@ class RemoteSensing extends Component {
             <div className="close" onClick={this.closeSelect}>
               ×
             </div>
-            <D3HeatMap
+            <D3LineGraph
               data={plotdata}
               title={`${dataset.title} Transect`}
-              xlinear={true}
               xlabel={"Distance"}
-              ylabel={"Depth"}
-              zlabel={parameter}
+              ylabel={pname}
               xunits={"km"}
-              yunits={"m"}
-              zunits={punit}
+              yunits={punit}
+              lcolor={"#000000"}
+              lweight={"1"}
               bcolor={"white"}
-              colors={colors}
-              display={"heatmap"}
+              xscale={"Linear"}
+              yscale={"Linear"}
             />
-            <select
-              className="parameter-select"
-              onChange={this.changePlotParameter}
-              value={parameter}
-            >
-              <option value="Temperature">Water Temperature</option>
-              <option value="Velocity">Water Velocity</option>
-            </select>
           </div>
         )}
+        {calc && <RasterCalculator selectedlayers={selectedlayers} />}
         <div className="printheader">
           <div>Datalakes Print</div>
           <div>
