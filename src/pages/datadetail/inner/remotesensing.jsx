@@ -2,98 +2,61 @@ import React, { Component } from "react";
 import axios from "axios";
 import "../datadetail.css";
 import Basemap from "../../../graphs/leaflet/basemap";
-import "../rs.css";
+import "../threed.css";
 import Loading from "../../../components/loading/loading";
 import MapControl from "../../../components/mapcontrol/mapcontrol";
-import sliceicon from "../img/sliceicon.svg";
 import menuicon from "../img/menuicon.svg";
 import colorlist from "../../../components/colorramp/colors";
-import { apiUrl } from "../../../../src/config.json";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import ColorManipulation from "../../../components/colormanipulation/colormanipulation";
+import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
+import FilterBox from "../../../components/filterbox/filterbox";
+import MapMenu from "../../../components/mapmenu/mapmenu";
+import MapLayers from "../../../components/maplayers/maplayers";
+import Legend from "../../../components/legend/legend";
+import DatetimeDepthSelector from "../../../components/datetimedepthselector/datetimedepthselector";
+import PrintLegend from "../../../components/legend/printlegend";
+import ErrorModal from "../../../components/errormodal/errormodal";
 
-class RemoteSensingSidebar extends Component {
-  state = {};
+class RemoteSensingMenu extends Component {
   render() {
     var {
       basemap,
       updateBaseMap,
-      datetime,
-      onChangeDatetime,
-      layer,
-      updateLayer,
-      mindatetime,
-      maxdatetime,
-      pixelinfo,
       selectedlayers,
-      onChangeColors,
+      toggleLayerView,
+      updateMapLayers,
     } = this.props;
-
-    var colors = [];
-    var array = [];
-    if (selectedlayers.length > 0) {
-      colors = selectedlayers[0].colors;
-      array = selectedlayers[0].array;
-    }
-    var pixelrows = [];
-    for (var i = 0; i < pixelinfo.length; i++) {
-      pixelrows.push(
-        <tr key={pixelinfo[i].name}>
-          <td>{pixelinfo[i].name}</td>
-          <td>{pixelinfo[i].value}</td>
-          <td>{pixelinfo[i].unit}</td>
-        </tr>
-      );
-    }
-
     return (
       <React.Fragment>
-        <div className="layers">
-          <div className="title">Select Products</div>
-          <select
-            className="layerselector"
-            onChange={updateLayer}
-            value={layer}
-            title="Edit the background map style"
-          >
-            <option value="chlorophylla">Chlorophyll A</option>
-            <option value="turbidity">Turbidity</option>
-          </select>
-
-          <DatePicker
-            selected={datetime}
-            dateFormat="dd MMMM yyyy"
-            onChange={onChangeDatetime}
-            minDate={mindatetime}
-            maxDate={maxdatetime}
-          />
-          <select
-            className="basemapselector"
-            onChange={updateBaseMap}
-            value={basemap}
-            title="Edit the background map style"
-          >
-            <option value="datalakesmap">Datalakes Map</option>
-            <option value="swisstopo">Swisstopo</option>
-            <option value="satellite">Satellite</option>
-            <option value="dark">Dark</option>
-          </select>
-        </div>
-        <div className="pixelinfo">
-          <div className="title">Pixel Information</div>
-          <table>
-            <tbody>{pixelrows}</tbody>
-          </table>
-        </div>
-        <div className="colormanipulation">
-          <div className="title">Color Manipulation</div>
-          <ColorManipulation
-            colors={colors}
-            onChange={onChangeColors}
-            array={array}
-          />
-        </div>
+        <FilterBox
+          title="Basemap"
+          preopen="true"
+          content={
+            <div className="basemap">
+              <select
+                className="basemapselector"
+                onChange={updateBaseMap}
+                value={basemap}
+                title="Edit the background map style"
+              >
+                <option value="datalakesmap">Datalakes Map</option>
+                <option value="swisstopo">Swisstopo</option>
+                <option value="satellite">Satellite</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+          }
+        />
+        <FilterBox
+          title="Map Layers"
+          preopen="true"
+          content={
+            <MapLayers
+              selectedlayers={selectedlayers}
+              toggleLayerView={toggleLayerView}
+              updateMapLayers={updateMapLayers}
+            />
+          }
+        />
       </React.Fragment>
     );
   }
@@ -103,13 +66,14 @@ class RemoteSensing extends Component {
   state = {
     datetime: new Date(),
     depth: 0,
+    timestep: 1440,
     selectedlayers: [],
     downloads: [],
     datasets: [],
     profile: false,
     timeline: false,
     slice: false,
-    menu: true,
+    menu: false,
     fullsize: false,
     help: false,
     point: false,
@@ -124,66 +88,48 @@ class RemoteSensing extends Component {
       { color: "#0000ff", point: 0 },
       { color: "#ff0000", point: 1 },
     ],
-    pixelinfo: [
-      { name: "Latitude", unit: "", value: "" },
-      { name: "Longitude", unit: "", value: "" },
-      { name: "Altitude", unit: "", value: "mAOD" },
-    ],
     plotdata: { x: [], y: [], z: [] },
     zoomIn: () => {},
     zoomOut: () => {},
+    modal: false,
+    modaltext: "",
+    modaldetail: "",
   };
 
-  onChangeDatetime = async (event) => {
-    var { depth, pointValue, lineValue } = this.state;
-    var datetime;
-    if (Array.isArray(event)) {
-      datetime = new Date(event[0]);
-    } else {
-      datetime = event;
+  onChangeTimestep = (timestep) => {
+    if (timestep !== this.state.timestep) {
+      this.setState({ timestep });
     }
+  };
+
+  onChangeDatetime = async (datetime) => {
     if (datetime.getTime() !== this.state.datetime.getTime()) {
-      this.setState({ datetime }, async () => {
-        this.updateVariable(datetime, depth);
-        this.updatePoint(pointValue);
-        this.updateLine(lineValue);
-      });
+      var { depth } = this.state;
+      await this.updateVariable(datetime, depth);
     }
   };
 
-  onChangeColors = (colors) => {
-    this.setState({ loading: true }, async () => {
-      var { selectedlayers } = this.state;
-      selectedlayers[0].colors = colors;
-      this.setState({
-        selectedlayers,
-        loading: false,
-      });
-    });
-  };
-
-  onChangeDepth = async (event) => {
-    var { datetime, pointValue, lineValue } = this.state;
-    var depth;
-    if (Array.isArray(event)) {
-      depth = parseFloat(event[0]);
-    } else {
-      depth = parseFloat(event.target.value);
-    }
+  onChangeDepth = async (depth) => {
     if (depth !== this.state.depth) {
+      var { datetime } = this.state;
       this.setState({ depth }, async () => {
         this.updateVariable(datetime, depth);
-        this.updatePoint(pointValue);
-        this.updateLine(lineValue);
       });
     }
+  };
+
+  remoteSensingMinMax = (array) => {
+    array = array.v;
+    var max = this.getMax(array);
+    var min = this.getMin(array);
+    return { filemin: min, filemax: max, filearray: array };
   };
 
   updateVariable = async (datetime, depth) => {
     function findFileId(files, fileid) {
       return files.find((f) => f.id === fileid);
     }
-    this.setState({ loading: true }, async () => {
+    this.setState({ loading: true, datetime, depth }, async () => {
       var { selectedlayers, downloads } = this.state;
 
       for (var i = 0; i < selectedlayers.length; i++) {
@@ -203,21 +149,21 @@ class RemoteSensing extends Component {
           downloads
         ));
 
-        var { min, max, array } = this.remoteSensingMinMax(data);
+        var { filemin, filemax, filearray } = this.remoteSensingMinMax(data);
 
         // Update the min and max value
         selectedlayers[i].realdatetime = realdatetime;
         selectedlayers[i].realdepth = realdepth;
         selectedlayers[i].data = data;
-        selectedlayers[i].min = min;
-        selectedlayers[i].max = max;
-        selectedlayers[i].array = array;
+        selectedlayers[i].min = filemin;
+        selectedlayers[i].max = filemax;
+        selectedlayers[i].datamin = filemin;
+        selectedlayers[i].datamax = filemax;
+        selectedlayers[i].array = filearray;
         selectedlayers[i].fileid = fileid;
       }
 
       this.setState({
-        datetime,
-        depth,
         selectedlayers,
         downloads,
         loading: false,
@@ -318,7 +264,6 @@ class RemoteSensing extends Component {
   };
 
   javascriptDatetimeToMatlab = (date) => {
-    console.log(date);
     return 719529 + date.getTime() / (24 * 60 * 60 * 1000);
   };
 
@@ -367,45 +312,62 @@ class RemoteSensing extends Component {
     return { x, y };
   };
 
+  getLake = (id) => {
+    var lakes = { 4: "zurich", 2: "biel", 1: "geneva", 3: "greifensee" };
+    return lakes[id];
+  };
+
   updatePoint = async (pointValue) => {
     var { graph, datetime } = this.state;
+    var { lakes_id } = this.props.dataset;
+    var apistem = this.props.files[0].filelink.split("/layer")[0];
+    var lake = this.getLake(lakes_id);
+    var t = datetime.getTime();
+    var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
+    var oldStyle = document.getElementById("map").style.cursor;
     if (graph === "depthgraph") {
-      // Convert to meteolakes units
-      var t = this.javascriptDatetimeToMatlab(datetime);
-      var { x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng);
-      axios
-        .get(
-          apiUrl + `/externaldata/meteolakes/depthprofile/zurich/${t}/${x}/${y}`
-        )
+      document.getElementById("map").style.cursor = "wait";
+      await axios
+        .get(`${apistem}/depthprofile/${lake}/${t}/${y}/${x}`)
         .then((response) => {
           var plotdata = this.removeNaN(response.data);
           this.setState({ pointValue, plotdata });
+          document.getElementById("map").style.cursor = oldStyle;
         })
         .catch((error) => {
           this.setState({ pointValue, plotdata: { x: [], y: [], z: [] } });
+          document.getElementById("map").style.cursor = oldStyle;
+          alert("Failed to collect data please try another location.");
         });
     } else if (graph === "timegraph") {
-      // Convert to meteolakes units
-      ({ x, y } = this.WGSlatlngtoCH(pointValue.lat, pointValue.lng));
-      axios
-        .get(apiUrl + `/externaldata/meteolakes/timeline/zurich/12/${x}/${y}`)
+      document.getElementById("map").style.cursor = "wait";
+      await axios
+        .get(`${apistem}/timeline/${lake}/${t}/${y}/${x}`)
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
           x = x.map((i) => new Date(i * 1000));
           var plotdata = { x, y, z, z1 };
           this.setState({ pointValue, plotdata });
+          document.getElementById("map").style.cursor = oldStyle;
         })
         .catch((error) => {
           this.setState({ pointValue, plotdata: { x: [], y: [], z: [] } });
+          document.getElementById("map").style.cursor = oldStyle;
+          alert("Failed to collect data please try another location.");
         });
     }
   };
 
-  updateLine = (lineValue) => {
+  updateLine = async (lineValue) => {
     var { graph, datetime } = this.state;
+    var { lakes_id } = this.props.dataset;
+    var apistem = this.props.files[0].filelink.split("/layer")[0];
+    var lake = this.getLake(lakes_id);
+    var t = datetime.getTime();
     if (graph === "slicegraph" && lineValue.length > 0) {
+      var oldStyle = document.getElementById("map").style.cursor;
+      document.getElementById("map").style.cursor = "wait";
       // Convert to meteolakes units
-      var t = this.javascriptDatetimeToMatlab(datetime);
       var { x: x1, y: y1 } = this.WGSlatlngtoCH(
         lineValue[0].lat,
         lineValue[0].lng
@@ -414,29 +376,23 @@ class RemoteSensing extends Component {
         lineValue[1].lat,
         lineValue[1].lng
       );
-      axios
-        .get(
-          apiUrl +
-            `/externaldata/meteolakes/transect/zurich/${t}/${x1}/${y1}/${x2}/${y2}`
-        )
+      await axios
+        .get(`${apistem}/transect/${lake}/${t}/${y1}/${x1}/${y2}/${x2}`)
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
           var plotdata = { x, y, z, z1 };
           this.setState({ lineValue, plotdata });
+          document.getElementById("map").style.cursor = oldStyle;
         })
         .catch((error) => {
           this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
+          document.getElementById("map").style.cursor = oldStyle;
+          alert("Failed to plot transect");
         });
     } else {
+      document.getElementById("map").style.cursor = oldStyle;
       this.setState({ lineValue, plotdata: { x: [], y: [], z: [] } });
     }
-  };
-
-  remoteSensingMinMax = (array) => {
-    array = array.v;
-    var max = this.getMax(array);
-    var min = this.getMin(array);
-    return { min, max, array };
   };
 
   toggleLayerView = (id) => {
@@ -570,13 +526,57 @@ class RemoteSensing extends Component {
     return { files, mindepth, maxdepth, mindatetime, maxdatetime };
   };
 
+  getColor = (selectedlayers) => {
+    var usedColors = selectedlayers.map((s) => s.color);
+    var colors = [
+      "#f0a3ff",
+      "#0075dc",
+      "#993f00",
+      "#4c005c",
+      "#191919",
+      "#005c31",
+      "#2bce48",
+      "#ffcc99",
+      "#808080",
+      "#94ffb5",
+      "#8f7c00",
+      "#9dcc00",
+      "#c20088",
+      "#003380",
+      "#ffa405",
+      "#ffa8bb",
+      "#426600",
+      "#ff0010",
+      "#5ef1f2",
+      "#00998f",
+      "#e0ff66",
+      "#740aff",
+      "#990000",
+      "#ffff80",
+      "#ffff00",
+      "#ff5005",
+    ];
+    var unusedColors = colors.filter((c) => !usedColors.includes(c));
+    return unusedColors[0];
+  };
+
   lastFile = (files) => {
     files.sort((a, b) =>
       new Date(a.maxdatetime).getTime() > new Date(b.maxdatetime).getTime()
-        ? -1
-        : 1
+        ? 1
+        : -1
     );
     return files[0];
+  };
+
+  roundDate = (date) => {
+    let hours =
+      Math.round((date.getHours() - 2 + date.getMinutes() / 60) / 3) * 3 + 2;
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours);
+  };
+
+  closeModal = () => {
+    this.setState({ modal: false, modaltext: "" });
   };
 
   downloadFile = async (
@@ -595,6 +595,7 @@ class RemoteSensing extends Component {
         d.datetime.getTime() === datetime.getTime() &&
         parseFloat(d.depth) === parseFloat(depth)
     );
+    var data, realdatetime, realdepth;
 
     if (downloaded) {
       return {
@@ -604,19 +605,23 @@ class RemoteSensing extends Component {
         downloads,
       };
     } else {
-      var data, realdatetime, realdepth;
-      var datetimeunix = Math.round(datetime.getTime() / 1000);
-      filelink = filelink.replace(":datetime", datetimeunix);
+      var datetimejs = Math.round(datetime.getTime());
+      filelink = filelink.replace(":datetime", datetimejs);
       filelink = filelink.replace(":depth", depth);
       ({ data } = await axios
-        .get(filelink, { timeout: 10000 })
+        .get(filelink, { timeout: 5000 })
         .catch((error) => {
           console.error(error);
-          alert("Failed to add layer");
-          this.setState({ loading: false });
+          let modaltext = `Failed to retrieve data from API. Datalakes has no control over the availability of data from external API's, please try again later to see if the API is back online.`;
+          this.setState({
+            loading: false,
+            modal: true,
+            modaltext,
+            modaldetail: error.message,
+          });
         }));
-      realdepth = depth;
       realdatetime = datetime;
+      realdepth = depth;
       downloads.push({
         data,
         datetime,
@@ -626,28 +631,14 @@ class RemoteSensing extends Component {
         realdatetime,
         realdepth,
       });
+
       return { data, realdatetime, realdepth, downloads };
     }
-  };
-
-  passLocation = (location) => {
-    var { pixelinfo } = this.state;
-    pixelinfo.find((pi) => pi.name === "Latitude").value = location.lat;
-    pixelinfo.find((pi) => pi.name === "Longitude").value = location.lng;
-    pixelinfo.find((pi) => pi.name === "Altitude").value = location.alt;
-    this.setState(pixelinfo);
   };
 
   async componentDidMount() {
     var { files, dataset, datasetparameters } = this.props;
     var { downloads } = this.state;
-
-    var maxdatetime = Math.max(
-      ...files.map((f) => new Date(f.maxdatetime).getTime())
-    );
-    var mindatetime = Math.min(
-      ...files.map((f) => new Date(f.mindatetime).getTime())
-    );
 
     // Build Selected Layers object
     var selectedlayers = [];
@@ -661,7 +652,11 @@ class RemoteSensing extends Component {
 
       // Find file with most recent data
       var file = this.lastFile(files);
-      var datetime = new Date(file.maxdatetime);
+      var datetime = this.roundDate(new Date());
+      if (new Date(file.maxdatetime).getTime() < datetime.getTime()) {
+        datetime = new Date(file.maxdatetime);
+      }
+
       var depth = Math.round(file.mindepth * 10) / 10;
 
       // Download data
@@ -676,29 +671,35 @@ class RemoteSensing extends Component {
         downloads
       ));
 
-      // Get data min and max
-      var { min, max, array } = this.remoteSensingMinMax(data);
-      var unit = "Test";
-      var name = "Name";
-
       let layer = {
         ...JSON.parse(JSON.stringify(dataset.plotproperties)),
         ...JSON.parse(JSON.stringify(dataset)),
       };
 
+      // Get data min and max
+      var mapplot = "raster";
+      var unit = plotparameters[i].unit;
+      var name = plotparameters[i].parseparameter;
+      var { filemin, filemax, filearray } = this.remoteSensingMinMax(data);
+
       // Add Additional Parameters
       layer["realdatetime"] = realdatetime;
       layer["realdepth"] = realdepth;
+      layer["mapplot"] = mapplot;
       layer["files"] = files;
       layer["name"] = name;
       layer["data"] = data;
-      layer["min"] = min;
-      layer["max"] = max;
+      layer["min"] = filemin;
+      layer["max"] = filemax;
+      layer["opacity"] = 1;
+      layer["datamin"] = filemin;
+      layer["datamax"] = filemax;
       layer["unit"] = unit;
-      layer["array"] = array;
+      layer["array"] = filearray;
       layer["fileid"] = file.id;
       layer["datasets_id"] = datasets_id;
       layer["datasetparameters"] = plotparameters;
+      layer["color"] = this.getColor(selectedlayers);
       layer["parameters_id"] = parameters_id;
       layer["colors"] = this.parseColor(layer.colors);
       layer["id"] = datasets_id.toString() + "&" + parameters_id.toString();
@@ -706,6 +707,13 @@ class RemoteSensing extends Component {
 
       selectedlayers.push(layer);
     }
+
+    var {
+      mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
+    } = this.getSliderParameters(selectedlayers);
 
     var datasets = [dataset];
     this.setState({
@@ -715,8 +723,10 @@ class RemoteSensing extends Component {
       datasets,
       selectedlayers,
       downloads,
-      maxdatetime,
       mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
     });
   }
 
@@ -724,22 +734,35 @@ class RemoteSensing extends Component {
     var {
       selectedlayers,
       datasets,
+      timestep,
       menu,
-      slice,
       fullsize,
       help,
       point,
       line,
-      maxdatetime,
-      mindatetime,
+      colors,
       loading,
+      graph,
+      plotdata,
+      parameter,
       basemap,
+      depth,
       datetime,
-      pixelinfo,
       zoomIn,
       zoomOut,
+      mindatetime,
+      maxdatetime,
+      mindepth,
+      maxdepth,
+      modal,
+      modaltext,
+      modaldetail,
     } = this.state;
+    var { dataset } = this.props;
     var controls = [
+      { title: "Menu", active: menu, onClick: this.toggleMenu, img: menuicon },
+    ];
+    /*var controls = [
       { title: "Menu", active: menu, onClick: this.toggleMenu, img: menuicon },
       {
         title: "Transect",
@@ -747,24 +770,22 @@ class RemoteSensing extends Component {
         onClick: this.toggleSlice,
         img: sliceicon,
       },
-    ];
+    ];*/
 
+    var graphclass = "graphwrapper hide";
+    if (graph !== "none" && plotdata.x.length > 0) graphclass = "graphwrapper";
+    var punit = "";
+    if (selectedlayers.length > 0) punit = selectedlayers[0].unit;
+    var load = loading && false;
     return (
-      <div className={fullsize ? "rs full" : "rs"}>
-        <div className={menu ? "sidebar" : "sidebar hidden"}>
-          <RemoteSensingSidebar
-            basemap={basemap}
-            updateBaseMap={this.updateBaseMap}
-            datetime={datetime}
-            onChangeDatetime={this.onChangeDatetime}
-            mindatetime={mindatetime}
-            maxdatetime={maxdatetime}
-            pixelinfo={pixelinfo}
-            selectedlayers={selectedlayers}
-            onChangeColors={this.onChangeColors}
-          />
-        </div>
-        <div className={menu ? "basemapwrapper" : "basemapwrapper full"}>
+      <div className={fullsize ? "threed full" : "threed"}>
+        <ErrorModal
+          visible={modal}
+          text={modaltext}
+          details={modaldetail}
+          closeModal={this.closeModal}
+        />
+        <div className="basemapwrapper">
           <div className="controls">
             <MapControl
               zoomIn={zoomIn}
@@ -787,15 +808,88 @@ class RemoteSensing extends Component {
             updateLine={this.updateLine}
             basemap={basemap}
             loading={loading}
-            passLocation={this.passLocation}
+            depth={depth}
+            datetime={datetime}
           />
 
-          {loading && (
+          <MapMenu
+            menu={menu}
+            help={help}
+            toggleMenu={this.toggleMenu}
+            toggleHelp={this.toggleHelp}
+            menucontent={
+              <RemoteSensingMenu
+                basemap={basemap}
+                updateBaseMap={this.updateBaseMap}
+                selectedlayers={selectedlayers}
+                toggleLayerView={this.toggleLayerView}
+                updateMapLayers={this.updateMapLayers}
+              />
+            }
+          />
+          <div className="timeselector-gis">
+            <DatetimeDepthSelector
+              selectedlayers={selectedlayers}
+              mindatetime={mindatetime}
+              maxdatetime={maxdatetime}
+              mindepth={mindepth}
+              maxdepth={maxdepth}
+              datetime={datetime}
+              depth={depth}
+              timestep={timestep}
+              onChangeDatetime={this.onChangeDatetime}
+              onChangeDepth={this.onChangeDepth}
+              onChangeTimestep={this.onChangeTimestep}
+            />
+          </div>
+          <div className="threedlegend">
+            <Legend selectedlayers={selectedlayers} open={false} />
+          </div>
+
+          {load && (
             <div className="map-loader">
               <Loading />
               Downloading and plotting data
             </div>
           )}
+        </div>
+        {graph === "slicegraph" && plotdata.x.length > 0 && (
+          <div className={graphclass}>
+            <div className="close" onClick={this.closeSelect}>
+              ×
+            </div>
+            <D3HeatMap
+              data={plotdata}
+              title={`${dataset.title} Transect`}
+              xlinear={true}
+              xlabel={"Distance"}
+              ylabel={"Depth"}
+              zlabel={parameter}
+              xunits={"km"}
+              yunits={"m"}
+              zunits={punit}
+              bcolor={"white"}
+              colors={colors}
+              display={"heatmap"}
+            />
+            <select
+              className="parameter-select"
+              onChange={this.changePlotParameter}
+              value={parameter}
+            >
+              <option value="Temperature">Water Temperature</option>
+              <option value="Velocity">Water Velocity</option>
+            </select>
+          </div>
+        )}
+        <div className="printheader">
+          <div>Datalakes Print</div>
+          <div>
+            {datetime.toString()} @ {depth}m
+          </div>
+        </div>
+        <div className="printlegend">
+          <PrintLegend selectedlayers={selectedlayers} />
         </div>
       </div>
     );

@@ -18,6 +18,7 @@ import ThreeDModel from "./inner/threedmodel";
 import RemoteSensing from "./inner/remotesensing";
 import ThreeDModelDownload from "./inner/threedmodeldownload";
 import Ch2018Graph from "./inner/ch2018graph";
+import RemoteSensingDownload from "./inner/remotesensingdownload";
 
 class DataDetail extends Component {
   state = {
@@ -536,7 +537,12 @@ class DataDetail extends Component {
         files,
         loading: false,
         step: "threedmodel",
-        allowedStep: ["threedmodel", "threedmodeldownload", "external", "webgis"],
+        allowedStep: [
+          "threedmodel",
+          "threedmodeldownload",
+          "external",
+          "webgis",
+        ],
       });
     } else if (mapplotfunction === "remoteSensing") {
       this.setState({
@@ -544,8 +550,13 @@ class DataDetail extends Component {
         datasetparameters,
         dropdown,
         files,
-        step: "external",
-        allowedStep: ["external", "webgis"],
+        step: "remotesensing",
+        allowedStep: [
+          "remotesensing",
+          "remotesensingdownload",
+          "external",
+          "webgis",
+        ],
       });
     } else if (mapplotfunction === "ch2018") {
       this.setState({
@@ -808,6 +819,25 @@ class DataDetail extends Component {
             />
           </React.Fragment>
         );
+        case "remotesensingdownload":
+          return (
+            <React.Fragment>
+              <h1>{dataset.title}</h1>
+              <DataSubMenu
+                step={step}
+                allowedStep={allowedStep}
+                updateSelectedState={this.updateSelectedState}
+                link={link}
+              />
+              <RemoteSensingDownload
+                dataset={dataset}
+                datasetparameters={datasetparameters}
+                getLabel={this.getLabel}
+                files={files}
+                link={link}
+              />
+            </React.Fragment>
+          );
       case "remotesensing":
         return (
           <React.Fragment>
