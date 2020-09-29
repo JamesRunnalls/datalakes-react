@@ -33,8 +33,8 @@
   "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
   "devDependencies": {},
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build --max_old_space_size=8192",
+    "start": "react-scripts --max_old_space_size=8192 start",
+    "build": "react-scripts --max_old_space_size=8192 build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
