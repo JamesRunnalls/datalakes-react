@@ -29,7 +29,7 @@ class Footer extends Component {
                       <a className="partner-logo" rel="noopener noreferrer" href="https://www.unige.ch/sciences/terre/en/highlights/lexplore-floating-laboratory-study-lake-geneva/" target="_blank" title="Visit the UNIGE news page for the L'EXPLORE platform">
                           <img alt="Universite de Geneve Logo" src={geneve} />
                       </a>
-                      <a className="partner-logo" rel="noopener noreferrer" href="https://www6.dijon.inra.fr/thonon/Actualites-du-CARRTEL/La-plateforme-experimentale-LeXPLORE-Exploration-du-Leman-baptisee" target="_blank" title="Visit the CARRTEL news page for the L'EXPLORE platform">
+                      <a className="partner-logo" rel="noopener noreferrer" href="https://www6.dijon.inrae.fr/thonon/" target="_blank" title="Visit the CARRTEL news page for the L'EXPLORE platform">
                           <img alt="Carrtel Logo" src={carrtel} />
                       </a>
                   </div>
