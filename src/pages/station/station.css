@@ -63,7 +63,9 @@
 }
 
 .live-parameter-container {
-  margin-top: 50px;
+  vertical-align: top;
+  width: 57%;
+  display: inline-block;
 }
 
 .live-parameter-container img {
@@ -71,12 +73,25 @@
   max-width: 100%;
 }
 
+.webcam {
+  width: 43%;
+  display: inline-block;
+}
+
+.webcam img {
+  width: 100%;
+}
+
 @media screen and (max-width: 500px) {
   .live-parameter-container {
     margin-top: 20px;
     margin-bottom: 120px;
+    width: 100%;
+  }
+  .webcam {
+    width: 100%;
   }
   .weatherstation-graph {
-    height: auto;
+    height: 500px;
   }
 }

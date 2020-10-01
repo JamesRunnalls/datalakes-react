@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import axios from "axios";
-import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import { apiUrl } from "../../../src/config.json";
 import D3LineGraph from "../../graphs/d3/linegraph/linegraph";
 import "./station.css";
@@ -22,13 +21,6 @@ class LiveParameterSummary extends Component {
             />
           );
         })}
-        <a href="https://www.pully.ch/fr/footer/webcam-medias/">
-          <img
-            src="https://www.pully.ch/media/64410/w_prieure.jpg?Cache=No&format=png"
-            alt="Webcam at Pully"
-          />
-        </a>
-        <div>Image Copywrite Ville de Pully</div>
       </div>
     );
   }
@@ -67,7 +59,7 @@ class LiveParameter extends Component {
         (hour < 10 ? "0" + hour : hour) + ":" + (min < 10 ? "0" + min : min);
 
       return (
-        <div className={paramClass} title={title} onClick={() => select(index)}>
+        <div className={paramClass} title={title}>
           <div className="value">{time}</div>
           <div className="units">{date + " " + month}</div>
           <div className="label">{year}</div>
@@ -87,7 +79,7 @@ class LiveParameter extends Component {
   }
 }
 
-class WeatherStationRight extends Component {
+class WeatherStationGraph extends Component {
   render() {
     var { dataset, datainfo, selected } = this.props;
     if (dataset.length > 0) {
@@ -164,22 +156,25 @@ class Station extends Component {
       return (
         <React.Fragment>
           <h1>{datainfo.name} Live</h1>
-          <SidebarLayout
-            sidebartitle="Time Series"
-            left={
-              <LiveParameterSummary
-                dataset={dataset}
-                selected={selected}
-                select={this.setSelectedState}
+
+          <LiveParameterSummary
+            dataset={dataset}
+            selected={selected}
+            select={this.setSelectedState}
+          />
+          <div className="webcam">
+            <a href="https://www.pully.ch/fr/footer/webcam-medias/">
+              <img
+                src="https://www.pully.ch/media/64410/w_prieure.jpg?Cache=No&format=png"
+                alt="Webcam at Pully"
               />
-            }
-            rightNoScroll={
-              <WeatherStationRight
-                dataset={dataset}
-                datainfo={datainfo}
-                selected={selected}
-              />
-            }
+            </a>
+            <div>Image Copywrite Ville de Pully</div>
+          </div>
+          <WeatherStationGraph
+            dataset={dataset}
+            datainfo={datainfo}
+            selected={selected}
           />
         </React.Fragment>
       );
