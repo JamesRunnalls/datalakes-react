@@ -1193,7 +1193,7 @@ class GIS extends Component {
           center={center}
           selectedlayers={selectedlayers}
           datasets={datasets}
-          legend={<Legend selectedlayers={selectedlayers} />}
+          legend={<Legend selectedlayers={selectedlayers} open={true} />}
           templates={templates}
           basemap={basemap}
           updateLocation={this.updateLocation}

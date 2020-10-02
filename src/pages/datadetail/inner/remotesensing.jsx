@@ -1016,7 +1016,7 @@ class RemoteSensing extends Component {
             />
           </div>
           <div className="threedlegend">
-            <Legend selectedlayers={selectedlayers} open={false} />
+            <Legend selectedlayers={selectedlayers} open={true} />
           </div>
 
           {load && (

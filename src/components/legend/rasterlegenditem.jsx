@@ -46,7 +46,7 @@ class RasterLegendItem extends Component {
             rowSpan={6}
           ></td>
           <td className="rasterdisplay-bar">&#9472;</td>
-          <td>{Math.round(1000 * max) / 1000}</td>
+          <td>{Math.round(10 * max) / 10}</td>
           <td>{unit}</td>
         </tr>
       );
@@ -59,14 +59,14 @@ class RasterLegendItem extends Component {
         >
           <td className="rasterdisplay-bar">&#9472;</td>
           <td className="rasterdisplay-innerlabel">
-            {Math.round(1000 * ((max + min) / 2)) / 1000}
+            {Math.round(10 * ((max + min) / 2)) / 10}
           </td>
         </tr>
       );
       inner.push(
         <tr key={2}>
           <td className="rasterdisplay-bar">&#9472;</td>
-          <td>{Math.round(1000 * min) / 1000}</td>
+          <td>{Math.round(10 * min) / 10}</td>
         </tr>
       );
     }
