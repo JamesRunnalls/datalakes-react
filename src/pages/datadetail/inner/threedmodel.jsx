@@ -43,6 +43,7 @@ class ThreeDMenu extends Component {
                 title="Edit the background map style"
               >
                 <option value="datalakesmap">Datalakes Map</option>
+                <option value="datalakesmapgrey">Datalakes Map Greyscale</option>
                 <option value="swisstopo">Swisstopo</option>
                 <option value="satellite">Satellite</option>
                 <option value="dark">Dark</option>

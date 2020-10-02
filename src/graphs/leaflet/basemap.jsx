@@ -1257,6 +1257,13 @@ class Basemap extends Component {
           'swisstopo DV 5704 000 000 | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://www.mapbox.com/">mapbox</a>',
       }
     );
+    var datalakesmapgrey = L.tileLayer(
+      "https://api.mapbox.com/styles/v1/jamesrunnalls/ckfs3ngtw0fx519o5oinhc5mh/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamFtZXNydW5uYWxscyIsImEiOiJjazk0ZG9zd2kwM3M5M2hvYmk3YW0wdW9yIn0.uIJUZoDgaC2LfdGtgMz0cQ",
+      {
+        attribution:
+          'swisstopo DV 5704 000 000 | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | &copy; <a href="https://www.mapbox.com/">mapbox</a>',
+      }
+    );
     var swisstopo = L.tileLayer(
       "https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg",
       {
@@ -1285,6 +1292,7 @@ class Basemap extends Component {
 
     this.baseMaps = {
       datalakesmap,
+      datalakesmapgrey,
       swisstopo,
       satellite,
       dark,
