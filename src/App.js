@@ -13,6 +13,7 @@ import GIS from "./pages/gis/gis";
 import Footer from "./format/footer/footer";
 import ch2018Graph from "./pages/datadetail/inner/ch2018graph";
 import ThreeViewer from "./graphs/three/threeviewer";
+import NetCDF from "./pages/netcdf/netcdf";
 import Amplify from "aws-amplify";
 import awsconfig from "./aws-exports";
 Amplify.configure(awsconfig);
@@ -33,6 +34,8 @@ class App extends Component {
             <Route path="/lakestation" component={Station} />
 
             <Route path="/API" component={API} />
+
+            <Route path="/netcdf" component={NetCDF} />
 
             <Route path="/adddataset" component={AddDataset} />
 
