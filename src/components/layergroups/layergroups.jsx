@@ -58,7 +58,7 @@ class LayerGroups extends Component {
         },
       },
       {
-        name: "Lake Griefen 3D Model",
+        name: "Lake Greifen 3D Model",
         description: "Some description",
         img: editlayers,
         data: {
@@ -76,7 +76,7 @@ class LayerGroups extends Component {
         img: editlayers,
         data: {
           selected: [
-            [1, 15],
+            [20, 15],
             [14, 25],
           ],
           center: [46.405, 6.578],
