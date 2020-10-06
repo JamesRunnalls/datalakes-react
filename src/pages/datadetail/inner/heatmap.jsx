@@ -194,6 +194,27 @@ class HeatMap extends Component {
     minY: 0,
   };
 
+  addGaps = (obj, gap) => {
+    if (this.state.xlabel === "Time" && obj) {
+      for (var i = 1; i < obj.x.length; i++) {
+        if (
+          obj.x[i].getTime() - obj.x[i - 1].getTime() >
+          gap * 60 * 60 * 1000
+        ) {
+          obj.x.splice(
+            i,
+            0,
+            new Date(obj.x[i - 1].getTime() + gap * 60 * 60 * 1000)
+          );
+          obj.z.map((z) => z.splice(i, 0, null));
+        }
+      }
+      return obj;
+    } else {
+      return obj;
+    }
+  };
+
   onChangeY = (event) => {
     this.setState({ lowerY: event[0], upperY: event[1] });
   };
@@ -584,6 +605,8 @@ class HeatMap extends Component {
       // Value
       var value = new Date(files[file].ave);
     }
+
+    plotdata = this.addGaps(plotdata, 12);
 
     return (
       <React.Fragment>
