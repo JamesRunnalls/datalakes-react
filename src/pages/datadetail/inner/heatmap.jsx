@@ -167,6 +167,125 @@ class DisplayOptions extends Component {
   }
 }
 
+class HeatMapSidebar extends Component {
+  render() {
+    return (
+      <React.Fragment>
+        <div>
+          <div>
+            x:{" "}
+            <div className="axis-select">
+              <DataSelect
+                value="value"
+                label="label"
+                dataList={this.props.xoptions}
+                defaultValue={this.props.xaxis}
+                onChange={this.props.handleAxisSelect("xaxis")}
+              />
+            </div>
+          </div>
+          <div>
+            y:{" "}
+            <div className="axis-select">
+              <DataSelect
+                value="value"
+                label="label"
+                dataList={this.props.yoptions}
+                defaultValue={this.props.yaxis}
+                onChange={this.props.handleAxisSelect("yaxis")}
+              />
+            </div>
+          </div>
+          <div>
+            z:{" "}
+            <div className="axis-select">
+              <DataSelect
+                value="value"
+                label="label"
+                dataList={this.props.zoptions}
+                defaultValue={this.props.zaxis}
+                onChange={this.props.handleAxisSelect("zaxis")}
+              />
+            </div>
+          </div>
+        </div>
+        {this.props.fileSlider && (
+          <FilterBox
+            title="Other Files"
+            preopen="true"
+            content={
+              <div className="">
+                <SliderSingle
+                  onChange={this.props.onChangeFile}
+                  onChangeFileInt={this.props.onChangeFileInt}
+                  file={this.props.file}
+                  value={this.props.value}
+                  min={this.props.min}
+                  max={this.props.max}
+                  files={this.props.files}
+                  type="time"
+                />
+                <LoadDataSets
+                  data={this.props.data}
+                  downloadData={this.props.downloadData}
+                />
+              </div>
+            }
+          />
+        )}
+        {this.props.timeSlider && (
+          <FilterBox
+            title="Date Range"
+            preopen="true"
+            content={
+              <div className="side-date-slider">
+                <SliderDouble
+                  onChange={this.props.onChangeTime}
+                  onChangeLower={this.props.onChangeLower}
+                  onChangeUpper={this.props.onChangeUpper}
+                  min={this.props.min}
+                  max={this.props.max}
+                  lower={this.props.lower}
+                  upper={this.props.upper}
+                  files={this.props.files}
+                />
+                <LoadDataSets
+                  data={this.props.data}
+                  downloadData={this.props.downloadData}
+                />
+              </div>
+            }
+          />
+        )}
+        <FilterBox
+          title={this.props.ylabel + " Range"}
+          content={
+            <div className="side-date-slider">
+              <NumberSliderDouble
+                onChange={this.props.onChangeY}
+                min={this.props.minY}
+                max={this.props.maxY}
+                lower={this.props.lowerY}
+                upper={this.props.upperY}
+                unit={this.props.yunits}
+              />
+            </div>
+          }
+        />
+        <DisplayOptions
+          colors={this.props.colors}
+          title={this.props.title}
+          bcolor={this.props.bcolor}
+          thresholdStep={this.props.thresholdStep}
+          minvalue={this.props.minvalue}
+          maxvalue={this.props.maxvalue}
+          onChange={this.props.onChangeDisplay}
+        />
+      </React.Fragment>
+    );
+  }
+}
+
 class HeatMap extends Component {
   state = {
     colors: [
@@ -201,12 +320,11 @@ class HeatMap extends Component {
           obj.x[i].getTime() - obj.x[i - 1].getTime() >
           gap * 60 * 60 * 1000
         ) {
-          obj.x.splice(
-            i,
-            0,
-            new Date(obj.x[i - 1].getTime() + gap * 60 * 60 * 1000)
-          );
+          obj.x.splice(i, 0, new Date(obj.x[i - 1].getTime() + 60 * 1000));
           obj.z.map((z) => z.splice(i, 0, null));
+          obj.x.splice(i + 1, 0, new Date(obj.x[i + 1].getTime() - 60 * 1000));
+          obj.z.map((z) => z.splice(i + 1, 0, null));
+          i = i + 2;
         }
       }
       return obj;
@@ -387,7 +505,12 @@ class HeatMap extends Component {
         u = i;
       }
     }
+
     var x = data.x.slice(l, u);
+    if (data.x[0] === upper && data.x[0] === lower) {
+      x = data.x;
+    }
+
     var y = data.y;
 
     var z = [];
@@ -424,12 +547,122 @@ class HeatMap extends Component {
     return { x: x, y: y, z: z };
   };
 
+  setAxisOptions = (datasetparameters, getLabel) => {
+    var xoptions = [];
+    var yoptions = [];
+    var zoptions = [];
+    for (var j = 0; j < datasetparameters.length; j++) {
+      if (datasetparameters[j]["axis"].includes("x")) {
+        xoptions.push({
+          value: datasetparameters[j]["axis"],
+          label: getLabel(
+            "parameters",
+            datasetparameters[j]["parameters_id"],
+            "name"
+          ),
+        });
+      } else if (datasetparameters[j]["axis"].includes("y")) {
+        yoptions.push({
+          value: datasetparameters[j]["axis"],
+          label: getLabel(
+            "parameters",
+            datasetparameters[j]["parameters_id"],
+            "name"
+          ),
+        });
+      } else if (datasetparameters[j]["axis"].includes("z")) {
+        zoptions.push({
+          value: datasetparameters[j]["axis"],
+          label: getLabel(
+            "parameters",
+            datasetparameters[j]["parameters_id"],
+            "name"
+          ),
+        });
+      }
+    }
+    return { xoptions, yoptions, zoptions };
+  };
+
+  combineFiles = (files, combined, data, file, xaxis, yaxis, zaxis) => {
+    var plotdata;
+    if (files[file].connect === "join") {
+      if (Array.isArray(combined)) {
+        plotdata = [];
+        for (var k = 0; k < combined.length; k++) {
+          plotdata.push({
+            x: combined[k][xaxis],
+            y: combined[k][yaxis],
+            z: combined[k][zaxis],
+          });
+        }
+      } else {
+        plotdata = {
+          x: combined[xaxis],
+          y: combined[yaxis],
+          z: combined[zaxis],
+        };
+      }
+    } else if (files[file].connect === "ind") {
+      plotdata = {
+        x: data[file][xaxis],
+        y: data[file][yaxis],
+        z: data[file][zaxis],
+      };
+    } else {
+      plotdata = {
+        x: data[0][xaxis],
+        y: data[0][yaxis],
+        z: data[0][zaxis],
+      };
+    }
+    return plotdata;
+  };
+
+  formatDepthTime = (plotdata, xlabel, ylabel) => {
+    if (Array.isArray(plotdata)) {
+      for (var i = 0; i < plotdata.length; i++) {
+        var { x, y, z } = plotdata[i];
+        if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+        if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+        if (xlabel === "Depth") x = x.map((i) => -i);
+        if (ylabel === "Depth") y = y.map((i) => -i);
+        plotdata[i] = { x, y, z };
+      }
+    } else {
+      ({ x, y, z } = plotdata);
+      if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+      if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+      if (xlabel === "Depth") x = x.map((i) => -i);
+      if (ylabel === "Depth") y = y.map((i) => -i);
+      plotdata = { x, y, z };
+    }
+    return plotdata;
+  };
+
   componentDidMount() {
     this.setDefault();
     document.addEventListener("keydown", this.handleKeyDown);
   }
 
   componentDidUpdate(prevProps) {
+    // If not much data download previous file
+    try {
+      var { onChangeLower, data, loading } = this.props;
+      let test = data.filter((d) => d !== 0);
+      if (
+        test.length === 1 &&
+        test[0].x.length < 5 &&
+        !loading &&
+        data.length > 1
+      ) {
+        onChangeLower(new Date((test[0].x[0] - 24 * 60 * 60) * 1000));
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    // Combine files on update
     if (prevProps.loading && !this.props.loading) {
       var { data } = this.props;
       var { minvalue, maxvalue } = this.state;
@@ -458,11 +691,6 @@ class HeatMap extends Component {
 
   render() {
     var {
-      onChangeTime,
-      onChangeFile,
-      onChangeFileInt,
-      onChangeLower,
-      onChangeUpper,
       datasetparameters,
       getLabel,
       data,
@@ -472,7 +700,6 @@ class HeatMap extends Component {
       min,
       files,
       file,
-      downloadData,
       loading,
       combined,
     } = this.props;
@@ -510,103 +737,34 @@ class HeatMap extends Component {
       }
     }
 
-    // Axis Options
-    var xoptions = [];
-    var yoptions = [];
-    var zoptions = [];
-    for (var j = 0; j < datasetparameters.length; j++) {
-      if (datasetparameters[j]["axis"].includes("x")) {
-        xoptions.push({
-          value: datasetparameters[j]["axis"],
-          label: getLabel(
-            "parameters",
-            datasetparameters[j]["parameters_id"],
-            "name"
-          ),
-        });
-      } else if (datasetparameters[j]["axis"].includes("y")) {
-        yoptions.push({
-          value: datasetparameters[j]["axis"],
-          label: getLabel(
-            "parameters",
-            datasetparameters[j]["parameters_id"],
-            "name"
-          ),
-        });
-      } else if (datasetparameters[j]["axis"].includes("z")) {
-        zoptions.push({
-          value: datasetparameters[j]["axis"],
-          label: getLabel(
-            "parameters",
-            datasetparameters[j]["parameters_id"],
-            "name"
-          ),
-        });
-      }
-    }
+    var { xoptions, yoptions, zoptions } = this.setAxisOptions(
+      datasetparameters,
+      getLabel
+    );
 
     if (!loading) {
-      // Get data
-      var plotdata;
-      if (files[file].connect === "join") {
-        if (Array.isArray(combined)) {
-          plotdata = [];
-          for (var k = 0; k < combined.length; k++) {
-            plotdata.push({
-              x: combined[k][xaxis],
-              y: combined[k][yaxis],
-              z: combined[k][zaxis],
-            });
-          }
-        } else {
-          plotdata = {
-            x: combined[xaxis],
-            y: combined[yaxis],
-            z: combined[zaxis],
-          };
-        }
-      } else if (files[file].connect === "ind") {
-        plotdata = {
-          x: data[file][xaxis],
-          y: data[file][yaxis],
-          z: data[file][zaxis],
-        };
-      } else {
-        plotdata = { x: data[0][xaxis], y: data[0][yaxis], z: data[0][zaxis] };
-      }
+      var plotdata = this.combineFiles(
+        files,
+        combined,
+        data,
+        file,
+        xaxis,
+        yaxis,
+        zaxis
+      );
 
-      if (timeSlider) {
+      if (timeSlider)
         plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
-      }
 
-      if (minY !== lowerY || maxY !== upperY) {
+      if (minY !== lowerY || maxY !== upperY)
         plotdata = this.YFilter(plotdata, lowerY, upperY, minY, maxY);
-      }
 
-      // Format data
-      if (Array.isArray(plotdata)) {
-        for (var i = 0; i < plotdata.length; i++) {
-          var { x, y, z } = plotdata[i];
-          if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
-          if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-          if (xlabel === "Depth") x = x.map((i) => -i);
-          if (ylabel === "Depth") y = y.map((i) => -i);
-          plotdata[i] = { x, y, z };
-        }
-      } else {
-        ({ x, y, z } = plotdata);
-        if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
-        if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-        if (xlabel === "Depth") x = x.map((i) => -i);
-        if (ylabel === "Depth") y = y.map((i) => -i);
-        plotdata = { x, y, z };
-      }
+      if (plotdata.x) plotdata = this.formatDepthTime(plotdata, xlabel, ylabel);
 
-      // Value
+      plotdata = this.addGaps(plotdata, 12);
+
       var value = new Date(files[file].ave);
     }
-
-    plotdata = this.addGaps(plotdata, 12);
 
     return (
       <React.Fragment>
@@ -632,112 +790,19 @@ class HeatMap extends Component {
             </div>
           }
           rightNoScroll={
-            <React.Fragment>
-              <div>
-                <div>
-                  x:{" "}
-                  <div className="axis-select">
-                    <DataSelect
-                      value="value"
-                      label="label"
-                      dataList={xoptions}
-                      defaultValue={xaxis}
-                      onChange={this.handleAxisSelect("xaxis")}
-                    />
-                  </div>
-                </div>
-                <div>
-                  y:{" "}
-                  <div className="axis-select">
-                    <DataSelect
-                      value="value"
-                      label="label"
-                      dataList={yoptions}
-                      defaultValue={yaxis}
-                      onChange={this.handleAxisSelect("yaxis")}
-                    />
-                  </div>
-                </div>
-                <div>
-                  z:{" "}
-                  <div className="axis-select">
-                    <DataSelect
-                      value="value"
-                      label="label"
-                      dataList={zoptions}
-                      defaultValue={zaxis}
-                      onChange={this.handleAxisSelect("zaxis")}
-                    />
-                  </div>
-                </div>
-              </div>
-              {fileSlider && (
-                <FilterBox
-                  title="Other Files"
-                  preopen="true"
-                  content={
-                    <div className="">
-                      <SliderSingle
-                        onChange={onChangeFile}
-                        onChangeFileInt={onChangeFileInt}
-                        file={file}
-                        value={value}
-                        min={min}
-                        max={max}
-                        files={files}
-                        type="time"
-                      />
-                      <LoadDataSets data={data} downloadData={downloadData} />
-                    </div>
-                  }
-                />
-              )}
-              {timeSlider && (
-                <FilterBox
-                  title="Date Range"
-                  preopen="true"
-                  content={
-                    <div className="side-date-slider">
-                      <SliderDouble
-                        onChange={onChangeTime}
-                        onChangeLower={onChangeLower}
-                        onChangeUpper={onChangeUpper}
-                        min={min}
-                        max={max}
-                        lower={lower}
-                        upper={upper}
-                        files={files}
-                      />
-                      <LoadDataSets data={data} downloadData={downloadData} />
-                    </div>
-                  }
-                />
-              )}
-              <FilterBox
-                title={ylabel + " Range"}
-                content={
-                  <div className="side-date-slider">
-                    <NumberSliderDouble
-                      onChange={this.onChangeY}
-                      min={minY}
-                      max={maxY}
-                      lower={lowerY}
-                      upper={upperY}
-                      unit={yunits}
-                    />
-                  </div>
-                }
-              />
-              <DisplayOptions
-                colors={colors}
-                title={title}
-                bcolor={bcolor}
-                thresholdStep={thresholdStep}
-                minvalue={minvalue}
-                maxvalue={maxvalue}
-                onChange={this.onChangeDisplay}
-              />
-            </React.Fragment>
+            <HeatMapSidebar
+              {...this.props}
+              {...this.state}
+              value={value}
+              timeSlider={timeSlider}
+              fileSlider={fileSlider}
+              xoptions={xoptions}
+              yoptions={yoptions}
+              zoptions={zoptions}
+              handleAxisSelect={this.handleAxisSelect}
+              onChangeY={this.onChangeY}
+              onChangeDisplay={this.onChangeDisplay}
+            />
           }
           open="False"
         />

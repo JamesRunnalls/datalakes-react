@@ -462,7 +462,7 @@ class DataDetail extends Component {
       mindatetime = new Date(mindatetime).getTime() / 1000;
       maxdatetime = new Date(maxdatetime).getTime() / 1000;
 
-      // Download first file
+      // Download first two files
       var dataArray = new Array(files.length).fill(0);
       var { data } = await axios
         .get(apiUrl + "/files/" + files[0].id + "?get=raw")
@@ -819,25 +819,25 @@ class DataDetail extends Component {
             />
           </React.Fragment>
         );
-        case "remotesensingdownload":
-          return (
-            <React.Fragment>
-              <h1>{dataset.title}</h1>
-              <DataSubMenu
-                step={step}
-                allowedStep={allowedStep}
-                updateSelectedState={this.updateSelectedState}
-                link={link}
-              />
-              <RemoteSensingDownload
-                dataset={dataset}
-                datasetparameters={datasetparameters}
-                getLabel={this.getLabel}
-                files={files}
-                link={link}
-              />
-            </React.Fragment>
-          );
+      case "remotesensingdownload":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
+            <RemoteSensingDownload
+              dataset={dataset}
+              datasetparameters={datasetparameters}
+              getLabel={this.getLabel}
+              files={files}
+              link={link}
+            />
+          </React.Fragment>
+        );
       case "remotesensing":
         return (
           <React.Fragment>

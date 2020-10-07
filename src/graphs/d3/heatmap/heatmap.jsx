@@ -825,7 +825,7 @@ class D3HeatMap extends Component {
           } else {
             contours = d3.contours().size([data.z[0].length, data.z.length]);
             values = data.z.flat();
-            fill(contours.thresholds(thresholds)(values)[0], data);
+            //fill(contours.thresholds(thresholds)(values)[0], data);
             contours
               .thresholds(thresholds)(values)
               .forEach((contour) => fill(contour, data));
