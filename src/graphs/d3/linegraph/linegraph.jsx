@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import { isEqual } from "lodash";
 import { format } from "date-fns";
 import GraphHeader from "../graphheader/graphheader";
+import "./linegraph.css";
 
 class D3LineGraph extends Component {
   state = {
@@ -127,6 +128,7 @@ class D3LineGraph extends Component {
           legend,
           setDownloadGraph,
           confidence,
+          simple,
         } = this.props;
 
         if (!lcolor) lcolor = ["#000000"];
@@ -138,7 +140,7 @@ class D3LineGraph extends Component {
 
         // Set graph size
         var margin = {
-            top: 40,
+            top: 10,
             right: 20,
             bottom: fontSize * 3 + 10,
             left: fontSize * 3 + 10,
@@ -416,290 +418,292 @@ class D3LineGraph extends Component {
             }
           }
 
-          // Zooming and Panning
-          var zoom = d3
-            .zoom()
-            .extent([
-              [0, 0],
-              [width, height],
-            ])
-            .on("zoom", normalzoom);
+          if (!simple) {
+            // Zooming and Panning
+            var zoom = d3
+              .zoom()
+              .extent([
+                [0, 0],
+                [width, height],
+              ])
+              .on("zoom", normalzoom);
 
-          var zoomx = d3
-            .zoom()
-            .extent([
-              [0, 0],
-              [width, height],
-            ])
-            .on("zoom", normalzoomx);
+            var zoomx = d3
+              .zoom()
+              .extent([
+                [0, 0],
+                [width, height],
+              ])
+              .on("zoom", normalzoomx);
 
-          var zoomy = d3
-            .zoom()
-            .extent([
-              [0, 0],
-              [width, height],
-            ])
-            .on("zoom", normalzoomy);
+            var zoomy = d3
+              .zoom()
+              .extent([
+                [0, 0],
+                [width, height],
+              ])
+              .on("zoom", normalzoomy);
 
-          var zoombox = svg
-            .append("rect")
-            .attr("id", "zoombox" + graphid)
-            .attr("width", width)
-            .attr("height", height)
-            .style("fill", "none")
-            .style("cursor", "move")
-            .attr("pointer-events", "all")
-            .call(zoom);
+            var zoombox = svg
+              .append("rect")
+              .attr("id", "zoombox" + graphid)
+              .attr("width", width)
+              .attr("height", height)
+              .style("fill", "none")
+              .style("cursor", "move")
+              .attr("pointer-events", "all")
+              .call(zoom);
 
-          var zoomboxx = svg
-            .append("rect")
-            .attr("id", "zoomboxx" + graphid)
-            .attr("width", width)
-            .attr("height", margin.bottom)
-            .style("fill", "none")
-            .style("cursor", "col-resize")
-            .attr("pointer-events", "all")
-            .attr("y", height)
-            .call(zoomx);
+            var zoomboxx = svg
+              .append("rect")
+              .attr("id", "zoomboxx" + graphid)
+              .attr("width", width)
+              .attr("height", margin.bottom)
+              .style("fill", "none")
+              .style("cursor", "col-resize")
+              .attr("pointer-events", "all")
+              .attr("y", height)
+              .call(zoomx);
 
-          var zoomboxy = svg
-            .append("rect")
-            .attr("id", "zoomboxy" + graphid)
-            .attr("width", margin.left)
-            .attr("height", height)
-            .style("fill", "none")
-            .style("cursor", "row-resize")
-            .attr("pointer-events", "all")
-            .attr("x", -margin.left)
-            .call(zoomy);
+            var zoomboxy = svg
+              .append("rect")
+              .attr("id", "zoomboxy" + graphid)
+              .attr("width", margin.left)
+              .attr("height", height)
+              .style("fill", "none")
+              .style("cursor", "row-resize")
+              .attr("pointer-events", "all")
+              .attr("x", -margin.left)
+              .call(zoomy);
 
-          function normalzoom() {
-            let t = d3.event.transform;
-            if (t !== d3.zoomIdentity) {
-              x = t.rescaleX(xref);
-              y = t.rescaleY(yref);
-              xAxis.scale(x);
-              gX.call(xAxis);
-              yAxis.scale(y);
+            function normalzoom() {
+              let t = d3.event.transform;
+              if (t !== d3.zoomIdentity) {
+                x = t.rescaleX(xref);
+                y = t.rescaleY(yref);
+                xAxis.scale(x);
+                gX.call(xAxis);
+                yAxis.scale(y);
+                gY.call(yAxis);
+                removeCommaFromLabels(gX);
+                line.selectAll("path").remove();
+                confInt.selectAll("path").remove();
+                plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+                yref = y;
+                xref = x;
+                zoombox.call(zoom.transform, d3.zoomIdentity);
+              }
+            }
+
+            function normalzoomx() {
+              let t = d3.event.transform;
+              if (t !== d3.zoomIdentity) {
+                x = t.rescaleX(xref);
+                xAxis.scale(x);
+                gX.call(xAxis);
+                removeCommaFromLabels(gX);
+                line.selectAll("path").remove();
+                confInt.selectAll("path").remove();
+                plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+                xref = x;
+                zoomboxx.call(zoom.transform, d3.zoomIdentity);
+              }
+            }
+
+            function normalzoomy() {
+              let t = d3.event.transform;
+              if (t !== d3.zoomIdentity) {
+                y = t.rescaleX(yref);
+                yAxis.scale(y);
+                gY.call(yAxis);
+                removeCommaFromLabels(gX);
+                line.selectAll("path").remove();
+                confInt.selectAll("path").remove();
+                plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+                yref = y;
+                zoomboxy.call(zoom.transform, d3.zoomIdentity);
+              }
+            }
+
+            zoombox.on("dblclick.zoom", null).on("dblclick", () => {
+              x = xbase;
+              y = ybase;
+              xref = xbase;
+              yref = ybase;
+              yAxis.scale(ybase);
               gY.call(yAxis);
-              removeCommaFromLabels(gX);
-              line.selectAll("path").remove();
-              confInt.selectAll("path").remove();
-              plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
-              yref = y;
-              xref = x;
-              zoombox.call(zoom.transform, d3.zoomIdentity);
-            }
-          }
-
-          function normalzoomx() {
-            let t = d3.event.transform;
-            if (t !== d3.zoomIdentity) {
-              x = t.rescaleX(xref);
-              xAxis.scale(x);
+              xAxis.scale(xbase);
               gX.call(xAxis);
               removeCommaFromLabels(gX);
               line.selectAll("path").remove();
               confInt.selectAll("path").remove();
               plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
-              xref = x;
-              zoomboxx.call(zoom.transform, d3.zoomIdentity);
+            });
+            zoomboxx.on("dblclick.zoom", null);
+            zoomboxy.on("dblclick.zoom", null);
+
+            // Add Focus
+            var focus = [];
+            for (let f = 0; f < data.length; f++) {
+              focus.push(
+                svg
+                  .append("g")
+                  .append("circle")
+                  .style("fill", lcolor[f])
+                  .attr("stroke", lcolor[f])
+                  .attr("r", 4)
+                  .style("opacity", 0)
+              );
             }
-          }
 
-          function normalzoomy() {
-            let t = d3.event.transform;
-            if (t !== d3.zoomIdentity) {
-              y = t.rescaleX(yref);
-              yAxis.scale(y);
-              gY.call(yAxis);
-              removeCommaFromLabels(gX);
-              line.selectAll("path").remove();
-              confInt.selectAll("path").remove();
-              plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
-              yref = y;
-              zoomboxy.call(zoom.transform, d3.zoomIdentity);
-            }
-          }
-
-          zoombox.on("dblclick.zoom", null).on("dblclick", () => {
-            x = xbase;
-            y = ybase;
-            xref = xbase;
-            yref = ybase;
-            yAxis.scale(ybase);
-            gY.call(yAxis);
-            xAxis.scale(xbase);
-            gX.call(xAxis);
-            removeCommaFromLabels(gX);
-            line.selectAll("path").remove();
-            confInt.selectAll("path").remove();
-            plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
-          });
-          zoomboxx.on("dblclick.zoom", null);
-          zoomboxy.on("dblclick.zoom", null);
-
-          // Add Focus
-          var focus = [];
-          for (let f = 0; f < data.length; f++) {
-            focus.push(
-              svg
+            // Add legend
+            if (legend) {
+              var legendblock = svg
                 .append("g")
-                .append("circle")
-                .style("fill", lcolor[f])
-                .attr("stroke", lcolor[f])
-                .attr("r", 4)
-                .style("opacity", 0)
-            );
-          }
+                .attr("id", "legendbox")
+                .attr("pointer-events", "none");
 
-          // Add legend
-          if (legend) {
-            var legendblock = svg
-              .append("g")
-              .attr("id", "legendbox")
-              .attr("pointer-events", "none");
-
-            // Add one dot in the legend for each name.
-            legendblock
-              .selectAll("legendtext")
-              .data(legend)
-              .enter()
-              .append("text")
-              .attr("x", width)
-              .attr("y", function (d, i) {
-                return height - 10 - i * 18;
-              })
-              .style("fill", function (d) {
-                return d.color;
-              })
-              .text(function (d) {
-                return "--- " + d.text;
-              })
-              .attr("text-anchor", "end")
-              .style("font-size", `${fontSize}px`)
-              .style("alignment-baseline", "middle");
-          }
-
-          // Add cursor catcher
-          svg
-            .select("#zoombox" + graphid)
-            .on("mouseover", mouseover)
-            .on("mousemove", mousemove)
-            .on("mouseout", mouseout);
-
-          function mouseover() {
-            for (let f = 0; f < focus.length; f++) {
-              focus[f].style("opacity", 1);
+              // Add one dot in the legend for each name.
+              legendblock
+                .selectAll("legendtext")
+                .data(legend)
+                .enter()
+                .append("text")
+                .attr("x", width)
+                .attr("y", function (d, i) {
+                  return height - 10 - i * 18;
+                })
+                .style("fill", function (d) {
+                  return d.color;
+                })
+                .text(function (d) {
+                  return "--- " + d.text;
+                })
+                .attr("text-anchor", "end")
+                .style("font-size", `${fontSize}px`)
+                .style("alignment-baseline", "middle");
             }
-          }
 
-          function mouseout() {
-            for (let f = 0; f < focus.length; f++) {
-              focus[f].style("opacity", 0);
-            }
-            document.getElementById("value" + graphid).innerHTML = "";
-          }
+            // Add cursor catcher
+            svg
+              .select("#zoombox" + graphid)
+              .on("mouseover", mouseover)
+              .on("mousemove", mousemove)
+              .on("mouseout", mouseout);
 
-          function closestCoordinates(x0, y0, xy) {
-            var x, y, dist_t;
-            var dist = Infinity;
-            for (var i = 0; i < xy.length; i++) {
-              dist_t = Math.sqrt(
-                Math.pow(Math.abs(xy[i].y - y0), 2) +
-                  Math.pow(Math.abs(xy[i].x - x0), 2)
-              );
-              if (dist_t < dist) {
-                x = xy[i].x;
-                y = xy[i].y;
-                dist = dist_t;
-              }
-            }
-            return { x: x, y: y };
-          }
-
-          function mousemove() {
-            try {
-              var y0 = y.invert(d3.mouse(this)[1]);
-              var x0 = x.invert(d3.mouse(this)[0]);
-              var selectedData;
-              var inner = `<tr><td>${
-                xunits ? xlabel + " (" + xunits + ")" : xlabel
-              }</td><td>${
-                yunits ? ylabel + " (" + yunits + ")" : ylabel
-              }</td></tr>`;
+            function mouseover() {
               for (let f = 0; f < focus.length; f++) {
-                selectedData = closestCoordinates(x0, y0, xy[f]);
-                focus[f]
-                  .attr("cx", x(selectedData.x))
-                  .attr("cy", y(selectedData.y));
-                var xtext;
-                if (xlabel === "Time") {
-                  xtext = format(new Date(selectedData.x), "hh:mm dd MMM yy");
-                } else {
-                  xtext = numberformat(selectedData.x);
-                }
-                var ytext;
-                if (ylabel === "Time") {
-                  ytext = format(new Date(selectedData.y), "hh:mm dd MMM yy");
-                } else {
-                  ytext = numberformat(selectedData.y);
-                }
-                inner =
-                  inner +
-                  `<tr style="color:${lcolor[f]}"><td>${xtext}</td><td>${ytext}</td></tr>`;
+                focus[f].style("opacity", 1);
               }
-              document.getElementById("value" + graphid).innerHTML = inner;
-            } catch (e) {}
-          }
-
-          function numberformat(num) {
-            num = parseFloat(num);
-            if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
-              num = num.toExponential(3);
-            } else {
-              num = Math.round(num * 10000) / 10000;
             }
-            return num;
-          }
 
-          d3.select("#png" + graphid).on("click", function () {
-            downloadGraph();
-          });
+            function mouseout() {
+              for (let f = 0; f < focus.length; f++) {
+                focus[f].style("opacity", 0);
+              }
+              document.getElementById("value" + graphid).innerHTML = "";
+            }
 
-          function downloadGraph() {
-            titlesvg.style("opacity", "1");
-            var s = new XMLSerializer();
-            var str = s.serializeToString(
-              document.getElementById("svg" + graphid)
-            );
+            function closestCoordinates(x0, y0, xy) {
+              var x, y, dist_t;
+              var dist = Infinity;
+              for (var i = 0; i < xy.length; i++) {
+                dist_t = Math.sqrt(
+                  Math.pow(Math.abs(xy[i].y - y0), 2) +
+                    Math.pow(Math.abs(xy[i].x - x0), 2)
+                );
+                if (dist_t < dist) {
+                  x = xy[i].x;
+                  y = xy[i].y;
+                  dist = dist_t;
+                }
+              }
+              return { x: x, y: y };
+            }
 
-            var canvas = document.createElement("canvas"),
-              context = canvas.getContext("2d");
+            function mousemove() {
+              try {
+                var y0 = y.invert(d3.mouse(this)[1]);
+                var x0 = x.invert(d3.mouse(this)[0]);
+                var selectedData;
+                var inner = `<tr><td>${
+                  xunits ? xlabel + " (" + xunits + ")" : xlabel
+                }</td><td>${
+                  yunits ? ylabel + " (" + yunits + ")" : ylabel
+                }</td></tr>`;
+                for (let f = 0; f < focus.length; f++) {
+                  selectedData = closestCoordinates(x0, y0, xy[f]);
+                  focus[f]
+                    .attr("cx", x(selectedData.x))
+                    .attr("cy", y(selectedData.y));
+                  var xtext;
+                  if (xlabel === "Time") {
+                    xtext = format(new Date(selectedData.x), "hh:mm dd MMM yy");
+                  } else {
+                    xtext = numberformat(selectedData.x);
+                  }
+                  var ytext;
+                  if (ylabel === "Time") {
+                    ytext = format(new Date(selectedData.y), "hh:mm dd MMM yy");
+                  } else {
+                    ytext = numberformat(selectedData.y);
+                  }
+                  inner =
+                    inner +
+                    `<tr style="color:${lcolor[f]}"><td>${xtext}</td><td>${ytext}</td></tr>`;
+                }
+                document.getElementById("value" + graphid).innerHTML = inner;
+              } catch (e) {}
+            }
 
-            canvas.width = viswidth;
-            canvas.height = visheight;
+            function numberformat(num) {
+              num = parseFloat(num);
+              if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
+                num = num.toExponential(3);
+              } else {
+                num = Math.round(num * 10000) / 10000;
+              }
+              return num;
+            }
 
-            var image = new Image();
-            image.onerror = function () {
-              alert(
-                "Appologies .png download failed. Pleaseawait  download as .svg."
+            d3.select("#png" + graphid).on("click", function () {
+              downloadGraph();
+            });
+
+            function downloadGraph() {
+              titlesvg.style("opacity", "1");
+              var s = new XMLSerializer();
+              var str = s.serializeToString(
+                document.getElementById("svg" + graphid)
               );
-            };
-            image.onload = function () {
-              context.drawImage(image, 0, 0);
-              var a = document.createElement("a");
-              a.download = "downloadgraph.png";
-              a.href = canvas.toDataURL("image/png");
-              a.click();
-            };
-            image.src =
-              "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
-            titlesvg.style("opacity", "0");
-          }
 
-          if (setDownloadGraph) {
-            setDownloadGraph(downloadGraph);
+              var canvas = document.createElement("canvas"),
+                context = canvas.getContext("2d");
+
+              canvas.width = viswidth;
+              canvas.height = visheight;
+
+              var image = new Image();
+              image.onerror = function () {
+                alert(
+                  "Appologies .png download failed. Pleaseawait  download as .svg."
+                );
+              };
+              image.onload = function () {
+                context.drawImage(image, 0, 0);
+                var a = document.createElement("a");
+                a.download = "downloadgraph.png";
+                a.href = canvas.toDataURL("image/png");
+                a.click();
+              };
+              image.src =
+                "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
+              titlesvg.style("opacity", "0");
+            }
+
+            if (setDownloadGraph) {
+              setDownloadGraph(downloadGraph);
+            }
           }
         }
       } catch (e) {
@@ -736,14 +740,13 @@ class D3LineGraph extends Component {
 
   render() {
     var { graphid, download, fullscreen, fontSize } = this.state;
-    var { title } = this.props;
-    return (
-      <React.Fragment>
-        <div
-          id={"vis" + graphid}
-          className={fullscreen ? "vis-main full" : "vis-main"}
-        >
-          <div className="vis-header">
+    var { title, simple } = this.props;
+    return simple ? (
+      <div className="linegraph-graph" id={"vis" + graphid} />
+    ) : (
+      <div className={fullscreen ? "vis-main full" : "vis-main"}>
+        <div className="linegraph-main">
+          <div className="linegraph-header">
             <GraphHeader
               id={graphid}
               title={title}
@@ -757,8 +760,9 @@ class D3LineGraph extends Component {
               downloadCSV={this.downloadCSV}
             />
           </div>
+          <div className="linegraph-graph" id={"vis" + graphid} />
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }

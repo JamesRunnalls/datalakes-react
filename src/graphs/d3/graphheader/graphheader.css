@@ -16,6 +16,7 @@
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 .vis-main.full {
@@ -26,16 +27,6 @@
   height: 100%;
   background-color: white;
   z-index: 999999;
-}
-
-.vis-header {
-  position: absolute;
-  left: 0;
-  top: 0;
-  padding: 3px;
-  width: 100%;
-  padding-left: 50px;
-  box-sizing: border-box;
 }
 
 .vis-header table.downloadtable {
@@ -54,6 +45,8 @@
   background-color: white;
   pointer-events: none;
   font-size: 12px;
+  position: absolute;
+  left: 50px;
 }
 
 .vis-header table.vis-data td {

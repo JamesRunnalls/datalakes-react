@@ -4,6 +4,9 @@ import "d3-contour";
 import { format } from "date-fns";
 import { getRGBAColor } from "../../../components/gradients/gradients";
 import GraphHeader from "../graphheader/graphheader";
+import "./heatmap.css";
+import { isEqual } from "lodash";
+import D3LineGraph from "../linegraph/linegraph";
 
 class D3HeatMap extends Component {
   state = {
@@ -13,10 +16,26 @@ class D3HeatMap extends Component {
     display: "contour",
     zoom: false,
     fontSize: 12,
+    xgraph: false,
+    ygraph: false,
+    mousex: false,
+    mousey: false,
   };
 
   editFontSize = (fontSize) => {
     this.setState({ fontSize });
+  };
+
+  toggleXgraph = () => {
+    this.setState({ xgraph: !this.state.xgraph }, () => {
+      window.dispatchEvent(new Event("resize"));
+    });
+  };
+
+  toggleYgraph = () => {
+    this.setState({ ygraph: !this.state.ygraph }, () => {
+      window.dispatchEvent(new Event("resize"));
+    });
   };
 
   toggleDownload = () => {
@@ -24,7 +43,17 @@ class D3HeatMap extends Component {
   };
 
   toggleFullscreen = () => {
-    this.setState({ fullscreen: !this.state.fullscreen });
+    var { fullscreen, xgraph, ygraph } = this.state;
+    this.setState(
+      {
+        fullscreen: !fullscreen,
+        xgraph: false,
+        ygraph: false,
+      },
+      () => {
+        this.setState({ xgraph, ygraph });
+      }
+    );
   };
 
   toggleDisplay = () => {
@@ -155,6 +184,7 @@ class D3HeatMap extends Component {
     try {
       d3.select("#svg" + graphid).remove();
       d3.select("#canvas" + graphid).remove();
+      d3.select("#tooltip" + graphid).remove();
     } catch (e) {}
     if (this.props.data !== undefined) {
       try {
@@ -179,7 +209,7 @@ class D3HeatMap extends Component {
 
         // Set graph size
         var margin = {
-            top: 40,
+            top: 10,
             right: fontSize * 5 + 10,
             bottom: fontSize * 3 + 10,
             left: fontSize * 3 + 10,
@@ -606,6 +636,7 @@ class D3HeatMap extends Component {
           .select("#vis" + graphid)
           .append("div")
           .style("opacity", 0)
+          .attr("id", "tooltip" + graphid)
           .attr("class", "graphtooltip");
 
         zoombox.on("mousemove", () => {
@@ -621,10 +652,10 @@ class D3HeatMap extends Component {
               process = data[getFileIndex(xdomarr, hoverX)];
             }
             var yi = closest(hoverY, process.y);
-            var xi;
+            var xi = closest(hoverX, process.x);
+
             var html = "";
             if (xlabel === "Time") {
-              xi = closest(hoverX, process.x);
               html =
                 "<table><tbody>" +
                 `<tr><td>x:</td><td>${format(
@@ -639,7 +670,6 @@ class D3HeatMap extends Component {
                 )} ${zunits}</td></tr>` +
                 "</tbody></table>";
             } else {
-              xi = closest(hoverX, process.x);
               html =
                 "<table><tbody>" +
                 `<tr><td>y:</td><td>${numberformat(
@@ -658,13 +688,16 @@ class D3HeatMap extends Component {
               .style("left", x(process.x[xi]) + margin.left + 10 + "px")
               .style("top", y(process.y[yi]) + margin.top - 20 + "px")
               .style("opacity", 1);
+            this.setState({ mousex: xi, mousey: yi });
           } catch (e) {
             tooltip.style("opacity", 0);
+            this.setState({ mousex: false, mousey: false });
           }
         });
 
         zoombox.on("mouseout", () => {
           tooltip.style("opacity", 0);
+          this.setState({ mousex: false, mousey: false });
         });
 
         function numberformat(num) {
@@ -927,20 +960,70 @@ class D3HeatMap extends Component {
     window.removeEventListener("resize", this.plotHeatMap);
   }
 
-  componentDidUpdate() {
-    this.plotHeatMap();
+  componentDidUpdate(prevProps, prevState) {
+    var { display, fontSize, fullscreen, xgraph, ygraph } = this.state;
+    if (
+      !isEqual(prevProps, this.props) ||
+      display !== prevState.display ||
+      fontSize !== prevState.fontSize ||
+      fullscreen !== prevState.fullscreen ||
+      xgraph !== prevState.xgraph ||
+      ygraph !== prevState.ygraph
+    )
+      this.plotHeatMap();
   }
 
   render() {
-    var { graphid, download, fullscreen, display, fontSize } = this.state;
-    var { title } = this.props;
+    var {
+      graphid,
+      download,
+      fullscreen,
+      display,
+      fontSize,
+      xgraph,
+      ygraph,
+      mousex,
+      mousey,
+    } = this.state;
+    var {
+      title,
+      ylabel,
+      xlabel,
+      zlabel,
+      xunits,
+      yunits,
+      zunits,
+      data,
+    } = this.props;
+    var xy = " ";
+    if (xgraph) xy = xy + "x";
+    if (ygraph) xy = xy + "y";
+
+    var dxy = [];
+    var dxx = [];
+    var dyy = [];
+    var dyx = [];
+
+    try {
+      if (xgraph && mousey && data.x) {
+        dxx = data.x;
+        dxy = data.z[mousey];
+      }
+      if (ygraph && mousex && data.x) {
+        dyx = data.z.map((z) => z[mousex]);
+        dyy = data.y;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    var datax = [{ x: dxx, y: dxy }];
+    var datay = [{ x: dyx, y: dyy }];
+
     return (
-      <React.Fragment>
-        <div
-          id={"vis" + graphid}
-          className={fullscreen ? "vis-main full" : "vis-main"}
-        >
-          <div className="vis-header">
+      <div className={fullscreen ? "vis-main full" : "vis-main"}>
+        <div className="heatmap-main">
+          <div className="heatmap-header">
             <GraphHeader
               id={graphid}
               title={title}
@@ -954,10 +1037,48 @@ class D3HeatMap extends Component {
               toggleFullscreen={this.toggleFullscreen}
               downloadJSON={this.downloadJSON}
               downloadCSV={this.downloadCSV}
+              toggleXgraph={this.toggleXgraph}
+              toggleYgraph={this.toggleYgraph}
             />
           </div>
+          <div className="heatmap-graphs">
+            <div className={"heatmap-top" + xy}>
+              <div className={"heatmap-left" + xy}>
+                {ygraph && (
+                  <D3LineGraph
+                    data={datay}
+                    xlabel={zlabel}
+                    ylabel={ylabel}
+                    xunits={zunits}
+                    yunits={yunits}
+                    lcolor={"black"}
+                    lweight={1}
+                    bcolor={"white"}
+                    simple={true}
+                  />
+                )}
+              </div>
+              <div className={"heatmap-right" + xy} id={"vis" + graphid} />
+            </div>
+            <div className={"heatmap-bottom" + xy}>
+              {xgraph && (
+                <D3LineGraph
+                  data={datax}
+                  xlabel={xlabel}
+                  ylabel={zlabel}
+                  xunits={xunits}
+                  yunits={zunits}
+                  lcolor={"black"}
+                  lweight={1}
+                  bcolor={"white"}
+                  xscale={"Time"}
+                  simple={true}
+                />
+              )}
+            </div>
+          </div>
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }

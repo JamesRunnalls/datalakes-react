@@ -76,7 +76,7 @@ class NetCDF extends Component {
   };
 
   render() {
-    var { loaded, data, delimiter, newline } = this.state;
+    var { data, delimiter, newline } = this.state;
     document.title = "Convert to NetCDF | Datalakes";
     return (
       <React.Fragment>

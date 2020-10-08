@@ -11,6 +11,7 @@ import ColorManipulation from "../../../components/colormanipulation/colormanipu
 import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
 import colorlist from "../../../components/colorramp/colors";
 import "../datadetail.css";
+import { isEqual } from "lodash";
 
 class DisplayOptions extends Component {
   state = {
@@ -311,6 +312,8 @@ class HeatMap extends Component {
     lowerY: 0,
     maxY: 1,
     minY: 0,
+    plotdata: [],
+    value: "",
   };
 
   addGaps = (obj, gap) => {
@@ -440,7 +443,38 @@ class HeatMap extends Component {
     var maxvalue = zdomain[1];
     var minY = ydomain[0];
     var maxY = ydomain[1];
+    var lowerY = minY;
+    var upperY = maxY;
     var thresholdStep = 20;
+
+    var time = datasetparameters.filter((p) => p.parameters_id === 1);
+    var timeSlider = false;
+    var fileSlider = false;
+    if (time.length > 0) {
+      if (time[0].axis !== "M") {
+        timeSlider = true;
+      } else {
+        fileSlider = true;
+      }
+    }
+
+    var { xoptions, yoptions, zoptions } = this.setAxisOptions(
+      datasetparameters,
+      getLabel
+    );
+
+    var plotdata = this.processPlotData(
+      xaxis,
+      yaxis,
+      zaxis,
+      xlabel,
+      ylabel,
+      upperY,
+      lowerY,
+      maxY,
+      minY,
+      timeSlider
+    );
 
     this.setState({
       title,
@@ -455,9 +489,15 @@ class HeatMap extends Component {
       maxvalue,
       minY,
       maxY,
+      lowerY,
+      upperY,
       thresholdStep,
-      upperY: maxY,
-      lowerY: minY,
+      timeSlider,
+      fileSlider,
+      xoptions,
+      yoptions,
+      zoptions,
+      plotdata,
     });
   };
 
@@ -640,13 +680,64 @@ class HeatMap extends Component {
     return plotdata;
   };
 
+  processPlotData = (
+    xaxis,
+    yaxis,
+    zaxis,
+    xlabel,
+    ylabel,
+    upperY,
+    lowerY,
+    maxY,
+    minY,
+    timeSlider
+  ) => {
+    var { data, lower, upper, max, min, files, file, combined } = this.props;
+    var plotdata = this.combineFiles(
+      files,
+      combined,
+      data,
+      file,
+      xaxis,
+      yaxis,
+      zaxis
+    );
+
+    if (timeSlider)
+      plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
+
+    if (minY !== lowerY || maxY !== upperY)
+      plotdata = this.YFilter(plotdata, lowerY, upperY, minY, maxY);
+
+    if (plotdata.x) plotdata = this.formatDepthTime(plotdata, xlabel, ylabel);
+
+    plotdata = this.addGaps(plotdata, 12);
+
+    return plotdata;
+  };
+
   componentDidMount() {
     this.setDefault();
     document.addEventListener("keydown", this.handleKeyDown);
   }
 
-  componentDidUpdate(prevProps) {
-    var { onChangeLower, data, loading } = this.props;
+  componentDidUpdate(prevProps, prevState) {
+    var { data, loading, onChangeLower, upper, lower } = this.props;
+    var {
+      minvalue,
+      maxvalue,
+      xaxis,
+      yaxis,
+      zaxis,
+      xlabel,
+      ylabel,
+      upperY,
+      lowerY,
+      maxY,
+      minY,
+      timeSlider,
+    } = this.state;
+
     // If not much data download previous file
     try {
       let test = data.filter((d) => d !== 0);
@@ -663,10 +754,10 @@ class HeatMap extends Component {
     }
 
     // Combine files on update
-    if (prevProps.loading && !this.props.loading) {
-      var { minvalue, maxvalue } = this.state;
-      var minY = Infinity;
-      var maxY = -Infinity;
+    if (prevProps.loading && !loading) {
+      // Update min max
+      minY = Infinity;
+      maxY = -Infinity;
       var dldata = data.filter((d) => d !== 0);
       for (var i = 0; i < dldata.length; i++) {
         var ydomain = d3.extent(
@@ -684,29 +775,50 @@ class HeatMap extends Component {
         minY = Math.min(ydomain[0], minY);
         maxY = Math.max(ydomain[1], maxY);
       }
+
       this.setState({ minvalue, maxvalue, minY, maxY });
+    }
+
+    var params = [
+      xaxis,
+      yaxis,
+      zaxis,
+      xlabel,
+      ylabel,
+      upperY,
+      lowerY,
+      maxY,
+      minY,
+      timeSlider,
+      upper,
+      lower,
+    ];
+
+    var prevparams = [
+      prevState.xaxis,
+      prevState.yaxis,
+      prevState.zaxis,
+      prevState.xlabel,
+      prevState.ylabel,
+      prevState.upperY,
+      prevState.lowerY,
+      prevState.maxY,
+      prevState.minY,
+      prevState.timeSlider,
+      prevProps.upper,
+      prevProps.lower,
+    ];
+
+    if ((prevProps.loading && !loading) || !isEqual(params, prevparams)) {
+      var plotdata = this.processPlotData(...params);
+      this.setState({ plotdata });
     }
   }
 
   render() {
-    var {
-      datasetparameters,
-      getLabel,
-      data,
-      lower,
-      upper,
-      max,
-      min,
-      files,
-      file,
-      loading,
-      combined,
-    } = this.props;
+    var { files, file } = this.props;
     const {
       bcolor,
-      xaxis,
-      yaxis,
-      zaxis,
       title,
       xlabel,
       ylabel,
@@ -717,54 +829,15 @@ class HeatMap extends Component {
       colors,
       minvalue,
       maxvalue,
-      maxY,
-      minY,
-      upperY,
-      lowerY,
       thresholdStep,
+      fileSlider,
+      timeSlider,
+      xoptions,
+      yoptions,
+      zoptions,
+      plotdata,
     } = this.state;
-
-    // Show time slider or multiple files
-    var time = datasetparameters.filter((p) => p.parameters_id === 1);
-    var timeSlider = false;
-    var fileSlider = false;
-    if (time.length > 0) {
-      if (time[0].axis !== "M") {
-        timeSlider = true;
-      } else {
-        fileSlider = true;
-      }
-    }
-
-    var { xoptions, yoptions, zoptions } = this.setAxisOptions(
-      datasetparameters,
-      getLabel
-    );
-
-    if (!loading) {
-      var plotdata = this.combineFiles(
-        files,
-        combined,
-        data,
-        file,
-        xaxis,
-        yaxis,
-        zaxis
-      );
-
-      if (timeSlider)
-        plotdata = this.datetimeFilter(plotdata, lower, upper, min, max);
-
-      if (minY !== lowerY || maxY !== upperY)
-        plotdata = this.YFilter(plotdata, lowerY, upperY, minY, maxY);
-
-      if (plotdata.x) plotdata = this.formatDepthTime(plotdata, xlabel, ylabel);
-
-      plotdata = this.addGaps(plotdata, 12);
-
-      var value = new Date(files[file].ave);
-    }
-
+    var value = new Date(files[file].ave);
     return (
       <React.Fragment>
         <SidebarLayout
