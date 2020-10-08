@@ -869,6 +869,11 @@ class Basemap extends Component {
     }
   };
 
+  capitalize = (s) => {
+    if (typeof s !== "string") return "";
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
+
   gitPlot = async (layer, file) => {
     var {
       datasetparameters,
@@ -886,19 +891,19 @@ class Basemap extends Component {
       unit,
       maxdepth,
       data,
+      yselectindex,
     } = layer;
     var datasetparameter = datasetparameters.find(
       (dp) => dp.parameters_id === parameters_id
     );
     var { datetime, depth } = this.props;
-    var type = datasetparameters
-      .map((dp) => dp.axis + "&" + dp.parameters_id)
-      .join(",");
-    var index, value;
-    var size, marker, dt, dd;
+    var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
+    var index, value, indexx, indexy;
+    var size, marker, dt;
     var minSize = 5;
     var maxSize = 30;
     var markerGroup = L.layerGroup().addTo(this.map);
+    var dd = "<tr><td><strong>Depth</strong></td><td>";
 
     if (type.includes("M&1") && type.includes("y&2")) {
       // Profiler
@@ -907,28 +912,53 @@ class Basemap extends Component {
       index = this.indexClosest(depth, data.y);
       value = this.numberformat(parseFloat(data[datasetparameter.axis][index]));
       dt = new Date(data[dp2.axis][index] * 1000);
-      dd = data[dp3.axis][index];
+      dd = dd + data[dp3.axis][index];
     } else if (
-      type.includes("z&") &&
+      type.join(",").includes("z&") &&
       type.includes("x&1") &&
       type.includes("y&2")
     ) {
       // 2D Depth Time Dataset
-      var indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
-      var indexy = this.indexClosest(depth, data["y"]);
+      indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      indexy = this.indexClosest(depth, data["y"]);
       value = this.numberformat(data[datasetparameter.axis][indexy][indexx]);
       dt = new Date(data["x"][indexx] * 1000);
-      dd = data["y"][indexy];
+      dd = dd + data["y"][indexy];
     } else if (
       type.includes("x&1") &&
       type.includes("y&") &&
-      !type.includes("z&")
+      !type.join(",").includes("z&")
     ) {
       // 1D Parameter Time Dataset
       index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
       value = this.numberformat(data[datasetparameter.axis][index]);
       dt = new Date(data["x"][index] * 1000);
-      dd = maxdepth;
+      dd = dd + maxdepth;
+    } else if (
+      type.includes("x&1") &&
+      !type.includes("y&2") &&
+      type.join(",").includes("z&")
+    ) {
+      // 2D Non-Depth Time Dataset
+      var param = datasetparameters.find((dp) => dp.axis === "y");
+      indexx = this.indexClosest(datetime.getTime() / 1000, data["x"]);
+      if (yselectindex) {
+        value = this.numberformat(
+          data[datasetparameter.axis][yselectindex][indexx]
+        );
+        dt = new Date(data["x"][indexx] * 1000);
+        dd =
+          `<tr><td><strong>${this.capitalize(
+            param.parseparameter
+          )}</strong></td><td>${data["y"][yselectindex]} ${param.unit}`;
+      } else {
+        value = this.numberformat(data[datasetparameter.axis][0][indexx]);
+        dt = new Date(data["x"][indexx] * 1000);
+        dd =
+          `<tr><td><strong>${this.capitalize(
+            param.parseparameter
+          )}</strong></td><td>${data["y"][0]} ${param.unit}`;
+      }
     } else {
       alert("No plotting function defined");
     }
@@ -967,7 +997,6 @@ class Basemap extends Component {
         String(value) +
         String(unit) +
         "</td></tr>" +
-        "<tr><td><strong>Depth</strong></td><td>" +
         dd +
         "</td></tr>" +
         '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/' +

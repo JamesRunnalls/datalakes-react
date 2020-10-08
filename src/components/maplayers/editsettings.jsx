@@ -8,6 +8,12 @@ class EditSettings extends Component {
       JSON.stringify(this.props.display ? this.props.display : [])
     ),
   };
+  yselectindexChange = (event) => {
+    var { display } = this.state;
+    display.yselectindex = event.target.value;
+    this.setState({ display });
+  };
+
   localOpacityChange = (event) => {
     var { display } = this.state;
     display.opacity = event.target.value / 100;
@@ -110,6 +116,10 @@ class EditSettings extends Component {
       alert("Min & Max values must be a valid number.");
     }
   };
+  capitalize = (s) => {
+    if (typeof s !== "string") return "";
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
   componentDidUpdate() {
     var { display } = this.state;
     if (
@@ -144,11 +154,17 @@ class EditSettings extends Component {
       min,
       max,
       opacity,
+      datasetparameters,
+      yselectindex,
+      data,
     } = display;
     if (min === null) min = 0;
     if (max === null) max = 0;
     var { removeSelected, id, display: displayProps } = this.props;
     var { array } = displayProps;
+    var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
+    if (!yselectindex) yselectindex = 0;
+    var yselectparam = datasetparameters.find((dp) => dp.axis === "y");
     return (
       <div className="editsettings">
         <div>
@@ -183,6 +199,21 @@ class EditSettings extends Component {
             </tbody>
           </table>
         </div>
+        {type.includes("x&1") &&
+          !type.includes("y&2") &&
+          type.join(",").includes("z&") && (
+            <div>
+              {this.capitalize(yselectparam.parseparameter) + " "}
+              <select value={yselectindex} onChange={this.yselectindexChange}>
+                {data.y.map((d, index) => (
+                  <option value={index} key={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+              {" " + yselectparam.unit}
+            </div>
+          )}
         {["marker", "group"].includes(mapplot) && (
           <div className="editsettings-markeroptions">
             <div className="editsettings-title">Marker Options</div>

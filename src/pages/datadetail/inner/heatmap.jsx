@@ -315,7 +315,7 @@ class HeatMap extends Component {
 
   addGaps = (obj, gap) => {
     if (this.state.xlabel === "Time" && obj) {
-      for (var i = 1; i < obj.x.length; i++) {
+      for (let i = 1; i < obj.x.length; i++) {
         if (
           obj.x[i].getTime() - obj.x[i - 1].getTime() >
           gap * 60 * 60 * 1000
@@ -646,9 +646,9 @@ class HeatMap extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    var { onChangeLower, data, loading } = this.props;
     // If not much data download previous file
     try {
-      var { onChangeLower, data, loading } = this.props;
       let test = data.filter((d) => d !== 0);
       if (
         test.length === 1 &&
@@ -664,7 +664,6 @@ class HeatMap extends Component {
 
     // Combine files on update
     if (prevProps.loading && !this.props.loading) {
-      var { data } = this.props;
       var { minvalue, maxvalue } = this.state;
       var minY = Infinity;
       var maxY = -Infinity;

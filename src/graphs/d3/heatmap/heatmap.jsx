@@ -610,8 +610,12 @@ class D3HeatMap extends Component {
 
         zoombox.on("mousemove", () => {
           try {
-            var hoverX = x.invert(d3.event.layerX || d3.event.offsetX);
-            var hoverY = y.invert(d3.event.layerY || d3.event.offsetY);
+            var hoverX = x.invert(
+              d3.event.layerX - margin.left || d3.event.offsetX - margin.left
+            );
+            var hoverY = y.invert(
+              d3.event.layerY - margin.top || d3.event.offsetY - margin.top
+            );
             var process = data;
             if (Array.isArray(data)) {
               process = data[getFileIndex(xdomarr, hoverX)];
@@ -651,8 +655,8 @@ class D3HeatMap extends Component {
             }
             tooltip
               .html(html)
-              .style("left", x(process.x[xi]) + 10 + "px")
-              .style("top", y(process.y[yi]) - 10 + "px")
+              .style("left", x(process.x[xi]) + margin.left + 10 + "px")
+              .style("top", y(process.y[yi]) + margin.top - 20 + "px")
               .style("opacity", 1);
           } catch (e) {
             tooltip.style("opacity", 0);
@@ -813,22 +817,35 @@ class D3HeatMap extends Component {
             zdomain[1],
             (zdomain[1] - zdomain[0]) / thresholdStep
           );
-          var contours, values;
+          var contours, crough, values;
           if (Array.isArray(data)) {
             data.forEach((d) => {
+              crough = d3
+                .contours()
+                .size([d.z[0].length, d.z.length])
+                .smooth(false);
               contours = d3.contours().size([d.z[0].length, d.z.length]);
               values = d.z.flat();
+              fill(crough.thresholds(thresholds)(values)[0], d);
               contours
                 .thresholds(thresholds)(values)
-                .forEach((contour) => fill(contour, d));
+                .forEach((contour, index) => {
+                  if (index !== 0) fill(contour, d);
+                });
             });
           } else {
+            crough = d3
+              .contours()
+              .size([data.z[0].length, data.z.length])
+              .smooth(false);
             contours = d3.contours().size([data.z[0].length, data.z.length]);
             values = data.z.flat();
-            //fill(contours.thresholds(thresholds)(values)[0], data);
+            fill(crough.thresholds(thresholds)(values)[0], data);
             contours
               .thresholds(thresholds)(values)
-              .forEach((contour) => fill(contour, data));
+              .forEach((contour, index) => {
+                if (index !== 0) fill(contour, data);
+              });
           }
 
           function fill(geometry, plotdata) {
