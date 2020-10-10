@@ -40,7 +40,7 @@ class RemoteSensingDownload extends Component {
         </option>
       );
     }
-    var url = "http://api.datalakes-eawag.ch/externaldata/remotesensing/";
+    var url = "https://api.datalakes-eawag.ch/externaldata/remotesensing/";
     var swagger = url + "api";
 
     return (
