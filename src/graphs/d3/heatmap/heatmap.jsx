@@ -660,7 +660,7 @@ class D3HeatMap extends Component {
                 "<table><tbody>" +
                 `<tr><td>x:</td><td>${format(
                   process.x[xi],
-                  "hh:mm dd MMM yy"
+                  "HH:mm dd MMM yy"
                 )}</td></tr>` +
                 `<tr><td>y:</td><td>${numberformat(
                   process.y[yi]
