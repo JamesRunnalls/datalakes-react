@@ -159,7 +159,7 @@ class FilterBoxInner extends Component {
   render() {
     var { params, checkbox, cat, filters, table } = this.props;
     params = params.map((p) => {
-      if (p.name === "internal") p.name = "Datalakes";
+      if (p.name === "internal") p.name = "Git Repository";
       return p;
     });
     params = params.filter((p) => p.name !== "Error");
