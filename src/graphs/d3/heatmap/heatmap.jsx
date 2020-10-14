@@ -206,6 +206,14 @@ class D3HeatMap extends Component {
         } = this.props;
 
         const { closest, indexOfClosest, props } = this;
+        const TimeLabels = [
+          "Time",
+          "time",
+          "datetime",
+          "Datetime",
+          "Date",
+          "date",
+        ];
 
         // Set graph size
         var margin = {
@@ -274,16 +282,21 @@ class D3HeatMap extends Component {
 
         // Format X-axis
         var x;
-        if ("xlinear" in this.props) {
-          x = d3.scaleLinear().range([0, width]).domain(xdomain);
-        } else {
+        if (TimeLabels.includes(xlabel)) {
           x = d3.scaleTime().range([0, width]).domain(xdomain);
+        } else {
+          x = d3.scaleLinear().range([0, width]).domain(xdomain);
         }
         var xref = x.copy();
         var xbase = x.copy();
 
         // Format Y-axis
-        var y = d3.scaleLinear().range([height, 0]).domain(ydomain);
+        var y;
+        if (TimeLabels.includes(ylabel)) {
+          y = d3.scaleTime().range([height, 0]).domain(ydomain);
+        } else {
+          y = d3.scaleLinear().range([height, 0]).domain(ydomain);
+        }
         var yref = y.copy();
         var ybase = y.copy();
 
@@ -325,35 +338,20 @@ class D3HeatMap extends Component {
           .text(title);
 
         // Add the X Axis
-        var gX;
-        if (xlabel === "Time") {
-          gX = svg
-            .append("g")
-            .attr("class", "x axis")
-            .attr("id", "axis--x")
-            .attr("transform", "translate(0," + height + ")")
-            .style("font-size", `${fontSize}px`)
-            .call(xAxis);
-        } else {
-          var xLabel = "";
-          if ("xlabel" in this.props) {
-            xLabel = this.props.xlabel;
-          }
+        var xLabel = "";
+        if ("xlabel" in this.props) xLabel = this.props.xlabel;
+        if ("xunits" in this.props)
+          xLabel = this.props.xlabel + " (" + xunits + ")";
 
-          xunits = "";
-          if ("xunits" in this.props) {
-            xunits = this.props.xunits;
-            xLabel = this.props.xlabel + " (" + xunits + ")";
-          }
+        var gX = svg
+          .append("g")
+          .attr("class", "x axis")
+          .attr("id", "axis--x")
+          .attr("transform", "translate(0," + height + ")")
+          .style("font-size", `${fontSize}px`)
+          .call(xAxis);
 
-          gX = svg
-            .append("g")
-            .attr("class", "x axis")
-            .attr("id", "axis--x")
-            .attr("transform", "translate(0," + height + ")")
-            .style("font-size", `${fontSize}px`)
-            .call(xAxis);
-
+        if (!TimeLabels.includes(xlabel)) {
           svg
             .append("text")
             .attr(
@@ -369,27 +367,22 @@ class D3HeatMap extends Component {
             .style("font-size", `${fontSize}px`)
             .style("text-anchor", "end")
             .text(xLabel);
-        }
 
-        gX.selectAll("text").attr("transform", function (d) {
-          return (
-            "rotate(-45)translate(-" +
-            this.getBBox().width * (3 / 4) +
-            ",-" +
-            this.getBBox().height * (3 / 4) +
-            ")"
-          );
-        });
+          gX.selectAll("text").attr("transform", function (d) {
+            return (
+              "rotate(-45)translate(-" +
+              this.getBBox().width * (3 / 4) +
+              ",-" +
+              this.getBBox().height * (3 / 4) +
+              ")"
+            );
+          });
+        }
 
         // Add the Y Axis
         var yLabel = "";
-        if ("ylabel" in this.props) {
-          yLabel = ylabel;
-        }
-
-        if ("yunits" in this.props) {
-          yLabel = ylabel + " (" + yunits + ")";
-        }
+        if ("ylabel" in this.props) yLabel = ylabel;
+        if ("yunits" in this.props) yLabel = ylabel + " (" + yunits + ")";
 
         var gY = svg
           .append("g")
@@ -398,15 +391,17 @@ class D3HeatMap extends Component {
           .style("font-size", `${fontSize}px`)
           .call(yAxis);
 
-        svg
-          .append("text")
-          .attr("transform", "rotate(-90)")
-          .attr("y", 0 - margin.left)
-          .attr("x", 0 - height / 2)
-          .attr("dy", `${fontSize}px`)
-          .style("font-size", `${fontSize}px`)
-          .style("text-anchor", "middle")
-          .text(yLabel);
+        if (!TimeLabels.includes(ylabel)) {
+          svg
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x", 0 - height / 2)
+            .attr("dy", `${fontSize}px`)
+            .style("font-size", `${fontSize}px`)
+            .style("text-anchor", "middle")
+            .text(yLabel);
+        }
 
         // Add the legend
         var defs = svg.append("defs");
@@ -654,35 +649,33 @@ class D3HeatMap extends Component {
             var yi = closest(hoverY, process.y);
             var xi = closest(hoverX, process.x);
 
-            var html = "";
-            if (xlabel === "Time") {
-              html =
-                "<table><tbody>" +
-                `<tr><td>x:</td><td>${format(
-                  process.x[xi],
-                  "HH:mm dd MMM yy"
-                )}</td></tr>` +
-                `<tr><td>y:</td><td>${numberformat(
-                  process.y[yi]
-                )} ${yunits}</td></tr>` +
-                `<tr><td>z:</td><td>${numberformat(
-                  process.z[yi][xi]
-                )} ${zunits}</td></tr>` +
-                "</tbody></table>";
+            var xval, yval;
+            var xu = "";
+            var yu = "";
+
+            if (TimeLabels.includes(xlabel)) {
+              xval = format(process.x[xi], "HH:mm dd MMM yy");
             } else {
-              html =
-                "<table><tbody>" +
-                `<tr><td>y:</td><td>${numberformat(
-                  process.x[xi]
-                )} ${xunits}</td></tr>` +
-                `<tr><td>y:</td><td>${numberformat(
-                  process.y[yi]
-                )} ${yunits}</td></tr>` +
-                `<tr><td>z:</td><td>${numberformat(
-                  process.z[yi][xi]
-                )} ${zunits}</td></tr>` +
-                "</tbody></table>";
+              xval = numberformat(process.x[xi]);
+              xu = xunits;
             }
+
+            if (TimeLabels.includes(ylabel)) {
+              yval = format(process.y[yi], "HH:mm dd MMM yy");
+            } else {
+              yval = numberformat(process.y[yi]);
+              yu = yunits;
+            }
+
+            var html =
+              "<table><tbody>" +
+              `<tr><td>y:</td><td>${xval} ${xu}</td></tr>` +
+              `<tr><td>y:</td><td>${yval} ${yu}</td></tr>` +
+              `<tr><td>z:</td><td>${numberformat(
+                process.z[yi][xi]
+              )} ${zunits}</td></tr>` +
+              "</tbody></table>";
+
             tooltip
               .html(html)
               .style("left", x(process.x[xi]) + margin.left + 10 + "px")

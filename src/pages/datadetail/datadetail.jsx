@@ -644,8 +644,8 @@ class DataDetail extends Component {
               data={data}
               lower={lower}
               upper={upper}
-              max={maxdatetime}
-              min={mindatetime}
+              maxdatetime={maxdatetime}
+              mindatetime={mindatetime}
               files={files}
               file={file}
               loading={innerLoading}

@@ -3,17 +3,23 @@ import "./filterbox.css";
 
 class FilterBox extends Component {
   state = {
-    open: false
+    open: false,
   };
   toggle = () => {
     this.setState({ open: !this.state.open });
   };
 
   componentDidMount() {
-    if (this.props.preopen === "true") {
+    if (this.props.preopen === "true" || this.props.preopen === true) {
       this.toggle();
     }
   }
+  componentDidUpdate(prevProps) {
+    if (prevProps.preopen !== this.props.preopen) {
+      this.toggle();
+    }
+  }
+
   render() {
     const { content, title, inner } = this.props;
     const { open } = this.state;
