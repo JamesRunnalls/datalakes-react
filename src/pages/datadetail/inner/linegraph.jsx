@@ -427,74 +427,84 @@ class LineGraph extends Component {
       }
       var confidence = [];
       for (var d = 0; d < dataset.length; d++) {
-        // Data masking
-        dataset[d] = this.maskAxis(
-          dataset[d],
-          xaxis,
-          yaxis,
-          mxaxis,
-          myaxis,
-          mask
-        );
-
-        // Time range
-        if (timeSlider) {
-          dataset[d] = this.datetimeFilter(dataset[d], lower, upper, min, max);
-        }
-
-        // Format data && downsample
-        var { x, y } = dataset[d];
-        if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
-        if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-        if (xlabel === "Depth") x = x.map((i) => -i);
-        if (ylabel === "Depth") y = y.map((i) => -i);
-        var out = { x, y };
-        if (xlabel === "Time") out = this.downsample(x, y, downsample);
-        dataset[d] = out;
-
-        // Confidence
-        var CI_upper, CI_lower;
-        if (xupper || xlower) {
-          CI_upper = xupper ? dataset[d][xpcu[0].axis] : dataset[d].x;
-          CI_lower = xlower ? dataset[d][xpcl[0].axis] : dataset[d].x;
-          confidence[d] = {
-            axis: "x",
-            CI_upper,
-            CI_lower,
-          };
-        } else if (yupper || ylower) {
-          CI_upper = yupper ? dataset[d][ypcu[0].axis] : dataset[d].y;
-          CI_lower = ylower ? dataset[d][ypcl[0].axis] : dataset[d].y;
-          confidence[d] = {
-            axis: "y",
-            CI_upper,
-            CI_lower,
-          };
-        } else {
-          confidence[d] = false;
-        }
-
-        if (fileSlider) {
-          var value = new Date(files[file[d]].ave);
-          var text = value.toDateString() + " " + value.toLocaleTimeString();
-          var color = lcolor[d];
-          legend.push({ color, text });
-          filecontrol.push(
-            <tr key={"file" + d}>
-              <td>
-                <input type="color" value={color} />
-              </td>
-              <td>{text}</td>
-              <td
-                id={d}
-                onClick={removeFile}
-                title="Remove"
-                className="removefile"
-              >
-                ✕
-              </td>
-            </tr>
+        if (dataset[d][xaxis] && dataset[d][yaxis]) {
+          // Data masking
+          dataset[d] = this.maskAxis(
+            dataset[d],
+            xaxis,
+            yaxis,
+            mxaxis,
+            myaxis,
+            mask
           );
+
+          // Time range
+          if (timeSlider) {
+            dataset[d] = this.datetimeFilter(
+              dataset[d],
+              lower,
+              upper,
+              min,
+              max
+            );
+          }
+
+          // Format data && downsample
+          var { x, y } = dataset[d];
+          if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
+          if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
+          if (xlabel === "Depth") x = x.map((i) => -i);
+          if (ylabel === "Depth") y = y.map((i) => -i);
+          var out = { x, y };
+          if (xlabel === "Time") out = this.downsample(x, y, downsample);
+          dataset[d] = out;
+
+          // Confidence
+          var CI_upper, CI_lower;
+          if (xupper || xlower) {
+            CI_upper = xupper ? dataset[d][xpcu[0].axis] : dataset[d].x;
+            CI_lower = xlower ? dataset[d][xpcl[0].axis] : dataset[d].x;
+            confidence[d] = {
+              axis: "x",
+              CI_upper,
+              CI_lower,
+            };
+          } else if (yupper || ylower) {
+            CI_upper = yupper ? dataset[d][ypcu[0].axis] : dataset[d].y;
+            CI_lower = ylower ? dataset[d][ypcl[0].axis] : dataset[d].y;
+            confidence[d] = {
+              axis: "y",
+              CI_upper,
+              CI_lower,
+            };
+          } else {
+            confidence[d] = false;
+          }
+
+          if (fileSlider) {
+            var value = new Date(files[file[d]].ave);
+            var text = value.toDateString() + " " + value.toLocaleTimeString();
+            var color = lcolor[d];
+            legend.push({ color, text });
+            filecontrol.push(
+              <tr key={"file" + d}>
+                <td>
+                  <input type="color" value={color} />
+                </td>
+                <td>{text}</td>
+                <td
+                  id={d}
+                  onClick={removeFile}
+                  title="Remove"
+                  className="removefile"
+                >
+                  ✕
+                </td>
+              </tr>
+            );
+          }
+        } else {
+          dataset[d] = { x: [], y: [] };
         }
       }
     }

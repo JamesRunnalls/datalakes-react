@@ -817,12 +817,15 @@ class HeatMap extends Component {
     // Combine files on update
     if (prevProps.loading && !loading) {
       // Update min max
-      minY = Infinity;
-      maxY = -Infinity;
       var dldata = data.filter((d) => d !== 0);
       for (var i = 0; i < dldata.length; i++) {
         var ydomain = d3.extent(
           [].concat.apply([], data[i].y).filter((f) => {
+            return !isNaN(parseFloat(f)) && isFinite(f);
+          })
+        );
+        var xdomain = d3.extent(
+          [].concat.apply([], data[i].x).filter((f) => {
             return !isNaN(parseFloat(f)) && isFinite(f);
           })
         );
@@ -835,9 +838,11 @@ class HeatMap extends Component {
         maxZ = Math.max(zdomain[1], maxZ);
         minY = Math.min(ydomain[0], minY);
         maxY = Math.max(ydomain[1], maxY);
+        minX = Math.min(xdomain[0], minX);
+        maxX = Math.max(xdomain[1], maxX);
       }
 
-      this.setState({ minZ, maxZ, minY, maxY });
+      this.setState({ minZ, maxZ, minY, maxY, minX, maxX });
     }
 
     // Update time bounds

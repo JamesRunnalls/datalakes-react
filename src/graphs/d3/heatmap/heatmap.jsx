@@ -20,6 +20,7 @@ class D3HeatMap extends Component {
     ygraph: false,
     mousex: false,
     mousey: false,
+    idx: 0,
   };
 
   editFontSize = (fontSize) => {
@@ -205,7 +206,7 @@ class D3HeatMap extends Component {
           setDownloadGraph,
         } = this.props;
 
-        const { closest, indexOfClosest, props } = this;
+        const { closest, indexOfClosest } = this;
         const TimeLabels = [
           "Time",
           "time",
@@ -241,8 +242,21 @@ class D3HeatMap extends Component {
           var ydomarr = [];
           var zdomarr = [];
           for (var h = 0; h < data.length; h++) {
-            xdomarr.push(d3.extent(data[h].x));
-            ydomarr.push(d3.extent(data[h].y));
+            let xext = d3.extent(data[h].x);
+            let yext = d3.extent(data[h].y);
+            if (
+              !xdomarr.map((x) => x[0]).includes(xext[0]) &&
+              !xdomarr.map((x) => x[1]).includes(xext[1])
+            ) {
+              xdomarr.push(xext);
+            }
+            if (
+              !ydomarr.map((y) => y[0]).includes(yext[0]) &&
+              !ydomarr.map((y) => y[1]).includes(yext[1])
+            ) {
+              ydomarr.push(yext);
+            }
+
             zdomarr.push(
               d3.extent(
                 [].concat.apply([], data[h].z).filter((f) => {
@@ -643,8 +657,13 @@ class D3HeatMap extends Component {
               d3.event.layerY - margin.top || d3.event.offsetY - margin.top
             );
             var process = data;
+            var idx = 0;
             if (Array.isArray(data)) {
-              process = data[getFileIndex(xdomarr, hoverX)];
+              idx = Math.max(
+                getFileIndex(xdomarr, hoverX),
+                getFileIndex(ydomarr, hoverY)
+              );
+              process = data[idx];
             }
             var yi = closest(hoverY, process.y);
             var xi = closest(hoverX, process.x);
@@ -681,7 +700,7 @@ class D3HeatMap extends Component {
               .style("left", x(process.x[xi]) + margin.left + 10 + "px")
               .style("top", y(process.y[yi]) + margin.top - 20 + "px")
               .style("opacity", 1);
-            this.setState({ mousex: xi, mousey: yi });
+            this.setState({ mousex: xi, mousey: yi, idx });
           } catch (e) {
             tooltip.style("opacity", 0);
             this.setState({ mousex: false, mousey: false });
@@ -719,7 +738,7 @@ class D3HeatMap extends Component {
 
         function getXfromIndex(index, plotdata) {
           if (index <= plotdata.x.length - 1) {
-            if ("xlinear" in props) {
+            if (!TimeLabels.includes(xlabel)) {
               return (
                 (plotdata.x[Math.ceil(index)] - plotdata.x[Math.floor(index)]) *
                   (index - Math.floor(index)) +
@@ -740,11 +759,20 @@ class D3HeatMap extends Component {
 
         function getYfromIndex(index, plotdata) {
           if (index <= plotdata.y.length - 1) {
-            return (
-              (plotdata.y[Math.ceil(index)] - plotdata.y[Math.floor(index)]) *
-                (index - Math.floor(index)) +
-              plotdata.y[Math.floor(index)]
-            );
+            if (!TimeLabels.includes(ylabel)) {
+              return (
+                (plotdata.y[Math.ceil(index)] - plotdata.y[Math.floor(index)]) *
+                  (index - Math.floor(index)) +
+                plotdata.y[Math.floor(index)]
+              );
+            } else {
+              return new Date(
+                (plotdata.y[Math.ceil(index)].getTime() -
+                  plotdata.y[Math.floor(index)].getTime()) *
+                  (index - Math.floor(index)) +
+                  plotdata.y[Math.floor(index)].getTime()
+              );
+            }
           } else {
             return plotdata.y[plotdata.y.length - 1];
           }
@@ -809,32 +837,50 @@ class D3HeatMap extends Component {
           }
         }
 
-        function getFileIndex(xscales, xp) {
-          for (var i = 0; i < xscales.length; i++) {
-            if (xp >= xscales[i][0] && xp <= xscales[i][1]) {
+        function getFileIndex(scales, p) {
+          for (var i = 0; i < scales.length; i++) {
+            if (p >= Math.min(...scales[i]) && p <= Math.max(...scales[i])) {
               return i;
             }
           }
           return NaN;
         }
 
-        function getXScales(scaleX, arr) {
-          var xscales = [];
+        function getScales(scale, arr) {
+          var scales = [];
+          var s0 = [];
+          var s1 = [];
           for (var i = 0; i < arr.length; i++) {
-            xscales.push([scaleX(arr[i][0]), scaleX(arr[i][1])]);
+            let ss0 = scale(arr[i][0]);
+            let ss1 = scale(arr[i][1]);
+            if (!s0.includes(ss0) && !s1.includes(ss1)) {
+              s0.push(ss0);
+              s1.push(ss1);
+              scales.push([ss0, ss1]);
+            }
           }
-          return xscales;
+          return scales;
         }
 
-        function getPixelValue(data, yp, xp, xscales, dataxpix, dataypix) {
-          var fileindex = getFileIndex(xscales, xp);
-          if (isNaN(fileindex)) {
-            return NaN;
-          } else {
-            var iy = indexOfClosest(yp, dataypix[fileindex]);
-            var ix = indexOfClosest(xp, dataxpix[fileindex]);
-            return data[fileindex].z[iy][ix];
+        function getPixelValue(
+          data,
+          yp,
+          xp,
+          xscales,
+          yscales,
+          dataxpix,
+          dataypix
+        ) {
+          let index = 0;
+          if (xscales.length > 1) {
+            index = getFileIndex(xscales, xp);
+          } else if (yscales.length > 1) {
+            index = getFileIndex(yscales, yp);
           }
+          if (isNaN(index)) return NaN;
+          var iy = indexOfClosest(yp, dataypix[index]);
+          var ix = indexOfClosest(xp, dataxpix[index]);
+          return data[index].z[iy][ix];
         }
 
         function fillCanvasContour(scaleX, scaleY) {
@@ -904,7 +950,8 @@ class D3HeatMap extends Component {
           if (!Array.isArray(data)) {
             var { indexxpix, indexypix } = pixelMapping(data, scaleX, scaleY);
           } else {
-            var xscales = getXScales(scaleX, xdomarr);
+            var xscales = getScales(scaleX, xdomarr);
+            var yscales = getScales(scaleY, ydomarr);
             var dataypix = data.map((d) => d.y.map((dd) => scaleY(dd)));
             var dataxpix = data.map((d) => d.x.map((dd) => scaleX(dd)));
           }
@@ -922,7 +969,15 @@ class D3HeatMap extends Component {
                 rgbacolor = colorScale(data.z[indexypix[j]][indexxpix[l]]);
               } else {
                 rgbacolor = colorScale(
-                  getPixelValue(data, j, l, xscales, dataxpix, dataypix)
+                  getPixelValue(
+                    data,
+                    j,
+                    l,
+                    xscales,
+                    yscales,
+                    dataxpix,
+                    dataypix
+                  )
                 );
               }
 
@@ -977,6 +1032,7 @@ class D3HeatMap extends Component {
       ygraph,
       mousex,
       mousey,
+      idx,
     } = this.state;
     var {
       title,
@@ -988,6 +1044,9 @@ class D3HeatMap extends Component {
       zunits,
       data,
     } = this.props;
+
+    const TimeLabels = ["Time", "time", "datetime", "Datetime", "Date", "date"];
+
     var xy = " ";
     if (xgraph) xy = xy + "x";
     if (ygraph) xy = xy + "y";
@@ -998,13 +1057,15 @@ class D3HeatMap extends Component {
     var dyx = [];
 
     try {
-      if (xgraph && mousey && data.x) {
-        dxx = data.x;
-        dxy = data.z[mousey];
+      let linedata = data;
+      if (Array.isArray(linedata)) linedata = linedata[idx];
+      if (xgraph && mousey && linedata) {
+        dxx = linedata.x;
+        dxy = linedata.z[mousey];
       }
-      if (ygraph && mousex && data.x) {
-        dyx = data.z.map((z) => z[mousex]);
-        dyy = data.y;
+      if (ygraph && mousex && linedata) {
+        dyx = linedata.z.map((z) => z[mousex]);
+        dyy = linedata.y;
       }
     } catch (e) {
       console.log(e);
@@ -1048,6 +1109,8 @@ class D3HeatMap extends Component {
                     lweight={1}
                     bcolor={"white"}
                     simple={true}
+                    xscale={TimeLabels.includes(zlabel) ? "Time" : ""}
+                    yscale={TimeLabels.includes(ylabel) ? "Time" : ""}
                   />
                 )}
               </div>
@@ -1064,7 +1127,8 @@ class D3HeatMap extends Component {
                   lcolor={"black"}
                   lweight={1}
                   bcolor={"white"}
-                  xscale={"Time"}
+                  xscale={TimeLabels.includes(xlabel) ? "Time" : ""}
+                  yscale={TimeLabels.includes(zlabel) ? "Time" : ""}
                   simple={true}
                 />
               )}

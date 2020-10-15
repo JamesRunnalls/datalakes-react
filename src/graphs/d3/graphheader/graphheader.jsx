@@ -74,16 +74,6 @@ class GraphHeader extends Component {
             <tbody>
               <tr>
                 <td className="title">{title}</td>
-                {toggleXgraph && (
-                  <td style={{ width: "25px" }}>
-                    <img
-                      src={xgraphIcon}
-                      alt="xgraph"
-                      onClick={toggleXgraph}
-                      title="Toggle X Graph"
-                    />
-                  </td>
-                )}
                 {toggleYgraph && (
                   <td style={{ width: "25px" }}>
                     <img
@@ -91,6 +81,16 @@ class GraphHeader extends Component {
                       alt="ygraph"
                       onClick={toggleYgraph}
                       title="Toggle y Graph"
+                    />
+                  </td>
+                )}
+                {toggleXgraph && (
+                  <td style={{ width: "25px" }}>
+                    <img
+                      src={xgraphIcon}
+                      alt="xgraph"
+                      onClick={toggleXgraph}
+                      title="Toggle X Graph"
                     />
                   </td>
                 )}

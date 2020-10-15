@@ -66,11 +66,14 @@ class LiveParameter extends Component {
         </div>
       );
     } else {
+      let value = 0;
+      try {
+        value =
+          Math.round(parameter.value[parameter.value.length - 1] * 10) / 10;
+      } catch (e) {}
       return (
         <div className={paramClass} title={title} onClick={() => select(index)}>
-          <div className="value">
-            {Math.round(parameter.value[parameter.value.length - 1] * 10) / 10}
-          </div>
+          <div className="value">{value}</div>
           <div className="units">{this.props.parameter.units}</div>
           <div className="label">{this.props.parameter.label}</div>
         </div>
