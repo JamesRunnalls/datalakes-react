@@ -446,11 +446,14 @@ class D3HeatMap extends Component {
           .attr("y", 0)
           .attr("fill", "url(#svgGradient)");
 
-        var t1 = Math.round(maxvalue * 100) / 100,
-          t5 = Math.round(minvalue * 100) / 100,
-          t3 = Math.round(((t1 + t5) / 2) * 100) / 100,
-          t2 = Math.round(((t1 + t3) / 2) * 100) / 100,
-          t4 = Math.round(((t3 + t5) / 2) * 100) / 100;
+        var ndp = 100;
+        if (maxvalue - minvalue < 0.1) ndp = 1000
+        if (maxvalue - minvalue < 0.01) ndp = 10000
+        var t1 = Math.round(maxvalue * ndp) / ndp,
+          t5 = Math.round(minvalue * ndp) / ndp,
+          t3 = Math.round(((t1 + t5) / 2) * ndp) / ndp,
+          t2 = Math.round(((t1 + t3) / 2) * ndp) / ndp,
+          t4 = Math.round(((t3 + t5) / 2) * ndp) / ndp;
 
         svg
           .append("text")

@@ -4,7 +4,7 @@ import "./sidebarlayout.css";
 class SidebarLayout extends Component {
   state = {
     open: window.innerWidth > 960,
-    resize: true
+    resize: true,
   };
 
   toggle = () => {
@@ -19,6 +19,9 @@ class SidebarLayout extends Component {
     const { open } = this.state;
     return (
       <div className="sidebarlayout">
+        <div className={open ? "leftcontainer" : "leftcontainer full"}>
+          {this.props.left}
+        </div>
         <div className={open ? "rightcontainer" : "rightcontainer hide"}>
           <div
             className="righthead"
@@ -34,9 +37,6 @@ class SidebarLayout extends Component {
               <div className="scroll">{this.props.right}</div>
             )}
           </div>
-        </div>
-        <div className={open ? "leftcontainer" : "leftcontainer full"}>
-          {this.props.left}
         </div>
       </div>
     );

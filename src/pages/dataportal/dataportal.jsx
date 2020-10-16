@@ -356,7 +356,13 @@ class DataPortal extends Component {
       }
     }
     distinct.sort((a, b) => {
-      return b.count - a.count;
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
     });
     return distinct;
   };

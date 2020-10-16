@@ -4,15 +4,15 @@ import DateTimePicker from "react-datetime-picker";
 import { SliderRail, Handle, Track, Tick } from "./components";
 import { format } from "date-fns";
 import { scaleTime } from "d3";
-import AvailbilityBar from './availabilitybar';
+import AvailbilityBar from "./availabilitybar";
 import "./slider.css";
 
 class DateSliderDouble extends Component {
-  formatDate = raw => {
+  formatDate = (raw) => {
     return new Date(raw * 1000);
   };
 
-  formatTick = ms => {
+  formatTick = (ms) => {
     const { min, max } = this.props;
     const diff = max - min;
     if (diff < 172800) {
@@ -36,7 +36,7 @@ class DateSliderDouble extends Component {
       height: 42,
       margin: "auto",
       marginTop: 40,
-      boxSizing: "border-box"
+      boxSizing: "border-box",
     };
     var {
       min,
@@ -46,7 +46,7 @@ class DateSliderDouble extends Component {
       onChange,
       onChangeLower,
       onChangeUpper,
-      files
+      files,
     } = this.props;
     min = this.formatDate(min);
     max = this.formatDate(max);
@@ -55,39 +55,36 @@ class DateSliderDouble extends Component {
     const dateTicks = scaleTime()
       .domain([min, max])
       .ticks(5)
-      .map(d => +d);
+      .map((d) => +d);
 
     return (
       <div className="datetime-selector">
-        <table className="datetime-table">
-          <tbody>
-            <tr>
-              <td className="left">
-                <DateTimePicker
-                  onChange={onChangeLower}
-                  value={lower}
-                  clearIcon={null}
-                  calendarIcon={null}
-                  maxDate={upper}
-                  minDate={min}
-                  disableClock={true}
-                />
-              </td>
-              <td className="center">></td>
-              <td className="right">
-                <DateTimePicker
-                  onChange={onChangeUpper}
-                  value={upper}
-                  clearIcon={null}
-                  calendarIcon={null}
-                  maxDate={max}
-                  minDate={lower}
-                  disableClock={true}
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div className="datetime-picker">
+          <div className="datetime-value">
+            <DateTimePicker
+              onChange={onChangeLower}
+              value={lower}
+              clearIcon={null}
+              calendarIcon={null}
+              maxDate={upper}
+              minDate={min}
+              disableClock={true}
+            />
+          </div>
+          <div className="datetime-value">></div>
+          <div className="datetime-value">
+            <DateTimePicker
+              onChange={onChangeUpper}
+              value={upper}
+              clearIcon={null}
+              calendarIcon={null}
+              maxDate={max}
+              minDate={lower}
+              disableClock={true}
+            />
+          </div>
+        </div>
+
         <Slider
           mode={3}
           domain={[+min, +max]}
@@ -102,7 +99,7 @@ class DateSliderDouble extends Component {
           <Handles>
             {({ handles, activeHandleID, getHandleProps }) => (
               <div className="slider-handles">
-                {handles.map(handle => (
+                {handles.map((handle) => (
                   <Handle
                     key={handle.id}
                     handle={handle}
@@ -131,7 +128,7 @@ class DateSliderDouble extends Component {
           <Ticks values={dateTicks}>
             {({ ticks }) => (
               <div>
-                {ticks.map(tick => (
+                {ticks.map((tick) => (
                   <Tick
                     key={tick.id}
                     tick={tick}

@@ -9,7 +9,7 @@
   vertical-align: top;
   max-width: 100%;
   box-sizing: border-box;
-  float: right;
+  display: inline-block;
   position: relative;
   background-color: white;
   min-height: 500px;
@@ -81,6 +81,7 @@
   max-width: 100%;
   box-sizing: border-box;
   position: relative;
+  display: inline-block;
 }
 
 .sidebarlayout .leftcontainer.full {

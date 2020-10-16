@@ -44,21 +44,8 @@
   box-sizing: border-box;
 }
 
-.datetime-table {
-  width: 100%;
-  margin-bottom: -15px;
-}
-
-.datetime-table .left {
-  text-align: right;
-}
-
-.datetime-table .center {
-  text-align: center;
-}
-
-.datetime-table .right {
-  text-align: left;
+.datetime-picker .datetime-value {
+  display: inline-block;
 }
 
 .react-datetime-picker__wrapper {
