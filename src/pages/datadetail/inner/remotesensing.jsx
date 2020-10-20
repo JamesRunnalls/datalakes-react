@@ -147,7 +147,9 @@ class RemoteSensingMenu extends Component {
                 title="Edit the background map style"
               >
                 <option value="datalakesmap">Datalakes Map</option>
-                <option value="datalakesmapgrey">Datalakes Map Greyscale</option>
+                <option value="datalakesmapgrey">
+                  Datalakes Map Greyscale
+                </option>
                 <option value="swisstopo">Swisstopo</option>
                 <option value="satellite">Satellite</option>
                 <option value="dark">Dark</option>
@@ -274,12 +276,20 @@ class RemoteSensing extends Component {
 
         var { filemin, filemax, filearray } = this.remoteSensingMinMax(data);
 
+        // Retain selected min and max values
+        var newmin = filemin;
+        var newmax = filemax;
+        if (selectedlayers[i].min !== selectedlayers[i].datamin)
+          newmin = selectedlayers[i].min;
+        if (selectedlayers[i].max !== selectedlayers[i].datamax)
+          newmax = selectedlayers[i].max;
+
         // Update the min and max value
         selectedlayers[i].realdatetime = realdatetime;
         selectedlayers[i].realdepth = realdepth;
         selectedlayers[i].data = data;
-        selectedlayers[i].min = filemin;
-        selectedlayers[i].max = filemax;
+        selectedlayers[i].min = newmin;
+        selectedlayers[i].max = newmax;
         selectedlayers[i].datamin = filemin;
         selectedlayers[i].datamax = filemax;
         selectedlayers[i].array = filearray;
