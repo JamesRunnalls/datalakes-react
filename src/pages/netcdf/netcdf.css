@@ -1,0 +1,119 @@
+.netcdf .previewtable {
+  overflow: scroll;
+  width: calc(100vw - 20px);
+  height: 45vh;
+  box-sizing: border-box;
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background-color: white;
+  z-index: 1;
+  box-shadow: 0 0 4px black;
+}
+
+.netcdf .previewtable .hidden {
+  text-align: right;
+  height: 20px;
+  font-size: 30px;
+  padding-right: 5px;
+  cursor: pointer;
+  line-height: 20px;
+}
+
+.netcdf .previewtable.hidden {
+  height: 20px;
+  overflow: hidden;
+}
+
+.netcdf .previewtable table {
+  border-collapse: collapse;
+}
+
+.netcdf .previewtable table td,
+.netcdf .previewtable table th {
+  border: 1px solid #c8c6bf;
+}
+.netcdf .previewtable table td {
+  padding: 0 15px;
+  min-width: 100px;
+}
+.netcdf .previewtable table th {
+  background-color: #e9e9e9;
+}
+
+.netcdf .fileselect {
+  width: 100%;
+  height: 150px;
+  border: 1px dashed grey;
+  text-align: center;
+  cursor: pointer;
+}
+
+.netcdf .fileselect input {
+  margin-top: 55px;
+}
+
+.netcdf .format {
+  margin: 20px 0;
+}
+
+.netcdf .format table th {
+  font-weight: 400;
+  font-style: italic;
+  color: grey;
+}
+
+.netcdf .format .skiprows {
+  display: inline-block;
+  margin-right: 100px;
+}
+
+.netcdf .format .skiprows input[type="number"] {
+  width: 60px;
+  margin-top: 15px;
+}
+
+.netcdf .format .delimeter {
+  display: inline-block;
+}
+
+.netcdf .format .delimeter input {
+  margin-top: 15px;
+}
+
+.netcdf .format .delimeter label {
+  margin-right: 15px;
+}
+
+.netcdf .format .delimeter input[type="text"] {
+  width: 60px;
+}
+
+.netcdf .format .attributes {
+  display: inline-block;
+  margin-right: 100px;
+}
+
+.netcdf .format .attributes .attributestable {
+  margin-top: 15px;
+}
+
+.netcdf .format .dimensions {
+  display: inline-block;
+}
+
+.netcdf .format .dimensions .dimensionstable {
+  margin-top: 15px;
+}
+
+.netcdf .format .row {
+  margin-bottom: 50px;
+}
+
+.netcdf .format .variables .variablestable {
+  margin-top: 15px;
+}
+
+.netcdf .format .create {
+  margin-bottom: 45vh;
+}

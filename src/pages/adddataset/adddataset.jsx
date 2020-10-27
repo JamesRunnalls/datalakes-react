@@ -522,7 +522,6 @@ class AddDataset extends Component {
       );
 
       var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
-      var defaultAxis = "y";
 
       // Fallback to parameter units if none provided in nc file
       var defaultUnit;
@@ -533,7 +532,10 @@ class AddDataset extends Component {
       }
 
       // Logic for default axis assignment
-      if (defaultParameter === 1) {
+      var defaultAxis = "y";
+      if (variables[key].dimensions.length > 1) {
+        defaultAxis = "z";
+      } else if (defaultParameter === 1) {
         defaultAxis = "x";
       }
 

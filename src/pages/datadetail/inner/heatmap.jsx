@@ -322,7 +322,7 @@ class HeatMap extends Component {
   };
 
   addGaps = (obj, timeaxis, gap) => {
-    if (timeaxis === "x" && obj) {
+    if (timeaxis === "x" && obj && obj.x) {
       for (let i = 1; i < obj.x.length; i++) {
         if (
           obj.x[i].getTime() - obj.x[i - 1].getTime() >
