@@ -295,7 +295,7 @@ class Home extends Component {
                           Access remotely sensed water quality parameters
                           including cholorphyll and total suspended matter for
                           water bodies across Switerland.
-                          <Link to="/map?selected=[[13,23],[1,15]]&hidden=[[13,23]]">
+                          <Link to="/map?selected=[[20,15],[21,23],[19,43]]&hidden=[[21,23],[19,43]]">
                             <button>Map Viewer</button>
                           </Link>
                         </td>
