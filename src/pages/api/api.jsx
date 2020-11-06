@@ -19,6 +19,7 @@ class API extends Component {
           >
             Swagger.
           </a>
+          <p>[ Base URL: https://api.datalakes-eawag.ch ]</p>
         </div>
         <div className="api-container">
           <SwaggerUI url={apiUrl + "/docs"} docExpansion="list" />
