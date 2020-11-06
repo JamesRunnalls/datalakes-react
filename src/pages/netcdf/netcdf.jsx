@@ -270,11 +270,12 @@ class Variables extends Component {
     var { variables } = this.state;
     let id = event.target.id.split("_");
     let i = parseInt(id[0]);
-    variables[i][id[2]] = event.target.value;
     if (variables[i][id[2]] !== event.target.value) {
       variables[i][id[2]] = event.target.value;
       this.setState({ variables }, () => {
-        this.props.onChangeVariables(variables);
+        setTimeout(() => {
+          this.props.onChangeVariables(variables);
+        });
       });
     }
   };
@@ -507,7 +508,7 @@ class PreviewTable extends Component {
     tablecontent.push(<tr key="firstrow">{firstrow}</tr>);
 
     for (var i = 0; i < nrows; i++) {
-      let tablerow = [<th>{i}</th>];
+      let tablerow = [<th key="trh">{i}</th>];
       let rowlength = table[i].length;
       for (var j = 0; j < ncols; j++) {
         if (j > rowlength - 1) {
@@ -585,13 +586,13 @@ class NetCDF extends Component {
         placeholder: "Add any comments",
       },
     ],
-    dimensions: [{ name: "time", len: "unlimited" }],
+    dimensions: [{ name: "Time", len: "unlimited" }],
     variables: [
       {
-        name: "time",
-        dimension: "time",
+        name: "Time",
+        dimension: "Time",
         unit: "seconds since 01-01-1970",
-        type: "float",
+        type: "string",
         startcol: 0,
         endcol: 0,
         startrow: 0,
@@ -690,8 +691,9 @@ class NetCDF extends Component {
   };
 
   createNetcdf = () => {
-    var { file, attributes, dimensions, variables } = this.state;
-
+    var { file, attributes, dimensions, variables, table } = this.state;
+    var url = "http://localhost:5000/netcdf";
+    var filename = file.name.split(".")[0] + ".nc";
     var outvariables = variables.map((v) => {
       v = {
         name: v.name,
@@ -707,14 +709,73 @@ class NetCDF extends Component {
       return v;
     });
 
-    var data = {
-      filename: file.name,
+    var data = {};
+    for (let variable of variables) {
+      data[variable.name] = this.sliceTable(table, variable);
+    }
+
+    var out = {
+      filename: filename,
       attributes,
       dimensions,
+      data,
       variables: outvariables,
     };
-    console.log(data);
+
+    axios({
+      method: "post",
+      url: url,
+      responseType: "blob",
+      data: out,
+    })
+      .then(({ data }) => {
+        const downloadUrl = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Failed to download files");
+      });
   };
+
+  sliceTable(table, variable) {
+    var arr = [];
+    if (variable.startcol === variable.endcol) {
+      for (
+        let i = parseInt(variable.startrow);
+        i < parseInt(variable.endrow) + 1;
+        i++
+      ) {
+        if (variable.type === "float") {
+          arr.push(parseFloat(table[i][parseInt(variable.startcol)]));
+        } else {
+          arr.push(table[i][parseInt(variable.startcol)]);
+        }
+      }
+    } else {
+      for (
+        let i = parseInt(variable.startrow);
+        i < parseInt(variable.endrow) + 1;
+        i++
+      ) {
+        let row = [];
+        for (
+          let j = parseInt(variable.startcol);
+          j < parseInt(variable.endcol) + 1;
+          j++
+        ) {
+          row.push(table[i][j]);
+        }
+        arr.push(row.join(" "));
+      }
+    }
+    return arr;
+  }
 
   updateTable = (data, delimeter, newline, skiprow) => {
     var lines = data.split(newline);

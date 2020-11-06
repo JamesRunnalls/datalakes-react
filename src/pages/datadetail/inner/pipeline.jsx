@@ -20,7 +20,7 @@ class Pipeline extends Component {
     const { dataset, renku, scripts } = this.props;
     var { scriptInt } = this.state;
     var { datasourcelink } = dataset;
-    var gitlab = datasourcelink.split("/blob/")[0];
+    var gitlab = datasourcelink.split("/blob/")[0].replace("/-", "");
     var renkulab = gitlab.replace("gitlab", "projects");
     var downloadlink = apiUrl + "/pipeline/files/" + dataset.id;
     var selectedscript = scripts[scriptInt];
@@ -39,7 +39,9 @@ class Pipeline extends Component {
       scriptHeaders.push(
         <div
           className={
-            parseInt(scriptInt) === k ? "pipeline-headitem active" : "pipeline-headitem"
+            parseInt(scriptInt) === k
+              ? "pipeline-headitem active"
+              : "pipeline-headitem"
           }
           id={k}
           key={"key" + k}
@@ -170,13 +172,20 @@ class Pipeline extends Component {
         <div className="pipeline-script">
           <div className="pipeline-head">{scriptHeaders}</div>
           <div className="pipeline-body">
-            {selectedscript ? <SyntaxHighlighter
-              language={scriptType}
-              style={github}
-              wrapLines={true}
-            >
-              {selectedscript.data}
-            </SyntaxHighlighter> : <div>Appologies, no accompanying scripts have been included with this dataset.</div>}
+            {selectedscript ? (
+              <SyntaxHighlighter
+                language={scriptType}
+                style={github}
+                wrapLines={true}
+              >
+                {selectedscript.data}
+              </SyntaxHighlighter>
+            ) : (
+              <div>
+                Appologies, no accompanying scripts have been included with this
+                dataset.
+              </div>
+            )}
           </div>
         </div>
         {dataset.renku === 0 && (
