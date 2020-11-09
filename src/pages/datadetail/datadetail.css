@@ -11,6 +11,32 @@
   display: none;
 }
 
+.downsample {
+  width: 200px;
+}
+
+.downsample .downsample-left {
+  width: 70%;
+  display: inline-block;
+}
+
+.downsample .downsample-right {
+  display: inline-block;
+  width: 30%;
+  text-align: center;
+  padding: 10px 0;
+  vertical-align: top;
+}
+
+.downsample .downsample-left input {
+  width: calc(100% - 5px);
+  margin-bottom: 5px;
+}
+
+.downsample .downsample-left select {
+  width: 100%;
+}
+
 .ch2018graph {
   width: 100vw;
   margin-left: calc(-50vw + 50%);

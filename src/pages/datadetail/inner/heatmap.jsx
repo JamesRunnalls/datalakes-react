@@ -20,6 +20,18 @@ class DisplayOptions extends Component {
     minZ: this.props.minZ,
     maxZ: this.props.maxZ,
     thresholdStep: this.props.thresholdStep,
+    decimate_active: this.props.decimate_active,
+    decimate_period: this.props.decimate_period,
+    decimate_time: this.props.decimate_time,
+  };
+  onChangeDecimatePeriod = (event) => {
+    this.setState({ decimate_period: event.target.value });
+  };
+  onChangeDecimateTime = (event) => {
+    this.setState({ decimate_time: event.target.value });
+  };
+  onChangeDecimate = () => {
+    this.setState({ decimate_active: !this.state.decimate_active });
   };
   onChangeLocalColors = (colors) => {
     this.setState({ colors });
@@ -53,9 +65,22 @@ class DisplayOptions extends Component {
       prevProps.colors !== this.props.colors ||
       prevProps.minZ !== this.props.minZ ||
       prevProps.maxZ !== this.props.maxZ ||
-      prevProps.thresholdStep !== this.props.thresholdStep
+      prevProps.thresholdStep !== this.props.thresholdStep ||
+      prevProps.decimate_active !== this.props.decimate_active ||
+      prevProps.decimate_time !== this.props.decimate_time ||
+      prevProps.decimate_period !== this.props.decimate_period
     ) {
-      var { colors, title, bcolor, minZ, maxZ, thresholdStep } = this.props;
+      var {
+        colors,
+        title,
+        bcolor,
+        minZ,
+        maxZ,
+        thresholdStep,
+        decimate_active,
+        decimate_period,
+        decimate_time,
+      } = this.props;
       this.setState({
         colors,
         title,
@@ -63,11 +88,23 @@ class DisplayOptions extends Component {
         minZ,
         maxZ,
         thresholdStep,
+        decimate_active,
+        decimate_period,
+        decimate_time,
       });
     }
   }
   render() {
-    var { colors, title, bcolor, minZ, maxZ, thresholdStep } = this.state;
+    var {
+      colors,
+      title,
+      bcolor,
+      minZ,
+      maxZ,
+      thresholdStep,
+      decimate_period,
+      decimate_time,
+    } = this.state;
     return (
       <FilterBox
         title="Display Options"
@@ -128,6 +165,40 @@ class DisplayOptions extends Component {
                       value={thresholdStep}
                       onChange={this.onChangeLocalThreshold}
                     />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>Down Sample</td>
+                  <td>
+                    <div className="downsample">
+                      <div className="downsample-left">
+                        <input
+                          type="time"
+                          id="threshold"
+                          value={decimate_time}
+                          onChange={this.onChangeDecimateTime}
+                        />
+                        <select
+                          value={decimate_period}
+                          onChange={this.onChangeDecimatePeriod}
+                        >
+                          <option value="1">1 hour</option>
+                          <option value="3">3 hours</option>
+                          <option value="4">6 hours</option>
+                          <option value="12">12 hours</option>
+                          <option value="24">1 day</option>
+                          <option value="48">2 days</option>
+                          <option value="168">1 week</option>
+                        </select>
+                      </div>
+                      <div className="downsample-right">
+                        <input
+                          type="checkbox"
+                          onChange={this.onChangeDecimate}
+                        />
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -275,6 +346,9 @@ class HeatMapSidebar extends Component {
           title={this.props.title}
           bcolor={this.props.bcolor}
           thresholdStep={this.props.thresholdStep}
+          decimate_active={this.props.decimate_active}
+          decimate_period={this.props.decimate_period}
+          decimate_time={this.props.decimate_time}
           minZ={this.props.minZ}
           maxZ={this.props.maxZ}
           onChange={this.props.onChangeDisplay}
@@ -304,6 +378,10 @@ class HeatMap extends Component {
     timeaxis: "",
     depthaxis: "",
     thresholdStep: 20,
+    gap: 12,
+    decimate_active: false,
+    decimate_period: 24,
+    decimate_time: "12:00",
     download: false,
     upperY: 1,
     lowerY: 0,
@@ -491,6 +569,9 @@ class HeatMap extends Component {
     }
 
     var thresholdStep = 20;
+    var decimate_active = false;
+    var decimate_period = 24;
+    var decimate_time = "12:00";
 
     var { xoptions, yoptions, zoptions } = this.setAxisOptions(
       datasetparameters,
@@ -510,7 +591,10 @@ class HeatMap extends Component {
       minX,
       maxX,
       timeaxis,
-      depthaxis
+      depthaxis,
+      decimate_active,
+      decimate_period,
+      decimate_time
     );
 
     this.setState({
@@ -541,6 +625,9 @@ class HeatMap extends Component {
       yoptions,
       zoptions,
       plotdata,
+      decimate_active,
+      decimate_period,
+      decimate_time,
     });
   };
 
@@ -725,6 +812,50 @@ class HeatMap extends Component {
     return plotdata;
   };
 
+  closest = (num, arr) => {
+    var curr = arr[0];
+    var diff = Math.abs(num - curr[0]);
+    for (var val = 0; val < arr.length; val++) {
+      var newdiff = Math.abs(num - arr[val][0]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        curr = arr[val];
+      }
+    }
+    return curr;
+  };
+
+  decimateData = (obj, timeaxis, active, period, time) => {
+    if (active && timeaxis === "x" && obj) {
+      return obj;
+    } else if (active && timeaxis === "y" && obj) {
+      var x = obj[0].x;
+      var { lowerY, upperY } = this.state;
+      var hour = time.split(":")[0];
+      var min = time.split(":")[1];
+      var minDate =
+        new Date(lowerY * 1000).setHours(parseInt(hour), parseInt(min)) / 1000;
+      var steps = Math.floor((upperY - minDate) / (period * 3600));
+      var date_list = [];
+      for (let i = 0; i < obj.length; i++) {
+        for (let j = 0; j < obj[i].y.length; j++) {
+          date_list.push([obj[i].y[j], i, j]);
+        }
+      }
+      var y = [];
+      var z = [];
+      for (let i = 0; i < steps; i++) {
+        let dt = minDate + i * period * 3600;
+        let close = this.closest(dt, date_list);
+        z.push(obj[close[1]].z[close[2]]);
+        y.push(obj[close[1]].y[close[2]]);
+      }
+      return { x, y, z };
+    } else {
+      return obj;
+    }
+  };
+
   processPlotData = (
     xaxis,
     yaxis,
@@ -738,7 +869,10 @@ class HeatMap extends Component {
     minX,
     maxX,
     timeaxis,
-    depthaxis
+    depthaxis,
+    decimate_active,
+    decimate_period,
+    decimate_time
   ) => {
     var { data, files, file, combined } = this.props;
     var plotdata = this.combineFiles(
@@ -764,9 +898,17 @@ class HeatMap extends Component {
         maxY
       );
 
+      plotdata = this.decimateData(
+        plotdata,
+        timeaxis,
+        decimate_active,
+        decimate_period,
+        decimate_time
+      );
+
       plotdata = this.formatDepthTime(plotdata, timeaxis, depthaxis);
 
-      plotdata = this.addGaps(plotdata, timeaxis, 12);
+      plotdata = this.addGaps(plotdata, timeaxis, this.state.gap);
     } catch (e) {
       console.error(e);
     }
@@ -797,6 +939,9 @@ class HeatMap extends Component {
       minX,
       timeaxis,
       depthaxis,
+      decimate_active,
+      decimate_period,
+      decimate_time,
     } = this.state;
 
     // If not much data download previous file
@@ -875,6 +1020,9 @@ class HeatMap extends Component {
       maxX,
       timeaxis,
       depthaxis,
+      decimate_active,
+      decimate_period,
+      decimate_time,
     ];
 
     var prevparams = [
@@ -891,8 +1039,10 @@ class HeatMap extends Component {
       prevState.maxX,
       prevState.timeaxis,
       prevState.depthaxis,
+      prevState.decimate_active,
+      prevState.decimate_period,
+      prevState.decimate_time,
     ];
-
     if ((prevProps.loading && !loading) || !isEqual(params, prevparams)) {
       var plotdata = this.processPlotData(...params);
       this.setState({ plotdata, upperX, lowerX, upperY, lowerY });
