@@ -88,7 +88,9 @@ class ColorTable extends Component {
                     </td>
                     <td style={{ width: "55%" }}>
                       {index === 0 || index === colors.length - 1 ? (
-                        <div style={{ width: "100%", overflow: "hidden" }}>{value}</div>
+                        <div style={{ width: "100%", overflow: "hidden" }}>
+                          {value}
+                        </div>
                       ) : (
                         <input
                           type="text"

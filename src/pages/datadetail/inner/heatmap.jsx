@@ -105,6 +105,7 @@ class DisplayOptions extends Component {
       decimate_period,
       decimate_time,
     } = this.state;
+    var { array } = this.props;
     return (
       <FilterBox
         title="Display Options"
@@ -207,6 +208,7 @@ class DisplayOptions extends Component {
             <ColorManipulation
               onChange={this.onChangeLocalColors}
               colors={colors}
+              array={array}
             />
             <div className="editsettings-button">
               <button
@@ -342,6 +344,7 @@ class HeatMapSidebar extends Component {
           preopen={preopeny}
         />
         <DisplayOptions
+          array={this.props.array}
           colors={this.props.colors}
           title={this.props.title}
           bcolor={this.props.bcolor}
@@ -360,6 +363,7 @@ class HeatMapSidebar extends Component {
 
 class HeatMap extends Component {
   state = {
+    array: [],
     colors: [
       { color: "#0000ff", point: 0 },
       { color: "#ff0000", point: 1 },
@@ -400,21 +404,55 @@ class HeatMap extends Component {
   };
 
   addGaps = (obj, timeaxis, gap) => {
-    if (timeaxis === "x" && obj && obj.x) {
-      for (let i = 1; i < obj.x.length; i++) {
-        if (
-          obj.x[i].getTime() - obj.x[i - 1].getTime() >
-          gap * 60 * 60 * 1000
-        ) {
-          obj.x.splice(i, 0, new Date(obj.x[i - 1].getTime() + 60 * 1000));
-          obj.z.map((z) => z.splice(i, 0, null));
-          obj.x.splice(i + 1, 0, new Date(obj.x[i + 1].getTime() - 60 * 1000));
-          obj.z.map((z) => z.splice(i + 1, 0, null));
-          i = i + 2;
+    if (timeaxis === "x" && obj) {
+      if (!Array.isArray(obj)) obj = [obj];
+      for (let i = 0; i < obj.length; i++) {
+        for (let j = 1; j < obj[i].x.length; j++) {
+          if (
+            obj[i].x[j].getTime() - obj[i].x[j - 1].getTime() >
+            gap * 60 * 60 * 1000
+          ) {
+            obj[i].x.splice(
+              j,
+              0,
+              new Date(obj[i].x[j - 1].getTime() + 60 * 1000)
+            );
+            obj[i].z.map((z) => z.splice(j, 0, null));
+            obj[i].x.splice(
+              j + 1,
+              0,
+              new Date(obj[i].x[j + 1].getTime() - 60 * 1000)
+            );
+            obj[i].z.map((z) => z.splice(j + 1, 0, null));
+            j = j + 2;
+          }
         }
       }
       return obj;
     } else if (timeaxis === "y" && obj) {
+      if (!Array.isArray(obj)) obj = [obj];
+      for (let i = 0; i < obj.length; i++) {
+        for (let j = 1; j < obj[i].y.length; j++) {
+          if (
+            obj[i].y[j].getTime() - obj[i].y[j - 1].getTime() >
+            gap * 60 * 60 * 1000
+          ) {
+            obj[i].y.splice(
+              j,
+              0,
+              new Date(obj[i].y[j - 1].getTime() + 60 * 1000)
+            );
+            obj[i].z.splice(j, 0, Array(obj[i].x.length).fill(null));
+            obj[i].y.splice(
+              j + 1,
+              0,
+              new Date(obj[i].y[j + 1].getTime() - 60 * 1000)
+            );
+            obj[i].z.splice(j, 0, Array(obj[i].x.length).fill(null));
+            j = j + 2;
+          }
+        }
+      }
       return obj;
     } else {
       return obj;
@@ -500,6 +538,22 @@ class HeatMap extends Component {
 
   formatDate = (raw) => {
     return new Date(raw * 1000);
+  };
+
+  getArray = (data) => {
+    if (Array.isArray(data)) {
+      var z = [];
+      for (var i = 0; i < data.length; i++) {
+        if ("z" in data[i]) {
+          z = z.concat(data[i].z.flat());
+        }
+      }
+      return z;
+    } else if ("z" in data) {
+      return data.z.flat();
+    } else {
+      return [];
+    }
   };
 
   setDefault = () => {
@@ -596,8 +650,10 @@ class HeatMap extends Component {
       decimate_period,
       decimate_time
     );
+    var array = this.getArray(plotdata);
 
     this.setState({
+      array,
       title,
       xlabel,
       ylabel,
@@ -827,30 +883,68 @@ class HeatMap extends Component {
 
   decimateData = (obj, timeaxis, active, period, time) => {
     if (active && timeaxis === "x" && obj) {
-      return obj;
-    } else if (active && timeaxis === "y" && obj) {
-      var x = obj[0].x;
-      var { lowerY, upperY } = this.state;
-      var hour = time.split(":")[0];
-      var min = time.split(":")[1];
-      var minDate =
-        new Date(lowerY * 1000).setHours(parseInt(hour), parseInt(min)) / 1000;
-      var steps = Math.floor((upperY - minDate) / (period * 3600));
-      var date_list = [];
+      console.log(obj);
+      if (!Array.isArray(obj)) obj = [obj];
+      let { lowerX, upperX } = this.state;
+      let hour = time.split(":")[0];
+      let min = time.split(":")[1];
+      let minDate =
+        new Date(lowerX * 1000).setHours(parseInt(hour), parseInt(min)) / 1000;
+      let steps = Math.floor((upperX - minDate) / (period * 3600));
+      let date_list = [];
+      let k = 0;
+      let out = [
+        { x: [], y: obj[0].y, z: Array.from(Array(obj[0].y.length), () => []) },
+      ];
       for (let i = 0; i < obj.length; i++) {
-        for (let j = 0; j < obj[i].y.length; j++) {
-          date_list.push([obj[i].y[j], i, j]);
+        if (!isEqual(out[out.length - 1].y, obj[i].y)) {
+          k++;
+          out.push({
+            x: [],
+            y: obj[i].y,
+            z: Array.from(Array(obj[i].y.length), () => []),
+          });
+        }
+        for (let j = 0; j < obj[i].x.length; j++) {
+          date_list.push([obj[i].x[j], i, j, k]);
         }
       }
-      var y = [];
-      var z = [];
       for (let i = 0; i < steps; i++) {
         let dt = minDate + i * period * 3600;
         let close = this.closest(dt, date_list);
-        z.push(obj[close[1]].z[close[2]]);
-        y.push(obj[close[1]].y[close[2]]);
+        for (let j = 0; j < obj[close[1]].y.length; j++) {
+          out[close[3]].z[j].push(obj[close[1]].z[j][close[2]]);
+        }
+        out[close[3]].x.push(obj[close[1]].x[close[2]]);
       }
-      return { x, y, z };
+      return out;
+    } else if (active && timeaxis === "y" && obj) {
+      if (!Array.isArray(obj)) obj = [obj];
+      let { lowerY, upperY } = this.state;
+      let hour = time.split(":")[0];
+      let min = time.split(":")[1];
+      let minDate =
+        new Date(lowerY * 1000).setHours(parseInt(hour), parseInt(min)) / 1000;
+      let steps = Math.floor((upperY - minDate) / (period * 3600));
+      let date_list = [];
+      let k = 0;
+      let out = [{ x: obj[0].x, y: [], z: [] }];
+      for (let i = 0; i < obj.length; i++) {
+        if (!isEqual(out[out.length - 1].x, obj[i].x)) {
+          k++;
+          out.push({ x: obj[i].x, y: [], z: [] });
+        }
+        for (let j = 0; j < obj[i].y.length; j++) {
+          date_list.push([obj[i].y[j], i, j, k]);
+        }
+      }
+      for (let i = 0; i < steps; i++) {
+        let dt = minDate + i * period * 3600;
+        let close = this.closest(dt, date_list);
+        out[close[3]].z.push(obj[close[1]].z[close[2]]);
+        out[close[3]].y.push(obj[close[1]].y[close[2]]);
+      }
+      return out;
     } else {
       return obj;
     }
@@ -908,7 +1002,10 @@ class HeatMap extends Component {
 
       plotdata = this.formatDepthTime(plotdata, timeaxis, depthaxis);
 
-      plotdata = this.addGaps(plotdata, timeaxis, this.state.gap);
+      var { gap } = this.state;
+      if (decimate_active) gap = 1.1 * decimate_period;
+
+      plotdata = this.addGaps(plotdata, timeaxis, gap);
     } catch (e) {
       console.error(e);
     }
@@ -1045,7 +1142,20 @@ class HeatMap extends Component {
     ];
     if ((prevProps.loading && !loading) || !isEqual(params, prevparams)) {
       var plotdata = this.processPlotData(...params);
-      this.setState({ plotdata, upperX, lowerX, upperY, lowerY });
+      var array = this.getArray(plotdata);
+      let zdomain = d3.extent(array);
+      minZ = zdomain[0];
+      maxZ = zdomain[1];
+      this.setState({
+        plotdata,
+        upperX,
+        lowerX,
+        upperY,
+        lowerY,
+        array,
+        minZ,
+        maxZ,
+      });
     }
   }
 
