@@ -55,17 +55,25 @@ class AddData extends Component {
             <p>
               Welcome to the Datalakes add dataset portal. Currently we only
               support connection to git repositories from the following
-              companies: <a href="https://renkulab.io/gitlab">Renkulab.io</a>.
+              companies: <a href="https://renkulab.io/gitlab">Renkulab.io</a>,{" "}
+              <a href="https://gitlab.com/">GitLab</a> and{" "}
+              <a href="https://github.com/">GitHub</a>.
             </p>
             <p>
               It is important that the repository is either open for public
-              access or you have invited Datalakes to have at least guest
-              access. For instructions click here.
+              access or you have invited the user <b>EawagDatalakes</b> to have
+              at least Reporter access.{" "}
+              <a href="https://renkulab.io/gitlab/james.runnalls">
+                Renkulab.io
+              </a>
+              , <a href="https://gitlab.com/EawagDatalakes">GitLab</a> and{" "}
+              <a href="https://github.com/eawagdatalakes">GitHub</a>
             </p>
             <p>
               Input data must be in NetCDF format according to the CF
               convensions. If you wish to upload multiple file to the same
-              dataset they must be of the same format and in the same folder.
+              dataset they must be of the same format and in the same folder
+              with no other files present.
             </p>
             <p>Enter a link below to the NetCDF file in your git repository.</p>
           </div>

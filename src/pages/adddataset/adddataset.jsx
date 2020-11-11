@@ -161,10 +161,6 @@ class AddDataset extends Component {
               fileInformation,
               dropdown
             );
-            datasetparameters = datasetparameters.map((dp, index) => {
-              dp.id = index;
-              return dp;
-            });
 
             internalthis.setState({
               allowedStep: [1, 2, 0, 0, 0],
@@ -219,7 +215,7 @@ class AddDataset extends Component {
       .catch((error) => {
         console.error(error.message);
       });
-    if ("data" in renkuData) {
+    if (renkuData && "data" in renkuData) {
       if (renkuData.data.lineage !== null) {
         dataset["renku"] = 0;
         allowedStep = [1, 2, 3, 0, 0];
@@ -415,6 +411,34 @@ class AddDataset extends Component {
       dir.unshift(repo);
       dir = dir.join("/");
       file = path[path.length - 1];
+    } else if (url.includes("github.com")) {
+      const path = url.split("/blob/")[1].split("/");
+      const loc = url.split("/blob/")[0].split("/");
+      const repo = loc[loc.length - 1];
+      branch = path[0];
+      ssh =
+        "git@github.com:" +
+        url.split("/blob/")[0].split("github.com/").pop() +
+        ".git";
+      dir = path.slice(1, path.length - 1);
+      dir.unshift(repo);
+      dir = dir.join("/");
+      file = path[path.length - 1];
+    } else if (url.includes("gitlab.com")) {
+      const path = url.split("/blob/")[1].split("/");
+      const loc = url.split("/blob/")[0].split("/");
+      const repo = loc[loc.length - 1];
+      branch = path[0];
+      ssh =
+        "git@gitlab.com:" +
+        url.split("/blob/")[0].split("gitlab.com/").pop() +
+        ".git";
+      dir = path.slice(1, path.length - 1);
+      dir.unshift(repo);
+      dir = dir.join("/");
+      file = path[path.length - 1];
+    } else {
+      alert("Repository type not recognised.");
     }
     return {
       ssh: ssh,
@@ -440,6 +464,13 @@ class AddDataset extends Component {
     var defaultValue = "";
     if (search.length !== 0) {
       defaultValue = search[0].id;
+    }
+    // Fix common match errors of pressure and temperature
+    if (defaultValue === 10 && !find.toLowerCase().includes("air")) {
+      defaultValue = 18;
+    }
+    if (defaultValue === 6 && !find.toLowerCase().includes("air")) {
+      defaultValue = 5;
     }
     return defaultValue;
   };
@@ -481,6 +512,56 @@ class AddDataset extends Component {
     }
   };
 
+  defaultAxis = (dp) => {
+    var maxdim = Math.max(...dp.map((d) => d.dims.length));
+    var params = dp.map((d) => d.parameters_id);
+    var type = "unknown";
+    if (maxdim === 2) {
+      type = "2D";
+    } else if (
+      maxdim === 1 &&
+      params.includes(1) &&
+      (params.includes(2) || params.includes(18))
+    ) {
+      type = "profile";
+    }
+    for (var i = 0; i < dp.length; i++) {
+      let defaultAxis = "y";
+      if (type === "2D") {
+        if (dp[i].dims.length > 1) {
+          defaultAxis = "z";
+        } else if (dp[i].parameters_id === 1) {
+          defaultAxis = "x";
+        }
+      } else if (type === "profile") {
+        if (dp[i].parameters_id === 1) {
+          defaultAxis = "M";
+        } else if (![2, 18].includes(dp[i].parameters_id)) {
+          defaultAxis = "x";
+        }
+      } else {
+        if (dp[i].parameters_id === 1) {
+          defaultAxis = "x";
+        }
+      }
+      dp[i].axis = defaultAxis;
+    }
+    return dp;
+  };
+
+  addMaskLink = (dp) => {
+    for (var i = 0; i < dp.length; i++) {
+      if (dp[i].parseparameter.includes("_qual")) {
+        let name = dp[i].parseparameter.split("_qual")[0];
+        let match = dp.find((d) => d.parseparameter === name);
+        if (match) {
+          dp[i].link = match.id;
+        }
+      }
+    }
+    return dp;
+  };
+
   setDatasetParameters = (fileInformation, dropdown) => {
     const { parameters, sensors } = dropdown;
     const { variables, attributes } = fileInformation;
@@ -494,6 +575,7 @@ class AddDataset extends Component {
     var datasetparameters = [];
 
     // Loop over variables in nc file
+    let index = 0;
     for (var key in variables) {
       parseparameter = key;
       parseUnit = "NA";
@@ -520,6 +602,13 @@ class AddDataset extends Component {
         parameters,
         parseparameter
       );
+      // Detect error mask layers
+      if (
+        parseparameter.includes("_qual") ||
+        parseUnit === "0 = nothing to report, 1 = more investigation"
+      ) {
+        defaultParameter = 27;
+      }
 
       var defaultSensor = this.fuseSearch(["name"], sensors, parseSensor);
 
@@ -531,29 +620,29 @@ class AddDataset extends Component {
         defaultUnit = parseUnit;
       }
 
-      // Logic for default axis assignment
-      var defaultAxis = "y";
-      if (variables[key].dimensions.length > 1) {
-        defaultAxis = "z";
-      } else if (defaultParameter === 1) {
-        defaultAxis = "x";
-      }
-
       // Summarise data
       variable = {
+        id: index,
         parseparameter: key,
         parseUnit: parseUnit,
         parseSensor: parseSensor,
         parameters_id: defaultParameter,
         unit: defaultUnit,
-        axis: defaultAxis,
+        axis: "y",
         link: -1,
         detail: "none",
         sensors_id: defaultSensor,
         included: true,
+        dims: variables[key].dimensions,
       };
       datasetparameters.push(variable);
+      index++;
     }
+
+    datasetparameters = this.defaultAxis(datasetparameters);
+
+    datasetparameters = this.addMaskLink(datasetparameters);
+
     return datasetparameters;
   };
 
@@ -573,13 +662,17 @@ class AddDataset extends Component {
 
   handleDataset = (input) => (event) => {
     var dataset = this.state.dataset;
-    dataset[input] = event.value ? event.value : event.target.value;
+    dataset[input] = Number.isInteger(event.value)
+      ? event.value
+      : event.target.value;
     this.setState({ dataset });
   };
 
   handleParameter = (a, b) => (event) => {
     var datasetparameters = this.state.datasetparameters;
-    datasetparameters[a][b] = event.value ? event.value : event.target.value;
+    datasetparameters[a][b] = Number.isInteger(event.value)
+      ? event.value
+      : event.target.value;
     if (b === "parameters_id") datasetparameters[a]["link"] = -1;
     this.setState({ datasetparameters });
   };
