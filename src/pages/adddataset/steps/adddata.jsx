@@ -75,6 +75,9 @@ class AddData extends Component {
               dataset they must be of the same format and in the same folder
               with no other files present.
             </p>
+            <p>
+              Data must be on the master branch.
+            </p>
             <p>Enter a link below to the NetCDF file in your git repository.</p>
           </div>
           <div className="form-group">
@@ -83,7 +86,7 @@ class AddData extends Component {
               id="git"
               type="text"
               ref="git"
-              placeholder="https://gitcompany/repo-group/repo-name/blob/branch-name/folders/file-name.nc"
+              placeholder="https://gitcompany/repo-group/repo-name/blob/master/folders/file-name.nc"
               onChange={this.props.handleChange("datasourcelink")}
               defaultValue={dataset.datasourcelink}
             />
