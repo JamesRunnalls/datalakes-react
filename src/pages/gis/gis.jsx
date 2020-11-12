@@ -593,7 +593,7 @@ class GIS extends Component {
       realdatetime = this.matlabToJavascriptDatetime(realdatetime);
     } else if (datasource === "Eawag RS") {
       realdepth = 0;
-      realdatetime = new Date(file.maxdatetime);
+      realdatetime = new Date(file.mindatetime);
     } else if (["MeteoSwiss", "FOEN"].includes(datasource)) {
       var coeff = 1000 * 60 * 10;
       realdepth = 0;
@@ -671,6 +671,7 @@ class GIS extends Component {
         realdatetime,
         realdepth,
       });
+      console.log("Real date time: ",realdatetime)
       this.setState({ downloads });
       return { data, realdatetime, realdepth };
     }

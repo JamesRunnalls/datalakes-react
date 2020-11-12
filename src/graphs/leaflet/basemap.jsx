@@ -327,7 +327,7 @@ class Basemap extends Component {
   };
 
   remoteSensing = async (layer, file) => {
-    var { maxdatetime } = file;
+    var { mindatetime } = file;
     var {
       min,
       max,
@@ -373,7 +373,7 @@ class Basemap extends Component {
               "<tr><td class='text-nowrap'><strong>Satellite</strong></td><td>Sentinal 3</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-              new Date(maxdatetime).toDateString() +
+              new Date(mindatetime).toDateString() +
               "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>LatLng</strong></td><td>" +
               data.lat[i] +
