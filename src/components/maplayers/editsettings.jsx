@@ -4,163 +4,112 @@ import "./maplayers.css";
 
 class EditSettings extends Component {
   state = {
-    display: JSON.parse(
-      JSON.stringify(this.props.display ? this.props.display : [])
-    ),
-  };
-  yselectindexChange = (event) => {
-    var { display } = this.state;
-    display.yselectindex = event.target.value;
-    this.setState({ display });
+    yselectindex: this.props.display.yselectindex,
+    opacity: this.props.display.opacity,
+    colors: this.props.display.colors,
+    min: this.props.display.min,
+    max: this.props.display.max,
+    markerLabel: this.props.display.markerLabel,
+    legend: this.props.display.legend,
+    movingAverage: this.props.display.movingAverage,
+    markerSymbol: this.props.display.markerSymbol,
+    markerFixedSize: this.props.display.markerFixedSize,
+    markerSize: this.props.display.markerSize,
+    vectorArrowColor: this.props.display.vectorArrowColor,
+    vectorFlowColor: this.props.display.vectorFlowColor,
+    vectorArrows: this.props.display.vectorArrows,
+    vectorFlow: this.props.display.vectorFlow,
+    vectorMagnitude: this.props.display.vectorMagnitude,
   };
 
-  localOpacityChange = (event) => {
-    var { display } = this.state;
-    display.opacity = event.target.value / 100;
-    this.setState({ display });
-  };
-  localColorChange = (colors) => {
-    var { display } = this.state;
-    display.colors = colors;
-    this.setState({ display });
-  };
-  resetMin = () => {
-    var { display } = this.state;
-    display.min = display.datamin;
-    this.setState({ display });
-  };
-  resetMax = () => {
-    var { display } = this.state;
-    display.max = display.datamax;
-    this.setState({ display });
-  };
-  localMinChange = (event) => {
-    var { display } = this.state;
-    display.min = event.target.value;
-    this.setState({ display });
-  };
-  localMaxChange = (event) => {
-    var { display } = this.state;
-    display.max = event.target.value;
-    this.setState({ display });
-  };
-  localMarkerLabelChange = () => {
-    var { display } = this.state;
-    display.markerLabel = !display.markerLabel;
-    this.setState({ display });
-  };
-  localLegendChange = () => {
-    var { display } = this.state;
-    display.legend = !display.legend;
-    this.setState({ display });
-  };
-  localMovingAverageChange = (event) => {
-    var { display } = this.state;
-    display.movingAverage = event.target.value;
-    this.setState({ display });
-  };
-  localMarkerSymbolChange = (event) => {
-    var { display } = this.state;
-    display.markerSymbol = event.target.value;
-    this.setState({ display });
-  };
-  localMarkerFixedSizeChange = (event) => {
-    var { display } = this.state;
-    var markerFixedSize = false;
-    if (event.target.value === "true") markerFixedSize = true;
-    display.markerFixedSize = markerFixedSize;
-    this.setState({ display });
-  };
-  localMarkerSizeChange = (event) => {
-    var { display } = this.state;
-    display.markerSize = event.target.value;
-    this.setState({ display });
-  };
-  localVectorArrowColorChange = (event) => {
-    var { display } = this.state;
-    var vectorArrowColor = false;
-    if (event.target.value === "true") vectorArrowColor = true;
-    display.vectorArrowColor = vectorArrowColor;
-    this.setState({ display });
-  };
-  localVectorFlowColorChange = (event) => {
-    var { display } = this.state;
-    display.vectorFlowColor = event.target.value;
-    this.setState({ display });
-  };
-  localVectorArrowsChange = () => {
-    var { display } = this.state;
-    display.vectorArrows = !display.vectorArrows;
-    this.setState({ display });
-  };
-  localVectorFlowChange = () => {
-    var { display } = this.state;
-    display.vectorFlow = !display.vectorFlow;
-    this.setState({ display });
-  };
-  localVectorMagnitudeChange = () => {
-    var { display } = this.state;
-    display.vectorMagnitude = !display.vectorMagnitude;
-    this.setState({ display });
-  };
-  updateDisplay = () => {
-    var { display } = this.state;
-    if (!isNaN(Number(display.min)) && !isNaN(Number(display.max))) {
-      display.min = Number(display.min);
-      display.max = Number(display.max);
-      var { onUpdate, displayGroup } = this.props;
-      var index = displayGroup.findIndex((x) => x.id === display.id);
-      displayGroup[index] = display;
-      onUpdate(displayGroup);
-    } else {
-      alert("Min & Max values must be a valid number.");
-    }
-  };
   capitalize = (s) => {
     if (typeof s !== "string") return "";
     return s.charAt(0).toUpperCase() + s.slice(1);
   };
-  componentDidUpdate() {
-    var { display } = this.state;
-    if (
-      display.datamax !== this.props.display.datamax ||
-      display.datamin !== this.props.display.datamin
-    ) {
-      if (display.datamax === display.max && display.datamin === display.min) {
-        display.min = this.props.display.datamin;
-        display.max = this.props.display.datamax;
-      }
-      display.datamin = this.props.display.datamin;
-      display.datamax = this.props.display.datamax;
-      this.setState({ display });
+  onChangeInput = (event, name) => {
+    this.setState({ [name]: event.target.value });
+  };
+  toggle = (name) => {
+    this.setState({ [name]: !this.state[name] });
+  };
+  localOpacityChange = (event) => {
+    this.setState({ opacity: event.target.value / 100 });
+  };
+  localColorChange = (colors) => {
+    this.setState({ colors });
+  };
+  resetMin = () => {
+    var { datamin } = this.props.display;
+    this.setState({ min: datamin });
+  };
+  resetMax = () => {
+    var { datamax } = this.props.display;
+    this.setState({ max: datamax });
+  };
+  localMarkerFixedSizeChange = (event) => {
+    var markerFixedSize = false;
+    if (event.target.value === "true") markerFixedSize = true;
+    this.setState({ markerFixedSize });
+  };
+  localVectorArrowColorChange = (event) => {
+    var vectorArrowColor = false;
+    if (event.target.value === "true") vectorArrowColor = true;
+    this.setState({ vectorArrowColor });
+  };
+  updateDisplay = () => {
+    var variables = [
+      "yselectindex",
+      "opacity",
+      "colors",
+      "min",
+      "max",
+      "markerLabel",
+      "legend",
+      "movingAverage",
+      "markerSymbol",
+      "markerFixedSize",
+      "markerSize",
+      "vectorArrowColor",
+      "vectorFlowColor",
+      "vectorArrows",
+      "vectorFlow",
+      "vectorMagnitude",
+    ];
+    var { display, onUpdate, displayGroup } = this.props;
+
+    for (let variable of variables) {
+      display[variable] = this.state[variable];
     }
-  }
+
+    var index = displayGroup.findIndex((x) => x.id === display.id);
+    displayGroup[index] = display;
+    onUpdate(displayGroup);
+  };
+
   render() {
-    var { display } = this.state;
     var {
-      movingAverage,
+      yselectindex,
+      opacity,
       colors,
+      min,
+      max,
       markerLabel,
       legend,
+      movingAverage,
       markerSymbol,
       markerFixedSize,
       markerSize,
-      mapplot,
-      vectorMagnitude,
-      vectorArrows,
-      vectorFlow,
       vectorArrowColor,
       vectorFlowColor,
-      min,
-      max,
-      opacity,
-      datasetparameters,
-      yselectindex,
-      data,
-    } = display;
+      vectorArrows,
+      vectorFlow,
+      vectorMagnitude,
+    } = this.state;
+    var { removeSelected, id, display: displayProps } = this.props;
+    var { mapplot, datasetparameters, data } = displayProps;
     if (min === null) min = 0;
     if (max === null) max = 0;
-    var { removeSelected, id, display: displayProps } = this.props;
+
     var { array } = displayProps;
     var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
     if (!yselectindex) yselectindex = 0;
@@ -173,7 +122,11 @@ class EditSettings extends Component {
               <tr>
                 <td style={{ width: "35px" }}>Min:</td>
                 <td>
-                  <input value={min} onChange={this.localMinChange} />
+                  <input
+                    type="number"
+                    value={min}
+                    onChange={(e) => this.onChangeInput(e, "min")}
+                  />
                 </td>
                 <td style={{ width: "70px" }}>
                   <div className="editsettings-button">
@@ -186,7 +139,11 @@ class EditSettings extends Component {
               <tr>
                 <td>Max:</td>
                 <td>
-                  <input value={max} onChange={this.localMaxChange} />
+                  <input
+                    type="number"
+                    value={max}
+                    onChange={(e) => this.onChangeInput(e, "max")}
+                  />
                 </td>
                 <td>
                   <div className="editsettings-button">
@@ -204,7 +161,10 @@ class EditSettings extends Component {
           type.join(",").includes("z&") && (
             <div>
               {this.capitalize(yselectparam.parseparameter) + " "}
-              <select value={yselectindex} onChange={this.yselectindexChange}>
+              <select
+                value={yselectindex}
+                onChange={(e) => this.onChangeInput(e, "yselectindex")}
+              >
                 {data.y.map((d, index) => (
                   <option value={index} key={d}>
                     {d}
@@ -224,7 +184,7 @@ class EditSettings extends Component {
                   <td>
                     <select
                       value={markerSymbol}
-                      onChange={this.localMarkerSymbolChange}
+                      onChange={(e) => this.onChangeInput(e, "markerSymbol")}
                     >
                       <option value="circle">&#9679; Circle</option>
                       <option value="square">&#9632; Square</option>
@@ -249,7 +209,7 @@ class EditSettings extends Component {
                       <input
                         type="text"
                         value={markerSize}
-                        onChange={this.localMarkerSizeChange}
+                        onChange={(e) => this.onChangeInput(e, "markerSize")}
                       />
                     )}
                   </td>
@@ -260,7 +220,7 @@ class EditSettings extends Component {
                     <input
                       type="checkbox"
                       checked={markerLabel}
-                      onChange={this.localMarkerLabelChange}
+                      onChange={() => this.toggle("markerLabel")}
                     ></input>
                   </td>
                 </tr>
@@ -278,7 +238,7 @@ class EditSettings extends Component {
                     <input
                       type="checkbox"
                       checked={vectorMagnitude}
-                      onChange={this.localVectorMagnitudeChange}
+                      onChange={() => this.toggle("vectorMagnitude")}
                     ></input>
                   </td>
                   <td>Magnitude Raster</td>
@@ -288,7 +248,7 @@ class EditSettings extends Component {
                     <input
                       type="checkbox"
                       checked={vectorArrows}
-                      onChange={this.localVectorArrowsChange}
+                      onChange={() => this.toggle("vectorArrows")}
                     ></input>
                   </td>
                   <td>Directional Arrows</td>
@@ -307,14 +267,14 @@ class EditSettings extends Component {
                     <input
                       type="checkbox"
                       checked={vectorFlow}
-                      onChange={this.localVectorFlowChange}
+                      onChange={() => this.toggle("vectorFlow")}
                     ></input>
                   </td>
                   <td>Flow Path</td>
                   <td>
                     <select
                       value={vectorFlowColor}
-                      onChange={this.localVectorFlowColorChange}
+                      onChange={(e) => this.onChangeInput(e, "vectorFlowColor")}
                     >
                       <option value="white">White</option>
                       <option value="true">Color Ramp</option>
@@ -350,7 +310,7 @@ class EditSettings extends Component {
                   <td>
                     <select
                       value={movingAverage}
-                      onChange={this.localMovingAverageChange}
+                      onChange={(e) => this.onChangeInput(e, "movingAverage")}
                     >
                       <option value="none">None</option>
                       <option value="1">1</option>
@@ -380,7 +340,7 @@ class EditSettings extends Component {
         <input
           type="checkbox"
           checked={legend}
-          onChange={this.localLegendChange}
+          onChange={() => this.toggle("legend")}
         ></input>
         <div className="editsettings-button">
           <button

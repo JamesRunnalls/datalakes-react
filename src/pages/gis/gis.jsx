@@ -671,7 +671,6 @@ class GIS extends Component {
         realdatetime,
         realdepth,
       });
-      console.log("Real date time: ",realdatetime)
       this.setState({ downloads });
       return { data, realdatetime, realdepth };
     }
