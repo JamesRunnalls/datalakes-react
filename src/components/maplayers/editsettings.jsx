@@ -20,6 +20,7 @@ class EditSettings extends Component {
     vectorArrows: this.props.display.vectorArrows,
     vectorFlow: this.props.display.vectorFlow,
     vectorMagnitude: this.props.display.vectorMagnitude,
+    validpixelexpression: this.props.display.validpixelexpression,
   };
 
   capitalize = (s) => {
@@ -74,6 +75,7 @@ class EditSettings extends Component {
       "vectorArrows",
       "vectorFlow",
       "vectorMagnitude",
+      "validpixelexpression",
     ];
     var { display, onUpdate, displayGroup } = this.props;
 
@@ -104,12 +106,12 @@ class EditSettings extends Component {
       vectorArrows,
       vectorFlow,
       vectorMagnitude,
+      validpixelexpression,
     } = this.state;
     var { removeSelected, id, display: displayProps } = this.props;
     var { mapplot, datasetparameters, data } = displayProps;
     if (min === null) min = 0;
     if (max === null) max = 0;
-
     var { array } = displayProps;
     var type = datasetparameters.map((dp) => dp.axis + "&" + dp.parameters_id);
     if (!yselectindex) yselectindex = 0;
@@ -324,6 +326,24 @@ class EditSettings extends Component {
                       <option value="9">9</option>
                       <option value="10">10</option>
                     </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+        {validpixelexpression !== null && (
+          <div>
+            <table>
+              <tbody>
+                <tr>
+                  <td>Valid Pixel Expression:</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={validpixelexpression}
+                      onChange={() => this.toggle("validpixelexpression")}
+                    />
                   </td>
                 </tr>
               </tbody>

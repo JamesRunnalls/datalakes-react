@@ -818,6 +818,7 @@ class GIS extends Component {
         // Moving Average for Remote Sensing
         if (dataset.mapplotfunction === "remoteSensing") {
           layer["movingAverage"] = 4;
+          layer["validpixelexpression"] = true;
         }
 
         // Optimise colors

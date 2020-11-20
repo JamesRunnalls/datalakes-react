@@ -334,10 +334,21 @@ class Basemap extends Component {
       unit,
       data,
       movingAverage,
+      validpixelexpression,
       colors,
       title,
       datasourcelink,
     } = layer;
+    data = JSON.parse(JSON.stringify(data));
+    if ("vp" in data && validpixelexpression) {
+      for (let i = data.vp.length - 1; i >= 0; i--) {
+        if (data.vp[i] === 1) {
+          data.v.splice(i, 1);
+          data.lon.splice(i, 1);
+          data.lat.splice(i, 1);
+        }
+      }
+    }
     var polygons = [];
     var coords;
     var x = data.lonres / 2;
@@ -348,7 +359,7 @@ class Basemap extends Component {
     } else {
       plotdata = data.v;
     }
-    for (var i = 0; i < data.lon.length; i++) {
+    for (let i = 0; i < data.lon.length; i++) {
       coords = [
         [data.lat[i] - y, data.lon[i] - x],
         [data.lat[i] + y, data.lon[i] - x],
@@ -947,17 +958,15 @@ class Basemap extends Component {
           data[datasetparameter.axis][yselectindex][indexx]
         );
         dt = new Date(data["x"][indexx] * 1000);
-        dd =
-          `<tr><td><strong>${this.capitalize(
-            param.parseparameter
-          )}</strong></td><td>${data["y"][yselectindex]} ${param.unit}`;
+        dd = `<tr><td><strong>${this.capitalize(
+          param.parseparameter
+        )}</strong></td><td>${data["y"][yselectindex]} ${param.unit}`;
       } else {
         value = this.numberformat(data[datasetparameter.axis][0][indexx]);
         dt = new Date(data["x"][indexx] * 1000);
-        dd =
-          `<tr><td><strong>${this.capitalize(
-            param.parseparameter
-          )}</strong></td><td>${data["y"][0]} ${param.unit}`;
+        dd = `<tr><td><strong>${this.capitalize(
+          param.parseparameter
+        )}</strong></td><td>${data["y"][0]} ${param.unit}`;
       }
     } else {
       alert("No plotting function defined");
