@@ -669,3 +669,33 @@
   margin-top: 20px;
   margin-bottom: 20px;
 }
+
+.remotesensingdownload {
+  height: 300px;
+}
+
+.remotesensingdownload .downloadinner {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.remotesensingdownload .downloadinner th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+}
+
+.remotesensingdownload .downloadinner tbody {
+}
+
+.remotesensingdownload .downloadinner button {
+  margin: 0;
+  padding: 2px 5px;
+}
+
+.remotesensingdownload .downloadinner table td {
+  padding: 2px 10px;
+}
