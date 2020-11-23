@@ -27,9 +27,12 @@ class RemoteSensingDownload extends Component {
       let path = sf.filelink.split("/");
       let name = path.pop().split(".")[0];
       let name_path = name.split("_");
+      let len = name_path.length;
       sf.folder = path.join("/");
-      sf.nc = `${sf.folder}/${name_path[0]}_${name_path[2]}_${name_path[3]}.nc`;
-      sf.satellite = name_path[2];
+      sf.nc = `${sf.folder}/${name_path[0]}_${name_path[len - 2]}_${
+        name_path[len - 1]
+      }.nc`;
+      sf.satellite = name_path[len - 2];
       return sf;
     });
     return selected_files;
@@ -65,7 +68,6 @@ class RemoteSensingDownload extends Component {
 
     var table_inner = [];
     for (var file of selected_files) {
-      console.log(file);
       table_inner.push(
         <tr key={file.filelink}>
           <td>{file.satellite}</td>

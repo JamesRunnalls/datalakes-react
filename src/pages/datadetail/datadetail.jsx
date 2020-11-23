@@ -410,6 +410,7 @@ class DataDetail extends Component {
     var dataset = server[0].data;
     var { mapplotfunction } = dataset;
     var files = server[1].data;
+    files = files.filter((v,i,a)=>a.findIndex(t=>(t.filelink === v.filelink))===i) // Remove duplicates
     var datasetparameters = server[2].data;
     var dropdown = server[3].data;
 

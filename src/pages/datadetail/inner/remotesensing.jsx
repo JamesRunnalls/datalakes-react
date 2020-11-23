@@ -741,8 +741,8 @@ class RemoteSensing extends Component {
   lastFile = (files) => {
     files.sort((a, b) =>
       new Date(a.maxdatetime).getTime() > new Date(b.maxdatetime).getTime()
-        ? 1
-        : -1
+        ? -1
+        : 1
     );
     return files[0];
   };

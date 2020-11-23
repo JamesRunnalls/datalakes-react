@@ -369,6 +369,21 @@ class Basemap extends Component {
       var value = Math.round(plotdata[i] * 1000) / 1000;
       var valuestring = String(value) + String(unit);
       var pixelcolor = getColor(plotdata[i], min, max, colors);
+      var satellite = "Sentinel 3";
+      if ("satellite" in data) {
+        satellite = data.satellite;
+      }
+      var vpe = "";
+      if ("vpe" in data) {
+        vpe =
+          '<tr><td class="text-nowrap"><strong>Valid Pixel Expression</strong></td><td style="word-break:break-word;">' +
+          data.vpe +
+          "</td></tr>";
+      }
+      var datestring =
+        new Date(mindatetime).toLocaleTimeString() +
+        " " +
+        new Date(mindatetime).toLocaleDateString();
       polygons.push(
         L.polygon(coords, {
           color: pixelcolor,
@@ -381,10 +396,11 @@ class Basemap extends Component {
               '<tr><td colSpan="2"><strong>' +
               title +
               "</strong></td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Satellite</strong></td><td>Sentinal 3</td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+              "<tr><td class='text-nowrap'><strong>Satellite</strong></td><td>" +
+              satellite +
+              "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Datetime</strong></td><td>" +
-              new Date(mindatetime).toDateString() +
+              datestring +
               "</td></tr>" +
               "<tr><td class='text-nowrap'><strong>LatLng</strong></td><td>" +
               data.lat[i] +
@@ -394,7 +410,9 @@ class Basemap extends Component {
               "<tr><td><strong>Value at point:</strong></td><td>" +
               String(value) +
               String(unit) +
-              '</td></tr><tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
+              "</td></tr>" +
+              vpe +
+              '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
               datasourcelink +
               '">More information</a></td></tr>' +
               "</tbody></table>"
