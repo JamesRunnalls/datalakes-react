@@ -522,6 +522,8 @@ class RemoteSensing extends Component {
       var x = arr.map((x) => x * (len / n));
       var y = [];
       var index, xin, yin;
+      var vpe = false;
+      if ("vp" in data && selectedlayers[0].validpixelexpression) vpe = true;
       for (var i = 0; i < x.length; i++) {
         ({ x: xin, y: yin } = this.coordsAlongLine(x[i], len, x1, y1, x2, y2));
         index = this.findClosest(
@@ -532,7 +534,9 @@ class RemoteSensing extends Component {
           data.latres,
           data.lonres
         );
-        if (index) {
+        let vp = true;
+        if (vpe && data.vp[index]) vp = false;
+        if (index && vp) {
           y.push(data.v[index]);
         } else {
           y.push(null);
