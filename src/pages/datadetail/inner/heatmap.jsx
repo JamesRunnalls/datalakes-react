@@ -106,6 +106,8 @@ class DisplayOptions extends Component {
       decimate_time,
     } = this.state;
     var { array } = this.props;
+    maxZ = (maxZ === undefined) ? 0 : maxZ;
+    minZ = (minZ === undefined) ? 0 : minZ;
     return (
       <FilterBox
         title="Display Options"
@@ -556,137 +558,6 @@ class HeatMap extends Component {
     }
   };
 
-  setDefault = () => {
-    var {
-      datasetparameters,
-      dataset,
-      getLabel,
-      data,
-      file,
-      maxdatetime,
-      mindatetime,
-    } = this.props;
-    var { xaxis, yaxis, zaxis, timeaxis, depthaxis } = this.state;
-
-    // Get axis labels and units
-    const xparam = datasetparameters.find((x) => x.axis === xaxis);
-    const yparam = datasetparameters.find((y) => y.axis === yaxis);
-    const zparam = datasetparameters.find((z) => z.axis === zaxis);
-    if (xparam.parameters_id === 1) timeaxis = "x";
-    if (yparam.parameters_id === 1) timeaxis = "y";
-    if (xparam.parameters_id === 2) depthaxis = "x";
-    if (yparam.parameters_id === 2) depthaxis = "y";
-    var xlabel = getLabel("parameters", xparam.parameters_id, "name");
-    var ylabel = getLabel("parameters", yparam.parameters_id, "name");
-    var zlabel = getLabel("parameters", zparam.parameters_id, "name");
-    var xunits = xparam.unit;
-    var yunits = yparam.unit;
-    var zunits = zparam.unit;
-    const title = dataset.title;
-    var colors = this.parseColor(dataset.plotproperties.colors);
-    var zdomain = d3.extent(
-      [].concat.apply([], data[file].z).filter((f) => {
-        return !isNaN(parseFloat(f)) && isFinite(f);
-      })
-    );
-    var ydomain = d3.extent(
-      [].concat.apply([], data[file].y).filter((f) => {
-        return !isNaN(parseFloat(f)) && isFinite(f);
-      })
-    );
-    var xdomain = d3.extent(
-      [].concat.apply([], data[file].x).filter((f) => {
-        return !isNaN(parseFloat(f)) && isFinite(f);
-      })
-    );
-    var minZ = zdomain[0] || 0;
-    var maxZ = zdomain[1] || 1;
-    var minY = ydomain[0];
-    var maxY = ydomain[1];
-    var minX = xdomain[0];
-    var maxX = xdomain[1];
-    var lowerY = minY;
-    var upperY = maxY;
-    var lowerX = minX;
-    var upperX = maxX;
-    var lowerZ = minZ;
-    var upperZ = maxZ;
-
-    if (timeaxis === "x" && maxdatetime && mindatetime) {
-      minX = Math.min(minX, mindatetime);
-      maxX = Math.max(maxX, maxdatetime);
-    }
-
-    if (timeaxis === "y" && maxdatetime && mindatetime) {
-      minY = Math.min(minY, mindatetime);
-      maxY = Math.max(maxY, maxdatetime);
-    }
-
-    var thresholdStep = 20;
-    var decimate_active = false;
-    var decimate_period = 24;
-    var decimate_time = "12:00";
-
-    var { xoptions, yoptions, zoptions } = this.setAxisOptions(
-      datasetparameters,
-      getLabel
-    );
-
-    var plotdata = this.processPlotData(
-      xaxis,
-      yaxis,
-      zaxis,
-      upperY,
-      lowerY,
-      maxY,
-      minY,
-      upperX,
-      lowerX,
-      minX,
-      maxX,
-      timeaxis,
-      depthaxis,
-      decimate_active,
-      decimate_period,
-      decimate_time
-    );
-    var array = this.getArray(plotdata);
-
-    this.setState({
-      array,
-      title,
-      xlabel,
-      ylabel,
-      zlabel,
-      xunits,
-      yunits,
-      zunits,
-      colors,
-      minX,
-      maxX,
-      minZ,
-      maxZ,
-      minY,
-      maxY,
-      lowerY,
-      upperY,
-      lowerX,
-      upperX,
-      lowerZ,
-      upperZ,
-      timeaxis,
-      depthaxis,
-      thresholdStep,
-      xoptions,
-      yoptions,
-      zoptions,
-      plotdata,
-      decimate_active,
-      decimate_period,
-      decimate_time,
-    });
-  };
-
   sliceXArray = (data, lower, upper) => {
     var l = 0;
     var u = data.x.length - 1;
@@ -713,7 +584,7 @@ class HeatMap extends Component {
     if (x.length > 0) {
       return { x: x, y: y, z: z };
     } else {
-      return false;
+      return data;
     }
   };
 
@@ -948,6 +819,137 @@ class HeatMap extends Component {
     } else {
       return obj;
     }
+  };
+
+  setDefault = () => {
+    var {
+      datasetparameters,
+      dataset,
+      getLabel,
+      data,
+      file,
+      maxdatetime,
+      mindatetime,
+    } = this.props;
+    var { xaxis, yaxis, zaxis, timeaxis, depthaxis } = this.state;
+
+    // Get axis labels and units
+    const xparam = datasetparameters.find((x) => x.axis === xaxis);
+    const yparam = datasetparameters.find((y) => y.axis === yaxis);
+    const zparam = datasetparameters.find((z) => z.axis === zaxis);
+    if (xparam.parameters_id === 1) timeaxis = "x";
+    if (yparam.parameters_id === 1) timeaxis = "y";
+    if (xparam.parameters_id === 2) depthaxis = "x";
+    if (yparam.parameters_id === 2) depthaxis = "y";
+    var xlabel = getLabel("parameters", xparam.parameters_id, "name");
+    var ylabel = getLabel("parameters", yparam.parameters_id, "name");
+    var zlabel = getLabel("parameters", zparam.parameters_id, "name");
+    var xunits = xparam.unit;
+    var yunits = yparam.unit;
+    var zunits = zparam.unit;
+    const title = dataset.title;
+    var colors = this.parseColor(dataset.plotproperties.colors);
+    var zdomain = d3.extent(
+      [].concat.apply([], data[file].z).filter((f) => {
+        return !isNaN(parseFloat(f)) && isFinite(f);
+      })
+    );
+    var ydomain = d3.extent(
+      [].concat.apply([], data[file].y).filter((f) => {
+        return !isNaN(parseFloat(f)) && isFinite(f);
+      })
+    );
+    var xdomain = d3.extent(
+      [].concat.apply([], data[file].x).filter((f) => {
+        return !isNaN(parseFloat(f)) && isFinite(f);
+      })
+    );
+    var minZ = zdomain[0] || 0;
+    var maxZ = zdomain[1] || 1;
+    var minY = ydomain[0];
+    var maxY = ydomain[1];
+    var minX = xdomain[0];
+    var maxX = xdomain[1];
+    var lowerY = minY;
+    var upperY = maxY;
+    var lowerX = minX;
+    var upperX = maxX;
+    var lowerZ = minZ;
+    var upperZ = maxZ;
+
+    if (timeaxis === "x" && maxdatetime && mindatetime) {
+      minX = Math.min(minX, mindatetime);
+      maxX = Math.max(maxX, maxdatetime);
+    }
+
+    if (timeaxis === "y" && maxdatetime && mindatetime) {
+      minY = Math.min(minY, mindatetime);
+      maxY = Math.max(maxY, maxdatetime);
+    }
+
+    var thresholdStep = 20;
+    var decimate_active = false;
+    var decimate_period = 24;
+    var decimate_time = "12:00";
+
+    var { xoptions, yoptions, zoptions } = this.setAxisOptions(
+      datasetparameters,
+      getLabel
+    );
+
+    var plotdata = this.processPlotData(
+      xaxis,
+      yaxis,
+      zaxis,
+      upperY,
+      lowerY,
+      maxY,
+      minY,
+      upperX,
+      lowerX,
+      minX,
+      maxX,
+      timeaxis,
+      depthaxis,
+      decimate_active,
+      decimate_period,
+      decimate_time
+    );
+    var array = this.getArray(plotdata);
+
+    this.setState({
+      array,
+      title,
+      xlabel,
+      ylabel,
+      zlabel,
+      xunits,
+      yunits,
+      zunits,
+      colors,
+      minX,
+      maxX,
+      minZ,
+      maxZ,
+      minY,
+      maxY,
+      lowerY,
+      upperY,
+      lowerX,
+      upperX,
+      lowerZ,
+      upperZ,
+      timeaxis,
+      depthaxis,
+      thresholdStep,
+      xoptions,
+      yoptions,
+      zoptions,
+      plotdata,
+      decimate_active,
+      decimate_period,
+      decimate_time,
+    });
   };
 
   processPlotData = (
