@@ -11,12 +11,9 @@ import DataDetail from "./pages/datadetail/datadetail";
 import AddDataset from "./pages/adddataset/adddataset";
 import GIS from "./pages/gis/gis";
 import Footer from "./format/footer/footer";
-import ch2018Graph from "./pages/datadetail/inner/ch2018graph";
 import ThreeViewer from "./graphs/three/threeviewer";
 import NetCDF from "./pages/netcdf/netcdf";
-import Amplify from "aws-amplify";
-import awsconfig from "./aws-exports";
-Amplify.configure(awsconfig);
+import ErrorBoundary from './pages/errorboundary/errorboundary';
 
 class App extends Component {
   render() {
@@ -25,25 +22,106 @@ class App extends Component {
         <Header />
         <main>
           <Switch>
-            <Route path="/live" component={Station} />
+            <Route
+              path="/map"
+              exact
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <GIS {...props} />
+                </ErrorBoundary>
+              )}
+            />
 
-            <Route path="/map" exact component={GIS} />
+            <Route
+              path="/data"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <DataPortal {...props} />
+                </ErrorBoundary>
+              )}
+            />
 
-            <Route path="/data" component={DataPortal} />
-            <Route path="/datadetail" component={DataDetail} />
-            <Route path="/lakestation" component={Station} />
+            <Route
+              path="/datadetail"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <DataDetail {...props} />
+                </ErrorBoundary>
+              )}
+            />
 
-            <Route path="/API" component={API} />
+            <Route
+              path="/lakestation"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <Station {...props} />
+                </ErrorBoundary>
+              )}
+            />
 
-            <Route path="/netcdf" component={NetCDF} />
+            <Route
+              path="/API"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <API {...props} />
+                </ErrorBoundary>
+              )}
+            />
 
-            <Route path="/adddataset" component={AddDataset} />
+            <Route
+              path="/netcdf"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <NetCDF {...props} />
+                </ErrorBoundary>
+              )}
+            />
 
-            <Route path="/ch2018" component={ch2018Graph} />
-            <Route path="/three" component={ThreeViewer} />
+            <Route
+              path="/adddataset"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <AddDataset {...props} />
+                </ErrorBoundary>
+              )}
+            />
 
-            <Route path="/" exact component={Home} />
-            <Route path="/" component={NotFound} />
+            <Route
+              path="/ch2018"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <ch2018Graph {...props} />
+                </ErrorBoundary>
+              )}
+            />
+
+            <Route
+              path="/three"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <ThreeViewer {...props} />
+                </ErrorBoundary>
+              )}
+            />
+
+            <Route
+              path="/"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <Home {...props} />
+                </ErrorBoundary>
+              )}
+              exact
+            />
+
+            <Route
+              path="/"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <NotFound {...props} />
+                </ErrorBoundary>
+              )}
+            />
           </Switch>
         </main>
         <Footer />
