@@ -33,6 +33,7 @@ class DataSelect extends Component {
           value={dValue}
           className="multi-select"
           classNamePrefix="dataselect"
+          onChange={this.props.onChange}
           styles={customStyles}
           noOptionsMessage={
             this.props.showModal

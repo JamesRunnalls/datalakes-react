@@ -212,10 +212,9 @@ class DataDetail extends Component {
     var lower = value.getTime() / 1000;
     var toDownload = this.selectedFiles(upper, lower, files, data);
     if (toDownload.length > 0) {
-      this.setState({ innerLoading: true });
+      this.setState({ innerLoading: true, lower });
       this.downloadMultipleFiles(toDownload);
     }
-    this.setState({ lower });
   };
 
   // Get data from API
