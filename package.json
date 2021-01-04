@@ -21,6 +21,7 @@
     "react-compound-slider": "^2.3.0",
     "react-datetime-picker": "^2.9.0",
     "react-dom": "^16.9.0",
+    "react-ga": "^3.3.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "^3.4.1",
     "react-select": "^3.0.8",

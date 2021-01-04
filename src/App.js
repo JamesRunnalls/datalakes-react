@@ -14,6 +14,9 @@ import Footer from "./format/footer/footer";
 import ThreeViewer from "./graphs/three/threeviewer";
 import NetCDF from "./pages/netcdf/netcdf";
 import ErrorBoundary from './pages/errorboundary/errorboundary';
+import ReactGA from 'react-ga';
+ReactGA.initialize('G-B3KL28BVT9');
+ReactGA.pageview(window.location.pathname + window.location.search);
 
 class App extends Component {
   render() {
