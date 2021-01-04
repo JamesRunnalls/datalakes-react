@@ -15,6 +15,8 @@ class RasterLegendItem extends Component {
     var { min, max, unit, colors } = this.props;
     if (min === null) min = 0;
     if (max === null) max = 0;
+    min = parseFloat(min);
+    max = parseFloat(max);
     var inner = [];
     var fixedColor = false;
     var selectStyle;
