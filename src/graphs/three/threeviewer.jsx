@@ -439,10 +439,10 @@ class ThreeViewer extends Component {
     var mesh = new THREE.Mesh(
       lakegeometry, // re-use the existing geometry
       new THREE.MeshBasicMaterial({
-        color: "grey",
+        color: "white",
         wireframe: false,
         transparent: true,
-        opacity: 0.7,
+        opacity: 0.08,
         depthWrite: false,
       })
     );
@@ -564,6 +564,7 @@ class ThreeViewer extends Component {
 
   render() {
     var { loaded } = this.state;
+    document.title = "Explore Lakes in 3D - Datalakes";
     return (
       <div className="threed">
         <div className="threeviewer" ref={(ref) => (this.mount = ref)}>
