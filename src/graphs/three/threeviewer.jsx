@@ -2,11 +2,13 @@ import React, { Component } from "react";
 import * as THREE from "three";
 import Delaunator from "delaunator";
 import axios from "axios";
+import * as d3 from "d3";
+import Loading from "../../components/loading/loading";
+import colorlist from "../../components/colorramp/colors";
+import { getBinaryColor } from "../../components/gradients/gradients";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { apiUrl } from "../../config.json";
-import * as d3 from "d3";
 import "./threeviewer.css";
-import Loading from "../../components/loading/loading";
 
 class ThreeViewer extends Component {
   state = {
@@ -17,19 +19,18 @@ class ThreeViewer extends Component {
     yScale: 1,
     quadtreeSensitivity: 0.5,
     velocityFactor: 2,
-    maxAge: 100,
-    noParticles: 7000,
+    maxAge: 200,
+    noParticles: 10000,
     fadeOutPercentage: 0.1,
   };
 
-  async componentDidMount() {
-    var { bounds, zScale, xScale, yScale, quadtreeSensitivity } = this.state;
-    var { data } = await axios.get(
-      apiUrl + "/externaldata/meteolakes/threed/geneva/velocity/737873"
-    );
-    var { depths, arr } = data;
+  downloadLake = async (name) => {
+    var { data } = await axios.get(apiUrl + "/externaldata/threed/" + name);
+    return data;
+  };
 
-    // Map global go-ordinate to grid co-ordinates
+  globalToLocalCoordinate = (depths, arr) => {
+    var { bounds, zScale, xScale, yScale } = this.state;
     let x_array = arr.map((q) => q[0]);
     let y_array = arr.map((q) => q[1]);
 
@@ -69,93 +70,32 @@ class ThreeViewer extends Component {
       a[1] = min.y + ((a[1] - min_y) / (max_y - min_y)) * (max.y - min.y);
       return a;
     });
+    return { depths, arr };
+  };
 
+  dataProperties = (depths, arr) => {
     var randomPick = [];
-    for (let i = 0; i < arr.length; i++) {
-      for (let j = 0; j < arr[i][2].length; j++) {
-        if (arr[i][2][j] !== -999 || arr[i][3][j] !== -999) {
+    var bottomSurface = [];
+    var depth_len = depths.length;
+    var arr_len = arr.length;
+    var minVelocity = 999;
+    var maxVelocity = 0;
+    for (let i = 0; i < arr_len; i++) {
+      let depth = 0;
+      for (let j = 0; j < depth_len; j++) {
+        if (arr[i][2][j] !== -999 && arr[i][3][j] !== -999) {
           randomPick.push([i, j]);
-        }
-      }
-    }
-
-    var bottomSurface = arr.map((a) => {
-      var depth = 0;
-      for (var i = 0; i < depths.length; i++) {
-        if (a[2][i] === -999 && a[3][i] === -999) {
+          let velocity = Math.sqrt(arr[i][2][j] ** 2 + arr[i][3][j] ** 2);
+          minVelocity = Math.min(velocity, minVelocity);
+          maxVelocity = Math.max(velocity, maxVelocity);
+        } else {
           break;
         }
-        depth = depths[i];
+        depth = depths[j];
       }
-      return { x: a[0], y: a[1], z: depth };
-    });
-
-    var {
-      nCols,
-      nRows,
-      xSize,
-      ySize,
-      xllcorner,
-      yllcorner,
-      griddata,
-      quadtree,
-    } = this.dataToGrid(arr, quadtreeSensitivity);
-
-    this.setState(
-      {
-        nCols,
-        nRows,
-        xSize,
-        ySize,
-        xllcorner,
-        yllcorner,
-        griddata,
-        arr,
-        depths,
-        randomPick,
-        bottomSurface,
-        loaded: true,
-        quadtree,
-      },
-      () => {
-        this.sceneSetup();
-        this.addCustomSceneObjects();
-        this.startAnimationLoop();
-        window.addEventListener("resize", this.handleWindowResize);
-      }
-    );
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.handleWindowResize);
-    window.cancelAnimationFrame(this.requestID);
-    this.controls.dispose();
-  }
-
-  sceneSetup = () => {
-    var { maxAge, noParticles, fadeOutPercentage } = this.state;
-    const width = this.mount.clientWidth;
-    const height = this.mount.clientHeight;
-
-    this.maxAge = maxAge;
-    this.noParticles = noParticles;
-    this.fadeOut = Math.round(this.maxAge * fadeOutPercentage);
-
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x000000);
-    this.camera = new THREE.PerspectiveCamera(
-      75, // fov = field of view
-      width / height, // aspect ratio
-      0.1, // near plane
-      1000 // far plane
-    );
-    this.camera.position.z = 55;
-    this.camera.position.x = 5;
-    this.camera.position.y = 15;
-    this.controls = new OrbitControls(this.camera, this.mount);
-    this.renderer = new THREE.WebGLRenderer({ alpha: true });
-    this.renderer.setSize(width, height);
-    this.mount.appendChild(this.renderer.domElement);
+      bottomSurface.push({ x: arr[i][0], y: arr[i][1], z: depth });
+    }
+    return { randomPick, bottomSurface, minVelocity, maxVelocity };
   };
 
   initialPositions = () => {
@@ -172,36 +112,6 @@ class ThreeViewer extends Component {
       positions[5] = positions[2];
       line.data.geometry.attributes.position.needsUpdate = true;
     });
-  };
-
-  nextPosition = (xin, yin, zin) => {
-    let {
-      xSize,
-      ySize,
-      xllcorner,
-      yllcorner,
-      nCols,
-      nRows,
-      griddata,
-      velocityFactor,
-      depths,
-    } = this.state;
-    var zi = this.indexOfClosest(zin, depths);
-    var i = Math.round((yin - yllcorner) / ySize);
-    var j = Math.round((xin - xllcorner) / xSize);
-    if (i > -1 && i < nRows && j > -1 && j < nCols && griddata[i][j] !== null) {
-      var u = 0;
-      var v = 0;
-      if (griddata[i][j][0].length > 0 && griddata[i][j][0][zi] !== -999)
-        u = griddata[i][j][0][zi];
-      if (griddata[i][j][1].length > 0 && griddata[i][j][1][zi] !== -999)
-        v = griddata[i][j][1][zi];
-      var x = xin + v * velocityFactor;
-      var y = yin + u * velocityFactor;
-      return { x, y, z: zin };
-    } else {
-      return false;
-    }
   };
 
   indexOfClosest = (num, arr) => {
@@ -279,10 +189,63 @@ class ThreeViewer extends Component {
     };
   };
 
+  generateColorBar = (arr) => {
+    var colors;
+    for (let color of colorlist) {
+      if (color.name === "Paraview") {
+        colors = color.data;
+      }
+    }
+    var colorbar = [];
+    for (let i = 0; i < 100; i++) {
+      colorbar.push(getBinaryColor(i, 0, 99, colors));
+    }
+    return colorbar;
+  };
+
+  nextPosition = (xin, yin, zin) => {
+    let {
+      xSize,
+      ySize,
+      xllcorner,
+      yllcorner,
+      nCols,
+      nRows,
+      griddata,
+      velocityFactor,
+      depths,
+    } = this.state;
+    var zi = this.indexOfClosest(zin, depths);
+    var i = Math.round((yin - yllcorner) / ySize);
+    var j = Math.round((xin - xllcorner) / xSize);
+    if (i > -1 && i < nRows && j > -1 && j < nCols && griddata[i][j] !== null) {
+      var u = 0;
+      var v = 0;
+      if (griddata[i][j][0].length > 0 && griddata[i][j][0][zi] !== -999)
+        u = griddata[i][j][0][zi];
+      if (griddata[i][j][1].length > 0 && griddata[i][j][1][zi] !== -999)
+        v = griddata[i][j][1][zi];
+      var x = xin + u * velocityFactor;
+      var y = yin + -v * velocityFactor;
+      return { x, y, z: zin, u, v };
+    } else {
+      return false;
+    }
+  };
+
   updatePositions = () => {
-    var { arr, randomPick, depths } = this.state;
+    var {
+      arr,
+      randomPick,
+      depths,
+      minVelocity,
+      maxVelocity,
+      colorbar,
+    } = this.state;
     var pl = randomPick.length - 1;
-    this.lines.forEach((line) => {
+    var line_len = this.lines.length;
+    for (let i = 0; i < line_len; i++) {
+      let line = this.lines[i];
       let positions = line.data.geometry.attributes.position.array;
       let colors = line.data.geometry.attributes.color.array;
       if (line.age < line.maxAge - this.fadeOut) {
@@ -297,6 +260,16 @@ class ThreeViewer extends Component {
           positions[line.age * 3] = nextposition.x;
           positions[line.age * 3 + 1] = nextposition.z;
           positions[line.age * 3 + 2] = nextposition.y;
+          let color =
+            colorbar[
+              Math.round(
+                Math.sqrt(nextposition.u ** 2 + nextposition.v ** 2) /
+                  (maxVelocity - minVelocity)
+              )
+            ];
+          colors[line.age * 4 - 4] = color[0];
+          colors[line.age * 4 - 3] = color[1];
+          colors[line.age * 4 - 2] = color[2];
           for (let c = 1; c < line.age; c++) {
             colors[c * 4 - 1] = Math.exp(1 - 1 / (c / line.age) ** 2);
           }
@@ -337,7 +310,7 @@ class ThreeViewer extends Component {
         line.data.geometry.attributes.position.needsUpdate = true;
         line.data.geometry.attributes.color.needsUpdate = true;
       }
-    });
+    }
   };
 
   removeOuterTriangles(indexDelaunay, maxVertex) {
@@ -367,6 +340,41 @@ class ThreeViewer extends Component {
     indexDelaunay.triangles = newTriangles;
     return indexDelaunay;
   }
+
+  handleWindowResize = () => {
+    const width = this.mount.clientWidth;
+    const height = this.mount.clientHeight;
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+  };
+
+  sceneSetup = () => {
+    var { maxAge, noParticles, fadeOutPercentage } = this.state;
+    const width = this.mount.clientWidth;
+    const height = this.mount.clientHeight;
+
+    this.maxAge = maxAge;
+    this.noParticles = noParticles;
+    this.fadeOut = Math.round(this.maxAge * fadeOutPercentage);
+
+    this.scene = new THREE.Scene();
+    //this.scene.background = new THREE.Color(0x000000);
+    this.camera = new THREE.PerspectiveCamera(
+      75, // fov = field of view
+      width / height, // aspect ratio
+      0.1, // near plane
+      1000 // far plane
+    );
+    this.camera.position.z = 55;
+    this.camera.position.x = 5;
+    this.camera.position.y = 15;
+    this.controls = new OrbitControls(this.camera, this.mount);
+    this.controls.maxPolarAngle = Math.PI / 2;
+    this.renderer = new THREE.WebGLRenderer({ alpha: true });
+    this.renderer.setSize(width, height);
+    this.mount.appendChild(this.renderer.domElement);
+  };
 
   addCustomSceneObjects = () => {
     var { bottomSurface } = this.state;
@@ -430,11 +438,11 @@ class ThreeViewer extends Component {
     lakegeometry.setIndex(meshIndex);
     var mesh = new THREE.Mesh(
       lakegeometry, // re-use the existing geometry
-      new THREE.MeshLambertMaterial({
-        color: "white",
+      new THREE.MeshBasicMaterial({
+        color: "grey",
         wireframe: false,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.7,
         depthWrite: false,
       })
     );
@@ -490,23 +498,80 @@ class ThreeViewer extends Component {
     this.requestID = window.requestAnimationFrame(this.startAnimationLoop);
   };
 
-  handleWindowResize = () => {
-    const width = this.mount.clientWidth;
-    const height = this.mount.clientHeight;
-    this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-  };
+  async componentDidMount() {
+    var lake = "geneva";
+    var url_lake = this.props.location.pathname.split("/").slice(-1)[0];
+    if (["zurich", "geneva"].includes(url_lake)) {
+      lake = url_lake;
+    }
+
+    var { quadtreeSensitivity } = this.state;
+
+    var { depths, arr } = await this.downloadLake(lake);
+    ({ depths, arr } = this.globalToLocalCoordinate(depths, arr));
+    var colorbar = this.generateColorBar(arr);
+    var {
+      randomPick,
+      bottomSurface,
+      minVelocity,
+      maxVelocity,
+    } = this.dataProperties(depths, arr);
+
+    var {
+      nCols,
+      nRows,
+      xSize,
+      ySize,
+      xllcorner,
+      yllcorner,
+      griddata,
+      quadtree,
+    } = this.dataToGrid(arr, quadtreeSensitivity);
+
+    this.setState(
+      {
+        nCols,
+        nRows,
+        xSize,
+        ySize,
+        xllcorner,
+        yllcorner,
+        griddata,
+        arr,
+        depths,
+        randomPick,
+        bottomSurface,
+        loaded: true,
+        quadtree,
+        colorbar,
+        minVelocity,
+        maxVelocity,
+      },
+      () => {
+        this.sceneSetup();
+        this.addCustomSceneObjects();
+        this.startAnimationLoop();
+        window.addEventListener("resize", this.handleWindowResize);
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleWindowResize);
+    window.cancelAnimationFrame(this.requestID);
+    this.controls.dispose();
+  }
 
   render() {
     var { loaded } = this.state;
     return (
-      <div className="temp">
+      <div className="threed">
         <div className="threeviewer" ref={(ref) => (this.mount = ref)}>
           {!loaded && (
             <div className="loading">
               <Loading />
-              Loading 3D Model
+              Building 3D Model...
+              <p>This will take a few seconds</p>
             </div>
           )}
         </div>
