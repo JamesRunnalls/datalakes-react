@@ -468,9 +468,12 @@ class AddDataset extends Component {
     // Fix common match errors of pressure and temperature
     if (defaultValue === 10 && !find.toLowerCase().includes("air")) {
       defaultValue = 18;
-    }
-    if (defaultValue === 6 && !find.toLowerCase().includes("air")) {
+    } else if (defaultValue === 6 && !find.toLowerCase().includes("air")) {
       defaultValue = 5;
+    } else if (defaultValue === 18 && !find.toLowerCase().includes("press")) {
+      defaultValue = search[1].id;
+    } else if (defaultValue === 2 && !find.toLowerCase().includes("depth")) {
+      defaultValue = search[1].id;
     }
     return defaultValue;
   };
@@ -670,9 +673,7 @@ class AddDataset extends Component {
 
   handleParameter = (a, b) => (event) => {
     var datasetparameters = this.state.datasetparameters;
-    datasetparameters[a][b] = Number.isInteger(event.value)
-      ? event.value
-      : event.target.value;
+    datasetparameters[a][b] = event.target ? event.target.value : event.value;
     if (b === "parameters_id") datasetparameters[a]["link"] = -1;
     this.setState({ datasetparameters });
   };
