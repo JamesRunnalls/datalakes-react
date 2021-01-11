@@ -566,7 +566,7 @@ class ThreeViewer extends Component {
     var { loaded } = this.state;
     document.title = "Explore Lakes in 3D - Datalakes";
     return (
-      <div className="threed">
+      <div className="fourd">
         <div className="threeviewer" ref={(ref) => (this.mount = ref)}>
           {!loaded && (
             <div className="loading">
