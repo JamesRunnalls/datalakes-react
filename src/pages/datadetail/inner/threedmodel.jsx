@@ -432,7 +432,7 @@ class ThreeDModel extends Component {
         lineValue[1].lng
       );
       await axios
-        .get(`${apistem}/transect/${lake}/${t}/${y1}/${x1}/${y2}/${x2}`)
+        .get(`${apistem}/transect/${lake}/${t}/${y1},${y2}/${x1},${x2}`)
         .then((response) => {
           var { x, y, z, z1 } = this.fillNaN2D(response.data);
           var plotdata = { x, y, z, z1 };
