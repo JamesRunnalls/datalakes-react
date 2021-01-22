@@ -8,6 +8,7 @@ import pipe from "./img/pipe.svg";
 import info from "./img/info.svg";
 import webgis from "./img/webgis.svg";
 import td from "./img/3d.svg";
+import map from "./img/map.svg";
 import "./datadetail.css";
 
 class DataSubMenu extends Component {
@@ -94,6 +95,15 @@ class DataSubMenu extends Component {
             >
               <img src={line} className="subnav-img" alt="Line Graph" />
               <div className="subnav-text">Line Graph</div>
+            </div>
+            <div
+              title="Preview data on the map"
+              className={this.active("locationmap",step) ? "subnav-item active" : "subnav-item"}
+              style={{display: this.hide("locationmap",allowedStep) && 'none'}}
+              onClick={() => updateSelectedState("locationmap")}
+            >
+              <img src={map} className="subnav-img" alt="Location Map" />
+              <div className="subnav-text">Map</div>
             </div>
             <div
               title="Preview data as a table"

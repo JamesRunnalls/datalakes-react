@@ -19,6 +19,7 @@ import RemoteSensing from "./inner/remotesensing";
 import ThreeDModelDownload from "./inner/threedmodeldownload";
 import Ch2018Graph from "./inner/ch2018graph";
 import RemoteSensingDownload from "./inner/remotesensingdownload";
+import LocationMap from "./inner/locationmap";
 
 class DataDetail extends Component {
   state = {
@@ -286,13 +287,23 @@ class DataDetail extends Component {
 
   addAverageTime = (array) => {
     for (var i = 0; i < array.length; i++) {
-      array[i].ave = new Date(
-        (parseFloat(new Date(array[i].mindatetime).getTime()) +
-          parseFloat(new Date(array[i].maxdatetime).getTime())) /
-          2
-      );
+      let mindt = parseFloat(new Date(array[i].mindatetime).getTime())
+      let maxdt = parseFloat(new Date(array[i].maxdatetime).getTime())
+      array[i].ave = new Date((mindt + maxdt)/2)
+      array[i].mindt = mindt / 1000;
+      array[i].maxdt = maxdt / 1000;
     }
     return array;
+  };
+
+  addFileLocation = (arr, dataset) => {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].latitude === "-9999" || arr[i].longitude === "-9999") {
+        arr[i].latitude = dataset.latitude;
+        arr[i].longitude = dataset.longitude;
+      }
+    }
+    return arr;
   };
 
   fileBounds = (array) => {
@@ -409,7 +420,9 @@ class DataDetail extends Component {
     var dataset = server[0].data;
     var { mapplotfunction } = dataset;
     var files = server[1].data;
-    files = files.filter((v,i,a)=>a.findIndex(t=>(t.filelink === v.filelink))===i) // Remove duplicates
+    files = files.filter(
+      (v, i, a) => a.findIndex((t) => t.filelink === v.filelink) === i
+    ); // Remove duplicates
     var datasetparameters = server[2].data;
     var dropdown = server[3].data;
 
@@ -448,11 +461,19 @@ class DataDetail extends Component {
         step = "preview";
       }
 
+      // Logic for showing map
+      if (dataset.longitude !== "-9999" && dataset.latitude !== "-9999") {
+        allowedStep.push("locationmap");
+      }
+
       // Filter for only json files
       files = files.filter((file) => file.filetype === "json");
 
       // Get add average time
       files = this.addAverageTime(files);
+
+      // Add location of file
+      files = this.addFileLocation(files, dataset);
 
       // Sort by value (descending)
       files.sort(this.numDescending);
@@ -692,6 +713,27 @@ class DataDetail extends Component {
               onChangeUpper={this.onChangeUpper}
               getLabel={this.getLabel}
               downloadData={this.downloadData}
+            />
+          </React.Fragment>
+        );
+      case "locationmap":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
+            <LocationMap
+              dataset={dataset}
+              file={file}
+              files={files}
+              min={mindatetime}
+              max={maxdatetime}
+              onChangeFileInt={this.onChangeFileInt}
+              removeFile={this.removeFile}
             />
           </React.Fragment>
         );

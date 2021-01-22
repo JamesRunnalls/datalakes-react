@@ -229,6 +229,11 @@
   background-color: transparent;
 }
 
+.filecontrol .color-line {
+  width: 20px;
+  height: 3px;
+}
+
 .filecontrol .removefile {
   cursor: pointer;
   font-weight: bold;
@@ -342,7 +347,7 @@
   font-size: bold;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 900px) {
   .data-subnav .subnav-item .subnav-text {
     display: none;
   }

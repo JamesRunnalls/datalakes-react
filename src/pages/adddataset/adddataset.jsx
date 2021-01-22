@@ -474,6 +474,8 @@ class AddDataset extends Component {
       defaultValue = search[1].id;
     } else if (defaultValue === 2 && !find.toLowerCase().includes("depth")) {
       defaultValue = search[1].id;
+    } else if (defaultValue === 22 && find.toLowerCase().includes("do")) {
+      defaultValue = 12;
     }
     return defaultValue;
   };

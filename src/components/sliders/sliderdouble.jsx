@@ -59,31 +59,33 @@ class DateSliderDouble extends Component {
 
     return (
       <div className="datetime-selector">
-        <div className="datetime-picker">
-          <div className="datetime-value">
-            <DateTimePicker
-              onChange={onChangeLower}
-              value={lower}
-              clearIcon={null}
-              calendarIcon={null}
-              maxDate={upper}
-              minDate={min}
-              disableClock={true}
-            />
+        {onChangeLower && (
+          <div className="datetime-picker">
+            <div className="datetime-value">
+              <DateTimePicker
+                onChange={onChangeLower}
+                value={lower}
+                clearIcon={null}
+                calendarIcon={null}
+                maxDate={upper}
+                minDate={min}
+                disableClock={true}
+              />
+            </div>
+            <div className="datetime-value">></div>
+            <div className="datetime-value">
+              <DateTimePicker
+                onChange={onChangeUpper}
+                value={upper}
+                clearIcon={null}
+                calendarIcon={null}
+                maxDate={max}
+                minDate={lower}
+                disableClock={true}
+              />
+            </div>
           </div>
-          <div className="datetime-value">></div>
-          <div className="datetime-value">
-            <DateTimePicker
-              onChange={onChangeUpper}
-              value={upper}
-              clearIcon={null}
-              calendarIcon={null}
-              maxDate={max}
-              minDate={lower}
-              disableClock={true}
-            />
-          </div>
-        </div>
+        )}
 
         <Slider
           mode={3}

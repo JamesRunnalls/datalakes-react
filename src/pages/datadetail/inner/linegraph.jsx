@@ -489,7 +489,7 @@ class LineGraph extends Component {
             filecontrol.push(
               <tr key={"file" + d}>
                 <td>
-                  <input type="color" value={color} />
+                  <div className="color-line" style={{backgroundColor: color}} />
                 </td>
                 <td>{text}</td>
                 <td
