@@ -501,7 +501,7 @@ class HeatMap extends Component {
       zlabel = parameter.name;
       zunits = parameter.unit;
       var zdomain = d3.extent(
-        [].concat.apply([], data[file][parameter.axis]).filter((f) => {
+        [].concat.apply([], data[[file[0]]][parameter.axis]).filter((f) => {
           return !isNaN(parseFloat(f)) && isFinite(f);
         })
       );
@@ -687,7 +687,7 @@ class HeatMap extends Component {
 
   combineFiles = (files, combined, data, file, xaxis, yaxis, zaxis) => {
     var plotdata;
-    if (files[file].connect === "join") {
+    if (files[file[0]].connect === "join") {
       if (Array.isArray(combined)) {
         plotdata = [];
         for (var k = 0; k < combined.length; k++) {
@@ -704,11 +704,11 @@ class HeatMap extends Component {
           z: combined[zaxis],
         };
       }
-    } else if (files[file].connect === "ind") {
+    } else if (files[file[0]].connect === "ind") {
       plotdata = {
-        x: data[file][xaxis],
-        y: data[file][yaxis],
-        z: data[file][zaxis],
+        x: data[file[0]][xaxis],
+        y: data[file[0]][yaxis],
+        z: data[file[0]][zaxis],
       };
     } else {
       plotdata = {
@@ -850,17 +850,17 @@ class HeatMap extends Component {
     const title = dataset.title;
     var colors = this.parseColor(dataset.plotproperties.colors);
     var zdomain = d3.extent(
-      [].concat.apply([], data[file].z).filter((f) => {
+      [].concat.apply([], data[file[0]].z).filter((f) => {
         return !isNaN(parseFloat(f)) && isFinite(f);
       })
     );
     var ydomain = d3.extent(
-      [].concat.apply([], data[file].y).filter((f) => {
+      [].concat.apply([], data[file[0]].y).filter((f) => {
         return !isNaN(parseFloat(f)) && isFinite(f);
       })
     );
     var xdomain = d3.extent(
-      [].concat.apply([], data[file].x).filter((f) => {
+      [].concat.apply([], data[file[0]].x).filter((f) => {
         return !isNaN(parseFloat(f)) && isFinite(f);
       })
     );
@@ -1181,7 +1181,7 @@ class HeatMap extends Component {
       zoptions,
       plotdata,
     } = this.state;
-    var value = new Date(files[file].ave);
+    var value = new Date(files[file[0]].ave);
     return (
       <React.Fragment>
         <SidebarLayout

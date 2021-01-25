@@ -17,7 +17,7 @@ class MapSelect extends Component {
   };
 
   componentDidMount() {
-    const { datasets, mapAddFilter, mapToggle } = this.props;
+    const { datasets, selectPoints, mapToggle } = this.props;
     var center = [46.85, 7.55];
     var zoom = 8;
 
@@ -37,7 +37,7 @@ class MapSelect extends Component {
       ],
     });
 
-    if (mapAddFilter) {
+    if (selectPoints) {
       var drawnItems = new L.FeatureGroup();
       this.map.addLayer(drawnItems);
       var drawControl = new L.Control.Draw({
@@ -55,7 +55,7 @@ class MapSelect extends Component {
 
       this.map.on("draw:created", function (e) {
         var layer = e.layer;
-        mapAddFilter(layer._latlngs[0]);
+        selectPoints(layer._latlngs[0]);
         drawnItems.clearLayers();
         drawnItems.addLayer(layer);
       });

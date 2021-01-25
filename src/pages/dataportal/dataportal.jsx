@@ -636,7 +636,7 @@ class DataPortal extends Component {
               >
                 <MapSelect
                   datasets={fDatasets}
-                  mapAddFilter={this.mapAddFilter}
+                  selectPoints={this.mapAddFilter}
                   filters={filters}
                   mapToggle={this.mapToggle}
                 />
