@@ -449,12 +449,21 @@ class LineGraph extends Component {
             );
           }
 
+          // Axis Direction
+          var yReverse = false;
+          var xReverse = false;
+          if (xlabel === "Depth" || xlabel === "Water Pressure") {
+            xReverse = true;
+          }
+          if (ylabel === "Depth" || ylabel === "Water Pressure") {
+            yReverse = true;
+          }
+
           // Format data && downsample
           var { x, y } = dataset[d];
           if (xlabel === "Time") x = x.map((i) => this.formatDate(i));
           if (ylabel === "Time") y = y.map((i) => this.formatDate(i));
-          if (xlabel === "Depth") x = x.map((i) => -i);
-          if (ylabel === "Depth") y = y.map((i) => -i);
+
           var out = { x, y };
           if (xlabel === "Time") out = this.downsample(x, y, downsample);
           dataset[d] = out;
@@ -489,7 +498,10 @@ class LineGraph extends Component {
             filecontrol.push(
               <tr key={"file" + d}>
                 <td>
-                  <div className="color-line" style={{backgroundColor: color}} />
+                  <div
+                    className="color-line"
+                    style={{ backgroundColor: color }}
+                  />
                 </td>
                 <td>{text}</td>
                 <td
@@ -543,6 +555,8 @@ class LineGraph extends Component {
                       bcolor={bcolor}
                       xscale={xscale}
                       yscale={yscale}
+                      yReverse={yReverse}
+                      xReverse={xReverse}
                       setDownloadGraph={this.setDownloadGraph}
                     />
                   </div>

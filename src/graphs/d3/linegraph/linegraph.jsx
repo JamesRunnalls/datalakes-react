@@ -129,6 +129,8 @@ class D3LineGraph extends Component {
           setDownloadGraph,
           confidence,
           simple,
+          yReverse,
+          xReverse,
         } = this.props;
 
         if (!lcolor) lcolor = ["#000000"];
@@ -161,12 +163,14 @@ class D3LineGraph extends Component {
         var x;
         var minx = this.getMin(data, "x");
         var maxx = this.getMax(data, "x");
+        var xrange = [0, width]
+        if (xReverse) xrange = [width, 0]
         if (xscale === "Time") {
-          x = d3.scaleTime().range([0, width]).domain([minx, maxx]);
+          x = d3.scaleTime().range(xrange).domain([minx, maxx]);
         } else if (xscale === "Log") {
-          x = d3.scaleLog().range([0, width]).domain([minx, maxx]);
+          x = d3.scaleLog().range(xrange).domain([minx, maxx]);
         } else {
-          x = d3.scaleLinear().range([0, width]).domain([minx, maxx]);
+          x = d3.scaleLinear().range(xrange).domain([minx, maxx]);
         }
         var xref = x.copy();
         var xbase = x.copy();
@@ -175,12 +179,14 @@ class D3LineGraph extends Component {
         var y;
         var miny = this.getMin(data, "y");
         var maxy = this.getMax(data, "y");
+        var yrange = [height, 0]
+        if (yReverse) yrange = [0, height]
         if (yscale === "Time") {
-          y = d3.scaleTime().range([height, 0]).domain([miny, maxy]);
+          y = d3.scaleTime().range(yrange).domain([miny, maxy]);
         } else if (yscale === "Log") {
-          y = d3.scaleLog().range([height, 0]).domain([miny, maxy]);
+          y = d3.scaleLog().range(yrange).domain([miny, maxy]);
         } else {
-          y = d3.scaleLinear().range([height, 0]).domain([miny, maxy]);
+          y = d3.scaleLinear().range(yrange).domain([miny, maxy]);
         }
         var yref = y.copy();
         var ybase = y.copy();
