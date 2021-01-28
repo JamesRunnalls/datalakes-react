@@ -89,6 +89,13 @@ class DataDetail extends Component {
     }
   };
 
+  cleanData = (data) => {
+    if (Object.keys(data).includes("undefined")){
+      delete data.undefined;
+    }
+    return data
+  }
+
   downloadMultipleFiles = async (arr) => {
     var { data: dataArray, files, combined } = this.state;
     for (var j = 0; j < arr.length; j++) {
@@ -98,7 +105,7 @@ class DataDetail extends Component {
           .catch((error) => {
             this.setState({ error: true });
           });
-        dataArray[arr[j]] = data;
+        dataArray[arr[j]] = this.cleanData(data)
       }
     }
     if (files[0].connect === "join") {
@@ -287,9 +294,9 @@ class DataDetail extends Component {
 
   addAverageTime = (array) => {
     for (var i = 0; i < array.length; i++) {
-      let mindt = parseFloat(new Date(array[i].mindatetime).getTime())
-      let maxdt = parseFloat(new Date(array[i].maxdatetime).getTime())
-      array[i].ave = new Date((mindt + maxdt)/2)
+      let mindt = parseFloat(new Date(array[i].mindatetime).getTime());
+      let maxdt = parseFloat(new Date(array[i].maxdatetime).getTime());
+      array[i].ave = new Date((mindt + maxdt) / 2);
       array[i].mindt = mindt / 1000;
       array[i].maxdt = maxdt / 1000;
     }
