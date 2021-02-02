@@ -649,6 +649,7 @@ class HeatMap extends Component {
   };
 
   setAxisOptions = (datasetparameters, getLabel) => {
+    console.log(datasetparameters)
     var xoptions = [];
     var yoptions = [];
     var zoptions = [];
@@ -980,6 +981,8 @@ class HeatMap extends Component {
       yaxis,
       zaxis
     );
+
+    console.log("Heatmap", plotdata)
 
     try {
       plotdata = this.sliceData(

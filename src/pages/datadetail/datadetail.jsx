@@ -20,6 +20,7 @@ import ThreeDModelDownload from "./inner/threedmodeldownload";
 import Ch2018Graph from "./inner/ch2018graph";
 import RemoteSensingDownload from "./inner/remotesensingdownload";
 import LocationMap from "./inner/locationmap";
+import Plot from "./inner/plot";
 
 class DataDetail extends Component {
   state = {
@@ -36,7 +37,7 @@ class DataDetail extends Component {
     files: [],
     data: "",
     step: "",
-    allowedStep: ["download", "pipeline", "information", "webgis"],
+    allowedStep: ["plot", "download", "pipeline", "information", "webgis"],
     file: [0],
     innerLoading: false,
     combined: [],
@@ -90,11 +91,11 @@ class DataDetail extends Component {
   };
 
   cleanData = (data) => {
-    if (Object.keys(data).includes("undefined")){
+    if (Object.keys(data).includes("undefined")) {
       delete data.undefined;
     }
-    return data
-  }
+    return data;
+  };
 
   downloadMultipleFiles = async (arr) => {
     var { data: dataArray, files, combined } = this.state;
@@ -105,7 +106,7 @@ class DataDetail extends Component {
           .catch((error) => {
             this.setState({ error: true });
           });
-        dataArray[arr[j]] = this.cleanData(data)
+        dataArray[arr[j]] = this.cleanData(data);
       }
     }
     if (files[0].connect === "join") {
@@ -405,6 +406,16 @@ class DataDetail extends Component {
     return objValue.concat(srcValue);
   };
 
+  getShape = (arr) => {
+    var shape = [];
+    var inner = arr;
+    while (inner[0]) {
+      shape.push(inner.length);
+      inner = inner[0];
+    }
+    return shape
+  };
+
   async componentDidMount() {
     this._isMounted = true;
     var { step, allowedStep } = this.state;
@@ -468,6 +479,8 @@ class DataDetail extends Component {
         step = "preview";
       }
 
+      step = "plot";
+
       // Logic for showing map
       if (dataset.longitude !== "-9999" && dataset.latitude !== "-9999") {
         allowedStep.push("locationmap");
@@ -490,17 +503,21 @@ class DataDetail extends Component {
       mindatetime = new Date(mindatetime).getTime() / 1000;
       maxdatetime = new Date(maxdatetime).getTime() / 1000;
 
-      // Download first two files
       var dataArray = new Array(files.length).fill(0);
       var { data } = await axios
         .get(apiUrl + "/files/" + files[0].id + "?get=raw")
         .catch((error) => {
           this.setState({ step: "error" });
         });
-
       dataArray[0] = data;
       var combined = JSON.parse(JSON.stringify(data));
       var { lower, upper } = this.dataBounds(dataArray);
+
+      // Add dataset length to datasetparameters
+      datasetparameters = datasetparameters.map((d) => {
+        d.shape = this.getShape(data[d.axis]);
+        return d;
+      });
 
       // Get Pipeline Data
       var renku = false;
@@ -654,6 +671,26 @@ class DataDetail extends Component {
                 </tr>
               </tbody>
             </table>
+          </React.Fragment>
+        );
+      case "plot":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
+            <Plot
+              datasetparameters={datasetparameters}
+              dataset={dataset}
+              data={data}
+              files={files}
+              file={file}
+              combined={combined}
+            />
           </React.Fragment>
         );
       case "heatmap":
