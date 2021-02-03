@@ -212,7 +212,7 @@ class Plot extends Component {
     bcolor: "#ffffff",
     lcolor: ["black"],
     lweight: ["0.5"],
-    xscale: "Linear",
+    xscale: "Time",
     yscale: "Linear",
     decimate_active: false,
     decimate_period: 24,
@@ -256,8 +256,8 @@ class Plot extends Component {
     var ydp = datasetparameters.find((dp) => dp.axis === yaxis);
     var yReverse = false;
     var xReverse = false;
-    if ([2, 18].includes(xdp.parameters_id)) xReverse = true;
-    if ([2, 18].includes(ydp.parameters_id)) yReverse = true;
+    if ([2, 18, 43].includes(xdp.parameters_id)) xReverse = true;
+    if ([2, 18, 43].includes(ydp.parameters_id)) yReverse = true;
     for (var j = 0; j < datasetparameters.length; j++) {
       if (datasetparameters[j]["axis"].includes("x")) {
         xoptions.push({
