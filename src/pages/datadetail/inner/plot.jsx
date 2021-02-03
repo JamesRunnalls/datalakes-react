@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
+import ColorManipulation from "../../../components/colormanipulation/colormanipulation";
 import DataSelect from "../../../components/dataselect/dataselect";
 import Loading from "../../../components/loading/loading";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
+import SliderDouble from "../../../components/sliders/sliderdouble";
+import NumberSliderDouble from "../../../components/sliders/sliderdoublenumber";
+import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import FilterBox from "../../../components/filterbox/filterbox";
 import colorlist from "../../../components/colorramp/colors";
@@ -101,7 +105,6 @@ class Graph extends Component {
 }
 
 class Sidebar extends Component {
-  state = {};
   render() {
     return (
       <React.Fragment>
@@ -115,6 +118,8 @@ class Sidebar extends Component {
           zoptions={this.props.zoptions}
           handleAxisSelect={this.props.handleAxisSelect}
         />
+        <Range {...this.props} />
+        <DisplayOptions />
       </React.Fragment>
     );
   }
@@ -188,6 +193,320 @@ class AxisSelect extends Component {
   }
 }
 
+class Range extends Component {
+  onChangeLowerX = (event) => {
+    this.props.onChangeX([event.getTime(), this.props.upperX * 1000]);
+  };
+
+  onChangeLowerY = (event) => {
+    this.props.onChangeY([event.getTime(), this.props.upperY * 1000]);
+  };
+
+  onChangeUpperX = (event) => {
+    this.props.onChangeX([this.props.lowerX * 1000, event.getTime()]);
+  };
+
+  onChangeUpperY = (event) => {
+    this.props.onChangeY([this.props.lowerY * 1000, event.getTime()]);
+  };
+
+  render() {
+    var { timeaxis, graph } = this.props;
+    return (
+      <React.Fragment>
+        <FilterBox
+          title={this.props.xlabel + " Range"}
+          content={
+            timeaxis === "x" ? (
+              <div className="side-date-slider">
+                <SliderDouble
+                  onChange={this.props.onChangeX}
+                  onChangeLower={this.onChangeLowerX}
+                  onChangeUpper={this.onChangeUpperX}
+                  min={this.props.minX}
+                  max={this.props.maxX}
+                  lower={this.props.lowerX}
+                  upper={this.props.upperX}
+                  files={this.props.files}
+                />
+                <LoadDataSets
+                  data={this.props.data}
+                  downloadData={this.props.downloadData}
+                />
+              </div>
+            ) : (
+              <div className="side-date-slider">
+                <NumberSliderDouble
+                  onChange={this.props.onChangeX}
+                  min={this.props.minX}
+                  max={this.props.maxX}
+                  lower={this.props.lowerX}
+                  upper={this.props.upperX}
+                  unit={this.props.xunits}
+                />
+              </div>
+            )
+          }
+          preopen={true}
+        />
+        {graph === "heatmap" && (
+          <FilterBox
+            title={this.props.ylabel + " Range"}
+            content={
+              timeaxis === "y" ? (
+                <div className="side-date-slider">
+                  <SliderDouble
+                    onChange={this.props.onChangeY}
+                    onChangeLower={this.onChangeLowerY}
+                    onChangeUpper={this.onChangeUpperY}
+                    min={this.props.minY}
+                    max={this.props.maxY}
+                    lower={this.props.lowerY}
+                    upper={this.props.upperY}
+                    files={this.props.files}
+                  />
+                  <LoadDataSets
+                    data={this.props.data}
+                    downloadData={this.props.downloadData}
+                  />
+                </div>
+              ) : (
+                <div className="side-date-slider">
+                  <NumberSliderDouble
+                    onChange={this.props.onChangeY}
+                    min={this.props.minY}
+                    max={this.props.maxY}
+                    lower={this.props.lowerY}
+                    upper={this.props.upperY}
+                    unit={this.props.yunits}
+                  />
+                </div>
+              )
+            }
+            preopen={false}
+          />
+        )}
+      </React.Fragment>
+    );
+  }
+}
+
+class DisplayOptions extends Component {
+  state = {
+    colors: this.props.colors,
+    title: this.props.title,
+    bcolor: this.props.bcolor,
+    minZ: this.props.minZ,
+    maxZ: this.props.maxZ,
+    thresholdStep: this.props.thresholdStep,
+    decimate_active: this.props.decimate_active,
+    decimate_period: this.props.decimate_period,
+    decimate_time: this.props.decimate_time,
+  };
+  onChangeDecimatePeriod = (event) => {
+    this.setState({ decimate_period: event.target.value });
+  };
+  onChangeDecimateTime = (event) => {
+    this.setState({ decimate_time: event.target.value });
+  };
+  onChangeDecimate = () => {
+    this.setState({ decimate_active: !this.state.decimate_active });
+  };
+  onChangeLocalColors = (colors) => {
+    this.setState({ colors });
+  };
+  onChangeLocalTitle = (event) => {
+    var title = event.target.value;
+    this.setState({ title });
+  };
+  onChangeLocalThreshold = (event) => {
+    var thresholdStep = event.target.value;
+    this.setState({ thresholdStep });
+  };
+  onChangeLocalMin = (event) => {
+    var minZ = parseFloat(event.target.value);
+    this.setState({ minZ });
+  };
+  onChangeLocalMax = (event) => {
+    var maxZ = parseFloat(event.target.value);
+    this.setState({ maxZ });
+  };
+  onChangeLocalBcolor = (event) => {
+    var bcolor = event.target.value;
+    this.setState({ bcolor });
+  };
+  updatePlot = () => {
+    this.props.onChange(this.state);
+  };
+  componentDidUpdate(prevProps) {
+    if (
+      prevProps.title !== this.props.title ||
+      prevProps.colors !== this.props.colors ||
+      prevProps.minZ !== this.props.minZ ||
+      prevProps.maxZ !== this.props.maxZ ||
+      prevProps.thresholdStep !== this.props.thresholdStep ||
+      prevProps.decimate_active !== this.props.decimate_active ||
+      prevProps.decimate_time !== this.props.decimate_time ||
+      prevProps.decimate_period !== this.props.decimate_period
+    ) {
+      var {
+        colors,
+        title,
+        bcolor,
+        minZ,
+        maxZ,
+        thresholdStep,
+        decimate_active,
+        decimate_period,
+        decimate_time,
+      } = this.props;
+      this.setState({
+        colors,
+        title,
+        bcolor,
+        minZ,
+        maxZ,
+        thresholdStep,
+        decimate_active,
+        decimate_period,
+        decimate_time,
+      });
+    }
+  }
+  render() {
+    var {
+      colors,
+      title,
+      bcolor,
+      minZ,
+      maxZ,
+      thresholdStep,
+      decimate_period,
+      decimate_time,
+    } = this.state;
+    var { array } = this.props;
+    maxZ = maxZ === undefined ? 0 : maxZ;
+    minZ = minZ === undefined ? 0 : minZ;
+    return (
+      <FilterBox
+        title="Display Options"
+        content={
+          <React.Fragment>
+            <table className="colors-table">
+              <tbody>
+                <tr>
+                  <td>Title</td>
+                  <td colSpan="2">
+                    <textarea
+                      id="title"
+                      defaultValue={title}
+                      onChange={this.onChangeLocalTitle}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Background</td>
+                  <td>
+                    <input
+                      type="color"
+                      id="bcolor"
+                      defaultValue={bcolor}
+                      onChange={this.onChangeLocalBcolor}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Maximum</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="maxZ"
+                      value={maxZ}
+                      onChange={this.onChangeLocalMax}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Minimum</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="minZ"
+                      value={minZ}
+                      onChange={this.onChangeLocalMin}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Number of Thresholds</td>
+                  <td>
+                    <input
+                      type="number"
+                      id="threshold"
+                      step="1"
+                      value={thresholdStep}
+                      onChange={this.onChangeLocalThreshold}
+                    />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>Down Sample</td>
+                  <td>
+                    <div className="downsample">
+                      <div className="downsample-left">
+                        <input
+                          type="time"
+                          id="threshold"
+                          value={decimate_time}
+                          onChange={this.onChangeDecimateTime}
+                        />
+                        <select
+                          value={decimate_period}
+                          onChange={this.onChangeDecimatePeriod}
+                        >
+                          <option value="1">1 hour</option>
+                          <option value="3">3 hours</option>
+                          <option value="4">6 hours</option>
+                          <option value="12">12 hours</option>
+                          <option value="24">1 day</option>
+                          <option value="48">2 days</option>
+                          <option value="168">1 week</option>
+                        </select>
+                      </div>
+                      <div className="downsample-right">
+                        <input
+                          type="checkbox"
+                          onChange={this.onChangeDecimate}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <ColorManipulation
+              onChange={this.onChangeLocalColors}
+              colors={colors}
+              array={array}
+            />
+            <div className="editsettings-button">
+              <button
+                type="button"
+                title="Update mapplot settings"
+                onClick={this.updatePlot}
+              >
+                Update Plot
+              </button>
+            </div>
+          </React.Fragment>
+        }
+      />
+    );
+  }
+}
+
 class Plot extends Component {
   state = {
     plotdata: [],
@@ -211,7 +530,7 @@ class Plot extends Component {
     title: "",
     bcolor: "#ffffff",
     lcolor: ["black"],
-    lweight: ["0.5"],
+    lweight: ["1"],
     xscale: "Time",
     yscale: "Linear",
     decimate_active: false,
@@ -232,6 +551,72 @@ class Plot extends Component {
     minZ: 0,
     yReverse: false,
     xReverse: false,
+    timeaxis: "",
+    refresh: false,
+  };
+
+  onChangeY = async (event) => {
+    var lower = event[0];
+    var upper = event[1];
+    if (
+      lower !== this.state.lowerY * 1000 ||
+      upper !== this.state.upperY * 1000
+    ) {
+      var { downloadMultipleFiles, data, files } = this.props;
+      var { timeaxis } = this.state;
+      if (timeaxis === "y") {
+        var toDownload = [];
+        for (var i = 0; i < files.length; i++) {
+          if (
+            new Date(files[i].mindatetime).getTime() < upper &&
+            new Date(files[i].maxdatetime).getTime() > lower &&
+            data[i] === 0
+          ) {
+            toDownload.push(i);
+          }
+        }
+        upper = upper / 1000;
+        lower = lower / 1000;
+        if (toDownload.length > 0) {
+          document.getElementById("detailloading").style.display = "block";
+          await downloadMultipleFiles(toDownload);
+          document.getElementById("detailloading").style.display = "none";
+        }
+      }
+      this.setState({ lowerY: lower, upperY: upper, refresh: true });
+    }
+  };
+
+  onChangeX = async (event) => {
+    var lower = event[0];
+    var upper = event[1];
+    if (
+      lower !== this.state.lowerX * 1000 ||
+      upper !== this.state.upperX * 1000
+    ) {
+      var { downloadMultipleFiles, data, files } = this.props;
+      var { timeaxis } = this.state;
+      if (timeaxis === "x") {
+        var toDownload = [];
+        for (var i = 0; i < files.length; i++) {
+          if (
+            new Date(files[i].mindatetime).getTime() < upper &&
+            new Date(files[i].maxdatetime).getTime() > lower &&
+            data[i] === 0
+          ) {
+            toDownload.push(i);
+          }
+        }
+        upper = upper / 1000;
+        lower = lower / 1000;
+        if (toDownload.length > 0) {
+          document.getElementById("detailloading").style.display = "block";
+          await downloadMultipleFiles(toDownload);
+          document.getElementById("detailloading").style.display = "none";
+        }
+      }
+      this.setState({ lowerX: lower, upperX: upper, refresh: true });
+    }
   };
 
   parseColor = (colorname) => {
@@ -318,6 +703,7 @@ class Plot extends Component {
       decimate_active,
       decimate_period,
       decimate_time,
+      timeaxis,
     } = this.state;
     if (event.value.includes("x")) xaxis = event.value;
     if (event.value.includes("y")) yaxis = event.value;
@@ -351,7 +737,8 @@ class Plot extends Component {
       decimate_active,
       decimate_period,
       decimate_time,
-      datasetparameters
+      datasetparameters,
+      timeaxis
     );
     this.setState({
       plotdata,
@@ -663,14 +1050,10 @@ class Plot extends Component {
     decimate_active,
     decimate_period,
     decimate_time,
-    datasetparameters
+    datasetparameters,
+    timeaxis
   ) => {
     var { data, files, file, combined } = this.props;
-    var timeaxis = "";
-    const xparam = datasetparameters.find((x) => x.axis === xaxis);
-    const yparam = datasetparameters.find((y) => y.axis === yaxis);
-    if (xparam.parameters_id === 1) timeaxis = "x";
-    if (yparam.parameters_id === 1) timeaxis = "y";
 
     var plotdata = this.combineFiles(
       files,
@@ -716,7 +1099,15 @@ class Plot extends Component {
     return plotdata;
   };
 
-  getInitialBounds = (dataset, data, file) => {
+  getInitialBounds = (dataset, data, file, xaxis, yaxis) => {
+    var { maxdatetime, mindatetime, datasetparameters } = this.props;
+
+    var timeaxis = "";
+    const xparam = datasetparameters.find((x) => x.axis === xaxis);
+    const yparam = datasetparameters.find((y) => y.axis === yaxis);
+    if (xparam.parameters_id === 1) timeaxis = "x";
+    if (yparam.parameters_id === 1) timeaxis = "y";
+
     const title = dataset.title;
     var colors = this.parseColor(dataset.plotproperties.colors);
     var zdomain = d3.extent(
@@ -746,6 +1137,15 @@ class Plot extends Component {
     var upperX = maxX;
     var lowerZ = minZ;
     var upperZ = maxZ;
+    if (timeaxis === "x" && maxdatetime && mindatetime) {
+      minX = Math.min(minX, mindatetime);
+      maxX = Math.max(maxX, maxdatetime);
+    }
+
+    if (timeaxis === "y" && maxdatetime && mindatetime) {
+      minY = Math.min(minY, mindatetime);
+      maxY = Math.max(maxY, maxdatetime);
+    }
     return {
       title,
       colors,
@@ -761,7 +1161,26 @@ class Plot extends Component {
       upperX,
       lowerZ,
       upperZ,
+      timeaxis,
     };
+  };
+
+  getZBounds = (plotdata) => {
+    var { minZ, maxZ } = this.state;
+    var pd = plotdata;
+    if (!isArray(plotdata)) {
+      pd = [pd];
+    }
+    for (var i = 0; i < pd.length; i++) {
+      let zdomain = d3.extent(
+        [].concat.apply([], pd[i].z).filter((f) => {
+          return !isNaN(parseFloat(f)) && isFinite(f);
+        })
+      );
+      minZ = Math.min(zdomain[0], minZ);
+      maxZ = Math.max(zdomain[1], maxZ);
+    }
+    return { minZ, maxZ };
   };
 
   componentDidMount() {
@@ -802,7 +1221,8 @@ class Plot extends Component {
       decimate_active,
       decimate_period,
       decimate_time,
-    } = this.getInitialBounds(dataset, data, file);
+      timeaxis,
+    } = this.getInitialBounds(dataset, data, file, xaxis, yaxis);
 
     var plotdata = this.processPlotData(
       xaxis,
@@ -819,7 +1239,8 @@ class Plot extends Component {
       decimate_active,
       decimate_period,
       decimate_time,
-      datasetparameters
+      datasetparameters,
+      timeaxis
     );
 
     this.setState({
@@ -850,7 +1271,34 @@ class Plot extends Component {
       upperX,
       lowerZ,
       upperZ,
+      timeaxis,
     });
+  }
+
+  componentDidUpdate() {
+    var { refresh } = this.state;
+    if (refresh) {
+      var plotdata = this.processPlotData(
+        this.state.xaxis,
+        this.state.yaxis,
+        this.state.zaxis,
+        this.state.upperY,
+        this.state.lowerY,
+        this.state.maxY,
+        this.state.minY,
+        this.state.upperX,
+        this.state.lowerX,
+        this.state.minX,
+        this.state.maxX,
+        this.state.decimate_active,
+        this.state.decimate_period,
+        this.state.decimate_time,
+        this.props.datasetparameters,
+        this.state.timeaxis
+      );
+      var { minZ, maxZ } = this.getZBounds(plotdata);
+      this.setState({ plotdata, refresh: false, minZ, maxZ });
+    }
   }
 
   render() {
@@ -859,12 +1307,24 @@ class Plot extends Component {
         <SidebarLayout
           sidebartitle="Plot Controls"
           left={
-            <div className="detailgraph">
-              <Graph {...this.state} {...this.props} />
-            </div>
+            <React.Fragment>
+              <div className="detailloading" id="detailloading">
+                <Loading />
+                Downloading extra files.
+              </div>
+              <div className="detailgraph">
+                <Graph {...this.state} {...this.props} />
+              </div>
+            </React.Fragment>
           }
           rightNoScroll={
-            <Sidebar {...this.state} handleAxisSelect={this.handleAxisSelect} />
+            <Sidebar
+              {...this.state}
+              {...this.props}
+              onChangeX={this.onChangeX}
+              onChangeY={this.onChangeY}
+              handleAxisSelect={this.handleAxisSelect}
+            />
           }
         />
       </React.Fragment>

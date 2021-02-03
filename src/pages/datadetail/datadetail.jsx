@@ -690,6 +690,9 @@ class DataDetail extends Component {
               files={files}
               file={file}
               combined={combined}
+              maxdatetime={maxdatetime}
+              mindatetime={mindatetime}
+              downloadMultipleFiles={this.downloadMultipleFiles}
             />
           </React.Fragment>
         );

@@ -175,10 +175,10 @@ export const getRGBAColor = (value, min, max, colors) => {
     return [255, 255, 255, 0];
   }
   if (value > max) {
-    return colors[colors.length - 1].rgba;
+    return [0, 0, 0, 0];
   }
   if (value < min) {
-    return colors[0].rbga;
+    return [0, 0, 0, 0];
   }
   var loc = (value - min) / (max - min);
   if (loc < 0 || loc > 1) {

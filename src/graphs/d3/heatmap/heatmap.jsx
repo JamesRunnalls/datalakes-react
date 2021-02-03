@@ -959,8 +959,10 @@ class D3HeatMap extends Component {
               .contours()
               .size([contour_data.z[0].length, contour_data.z.length])
               .smooth(false);
-            contours = d3.contours().size([contour_data.z[0].length, contour_data.z.length]);
-            values = autoDownSample(contour_data.z);
+            contours = d3
+              .contours()
+              .size([contour_data.z[0].length, contour_data.z.length]);
+            values = contour_data.z.flat();
             fill(crough.thresholds(thresholds)(values)[0], contour_data);
             contours
               .thresholds(thresholds)(values)

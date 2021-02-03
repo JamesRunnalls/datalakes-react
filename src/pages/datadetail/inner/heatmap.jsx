@@ -982,8 +982,6 @@ class HeatMap extends Component {
       zaxis
     );
 
-    console.log("Heatmap", plotdata)
-
     try {
       plotdata = this.sliceData(
         plotdata,
