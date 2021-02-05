@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-import ContactForm from "../../components/contactform/contactform";
 import HomepageMap from "../../graphs/leaflet/homepage_map";
 import epfl from "./img/epfl.svg";
 import epflc from "./img/epflc.svg";
@@ -17,6 +16,8 @@ import sdscc from "./img/sdscc.svg";
 import map from "./img/map.png";
 import data from "./img/data.png";
 import api from "./img/api.png";
+import james from "./img/james.png";
+import damien from "./img/damien.jpg";
 import "./home.css";
 
 class PartnerBanner extends Component {
@@ -438,7 +439,34 @@ class Home extends Component {
             <h2>Get in Touch</h2>
           </div>
           <div className="home-text">
-            <ContactForm />
+            <table className="contact">
+              <tbody>
+                <tr>
+                  <td>
+                    <img src={james} alt="Portrait James"/>
+                  </td>
+                  <td>
+                    For all queries regarding the functioning of the Datalakes
+                    web application please email James Runnalls.
+                    <p>
+                      <b>James.Runnalls@eawag.ch</b>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <img src={damien} alt="Portrait Damien"/>
+                  </td>
+                  <td>
+                    For all queries regarding the Datalakes project and for
+                    possible collaborations please email Damien Bouffard.
+                    <p>
+                      <b>Damien.Bouffard@eawag.ch</b>
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </React.Fragment>
