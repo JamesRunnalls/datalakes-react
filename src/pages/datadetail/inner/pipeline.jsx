@@ -152,18 +152,16 @@ class Pipeline extends Component {
                   <button>GitLab</button>
                 </a>
               </div>
-              {dataset.renku === 0 && (
-                <div className="accessOption">
-                  3. View on Renkulab.io, interactive environments are availble.
-                  <div className="pipeline-private">
-                    Private repositories will require login. Get in touch for
-                    access to private repositories.
-                  </div>
-                  <a href={renkulab} target="_blank" rel="noopener noreferrer">
-                    <button>Renkulab</button>
-                  </a>
+              <div className="accessOption">
+                3. View on Renkulab.io, interactive environments are availble.
+                <div className="pipeline-private">
+                  Private repositories will require login. Get in touch for
+                  access to private repositories.
                 </div>
-              )}
+                <a href={renkulab} target="_blank" rel="noopener noreferrer">
+                  <button>Renkulab</button>
+                </a>
+              </div>
             </div>
           </div>
         </div>

@@ -65,7 +65,7 @@ class Dataset extends Component {
     let day = ("0" + date.getDate()).slice(-2);
     let month = ("0" + (date.getMonth() + 1)).slice(-2);
     let year = date.getFullYear();
-    return day + "/" + month + "/" + year
+    return day + "/" + month + "/" + year;
   };
 
   render() {
@@ -156,7 +156,11 @@ class PopupBox extends Component {
 
 class FilterBoxInner extends Component {
   capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    if (string && string.length > 2) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    } else {
+      return string;
+    }
   };
   state = {};
   render() {
