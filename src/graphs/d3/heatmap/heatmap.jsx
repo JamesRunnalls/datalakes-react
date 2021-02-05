@@ -111,24 +111,6 @@ class D3HeatMap extends Component {
     return index;
   };
 
-  indexOfClosestArr = (num, arr) => {
-    for (let i = 0; i < arr.length; i++) {
-      if (num >= arr[i].min && num <= arr[i]) {
-        var index = 0;
-        var diff = Math.abs(num - arr[i][0]);
-        for (var val = 0; val < arr[i].length; val++) {
-          var newdiff = Math.abs(num - arr[i][val]);
-          if (newdiff < diff) {
-            diff = newdiff;
-            index = val;
-          }
-        }
-      }
-      return { file: i, index };
-    }
-    return false;
-  };
-
   downloadCSV = () => {
     try {
       var {
@@ -261,7 +243,6 @@ class D3HeatMap extends Component {
 
         // Get data extents
         var xdomain, ydomain, zdomain;
-        var domainSpace = [];
         if (Array.isArray(data)) {
           var xdomarr = [];
           var ydomarr = [];
@@ -269,7 +250,6 @@ class D3HeatMap extends Component {
           for (var h = 0; h < data.length; h++) {
             let xext = d3.extent(data[h].x);
             let yext = d3.extent(data[h].y);
-            domainSpace.push({ xext, yext });
             if (
               !xdomarr.map((x) => x[0]).includes(xext[0]) &&
               !xdomarr.map((x) => x[1]).includes(xext[1])
