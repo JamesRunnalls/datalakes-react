@@ -111,6 +111,24 @@ class D3HeatMap extends Component {
     return index;
   };
 
+  indexOfClosestArr = (num, arr) => {
+    for (let i = 0; i < arr.length; i++) {
+      if (num >= arr[i].min && num <= arr[i]) {
+        var index = 0;
+        var diff = Math.abs(num - arr[i][0]);
+        for (var val = 0; val < arr[i].length; val++) {
+          var newdiff = Math.abs(num - arr[i][val]);
+          if (newdiff < diff) {
+            diff = newdiff;
+            index = val;
+          }
+        }
+      }
+      return { file: i, index };
+    }
+    return false;
+  };
+
   downloadCSV = () => {
     try {
       var {
@@ -243,6 +261,7 @@ class D3HeatMap extends Component {
 
         // Get data extents
         var xdomain, ydomain, zdomain;
+        var domainSpace = [];
         if (Array.isArray(data)) {
           var xdomarr = [];
           var ydomarr = [];
@@ -250,6 +269,7 @@ class D3HeatMap extends Component {
           for (var h = 0; h < data.length; h++) {
             let xext = d3.extent(data[h].x);
             let yext = d3.extent(data[h].y);
+            domainSpace.push({ xext, yext });
             if (
               !xdomarr.map((x) => x[0]).includes(xext[0]) &&
               !xdomarr.map((x) => x[1]).includes(xext[1])
@@ -862,6 +882,47 @@ class D3HeatMap extends Component {
           return { indexxpix, indexypix };
         }
 
+        function pixelMappingArray(
+          data,
+          scaleX,
+          scaleY,
+          highh,
+          lowh,
+          highw,
+          loww
+        ) {
+          // Currently using closest (needs to be improved)
+
+          var index = [];
+          for (var i = 0; i < data.length; i++) {
+            let ypix = data[i].y.map((dy) => scaleY(dy));
+            let xpix = data[i].x.map((dx) => scaleX(dx));
+
+            let indexxpix = [];
+            let xstart = Math.max(...[0, Math.ceil(Math.min(...xpix)), loww]);
+            let xend = Math.min(
+              ...[width, Math.floor(Math.max(...xpix)), highw]
+            );
+
+            let indexypix = [];
+            let ystart = Math.max(...[0, Math.ceil(Math.min(...ypix)), lowh]);
+            let yend = Math.min(
+              ...[height, Math.floor(Math.max(...ypix)), highh]
+            );
+
+            for (var j = xstart; j < xend; j++) {
+              indexxpix.push([j, indexOfClosest(j, xpix)]);
+            }
+
+            for (var k = ystart; k < yend; k++) {
+              indexypix.push([k, indexOfClosest(k, ypix)]);
+            }
+
+            index.push({ indexxpix, indexypix });
+          }
+          return index;
+        }
+
         function getFileIndex(scales, p) {
           for (var i = 0; i < scales.length; i++) {
             if (p >= Math.min(...scales[i]) && p <= Math.max(...scales[i])) {
@@ -869,43 +930,6 @@ class D3HeatMap extends Component {
             }
           }
           return NaN;
-        }
-
-        function getScales(scale, arr) {
-          var scales = [];
-          var s0 = [];
-          var s1 = [];
-          for (var i = 0; i < arr.length; i++) {
-            let ss0 = scale(arr[i][0]);
-            let ss1 = scale(arr[i][1]);
-            if (!s0.includes(ss0) && !s1.includes(ss1)) {
-              s0.push(ss0);
-              s1.push(ss1);
-              scales.push([ss0, ss1]);
-            }
-          }
-          return scales;
-        }
-
-        function getPixelValue(
-          data,
-          yp,
-          xp,
-          xscales,
-          yscales,
-          dataxpix,
-          dataypix
-        ) {
-          let index = 0;
-          if (xscales.length > 1) {
-            index = getFileIndex(xscales, xp);
-          } else if (yscales.length > 1) {
-            index = getFileIndex(yscales, yp);
-          }
-          if (isNaN(index)) return NaN;
-          var iy = indexOfClosest(yp, dataypix[index]);
-          var ix = indexOfClosest(xp, dataxpix[index]);
-          return data[index].z[iy][ix];
         }
 
         function autoDownSample(arr) {
@@ -1030,27 +1054,48 @@ class D3HeatMap extends Component {
         }
 
         function putImgDataMultMatrix(arr, scaleX, scaleY) {
-          var xscales = getScales(scaleX, xdomarr);
-          var yscales = getScales(scaleY, ydomarr);
-          var dataypix = arr.map((d) => d.y.map((dd) => scaleY(dd)));
-          var dataxpix = arr.map((d) => d.x.map((dd) => scaleX(dd)));
           var imgData = context.createImageData(width, height);
-          var highh = Math.min(height, Math.floor(scaleY(ydomain[0])));
-          var lowh = Math.max(0, Math.floor(scaleY(ydomain[1])));
-          var highw = Math.min(width, Math.floor(scaleX(xdomain[1])));
-          var loww = Math.max(0, Math.floor(scaleX(xdomain[0])));
-          var i, j, l, rgbacolor;
-          for (j = lowh; j < highh; j++) {
-            for (l = loww; l < highw; l++) {
-              rgbacolor = colorScale(
-                getPixelValue(arr, j, l, xscales, yscales, dataxpix, dataypix)
-              );
+          var highh, lowh, highw, loww;
+          if (yReverse) {
+            highh = Math.min(height, Math.floor(scaleY(ydomain[1])));
+            lowh = Math.max(0, Math.floor(scaleY(ydomain[0])));
+          } else {
+            highh = Math.min(height, Math.floor(scaleY(ydomain[0])));
+            lowh = Math.max(0, Math.floor(scaleY(ydomain[1])));
+          }
+          if (xReverse) {
+            highw = Math.min(width, Math.floor(scaleX(xdomain[0])));
+            loww = Math.max(0, Math.floor(scaleX(xdomain[1])));
+          } else {
+            highw = Math.min(width, Math.floor(scaleX(xdomain[1])));
+            loww = Math.max(0, Math.floor(scaleX(xdomain[0])));
+          }
+          var index = pixelMappingArray(
+            arr,
+            scaleX,
+            scaleY,
+            highh,
+            lowh,
+            highw,
+            loww
+          );
 
-              i = (width * j + l) * 4;
-              imgData.data[i + 0] = rgbacolor[0];
-              imgData.data[i + 1] = rgbacolor[1];
-              imgData.data[i + 2] = rgbacolor[2];
-              imgData.data[i + 3] = rgbacolor[3];
+          var rgbacolor, l;
+          for (var i = 0; i < index.length; i++) {
+            for (var j = 0; j < index[i].indexypix.length; j++) {
+              for (var k = 0; k < index[i].indexxpix.length; k++) {
+                rgbacolor = colorScale(
+                  arr[i].z[index[i].indexypix[j][1]][index[i].indexxpix[k][1]]
+                );
+                l =
+                  (width * index[i].indexypix[j][0] +
+                    index[i].indexxpix[k][0]) *
+                  4;
+                imgData.data[l + 0] = rgbacolor[0];
+                imgData.data[l + 1] = rgbacolor[1];
+                imgData.data[l + 2] = rgbacolor[2];
+                imgData.data[l + 3] = rgbacolor[3];
+              }
             }
           }
           context.putImageData(imgData, 1, 0);
