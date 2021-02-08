@@ -87,7 +87,7 @@ class PartnerBanner extends Component {
           <a
             className="partner-logo"
             rel="noopener noreferrer"
-            href="https://www6.lyon-grenoble.inrae.fr/carrtel/News/The-experimental-platform-LeXPLORE-Exploration-of-Lake-Geneva-named"
+            href="https://www6.lyon-grenoble.inrae.fr/carrtel"
             target="_blank"
             title="Visit the CARRTEL news page for the L'EXPLORE platform"
           >
