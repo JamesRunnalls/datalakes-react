@@ -555,6 +555,10 @@ class Plot extends Component {
     refresh: false,
   };
 
+  average = (nums) => {
+    return nums.reduce((a, b) => a + b) / nums.length;
+  };
+
   onChangeY = async (event) => {
     var lower = event[0];
     var upper = event[1];
@@ -738,7 +742,8 @@ class Plot extends Component {
       decimate_period,
       decimate_time,
       datasetparameters,
-      timeaxis
+      timeaxis,
+      graph
     );
     this.setState({
       plotdata,
@@ -760,30 +765,95 @@ class Plot extends Component {
     });
   };
 
-  selectAxis = (files, data, file, xaxis, yaxis, zaxis, datasetparameters) => {
+  maskArray = (arr, maskArr, mask) => {
+    var out = [];
+    if (mask && isArray(maskArr) && arr.length === maskArr.length) {
+      if (isArray(arr[0])) {
+        for (let i = 0; i < arr.length; i++) {
+          let inner = [];
+          for (let j = 0; j < arr[i].length; j++) {
+            if (maskArr[i][j] < 1) {
+              inner.push(arr[i][j]);
+            } else {
+              inner.push(null);
+            }
+          }
+          out.push(inner);
+        }
+      } else {
+        for (let i = 0; i < arr.length; i++) {
+          if (maskArr[i] < 1) {
+            out.push(arr[i]);
+          } else {
+            out.push(null);
+          }
+        }
+      }
+      return out;
+    } else {
+      return arr;
+    }
+  };
+
+  selectAxisAndMask = (files, data, file, xaxis, yaxis, zaxis, dp, mask) => {
     var plotdata;
+
+    // Looks for mask variables
+
+    var mxaxis = false;
+    var myaxis = false;
+    var mzaxis = false;
+
+    var xp = dp.find((p) => p.axis === xaxis);
+    var yp = dp.find((p) => p.axis === yaxis);
+    var zp = dp.find((p) => p.axis === zaxis);
+
+    if (xp && dp.find((dp) => dp.link === xp.id && dp.parameters_id === 27)) {
+      mxaxis = dp.find((dp) => dp.link === xp.id && dp.parameters_id === 27)[
+        "axis"
+      ];
+    }
+
+    if (yp && dp.find((dp) => dp.link === yp.id && dp.parameters_id === 27)) {
+      mxaxis = dp.find((dp) => dp.link === yp.id && dp.parameters_id === 27)[
+        "axis"
+      ];
+    }
+
+    if (zp && dp.find((dp) => dp.link === zp.id && dp.parameters_id === 27)) {
+      mxaxis = dp.find((dp) => dp.link === zp.id && dp.parameters_id === 27)[
+        "axis"
+      ];
+    }
+
+    // Case 1: Join
     if (files[file[0]].connect === "join") {
       plotdata = [];
       for (var k = 0; k < data.length; k++) {
         if (data[k] !== 0) {
           plotdata.push({
-            x: data[k][xaxis],
-            y: data[k][yaxis],
-            z: data[k][zaxis],
+            x: this.maskArray(data[k][xaxis], data[k][mxaxis], mask),
+            y: this.maskArray(data[k][yaxis], data[k][myaxis], mask),
+            z: this.maskArray(data[k][zaxis], data[k][mzaxis], mask),
           });
         }
       }
+      // Case 2: Individual
     } else if (files[file[0]].connect === "ind") {
-      plotdata = {
-        x: data[file[0]][xaxis],
-        y: data[file[0]][yaxis],
-        z: data[file[0]][zaxis],
-      };
+      plotdata = [];
+      for (var j = 0; j < file.length; j++) {
+        plotdata.push({
+          x: this.maskArray(data[file[j]][xaxis], data[file[j]][mxaxis], mask),
+          y: this.maskArray(data[file[j]][yaxis], data[file[j]][myaxis], mask),
+          z: this.maskArray(data[file[j]][zaxis], data[file[j]][mzaxis], mask),
+        });
+      }
+      // Case 3: Single file
     } else {
       plotdata = {
-        x: data[0][xaxis],
-        y: data[0][yaxis],
-        z: data[0][zaxis],
+        x: this.maskArray(data[0][xaxis], data[0][mxaxis], mask),
+        y: this.maskArray(data[0][yaxis], data[0][myaxis], mask),
+        z: this.maskArray(data[0][zaxis], data[0][mzaxis], mask),
       };
     }
     return plotdata;
@@ -814,9 +884,34 @@ class Plot extends Component {
     return plotdata;
   };
 
+  joinData = (plotdata, graph, connect, timeaxis) => {
+    if (graph === "linegraph" && isArray(plotdata) && connect === "join") {
+      var data = [];
+      for (var i = 0; i < plotdata.length; i++) {
+        for (var j = 0; j < plotdata[i].x.length; j++) {
+          data.push({ x: plotdata[i].x[j], y: plotdata[i].y[j] });
+        }
+      }
+      if (timeaxis === "x") {
+        data.sort((a, b) => (a.x > b.x ? 1 : b.x > a.x ? -1 : 0));
+      } else if (timeaxis === "y") {
+        data.sort((a, b) => (a.y > b.y ? 1 : b.y > a.y ? -1 : 0));
+      }
+
+      var x = [];
+      var y = [];
+      for (var k = 0; k < data.length; k++) {
+        x.push(data[k].x);
+        y.push(data[k].y);
+      }
+      return { x, y };
+    } else {
+      return plotdata;
+    }
+  };
+
   decimateData = (obj, timeaxis, active, period, time) => {
     if (active && timeaxis === "x" && obj) {
-      console.log(obj);
       if (!Array.isArray(obj)) obj = [obj];
       let { lowerX, upperX } = this.state;
       let hour = time.split(":")[0];
@@ -902,14 +997,18 @@ class Plot extends Component {
 
     var y = data.y;
 
-    var z = [];
-    for (var j = 0; j < data.y.length; j++) {
-      z.push(data.z[j].slice(l, u));
+    var z;
+    if (data.z) {
+      z = [];
+      for (var j = 0; j < data.y.length; j++) {
+        z.push(data.z[j].slice(l, u));
+      }
     }
+
     if (x.length > 0) {
       return { x: x, y: y, z: z };
     } else {
-      return data;
+      return false;
     }
   };
 
@@ -927,13 +1026,21 @@ class Plot extends Component {
     var y = data.y.slice(l, u);
     var x = data.x;
 
-    var z = [];
-    for (var j = 0; j < data.y.length; j++) {
-      if (j >= l && j <= u) {
-        z.push(data.z[j]);
+    var z;
+    if (data.z) {
+      z = [];
+      for (var j = 0; j < data.y.length; j++) {
+        if (j >= l && j <= u) {
+          z.push(data.z[j]);
+        }
       }
     }
-    return { x: x, y: y, z: z };
+
+    if (y.length > 0) {
+      return { x: x, y: y, z: z };
+    } else {
+      return false;
+    }
   };
 
   sliceData = (
@@ -945,9 +1052,12 @@ class Plot extends Component {
     minX,
     maxX,
     minY,
-    maxY
+    maxY,
+    connect
   ) => {
-    if (upperX < maxX || lowerX > minX) {
+    if (connect === "ind") {
+      return plotdata;
+    } else if (upperX < maxX || lowerX > minX) {
       if (Array.isArray(plotdata)) {
         var dataoutX = [];
         for (let i = 0; i < plotdata.length; i++) {
@@ -1045,20 +1155,24 @@ class Plot extends Component {
     decimate_period,
     decimate_time,
     datasetparameters,
-    timeaxis
+    timeaxis,
+    graph
   ) => {
+    var { mask } = this.state;
     var { data, files, file } = this.props;
 
-    var plotdata = this.selectAxis(
+    var plotdata = this.selectAxisAndMask(
       files,
       data,
       file,
       xaxis,
       yaxis,
       zaxis,
-      datasetparameters
+      datasetparameters,
+      mask
     );
-    plotdata = this.formatTime(plotdata, datasetparameters, xaxis, yaxis);
+
+    plotdata = this.joinData(plotdata, graph, files[file[0]].connect, timeaxis);
 
     try {
       plotdata = this.sliceData(
@@ -1070,9 +1184,13 @@ class Plot extends Component {
         minX,
         maxX,
         minY,
-        maxY
+        maxY,
+        files[file[0]].connect
       );
-
+    } catch (e) {
+      console.error(e);
+    }
+    try {
       plotdata = this.decimateData(
         plotdata,
         timeaxis,
@@ -1080,7 +1198,15 @@ class Plot extends Component {
         decimate_period,
         decimate_time
       );
-
+    } catch (e) {
+      console.error(e);
+    }
+    try {
+      plotdata = this.formatTime(plotdata, datasetparameters, xaxis, yaxis);
+    } catch (e) {
+      console.error(e);
+    }
+    try {
       var { gap } = this.state;
       if (decimate_active) gap = 1.1 * decimate_period;
 
@@ -1233,7 +1359,8 @@ class Plot extends Component {
       decimate_period,
       decimate_time,
       datasetparameters,
-      timeaxis
+      timeaxis,
+      graph
     );
 
     this.setState({
@@ -1287,7 +1414,8 @@ class Plot extends Component {
         this.state.decimate_period,
         this.state.decimate_time,
         this.props.datasetparameters,
-        this.state.timeaxis
+        this.state.timeaxis,
+        this.state.graph
       );
       var { minZ, maxZ } = this.getZBounds(plotdata);
       this.setState({ plotdata, refresh: false, minZ, maxZ });
