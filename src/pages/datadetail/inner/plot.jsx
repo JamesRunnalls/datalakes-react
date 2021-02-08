@@ -760,24 +760,18 @@ class Plot extends Component {
     });
   };
 
-  combineFiles = (files, combined, data, file, xaxis, yaxis, zaxis) => {
+  selectAxis = (files, data, file, xaxis, yaxis, zaxis, datasetparameters) => {
     var plotdata;
     if (files[file[0]].connect === "join") {
-      if (Array.isArray(combined)) {
-        plotdata = [];
-        for (var k = 0; k < combined.length; k++) {
+      plotdata = [];
+      for (var k = 0; k < data.length; k++) {
+        if (data[k] !== 0) {
           plotdata.push({
-            x: combined[k][xaxis],
-            y: combined[k][yaxis],
-            z: combined[k][zaxis],
+            x: data[k][xaxis],
+            y: data[k][yaxis],
+            z: data[k][zaxis],
           });
         }
-      } else {
-        plotdata = {
-          x: combined[xaxis],
-          y: combined[yaxis],
-          z: combined[zaxis],
-        };
       }
     } else if (files[file[0]].connect === "ind") {
       plotdata = {
@@ -802,7 +796,7 @@ class Plot extends Component {
     if (xdp.parameters_id === 1) {
       if (isArray(plotdata)) {
         for (let i = 0; i < plotdata.length; i++) {
-          plotdata[i].x = plotdata[i].x.map((pdx) => new Date(pdx));
+          plotdata[i].x = plotdata[i].x.map((pdx) => new Date(pdx * 1000));
         }
       } else {
         plotdata.x = plotdata.x.map((pdx) => new Date(pdx * 1000));
@@ -814,7 +808,7 @@ class Plot extends Component {
           plotdata[i].y = plotdata[i].y.map((pdy) => new Date(pdy * 1000));
         }
       } else {
-        plotdata.y = plotdata.y.map((pdy) => new Date(pdy));
+        plotdata.y = plotdata.y.map((pdy) => new Date(pdy * 1000));
       }
     }
     return plotdata;
@@ -1053,18 +1047,17 @@ class Plot extends Component {
     datasetparameters,
     timeaxis
   ) => {
-    var { data, files, file, combined } = this.props;
+    var { data, files, file } = this.props;
 
-    var plotdata = this.combineFiles(
+    var plotdata = this.selectAxis(
       files,
-      combined,
       data,
       file,
       xaxis,
       yaxis,
-      zaxis
+      zaxis,
+      datasetparameters
     );
-
     plotdata = this.formatTime(plotdata, datasetparameters, xaxis, yaxis);
 
     try {

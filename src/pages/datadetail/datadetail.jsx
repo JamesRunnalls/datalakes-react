@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import * as d3 from "d3";
-import { mergeWith, isEqual } from "lodash";
 import HeatMap from "./inner/heatmap";
 import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
@@ -40,7 +39,6 @@ class DataDetail extends Component {
     allowedStep: ["plot", "download", "pipeline", "information", "webgis"],
     file: [0],
     innerLoading: false,
-    combined: [],
     addnewfiles: true,
   };
 
@@ -48,7 +46,7 @@ class DataDetail extends Component {
 
   downloadData = async () => {
     this.downloadData = () => {}; // Only possible to fire once.
-    var { data: dataArray, files, combined } = this.state;
+    var { data: dataArray, files } = this.state;
     for (var j = 0; j < files.length; j++) {
       if (dataArray[j] === 0) {
         var { data } = await axios
@@ -57,13 +55,9 @@ class DataDetail extends Component {
             this.setState({ error: true });
           });
         dataArray[j] = data;
-        if (files[0].connect === "join") {
-          combined = this.combineTimeseries(dataArray);
-        }
         if (this._isMounted) {
           this.setState({
             data: dataArray,
-            combined,
           });
         } else {
           return false;
@@ -98,7 +92,7 @@ class DataDetail extends Component {
   };
 
   downloadMultipleFiles = async (arr) => {
-    var { data: dataArray, files, combined } = this.state;
+    var { data: dataArray, files } = this.state;
     for (var j = 0; j < arr.length; j++) {
       if (dataArray[arr[j]] === 0) {
         var { data } = await axios
@@ -109,14 +103,10 @@ class DataDetail extends Component {
         dataArray[arr[j]] = this.cleanData(data);
       }
     }
-    if (files[0].connect === "join") {
-      combined = this.combineTimeseries(dataArray);
-    }
     if (this._isMounted) {
       this.setState({
         data: dataArray,
-        innerLoading: false,
-        combined,
+        innerLoading: false
       });
     } else {
       return false;
@@ -355,42 +345,6 @@ class DataDetail extends Component {
     return min;
   };
 
-  combineTimeseries = (arr) => {
-    var inArray = JSON.parse(JSON.stringify(arr));
-    inArray = inArray.filter((value) => {
-      return value !== 0;
-    });
-    inArray.sort((a, b) => {
-      return this.getAve(a.x) - this.getAve(b.x);
-    });
-    if (Object.keys(inArray[0]).includes("z")) {
-      if (isEqual(inArray[0].y, inArray[1].y)) {
-        try {
-          var combinedthree = {};
-          combinedthree["y"] = inArray[0].y;
-          combinedthree["x"] = inArray.map((i) => i.x).flat();
-          var zKeys = Object.keys(inArray[0]).filter((k) => k.includes("z"));
-          for (let zKey of zKeys) {
-            combinedthree[zKey] = this.merge2DArray(
-              inArray.map((i) => i[zKey])
-            );
-          }
-          return combinedthree;
-        } catch (e) {
-          return inArray;
-        }
-      } else {
-        return inArray;
-      }
-    } else {
-      var combinedArr = Object.assign({}, inArray[0]);
-      for (var i = 1; i < inArray.length; i++) {
-        combinedArr = mergeWith(combinedArr, inArray[i], this.customizer);
-      }
-      return combinedArr;
-    }
-  };
-
   merge2DArray = (arr) => {
     let merged = [];
     for (var i = 0; i < arr[0].length; i++) {
@@ -510,7 +464,6 @@ class DataDetail extends Component {
           this.setState({ step: "error" });
         });
       dataArray[0] = data;
-      var combined = JSON.parse(JSON.stringify(data));
       var { lower, upper } = this.dataBounds(dataArray);
 
       // Add dataset length to datasetparameters
@@ -555,7 +508,6 @@ class DataDetail extends Component {
         dropdown,
         step,
         allowedStep,
-        combined,
         scripts,
       });
       //} else if (datasource === "Meteolakes") {
@@ -643,7 +595,6 @@ class DataDetail extends Component {
       files,
       file,
       innerLoading,
-      combined,
       scripts,
       addnewfiles,
     } = this.state;
@@ -689,7 +640,6 @@ class DataDetail extends Component {
               data={data}
               files={files}
               file={file}
-              combined={combined}
               maxdatetime={maxdatetime}
               mindatetime={mindatetime}
               downloadMultipleFiles={this.downloadMultipleFiles}
@@ -717,7 +667,6 @@ class DataDetail extends Component {
               files={files}
               file={file}
               loading={innerLoading}
-              combined={combined}
               onChangeTime={this.onChangeTime}
               onChangeFile={this.onChangeFile}
               onChangeFileInt={this.onChangeFileInt}
@@ -749,7 +698,6 @@ class DataDetail extends Component {
               files={files}
               file={file}
               loading={innerLoading}
-              combined={combined}
               addnewfiles={addnewfiles}
               onChangeTime={this.onChangeTime}
               onChangeFile={this.onChangeFile}
