@@ -31,14 +31,14 @@ class Graph extends Component {
       thresholdStep,
       minZ,
       maxZ,
-      legend,
       confidence,
       lcolor,
       lweight,
-      xscale,
-      yscale,
+      timeaxis,
       xReverse,
       yReverse,
+      file,
+      files
     } = this.props;
     switch (graph) {
       default:
@@ -79,6 +79,17 @@ class Graph extends Component {
           </React.Fragment>
         );
       case "linegraph":
+        var xscale = "Linear";
+        var yscale = "Linear";
+        if (timeaxis === "x") xscale = "Time";
+        if (timeaxis === "y") yscale = "Time";
+        var legend = [];
+        for (var i = 0; i < file.length; i++) {
+          var value = new Date(files[file[i]].ave);
+          var text = value.toDateString() + " " + value.toLocaleTimeString();
+          var color = lcolor[i];
+          legend.push({ id: i, color, text, value });
+        }
         return (
           <React.Fragment>
             <D3LineGraph
@@ -195,6 +206,19 @@ class AxisSelect extends Component {
 }
 
 class Range extends Component {
+  closest = (num, arr) => {
+    var diff = Infinity;
+    var index = 0;
+    for (var i = 0; i < arr.length; i++) {
+      var newdiff = Math.abs(num - arr[i]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = i;
+      }
+    }
+    return index;
+  };
+
   onChangeLowerX = (event) => {
     this.props.onChangeX([event.getTime(), this.props.upperX * 1000]);
   };
@@ -209,6 +233,15 @@ class Range extends Component {
 
   onChangeUpperY = (event) => {
     this.props.onChangeY([this.props.lowerY * 1000, event.getTime()]);
+  };
+
+  onChangeFile = (event) => {
+    var { onChangeFile, files } = this.props;
+    var id = this.closest(
+      event[0],
+      files.map((a) => a.ave.getTime())
+    );
+    if (id > 0 && id < files.length) onChangeFile(id);
   };
 
   render() {
@@ -295,17 +328,37 @@ class Range extends Component {
         );
       case "linegraph":
         var connect = files[file[0]].connect;
-        var {
-          onChangeFile,
-          onChangeFileInt,
-          value,
-          min,
-          max,
-          addnewfiles,
-          toggleAddNewFile,
-          filecontrol,
-        } = this.props;
+        var { onChangeFile, toggleAddNewFile, removeFile, lcolor } = this.props;
         if (connect === "ind") {
+          // Special range selector for individual profiles
+          var { mindatetime, maxdatetime, addNewFiles } = this.props;
+          var fileControl = [];
+          if (file.length > 0) {
+            var value = files[file[file.length - 1]].ave;
+            for (var i = 0; i < file.length; i++) {
+              let dt = new Date(files[file[i]].ave);
+              let text = dt.toDateString() + " " + dt.toLocaleTimeString();
+              fileControl.push(
+                <tr key={"file" + i}>
+                  <td>
+                    <div
+                      className="color-line"
+                      style={{ backgroundColor: lcolor[i] }}
+                    />
+                  </td>
+                  <td>{text}</td>
+                  <td
+                    id={i}
+                    onClick={removeFile}
+                    title="Remove"
+                    className="removefile"
+                  >
+                    ✕
+                  </td>
+                </tr>
+              );
+            }
+          }
           return (
             <React.Fragment>
               <FilterBox
@@ -314,12 +367,12 @@ class Range extends Component {
                 content={
                   <div className="">
                     <SliderSingle
-                      onChange={onChangeFile}
-                      onChangeFileInt={onChangeFileInt}
+                      onChange={this.onChangeFile}
+                      onChangeFileInt={onChangeFile}
                       file={file}
                       value={value}
-                      min={min}
-                      max={max}
+                      min={mindatetime}
+                      max={maxdatetime}
                       files={files}
                       type="time"
                     />
@@ -327,13 +380,13 @@ class Range extends Component {
                     <div className="keeplines">
                       Keep previously plotted line{" "}
                       <input
-                        checked={addnewfiles}
+                        checked={addNewFiles}
                         type="checkbox"
                         onChange={toggleAddNewFile}
                       />
                     </div>
                     <table className="filecontrol">
-                      <tbody>{filecontrol}</tbody>
+                      <tbody>{fileControl}</tbody>
                     </table>
                   </div>
                 }
@@ -628,10 +681,29 @@ class Plot extends Component {
     ],
     title: "",
     bcolor: "#ffffff",
-    lcolor: ["black"],
-    lweight: ["1"],
-    xscale: "Time",
-    yscale: "Linear",
+    lcolor: [
+      "#000000",
+      "#e6194B",
+      "#3cb44b",
+      "#ffe119",
+      "#4363d8",
+      "#f58231",
+      "#911eb4",
+      "#42d4f4",
+      "#f032e6",
+      "#bfef45",
+      "#fabed4",
+      "#469990",
+      "#dcbeff",
+      "#9A6324",
+      "#fffac8",
+      "#800000",
+      "#aaffc3",
+      "#808000",
+      "#ffd8b1",
+      "#000075",
+    ],
+    lweight: Array.from({ length: 20 }).map((x) => "1"),
     decimate_active: false,
     decimate_period: 24,
     decimate_time: "12:00",
@@ -652,6 +724,11 @@ class Plot extends Component {
     xReverse: false,
     timeaxis: "",
     refresh: false,
+    addNewFiles: true,
+  };
+
+  toggleAddNewFile = () => {
+    this.setState({ addNewFiles: !this.state.addNewFiles });
   };
 
   average = (nums) => {
@@ -719,6 +796,22 @@ class Plot extends Component {
         }
       }
       this.setState({ lowerX: lower, upperX: upper, refresh: true });
+    }
+  };
+
+  onChangeFile = async (event) => {
+    var { file, data, downloadMultipleFiles } = this.props;
+    var { addNewFiles } = this.state;
+    if (!file.includes(event) && file.length < 20) {
+      if (!addNewFiles) file = [];
+      file.push(event);
+      if (data[event] === 0) {
+        document.getElementById("detailloading").style.display = "block";
+        await downloadMultipleFiles([event], file);
+        document.getElementById("detailloading").style.display = "none";
+      } else {
+        await downloadMultipleFiles([], file);
+      }
     }
   };
 
@@ -1404,6 +1497,7 @@ class Plot extends Component {
       minY = Math.min(minY, mindatetime);
       maxY = Math.max(maxY, maxdatetime);
     }
+
     return {
       title,
       colors,
@@ -1535,9 +1629,9 @@ class Plot extends Component {
     });
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     var { refresh } = this.state;
-    if (refresh) {
+    if (refresh || this.props.fileChange !== prevProps.fileChange) {
       var plotdata = this.processPlotData(
         this.state.xaxis,
         this.state.yaxis,
@@ -1582,8 +1676,10 @@ class Plot extends Component {
             <Sidebar
               {...this.state}
               {...this.props}
+              onChangeFile={this.onChangeFile}
               onChangeX={this.onChangeX}
               onChangeY={this.onChangeY}
+              toggleAddNewFile={this.toggleAddNewFile}
               handleAxisSelect={this.handleAxisSelect}
             />
           }

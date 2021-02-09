@@ -66,6 +66,7 @@ class SliderSingle extends Component {
         new Date(update[0]).toLocaleTimeString();
       min = this.formatDate(min);
       max = this.formatDate(max);
+
       dateTicks = scaleTime()
         .domain([min, max])
         .ticks(5)

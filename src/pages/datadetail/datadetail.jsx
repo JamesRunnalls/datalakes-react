@@ -91,8 +91,8 @@ class DataDetail extends Component {
     return data;
   };
 
-  downloadMultipleFiles = async (arr) => {
-    var { data: dataArray, files } = this.state;
+  downloadMultipleFiles = async (arr, newfile = false) => {
+    var { data: dataArray, files, file } = this.state;
     for (var j = 0; j < arr.length; j++) {
       if (dataArray[arr[j]] === 0) {
         var { data } = await axios
@@ -103,10 +103,14 @@ class DataDetail extends Component {
         dataArray[arr[j]] = this.cleanData(data);
       }
     }
+    if (newfile) {
+      file = newfile;
+    }
     if (this._isMounted) {
       this.setState({
         data: dataArray,
-        innerLoading: false
+        file,
+        innerLoading: false,
       });
     } else {
       return false;
@@ -367,7 +371,7 @@ class DataDetail extends Component {
       shape.push(inner.length);
       inner = inner[0];
     }
-    return shape
+    return shape;
   };
 
   async componentDidMount() {
@@ -640,8 +644,10 @@ class DataDetail extends Component {
               data={data}
               files={files}
               file={file}
+              fileChange={JSON.stringify(file)}
               maxdatetime={maxdatetime}
               mindatetime={mindatetime}
+              removeFile={this.removeFile}
               downloadMultipleFiles={this.downloadMultipleFiles}
             />
           </React.Fragment>
