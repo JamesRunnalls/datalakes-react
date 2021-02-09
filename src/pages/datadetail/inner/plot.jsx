@@ -38,7 +38,7 @@ class Graph extends Component {
       xReverse,
       yReverse,
       file,
-      files
+      files,
     } = this.props;
     switch (graph) {
       default:
@@ -131,7 +131,7 @@ class Sidebar extends Component {
           handleAxisSelect={this.props.handleAxisSelect}
         />
         <Range {...this.props} />
-        <DisplayOptions />
+        <DisplayOptions {...this.props} />
       </React.Fragment>
     );
   }
@@ -450,10 +450,14 @@ class DisplayOptions extends Component {
     bcolor: this.props.bcolor,
     minZ: this.props.minZ,
     maxZ: this.props.maxZ,
+    mask: this.props.mask,
     thresholdStep: this.props.thresholdStep,
     decimate_active: this.props.decimate_active,
     decimate_period: this.props.decimate_period,
     decimate_time: this.props.decimate_time,
+  };
+  toggleMask = () => {
+    this.setState({ mask: !this.state.mask });
   };
   onChangeDecimatePeriod = (event) => {
     this.setState({ decimate_period: event.target.value });
@@ -488,30 +492,37 @@ class DisplayOptions extends Component {
     this.setState({ bcolor });
   };
   updatePlot = () => {
-    this.props.onChange(this.state);
+    this.props.onChangeState(this.state);
   };
   componentDidUpdate(prevProps) {
+    var {
+      colors,
+      title,
+      bcolor,
+      minZ,
+      maxZ,
+      thresholdStep,
+      decimate_active,
+      decimate_period,
+      decimate_time,
+    } = this.props;
+    var updateZ = false;
     if (
-      prevProps.title !== this.props.title ||
-      prevProps.colors !== this.props.colors ||
-      prevProps.minZ !== this.props.minZ ||
-      prevProps.maxZ !== this.props.maxZ ||
-      prevProps.thresholdStep !== this.props.thresholdStep ||
-      prevProps.decimate_active !== this.props.decimate_active ||
-      prevProps.decimate_time !== this.props.decimate_time ||
-      prevProps.decimate_period !== this.props.decimate_period
+      !isNaN(minZ) &&
+      !isNaN(maxZ) &&
+      (prevProps.minZ !== minZ || prevProps.maxZ !== maxZ)
     ) {
-      var {
-        colors,
-        title,
-        bcolor,
-        minZ,
-        maxZ,
-        thresholdStep,
-        decimate_active,
-        decimate_period,
-        decimate_time,
-      } = this.props;
+      updateZ = true;
+    }
+    if (
+      prevProps.title !== title ||
+      prevProps.colors !== colors ||
+      updateZ ||
+      prevProps.thresholdStep !== thresholdStep ||
+      prevProps.decimate_active !== decimate_active ||
+      prevProps.decimate_time !== decimate_time ||
+      prevProps.decimate_period !== decimate_period
+    ) {
       this.setState({
         colors,
         title,
@@ -535,8 +546,9 @@ class DisplayOptions extends Component {
       thresholdStep,
       decimate_period,
       decimate_time,
+      mask,
     } = this.state;
-    var { array } = this.props;
+    var { array, graph } = this.props;
     maxZ = maxZ === undefined ? 0 : maxZ;
     minZ = minZ === undefined ? 0 : minZ;
     return (
@@ -567,41 +579,46 @@ class DisplayOptions extends Component {
                     />
                   </td>
                 </tr>
-                <tr>
-                  <td>Maximum</td>
-                  <td>
-                    <input
-                      type="number"
-                      id="maxZ"
-                      value={maxZ}
-                      onChange={this.onChangeLocalMax}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Minimum</td>
-                  <td>
-                    <input
-                      type="number"
-                      id="minZ"
-                      value={minZ}
-                      onChange={this.onChangeLocalMin}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>Number of Thresholds</td>
-                  <td>
-                    <input
-                      type="number"
-                      id="threshold"
-                      step="1"
-                      value={thresholdStep}
-                      onChange={this.onChangeLocalThreshold}
-                    />
-                  </td>
-                </tr>
-
+                {graph === "heatmap" && (
+                  <tr>
+                    <td>Maximum</td>
+                    <td>
+                      <input
+                        type="number"
+                        id="maxZ"
+                        value={maxZ}
+                        onChange={this.onChangeLocalMax}
+                      />
+                    </td>
+                  </tr>
+                )}
+                {graph === "heatmap" && (
+                  <tr>
+                    <td>Minimum</td>
+                    <td>
+                      <input
+                        type="number"
+                        id="minZ"
+                        value={minZ}
+                        onChange={this.onChangeLocalMin}
+                      />
+                    </td>
+                  </tr>
+                )}
+                {graph === "heatmap" && (
+                  <tr>
+                    <td>Number of Thresholds</td>
+                    <td>
+                      <input
+                        type="number"
+                        id="threshold"
+                        step="1"
+                        value={thresholdStep}
+                        onChange={this.onChangeLocalThreshold}
+                      />
+                    </td>
+                  </tr>
+                )}
                 <tr>
                   <td>Down Sample</td>
                   <td>
@@ -635,14 +652,25 @@ class DisplayOptions extends Component {
                     </div>
                   </td>
                 </tr>
+                <tr>
+                  <td>Show Masked Points</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={!mask}
+                      onChange={this.toggleMask}
+                    />
+                  </td>
+                </tr>
               </tbody>
             </table>
-
-            <ColorManipulation
-              onChange={this.onChangeLocalColors}
-              colors={colors}
-              array={array}
-            />
+            {graph === "heatmap" && (
+              <ColorManipulation
+                onChange={this.onChangeLocalColors}
+                colors={colors}
+                array={array}
+              />
+            )}
             <div className="editsettings-button">
               <button
                 type="button"
@@ -703,6 +731,7 @@ class Plot extends Component {
       "#ffd8b1",
       "#000075",
     ],
+    thresholdStep: 20,
     lweight: Array.from({ length: 20 }).map((x) => "1"),
     decimate_active: false,
     decimate_period: 24,
@@ -727,12 +756,30 @@ class Plot extends Component {
     addNewFiles: true,
   };
 
-  toggleAddNewFile = () => {
-    this.setState({ addNewFiles: !this.state.addNewFiles });
+  closest = (num, arr) => {
+    var diff = Infinity;
+    var index = 0;
+    for (var i = 0; i < arr.length; i++) {
+      var newdiff = Math.abs(num - arr[i]);
+      if (newdiff < diff) {
+        diff = newdiff;
+        index = i;
+      }
+    }
+    return index;
   };
 
   average = (nums) => {
     return nums.reduce((a, b) => a + b) / nums.length;
+  };
+
+  toggleAddNewFile = () => {
+    this.setState({ addNewFiles: !this.state.addNewFiles });
+  };
+
+  onChangeState = (state) => {
+    state.refresh = true;
+    this.setState(state);
   };
 
   onChangeY = async (event) => {
@@ -1392,7 +1439,6 @@ class Plot extends Component {
   ) => {
     var { mask } = this.state;
     var { data, files, file } = this.props;
-
     var plotdata = this.selectAxisAndMask(
       files,
       data,
@@ -1676,6 +1722,7 @@ class Plot extends Component {
             <Sidebar
               {...this.state}
               {...this.props}
+              onChangeState={this.onChangeState}
               onChangeFile={this.onChangeFile}
               onChangeX={this.onChangeX}
               onChangeY={this.onChangeY}
