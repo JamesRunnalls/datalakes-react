@@ -6,6 +6,7 @@ import DataSelect from "../../../components/dataselect/dataselect";
 import Loading from "../../../components/loading/loading";
 import D3HeatMap from "../../../graphs/d3/heatmap/heatmap";
 import SliderDouble from "../../../components/sliders/sliderdouble";
+import SliderSingle from "../../../components/sliders/slidersingle";
 import NumberSliderDouble from "../../../components/sliders/sliderdoublenumber";
 import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
@@ -211,83 +212,181 @@ class Range extends Component {
   };
 
   render() {
-    var { timeaxis, graph } = this.props;
-    return (
-      <React.Fragment>
-        <FilterBox
-          title={this.props.xlabel + " Range"}
-          content={
-            timeaxis === "x" ? (
-              <div className="side-date-slider">
-                <SliderDouble
-                  onChange={this.props.onChangeX}
-                  onChangeLower={this.onChangeLowerX}
-                  onChangeUpper={this.onChangeUpperX}
-                  min={this.props.minX}
-                  max={this.props.maxX}
-                  lower={this.props.lowerX}
-                  upper={this.props.upperX}
-                  files={this.props.files}
-                />
-                <LoadDataSets
-                  data={this.props.data}
-                  downloadData={this.props.downloadData}
-                />
-              </div>
-            ) : (
-              <div className="side-date-slider">
-                <NumberSliderDouble
-                  onChange={this.props.onChangeX}
-                  min={this.props.minX}
-                  max={this.props.maxX}
-                  lower={this.props.lowerX}
-                  upper={this.props.upperX}
-                  unit={this.props.xunits}
-                />
-              </div>
-            )
-          }
-          preopen={true}
-        />
-        {graph === "heatmap" && (
-          <FilterBox
-            title={this.props.ylabel + " Range"}
-            content={
-              timeaxis === "y" ? (
-                <div className="side-date-slider">
-                  <SliderDouble
-                    onChange={this.props.onChangeY}
-                    onChangeLower={this.onChangeLowerY}
-                    onChangeUpper={this.onChangeUpperY}
-                    min={this.props.minY}
-                    max={this.props.maxY}
-                    lower={this.props.lowerY}
-                    upper={this.props.upperY}
-                    files={this.props.files}
-                  />
-                  <LoadDataSets
-                    data={this.props.data}
-                    downloadData={this.props.downloadData}
-                  />
-                </div>
-              ) : (
-                <div className="side-date-slider">
-                  <NumberSliderDouble
-                    onChange={this.props.onChangeY}
-                    min={this.props.minY}
-                    max={this.props.maxY}
-                    lower={this.props.lowerY}
-                    upper={this.props.upperY}
-                    unit={this.props.yunits}
-                  />
-                </div>
-              )
-            }
-            preopen={false}
-          />
-        )}
-      </React.Fragment>
-    );
+    var { timeaxis, graph, files, file, onChangeX, onChangeY } = this.props;
+    var { minX, maxX, minY, maxY, lowerX, upperX, lowerY, upperY } = this.props;
+    var { data, downloadData, xunits, yunits, xlabel, ylabel } = this.props;
+
+    switch (graph) {
+      default:
+        return <React.Fragment></React.Fragment>;
+      case "heatmap":
+        return (
+          <React.Fragment>
+            <FilterBox
+              title={"y" === timeaxis ? ylabel + " Range" : xlabel + " Range"}
+              content={
+                ["x", "y"].includes(timeaxis) ? (
+                  <div className="side-date-slider">
+                    <SliderDouble
+                      onChange={"x" === timeaxis ? onChangeX : onChangeY}
+                      onChangeLower={
+                        "x" === timeaxis
+                          ? this.onChangeLowerX
+                          : this.onChangeLowerY
+                      }
+                      onChangeUpper={
+                        "x" === timeaxis
+                          ? this.onChangeUpperX
+                          : this.onChangeUpperY
+                      }
+                      min={"x" === timeaxis ? minX : minY}
+                      max={"x" === timeaxis ? maxX : maxY}
+                      lower={"x" === timeaxis ? lowerX : lowerY}
+                      upper={"x" === timeaxis ? upperX : upperY}
+                      files={files}
+                    />
+                    <LoadDataSets data={data} downloadData={downloadData} />
+                  </div>
+                ) : (
+                  <div className="side-date-slider">
+                    <NumberSliderDouble
+                      onChange={onChangeX}
+                      min={minX}
+                      max={maxX}
+                      lower={lowerX}
+                      upper={upperX}
+                      unit={xunits}
+                    />
+                  </div>
+                )
+              }
+              preopen={true}
+            />
+            <FilterBox
+              title={"y" === timeaxis ? xlabel + " Range" : ylabel + " Range"}
+              content={
+                "y" === timeaxis ? (
+                  <div className="side-date-slider">
+                    <NumberSliderDouble
+                      onChange={onChangeX}
+                      min={minX}
+                      max={maxX}
+                      lower={lowerX}
+                      upper={upperX}
+                      unit={xunits}
+                    />
+                  </div>
+                ) : (
+                  <div className="side-date-slider">
+                    <NumberSliderDouble
+                      onChange={onChangeY}
+                      min={minY}
+                      max={maxY}
+                      lower={lowerY}
+                      upper={upperY}
+                      unit={yunits}
+                    />
+                  </div>
+                )
+              }
+              preopen={false}
+            />
+          </React.Fragment>
+        );
+      case "linegraph":
+        var connect = files[file[0]].connect;
+        var {
+          onChangeFile,
+          onChangeFileInt,
+          value,
+          min,
+          max,
+          addnewfiles,
+          toggleAddNewFile,
+          filecontrol,
+        } = this.props;
+        if (connect === "ind") {
+          return (
+            <React.Fragment>
+              <FilterBox
+                title="Files"
+                preopen="true"
+                content={
+                  <div className="">
+                    <SliderSingle
+                      onChange={onChangeFile}
+                      onChangeFileInt={onChangeFileInt}
+                      file={file}
+                      value={value}
+                      min={min}
+                      max={max}
+                      files={files}
+                      type="time"
+                    />
+                    <LoadDataSets data={data} downloadData={downloadData} />
+                    <div className="keeplines">
+                      Keep previously plotted line{" "}
+                      <input
+                        checked={addnewfiles}
+                        type="checkbox"
+                        onChange={toggleAddNewFile}
+                      />
+                    </div>
+                    <table className="filecontrol">
+                      <tbody>{filecontrol}</tbody>
+                    </table>
+                  </div>
+                }
+              />
+            </React.Fragment>
+          );
+        } else {
+          return (
+            <React.Fragment>
+              <FilterBox
+                title={"y" === timeaxis ? ylabel + " Range" : xlabel + " Range"}
+                content={
+                  ["x", "y"].includes(timeaxis) ? (
+                    <div className="side-date-slider">
+                      <SliderDouble
+                        onChange={"x" === timeaxis ? onChangeX : onChangeY}
+                        onChangeLower={
+                          "x" === timeaxis
+                            ? this.onChangeLowerX
+                            : this.onChangeLowerY
+                        }
+                        onChangeUpper={
+                          "x" === timeaxis
+                            ? this.onChangeUpperX
+                            : this.onChangeUpperY
+                        }
+                        min={"x" === timeaxis ? minX : minY}
+                        max={"x" === timeaxis ? maxX : maxY}
+                        lower={"x" === timeaxis ? lowerX : lowerY}
+                        upper={"x" === timeaxis ? upperX : upperY}
+                        files={files}
+                      />
+                      <LoadDataSets data={data} downloadData={downloadData} />
+                    </div>
+                  ) : (
+                    <div className="side-date-slider">
+                      <NumberSliderDouble
+                        onChange={onChangeX}
+                        min={minX}
+                        max={maxX}
+                        lower={lowerX}
+                        upper={upperX}
+                        unit={xunits}
+                      />
+                    </div>
+                  )
+                }
+                preopen={true}
+              />
+            </React.Fragment>
+          );
+        }
+    }
   }
 }
 
@@ -636,6 +735,10 @@ class Plot extends Component {
     }
   };
 
+  findLink = (parameters, link) => {
+    return parameters.find((p) => p.id === link);
+  };
+
   setAxisOptions = (datasetparameters, xaxis, yaxis, zaxis) => {
     var xoptions = [];
     var yoptions = [];
@@ -648,15 +751,26 @@ class Plot extends Component {
     if ([2, 18, 43].includes(xdp.parameters_id)) xReverse = true;
     if ([2, 18, 43].includes(ydp.parameters_id)) yReverse = true;
     for (var j = 0; j < datasetparameters.length; j++) {
+      var detail = datasetparameters[j]["detail"];
+      var link = datasetparameters[j]["link"];
+      var extra = "";
+      if (Number.isInteger(link) && this.findLink(datasetparameters, link)) {
+        extra = ` (${this.findLink(datasetparameters, link).name})`;
+      } else if (["none", null, "null"].includes(detail)) {
+        extra = "";
+      } else {
+        extra = ` (${detail})`;
+      }
+
       if (datasetparameters[j]["axis"].includes("x")) {
         xoptions.push({
           value: datasetparameters[j]["axis"],
-          label: datasetparameters[j]["name"],
+          label: datasetparameters[j]["name"] + extra,
         });
       } else if (datasetparameters[j]["axis"].includes("y")) {
         yoptions.push({
           value: datasetparameters[j]["axis"],
-          label: datasetparameters[j]["name"],
+          label: datasetparameters[j]["name"] + extra,
         });
       } else if (datasetparameters[j]["axis"].includes("z")) {
         if (
@@ -667,7 +781,7 @@ class Plot extends Component {
         }
         zoptions.push({
           value: datasetparameters[j]["axis"],
-          label: datasetparameters[j]["name"],
+          label: datasetparameters[j]["name"] + extra,
         });
       }
     }
@@ -726,6 +840,21 @@ class Plot extends Component {
       yaxis,
       zaxis
     );
+
+    // Reset upper and lower values
+    if (timeaxis === "x") {
+      upperY = maxY;
+      lowerY = minY;
+    } else if (timeaxis === "y") {
+      upperX = maxX;
+      lowerX = minX;
+    } else {
+      upperX = maxX;
+      lowerX = minX;
+      upperY = maxY;
+      lowerY = minY;
+    }
+
     var plotdata = this.processPlotData(
       xaxis,
       yaxis,
@@ -745,6 +874,9 @@ class Plot extends Component {
       timeaxis,
       graph
     );
+
+    var { minZ, maxZ } = this.getZBounds(plotdata);
+
     this.setState({
       plotdata,
       xaxis,
@@ -762,6 +894,12 @@ class Plot extends Component {
       zunits,
       yReverse,
       xReverse,
+      upperX,
+      lowerX,
+      upperY,
+      lowerY,
+      minZ,
+      maxZ,
     });
   };
 
@@ -980,12 +1118,12 @@ class Plot extends Component {
 
   sliceXArray = (data, lower, upper) => {
     var l = 0;
-    var u = data.x.length - 1;
+    var u = data.x.length;
     for (var i = 0; i < data.x.length; i++) {
       if (data.x[i] < lower) {
         l = i;
       }
-      if (data.x[i] > upper && u === data.x.length - 1) {
+      if (data.x[i] > upper && u === data.x.length) {
         u = i;
       }
     }
@@ -1014,12 +1152,12 @@ class Plot extends Component {
 
   sliceYArray = (data, lower, upper) => {
     var l = 0;
-    var u = data.y.length - 1;
+    var u = data.y.length;
     for (var i = 0; i < data.y.length; i++) {
       if (data.y[i] < lower) {
         l = i;
       }
-      if (data.y[i] > upper && u === data.y.length - 1) {
+      if (data.y[i] > upper + 0.01 && u === data.y.length) {
         u = i;
       }
     }
@@ -1073,7 +1211,8 @@ class Plot extends Component {
       if (Array.isArray(plotdata)) {
         var dataoutY = [];
         for (let i = 0; i < plotdata.length; i++) {
-          dataoutY.push(this.sliceYArray(plotdata[i], lowerY, upperY));
+          let slice = this.sliceYArray(plotdata[i], lowerY, upperY);
+          if (slice) dataoutY.push(slice);
         }
         plotdata = dataoutY;
       } else {
@@ -1285,7 +1424,8 @@ class Plot extends Component {
   };
 
   getZBounds = (plotdata) => {
-    var { minZ, maxZ } = this.state;
+    var minZ = Infinity;
+    var maxZ = -Infinity;
     var pd = plotdata;
     if (!isArray(plotdata)) {
       pd = [pd];
