@@ -84,7 +84,7 @@ class DataSubMenu extends Component {
               style={{display: this.hide("plot",allowedStep) && 'none'}}
               onClick={() => updateSelectedState("plot")}
             >
-              <img src={td} className="subnav-img" alt="Plot" />
+              <img src={line} className="subnav-img" alt="Plot" />
               <div className="subnav-text">Plot</div>
             </div>
             <div

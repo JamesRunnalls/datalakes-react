@@ -426,12 +426,8 @@ class DataDetail extends Component {
         datasetparameters.filter((param) => param.axis === "z").length > 0;
 
       if (x && y && z) {
-        allowedStep.push("heatmap");
-        step = "heatmap";
       } else if (x && y) {
-        allowedStep.push("linegraph");
         allowedStep.push("preview");
-        step = "linegraph";
       } else {
         allowedStep.push("preview");
         step = "preview";

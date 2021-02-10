@@ -12,7 +12,7 @@ import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import FilterBox from "../../../components/filterbox/filterbox";
 import colorlist from "../../../components/colorramp/colors";
-import { isArray, isEqual } from "lodash";
+import { isArray, isInteger } from "lodash";
 
 class Graph extends Component {
   render() {
@@ -452,21 +452,10 @@ class DisplayOptions extends Component {
     maxZ: this.props.maxZ,
     mask: this.props.mask,
     thresholdStep: this.props.thresholdStep,
-    decimate_active: this.props.decimate_active,
-    decimate_period: this.props.decimate_period,
-    decimate_time: this.props.decimate_time,
+    decimate: this.props.decimate,
   };
   toggleMask = () => {
     this.setState({ mask: !this.state.mask });
-  };
-  onChangeDecimatePeriod = (event) => {
-    this.setState({ decimate_period: event.target.value });
-  };
-  onChangeDecimateTime = (event) => {
-    this.setState({ decimate_time: event.target.value });
-  };
-  onChangeDecimate = () => {
-    this.setState({ decimate_active: !this.state.decimate_active });
   };
   onChangeLocalColors = (colors) => {
     this.setState({ colors });
@@ -502,9 +491,7 @@ class DisplayOptions extends Component {
       minZ,
       maxZ,
       thresholdStep,
-      decimate_active,
-      decimate_period,
-      decimate_time,
+      decimate,
     } = this.props;
     var updateZ = false;
     if (
@@ -519,9 +506,7 @@ class DisplayOptions extends Component {
       prevProps.colors !== colors ||
       updateZ ||
       prevProps.thresholdStep !== thresholdStep ||
-      prevProps.decimate_active !== decimate_active ||
-      prevProps.decimate_time !== decimate_time ||
-      prevProps.decimate_period !== decimate_period
+      prevProps.decimate !== decimate
     ) {
       this.setState({
         colors,
@@ -530,9 +515,7 @@ class DisplayOptions extends Component {
         minZ,
         maxZ,
         thresholdStep,
-        decimate_active,
-        decimate_period,
-        decimate_time,
+        decimate,
       });
     }
   }
@@ -544,11 +527,9 @@ class DisplayOptions extends Component {
       minZ,
       maxZ,
       thresholdStep,
-      decimate_period,
-      decimate_time,
       mask,
     } = this.state;
-    var { array, graph } = this.props;
+    var { array, graph, timeaxis } = this.props;
     maxZ = maxZ === undefined ? 0 : maxZ;
     minZ = minZ === undefined ? 0 : minZ;
     return (
@@ -619,39 +600,13 @@ class DisplayOptions extends Component {
                     </td>
                   </tr>
                 )}
-                <tr>
-                  <td>Down Sample</td>
-                  <td>
-                    <div className="downsample">
-                      <div className="downsample-left">
-                        <input
-                          type="time"
-                          id="threshold"
-                          value={decimate_time}
-                          onChange={this.onChangeDecimateTime}
-                        />
-                        <select
-                          value={decimate_period}
-                          onChange={this.onChangeDecimatePeriod}
-                        >
-                          <option value="1">1 hour</option>
-                          <option value="3">3 hours</option>
-                          <option value="4">6 hours</option>
-                          <option value="12">12 hours</option>
-                          <option value="24">1 day</option>
-                          <option value="48">2 days</option>
-                          <option value="168">1 week</option>
-                        </select>
-                      </div>
-                      <div className="downsample-right">
-                        <input
-                          type="checkbox"
-                          onChange={this.onChangeDecimate}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                </tr>
+                {["x", "y"].includes(timeaxis) && (
+                  <tr>
+                    <td>Down Sample</td>
+                    <td>1:1</td>
+                  </tr>
+                )}
+
                 <tr>
                   <td>Show Masked Points</td>
                   <td>
@@ -733,9 +688,7 @@ class Plot extends Component {
     ],
     thresholdStep: 20,
     lweight: Array.from({ length: 20 }).map((x) => "1"),
-    decimate_active: false,
-    decimate_period: 24,
-    decimate_time: "12:00",
+    decimate: 1,
     mask: true,
     upperY: 1,
     lowerY: 0,
@@ -958,9 +911,7 @@ class Plot extends Component {
       lowerX,
       minX,
       maxX,
-      decimate_active,
-      decimate_period,
-      decimate_time,
+      decimate,
       timeaxis,
     } = this.state;
     if (event.value.includes("x")) xaxis = event.value;
@@ -1007,9 +958,7 @@ class Plot extends Component {
       lowerX,
       minX,
       maxX,
-      decimate_active,
-      decimate_period,
-      decimate_time,
+      decimate,
       datasetparameters,
       timeaxis,
       graph
@@ -1188,71 +1137,27 @@ class Plot extends Component {
     }
   };
 
-  decimateData = (obj, timeaxis, active, period, time) => {
-    if (active && timeaxis === "x" && obj) {
-      if (!Array.isArray(obj)) obj = [obj];
-      let { lowerX, upperX } = this.state;
-      let hour = time.split(":")[0];
-      let min = time.split(":")[1];
-      let minDate =
-        new Date(lowerX * 1000).setHours(parseInt(hour), parseInt(min)) / 1000;
-      let steps = Math.floor((upperX - minDate) / (period * 3600));
-      let date_list = [];
-      let k = 0;
-      let out = [
-        { x: [], y: obj[0].y, z: Array.from(Array(obj[0].y.length), () => []) },
-      ];
-      for (let i = 0; i < obj.length; i++) {
-        if (!isEqual(out[out.length - 1].y, obj[i].y)) {
-          k++;
-          out.push({
-            x: [],
-            y: obj[i].y,
-            z: Array.from(Array(obj[i].y.length), () => []),
-          });
+  decimateData = (plotdata, timeaxis, decimate, graph) => {
+    console.log("Here")
+    if (decimate > 1 && isInteger(decimate) && plotdata) {
+      var data = JSON.parse(JSON.stringify(plotdata));
+      if (!Array.isArray(data)) data = [data];
+      if (timeaxis === "x" && graph === "linegraph") {
+        var out = [];
+        for (let i = 0; i < data.length; i++) {
+          var inner = { x: [], y: [], z: undefined };
+          for (let j = 0; j < data[i].x.length; j + decimate) {
+            if (data[i].x[j]) {
+              inner.x.push(data[i].x[j]);
+              inner.y.push(data[i].y[j]);
+            }
+          }
+          out.push(inner);
         }
-        for (let j = 0; j < obj[i].x.length; j++) {
-          date_list.push([obj[i].x[j], i, j, k]);
-        }
+        return out;
       }
-      for (let i = 0; i < steps; i++) {
-        let dt = minDate + i * period * 3600;
-        let close = this.closest(dt, date_list);
-        for (let j = 0; j < obj[close[1]].y.length; j++) {
-          out[close[3]].z[j].push(obj[close[1]].z[j][close[2]]);
-        }
-        out[close[3]].x.push(obj[close[1]].x[close[2]]);
-      }
-      return out;
-    } else if (active && timeaxis === "y" && obj) {
-      if (!Array.isArray(obj)) obj = [obj];
-      let { lowerY, upperY } = this.state;
-      let hour = time.split(":")[0];
-      let min = time.split(":")[1];
-      let minDate =
-        new Date(lowerY * 1000).setHours(parseInt(hour), parseInt(min)) / 1000;
-      let steps = Math.floor((upperY - minDate) / (period * 3600));
-      let date_list = [];
-      let k = 0;
-      let out = [{ x: obj[0].x, y: [], z: [] }];
-      for (let i = 0; i < obj.length; i++) {
-        if (!isEqual(out[out.length - 1].x, obj[i].x)) {
-          k++;
-          out.push({ x: obj[i].x, y: [], z: [] });
-        }
-        for (let j = 0; j < obj[i].y.length; j++) {
-          date_list.push([obj[i].y[j], i, j, k]);
-        }
-      }
-      for (let i = 0; i < steps; i++) {
-        let dt = minDate + i * period * 3600;
-        let close = this.closest(dt, date_list);
-        out[close[3]].z.push(obj[close[1]].z[close[2]]);
-        out[close[3]].y.push(obj[close[1]].y[close[2]]);
-      }
-      return out;
     } else {
-      return obj;
+      return plotdata;
     }
   };
 
@@ -1430,14 +1335,12 @@ class Plot extends Component {
     lowerX,
     minX,
     maxX,
-    decimate_active,
-    decimate_period,
-    decimate_time,
+    decimate,
     datasetparameters,
     timeaxis,
     graph
   ) => {
-    var { mask } = this.state;
+    var { mask, gap } = this.state;
     var { data, files, file } = this.props;
     var plotdata = this.selectAxisAndMask(
       files,
@@ -1469,13 +1372,7 @@ class Plot extends Component {
       console.error(e);
     }
     try {
-      plotdata = this.decimateData(
-        plotdata,
-        timeaxis,
-        decimate_active,
-        decimate_period,
-        decimate_time
-      );
+      plotdata = this.decimateData(plotdata, timeaxis, decimate, graph);
     } catch (e) {
       console.error(e);
     }
@@ -1485,9 +1382,6 @@ class Plot extends Component {
       console.error(e);
     }
     try {
-      var { gap } = this.state;
-      if (decimate_active) gap = 1.1 * decimate_period;
-
       plotdata = this.addGaps(plotdata, timeaxis, gap);
     } catch (e) {
       console.error(e);
@@ -1584,7 +1478,7 @@ class Plot extends Component {
 
   componentDidMount() {
     var { datasetparameters, dataset, file, data } = this.props;
-    var { xaxis, yaxis, zaxis } = this.state;
+    var { xaxis, yaxis, zaxis, decimate } = this.state;
 
     var {
       xoptions,
@@ -1617,9 +1511,6 @@ class Plot extends Component {
       upperX,
       lowerZ,
       upperZ,
-      decimate_active,
-      decimate_period,
-      decimate_time,
       timeaxis,
     } = this.getInitialBounds(dataset, data, file, xaxis, yaxis);
 
@@ -1635,9 +1526,7 @@ class Plot extends Component {
       lowerX,
       minX,
       maxX,
-      decimate_active,
-      decimate_period,
-      decimate_time,
+      decimate,
       datasetparameters,
       timeaxis,
       graph
@@ -1690,9 +1579,7 @@ class Plot extends Component {
         this.state.lowerX,
         this.state.minX,
         this.state.maxX,
-        this.state.decimate_active,
-        this.state.decimate_period,
-        this.state.decimate_time,
+        this.state.decimate,
         this.props.datasetparameters,
         this.state.timeaxis,
         this.state.graph
