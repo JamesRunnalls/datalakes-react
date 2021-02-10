@@ -163,8 +163,8 @@ class D3LineGraph extends Component {
         var x;
         var minx = this.getMin(data, "x");
         var maxx = this.getMax(data, "x");
-        var xrange = [0, width]
-        if (xReverse) xrange = [width, 0]
+        var xrange = [0, width];
+        if (xReverse) xrange = [width, 0];
         if (xscale === "Time") {
           x = d3.scaleTime().range(xrange).domain([minx, maxx]);
         } else if (xscale === "Log") {
@@ -179,8 +179,8 @@ class D3LineGraph extends Component {
         var y;
         var miny = this.getMin(data, "y");
         var maxy = this.getMax(data, "y");
-        var yrange = [height, 0]
-        if (yReverse) yrange = [0, height]
+        var yrange = [height, 0];
+        if (yReverse) yrange = [0, height];
         if (yscale === "Time") {
           y = d3.scaleTime().range(yrange).domain([miny, maxy]);
         } else if (yscale === "Log") {
@@ -563,7 +563,7 @@ class D3LineGraph extends Component {
             }
 
             // Add legend
-            if (legend) {
+            if (legend && legend.length > 1) {
               var legendblock = svg
                 .append("g")
                 .attr("id", "legendbox")

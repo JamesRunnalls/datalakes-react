@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import * as d3 from "d3";
-import { mergeWith, isEqual } from "lodash";
 import HeatMap from "./inner/heatmap";
 import LineGraph from "./inner/linegraph";
 import Download from "./inner/download";
@@ -20,6 +19,7 @@ import ThreeDModelDownload from "./inner/threedmodeldownload";
 import Ch2018Graph from "./inner/ch2018graph";
 import RemoteSensingDownload from "./inner/remotesensingdownload";
 import LocationMap from "./inner/locationmap";
+import Plot from "./inner/plot";
 
 class DataDetail extends Component {
   state = {
@@ -36,10 +36,9 @@ class DataDetail extends Component {
     files: [],
     data: "",
     step: "",
-    allowedStep: ["download", "pipeline", "information", "webgis"],
+    allowedStep: ["plot", "download", "pipeline", "information", "webgis"],
     file: [0],
     innerLoading: false,
-    combined: [],
     addnewfiles: true,
   };
 
@@ -47,7 +46,7 @@ class DataDetail extends Component {
 
   downloadData = async () => {
     this.downloadData = () => {}; // Only possible to fire once.
-    var { data: dataArray, files, combined } = this.state;
+    var { data: dataArray, files } = this.state;
     for (var j = 0; j < files.length; j++) {
       if (dataArray[j] === 0) {
         var { data } = await axios
@@ -56,13 +55,9 @@ class DataDetail extends Component {
             this.setState({ error: true });
           });
         dataArray[j] = data;
-        if (files[0].connect === "join") {
-          combined = this.combineTimeseries(dataArray);
-        }
         if (this._isMounted) {
           this.setState({
             data: dataArray,
-            combined,
           });
         } else {
           return false;
@@ -90,14 +85,14 @@ class DataDetail extends Component {
   };
 
   cleanData = (data) => {
-    if (Object.keys(data).includes("undefined")){
+    if (Object.keys(data).includes("undefined")) {
       delete data.undefined;
     }
-    return data
-  }
+    return data;
+  };
 
-  downloadMultipleFiles = async (arr) => {
-    var { data: dataArray, files, combined } = this.state;
+  downloadMultipleFiles = async (arr, newfile = false) => {
+    var { data: dataArray, files, file } = this.state;
     for (var j = 0; j < arr.length; j++) {
       if (dataArray[arr[j]] === 0) {
         var { data } = await axios
@@ -105,17 +100,17 @@ class DataDetail extends Component {
           .catch((error) => {
             this.setState({ error: true });
           });
-        dataArray[arr[j]] = this.cleanData(data)
+        dataArray[arr[j]] = this.cleanData(data);
       }
     }
-    if (files[0].connect === "join") {
-      combined = this.combineTimeseries(dataArray);
+    if (newfile) {
+      file = newfile;
     }
     if (this._isMounted) {
       this.setState({
         data: dataArray,
+        file,
         innerLoading: false,
-        combined,
       });
     } else {
       return false;
@@ -354,42 +349,6 @@ class DataDetail extends Component {
     return min;
   };
 
-  combineTimeseries = (arr) => {
-    var inArray = JSON.parse(JSON.stringify(arr));
-    inArray = inArray.filter((value) => {
-      return value !== 0;
-    });
-    inArray.sort((a, b) => {
-      return this.getAve(a.x) - this.getAve(b.x);
-    });
-    if (Object.keys(inArray[0]).includes("z")) {
-      if (isEqual(inArray[0].y, inArray[1].y)) {
-        try {
-          var combinedthree = {};
-          combinedthree["y"] = inArray[0].y;
-          combinedthree["x"] = inArray.map((i) => i.x).flat();
-          var zKeys = Object.keys(inArray[0]).filter((k) => k.includes("z"));
-          for (let zKey of zKeys) {
-            combinedthree[zKey] = this.merge2DArray(
-              inArray.map((i) => i[zKey])
-            );
-          }
-          return combinedthree;
-        } catch (e) {
-          return inArray;
-        }
-      } else {
-        return inArray;
-      }
-    } else {
-      var combinedArr = Object.assign({}, inArray[0]);
-      for (var i = 1; i < inArray.length; i++) {
-        combinedArr = mergeWith(combinedArr, inArray[i], this.customizer);
-      }
-      return combinedArr;
-    }
-  };
-
   merge2DArray = (arr) => {
     let merged = [];
     for (var i = 0; i < arr[0].length; i++) {
@@ -403,6 +362,16 @@ class DataDetail extends Component {
 
   customizer = (objValue, srcValue) => {
     return objValue.concat(srcValue);
+  };
+
+  getShape = (arr) => {
+    var shape = [];
+    var inner = arr;
+    while (inner[0]) {
+      shape.push(inner.length);
+      inner = inner[0];
+    }
+    return shape;
   };
 
   async componentDidMount() {
@@ -457,16 +426,14 @@ class DataDetail extends Component {
         datasetparameters.filter((param) => param.axis === "z").length > 0;
 
       if (x && y && z) {
-        allowedStep.push("heatmap");
-        step = "heatmap";
       } else if (x && y) {
-        allowedStep.push("linegraph");
         allowedStep.push("preview");
-        step = "linegraph";
       } else {
         allowedStep.push("preview");
         step = "preview";
       }
+
+      step = "plot";
 
       // Logic for showing map
       if (dataset.longitude !== "-9999" && dataset.latitude !== "-9999") {
@@ -490,17 +457,20 @@ class DataDetail extends Component {
       mindatetime = new Date(mindatetime).getTime() / 1000;
       maxdatetime = new Date(maxdatetime).getTime() / 1000;
 
-      // Download first two files
       var dataArray = new Array(files.length).fill(0);
       var { data } = await axios
         .get(apiUrl + "/files/" + files[0].id + "?get=raw")
         .catch((error) => {
           this.setState({ step: "error" });
         });
-
       dataArray[0] = data;
-      var combined = JSON.parse(JSON.stringify(data));
       var { lower, upper } = this.dataBounds(dataArray);
+
+      // Add dataset length to datasetparameters
+      datasetparameters = datasetparameters.map((d) => {
+        d.shape = this.getShape(data[d.axis]);
+        return d;
+      });
 
       // Get Pipeline Data
       var renku = false;
@@ -538,7 +508,6 @@ class DataDetail extends Component {
         dropdown,
         step,
         allowedStep,
-        combined,
         scripts,
       });
       //} else if (datasource === "Meteolakes") {
@@ -626,7 +595,6 @@ class DataDetail extends Component {
       files,
       file,
       innerLoading,
-      combined,
       scripts,
       addnewfiles,
     } = this.state;
@@ -656,6 +624,30 @@ class DataDetail extends Component {
             </table>
           </React.Fragment>
         );
+      case "plot":
+        return (
+          <React.Fragment>
+            <h1>{dataset.title}</h1>
+            <DataSubMenu
+              step={step}
+              allowedStep={allowedStep}
+              updateSelectedState={this.updateSelectedState}
+              link={link}
+            />
+            <Plot
+              datasetparameters={datasetparameters}
+              dataset={dataset}
+              data={data}
+              files={files}
+              file={file}
+              fileChange={JSON.stringify(file)}
+              maxdatetime={maxdatetime}
+              mindatetime={mindatetime}
+              removeFile={this.removeFile}
+              downloadMultipleFiles={this.downloadMultipleFiles}
+            />
+          </React.Fragment>
+        );
       case "heatmap":
         return (
           <React.Fragment>
@@ -677,7 +669,6 @@ class DataDetail extends Component {
               files={files}
               file={file}
               loading={innerLoading}
-              combined={combined}
               onChangeTime={this.onChangeTime}
               onChangeFile={this.onChangeFile}
               onChangeFileInt={this.onChangeFileInt}
@@ -709,7 +700,6 @@ class DataDetail extends Component {
               files={files}
               file={file}
               loading={innerLoading}
-              combined={combined}
               addnewfiles={addnewfiles}
               onChangeTime={this.onChangeTime}
               onChangeFile={this.onChangeFile}

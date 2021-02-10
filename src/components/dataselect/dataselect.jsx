@@ -3,19 +3,19 @@ import Select from "react-select";
 import "./dataselect.css";
 
 class DataSelect extends Component {
-  addNew = table => {
+  addNew = (table) => {
     this.props.showModal(table);
   };
 
   render() {
     const customStyles = {
-      control: base => ({
+      control: (base) => ({
         ...base,
         height: 30,
-        minHeight: 30
-      })
+        minHeight: 30,
+      }),
     };
-    var { dataList, defaultValue, value, label } = this.props;
+    var { dataList, defaultValue, value, label, disabled } = this.props;
     var list = [];
     try {
       if (dataList.length > 0) {
@@ -25,7 +25,9 @@ class DataSelect extends Component {
         }
       }
     } catch (e) {}
-    var dValue = list.find(x => x.value === defaultValue);
+    var dValue = list.find((x) => x.value === defaultValue);
+    var isDisabled = false;
+    if (disabled) isDisabled = disabled;
     return (
       <div>
         <Select
@@ -35,6 +37,7 @@ class DataSelect extends Component {
           classNamePrefix="dataselect"
           onChange={this.props.onChange}
           styles={customStyles}
+          isDisabled={isDisabled}
           noOptionsMessage={
             this.props.showModal
               ? () => (

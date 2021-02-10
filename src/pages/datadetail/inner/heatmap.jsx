@@ -649,6 +649,7 @@ class HeatMap extends Component {
   };
 
   setAxisOptions = (datasetparameters, getLabel) => {
+    console.log(datasetparameters)
     var xoptions = [];
     var yoptions = [];
     var zoptions = [];

@@ -79,6 +79,15 @@ class DataSubMenu extends Component {
               <div className="subnav-text">Information</div>
             </div>
             <div
+              title="Plot data"
+              className={this.active("plot",step) ? "subnav-item active" : "subnav-item"}
+              style={{display: this.hide("plot",allowedStep) && 'none'}}
+              onClick={() => updateSelectedState("plot")}
+            >
+              <img src={line} className="subnav-img" alt="Plot" />
+              <div className="subnav-text">Plot</div>
+            </div>
+            <div
               title="Preview data as a heat map"
               className={this.active("heatmap",step) ? "subnav-item active" : "subnav-item"}
               style={{display: this.hide("heatmap",allowedStep) && 'none'}}
