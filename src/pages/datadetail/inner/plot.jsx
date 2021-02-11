@@ -453,6 +453,7 @@ class DisplayOptions extends Component {
     mask: this.props.mask,
     thresholdStep: this.props.thresholdStep,
     decimate: this.props.decimate,
+    average: this.props.average,
   };
   toggleMask = () => {
     this.setState({ mask: !this.state.mask });
@@ -461,6 +462,10 @@ class DisplayOptions extends Component {
   onChangeDecimate = (event) => {
     var decimate = parseInt(event.target.value);
     this.setState({ decimate });
+  };
+  onChangeAverage = (event) => {
+    var average = event.target.value;
+    this.setState({ average });
   };
   onChangeLocalColors = (colors) => {
     this.setState({ colors });
@@ -497,6 +502,7 @@ class DisplayOptions extends Component {
       maxZ,
       thresholdStep,
       decimate,
+      average,
     } = this.props;
     var updateZ = false;
     if (
@@ -511,7 +517,8 @@ class DisplayOptions extends Component {
       prevProps.colors !== colors ||
       updateZ ||
       prevProps.thresholdStep !== thresholdStep ||
-      prevProps.decimate !== decimate
+      prevProps.decimate !== decimate ||
+      prevProps.average !== average
     ) {
       this.setState({
         colors,
@@ -521,6 +528,7 @@ class DisplayOptions extends Component {
         maxZ,
         thresholdStep,
         decimate,
+        average,
       });
     }
   }
@@ -534,6 +542,7 @@ class DisplayOptions extends Component {
       thresholdStep,
       mask,
       decimate,
+      average,
     } = this.state;
     var { array, graph, timeaxis } = this.props;
     maxZ = maxZ === undefined ? 0 : maxZ;
@@ -622,7 +631,25 @@ class DisplayOptions extends Component {
                     </td>
                   </tr>
                 )}
-
+                {["x", "y"].includes(timeaxis) && (
+                  <tr>
+                    <td>Averaging</td>
+                    <td>
+                      <select
+                        id="average"
+                        value={average}
+                        onChange={this.onChangeAverage}
+                        className="scale-select"
+                      >
+                        <option value="None">None</option>
+                        <option value="Hourly">Hourly</option>
+                        <option value="Daily">Daily</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Yearly">Yearly</option>
+                      </select>
+                    </td>
+                  </tr>
+                )}
                 <tr>
                   <td>Show Masked Points</td>
                   <td>
@@ -705,6 +732,7 @@ class Plot extends Component {
     thresholdStep: 20,
     lweight: Array.from({ length: 20 }).map((x) => "1"),
     decimate: 1,
+    average: "Daily",
     mask: true,
     upperY: 1,
     lowerY: 0,
@@ -928,6 +956,7 @@ class Plot extends Component {
       minX,
       maxX,
       decimate,
+      average,
       timeaxis,
     } = this.state;
     if (event.value.includes("x")) xaxis = event.value;
@@ -975,6 +1004,7 @@ class Plot extends Component {
       minX,
       maxX,
       decimate,
+      average,
       datasetparameters,
       timeaxis,
       graph
@@ -1147,7 +1177,104 @@ class Plot extends Component {
         x.push(data[k].x);
         y.push(data[k].y);
       }
-      return { x, y };
+      return { x, y, z: undefined };
+    } else {
+      return plotdata;
+    }
+  };
+
+  roundFactor = (dt, factor) => {
+    var year = dt.getFullYear();
+    var month = dt.getMonth();
+    var day = dt.getDate();
+    var hours = dt.getHours();
+    if (factor === "Hourly") {
+      return new Date(year, month, day, hours);
+    } else if (factor === "Daily") {
+      return new Date(year, month, day);
+    } else if (factor === "Monthly") {
+      return new Date(year, month);
+    } else if (factor === "Yearly") {
+      return new Date(year);
+    } else {
+      return dt;
+    }
+  };
+
+  average1D = (arr, factor, tx) => {
+    var ox = "y";
+    if (tx === "y") ox = "x";
+    var data = {};
+    var value;
+    for (var i = 0; i < arr[tx].length; i++) {
+      value = this.roundFactor(arr[tx][i], factor).getTime();
+      if (value in data) {
+        data[value].push(arr[ox][i]);
+      } else {
+        data[value] = [arr[ox][i]];
+      }
+    }
+    var arrDict = [];
+    for (var key in data) {
+      arrDict.push({
+        [tx]: new Date(parseInt(key)),
+        [ox]: this.average(data[key]),
+      });
+    }
+    arrDict.sort((a, b) => (a[tx] > b[tx] ? 1 : b[tx] > a[tx] ? -1 : 0));
+    var x = [];
+    var y = [];
+    for (var k = 0; k < arrDict.length; k++) {
+      x.push(arrDict[k].x);
+      y.push(arrDict[k].y);
+    }
+    return { x, y, z: undefined };
+  };
+
+  average2D = (arr, factor, tx, bounds) => {
+    var ox = "y";
+    if (tx === "x") {
+      for (var i = 0; i < arr[tx].length; i++) {
+        value = this.roundFactor(arr[tx][i], factor).getTime();
+        if (value in data) {
+          data[value].push(arr[ox][i]);
+        } else {
+          data[value] = [arr[ox][i]];
+        }
+      }
+    } else if (tx === "y") {
+      ox = "x";
+    } else {
+      return arr;
+    }
+  };
+
+  averageData = (plotdata, timeaxis, average, graph, bounds) => {
+    var out;
+    if ((plotdata && ["x", "y"].includes(timeaxis), average !== "None")) {
+      if (graph === "linegraph") {
+        if (Array.isArray(plotdata)) {
+          out = [];
+          for (let i = 0; i < plotdata.length; i++) {
+            out.push(this.average1D(plotdata[i], average, timeaxis));
+          }
+        } else {
+          out = this.average1D(plotdata, average, timeaxis);
+        }
+        return out;
+      } else if (graph === "heatmap") {
+        if (Array.isArray(plotdata)) {
+          out = [];
+          for (let i = 0; i < plotdata.length; i++) {
+            out.push(this.average2D(plotdata[i], average, timeaxis, bounds));
+          }
+        } else {
+          out = this.average2D(plotdata, average, timeaxis, bounds);
+        }
+        return out;
+      } else {
+        return plotdata;
+      }
     } else {
       return plotdata;
     }
@@ -1402,6 +1529,7 @@ class Plot extends Component {
     minX,
     maxX,
     decimate,
+    average,
     datasetparameters,
     timeaxis,
     graph
@@ -1437,6 +1565,7 @@ class Plot extends Component {
     } catch (e) {
       console.error(e);
     }
+
     try {
       plotdata = this.decimateData(plotdata, timeaxis, decimate, graph);
     } catch (e) {
@@ -1444,9 +1573,20 @@ class Plot extends Component {
     }
     try {
       plotdata = this.formatTime(plotdata, datasetparameters, xaxis, yaxis);
+      try {
+        plotdata = this.averageData(plotdata, timeaxis, average, graph, {
+          lowerX,
+          lowerY,
+          upperX,
+          upperY,
+        });
+      } catch (e) {
+        console.error(e);
+      }
     } catch (e) {
       console.error(e);
     }
+
     try {
       plotdata = this.addGaps(plotdata, timeaxis, gap);
     } catch (e) {
@@ -1544,7 +1684,7 @@ class Plot extends Component {
 
   componentDidMount() {
     var { datasetparameters, dataset, file, data } = this.props;
-    var { xaxis, yaxis, zaxis, decimate } = this.state;
+    var { xaxis, yaxis, zaxis, decimate, average } = this.state;
 
     var {
       xoptions,
@@ -1593,6 +1733,7 @@ class Plot extends Component {
       minX,
       maxX,
       decimate,
+      average,
       datasetparameters,
       timeaxis,
       graph
@@ -1646,6 +1787,7 @@ class Plot extends Component {
         this.state.minX,
         this.state.maxX,
         this.state.decimate,
+        this.state.average,
         this.props.datasetparameters,
         this.state.timeaxis,
         this.state.graph
