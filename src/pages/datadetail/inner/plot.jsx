@@ -732,7 +732,7 @@ class Plot extends Component {
     thresholdStep: 20,
     lweight: Array.from({ length: 20 }).map((x) => "1"),
     decimate: 1,
-    average: "Daily",
+    average: "None",
     mask: true,
     upperY: 1,
     lowerY: 0,
@@ -775,7 +775,7 @@ class Plot extends Component {
   };
 
   onChangeState = (state) => {
-    state.refresh = true;
+    state.refresh = "z";
     this.setState(state);
   };
 
@@ -1193,9 +1193,9 @@ class Plot extends Component {
     } else if (factor === "Daily") {
       return new Date(year, month, day);
     } else if (factor === "Monthly") {
-      return new Date(year, month);
+      return new Date(year, month, 0);
     } else if (factor === "Yearly") {
-      return new Date(year);
+      return new Date(year, 0, 0);
     } else {
       return dt;
     }
@@ -1233,17 +1233,73 @@ class Plot extends Component {
 
   average2D = (arr, factor, tx, bounds) => {
     var ox = "y";
+    var data = {};
+    var arrDict = [];
+    var value, x, y, z;
     if (tx === "x") {
-      for (var i = 0; i < arr[tx].length; i++) {
+      for (let i = 0; i < arr[tx].length; i++) {
         value = this.roundFactor(arr[tx][i], factor).getTime();
         if (value in data) {
-          data[value].push(arr[ox][i]);
+          for (let j = 0; j < arr[ox].length; j++) {
+            data[value][j].push(arr.z[j][i]);
+          }
         } else {
-          data[value] = [arr[ox][i]];
+          data[value] = [];
+          for (let j = 0; j < arr[ox].length; j++) {
+            data[value].push([arr.z[j][i]]);
+          }
         }
       }
+      for (let key in data) {
+        arrDict.push({
+          [tx]: new Date(parseInt(key)),
+          z: data[key].map((d) => this.average(d)),
+        });
+      }
+      arrDict.sort((a, b) => (a[tx] > b[tx] ? 1 : b[tx] > a[tx] ? -1 : 0));
+      x = [];
+      y = arr[ox];
+      z = [...Array(y.length)].map((x) => []);
+      for (let i = 0; i < arrDict.length; i++) {
+        x.push(arrDict[i].x);
+        for (let j = 0; j < arr[ox].length; j++) {
+          z[j].push(arrDict[i].z[j]);
+        }
+      }
+      return { x, y, z };
     } else if (tx === "y") {
       ox = "x";
+      for (let i = 0; i < arr[tx].length; i++) {
+        value = this.roundFactor(arr[tx][i], factor).getTime();
+        if (value in data) {
+          data[value].push(arr.z[i]);
+        } else {
+          data[value] = [arr.z[i]];
+        }
+      }
+      for (let key in data) {
+        let zz = [];
+        for (let i = 0; i < arr[ox].length; i++) {
+          let zt = [];
+          for (let j = 0; j < data[key].length; j++) {
+            zt.push(data[key][j][i]);
+          }
+          zz.push(this.average(zt));
+        }
+        arrDict.push({
+          [tx]: new Date(parseInt(key)),
+          z: zz,
+        });
+      }
+      arrDict.sort((a, b) => (a[tx] > b[tx] ? 1 : b[tx] > a[tx] ? -1 : 0));
+      x = arr[ox];
+      y = [];
+      z = [];
+      for (let i = 0; i < arrDict.length; i++) {
+        y.push(arrDict[i].y);
+        z.push(arrDict[i].z);
+      }
+      return { x, y, z };
     } else {
       return arr;
     }
@@ -1792,7 +1848,10 @@ class Plot extends Component {
         this.state.timeaxis,
         this.state.graph
       );
-      var { minZ, maxZ } = this.getZBounds(plotdata);
+      var { minZ, maxZ } = this.state;
+      if (refresh !== "z") {
+        ({ minZ, maxZ } = this.getZBounds(plotdata));
+      }
       this.setState({ plotdata, refresh: false, minZ, maxZ });
     }
   }
