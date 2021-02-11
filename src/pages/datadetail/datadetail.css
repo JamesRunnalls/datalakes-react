@@ -563,6 +563,12 @@
   padding-right: 15px;
 }
 
+.downsample {
+  display: inline-block;
+  width: 50px;
+  margin-left: 5px;
+}
+
 .color-buttons {
   padding-top: 10px;
   text-align: center;

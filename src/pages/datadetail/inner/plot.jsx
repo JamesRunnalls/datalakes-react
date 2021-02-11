@@ -457,6 +457,11 @@ class DisplayOptions extends Component {
   toggleMask = () => {
     this.setState({ mask: !this.state.mask });
   };
+
+  onChangeDecimate = (event) => {
+    var decimate = parseInt(event.target.value);
+    this.setState({ decimate });
+  };
   onChangeLocalColors = (colors) => {
     this.setState({ colors });
   };
@@ -528,6 +533,7 @@ class DisplayOptions extends Component {
       maxZ,
       thresholdStep,
       mask,
+      decimate,
     } = this.state;
     var { array, graph, timeaxis } = this.props;
     maxZ = maxZ === undefined ? 0 : maxZ;
@@ -603,7 +609,17 @@ class DisplayOptions extends Component {
                 {["x", "y"].includes(timeaxis) && (
                   <tr>
                     <td>Down Sample</td>
-                    <td>1:1</td>
+                    <td>
+                      1:
+                      <input
+                        className="downsample"
+                        type="number"
+                        step="1"
+                        min="1"
+                        value={decimate}
+                        onChange={this.onChangeDecimate}
+                      />
+                    </td>
                   </tr>
                 )}
 
@@ -1137,24 +1153,74 @@ class Plot extends Component {
     }
   };
 
-  decimateData = (plotdata, timeaxis, decimate, graph) => {
-    console.log("Here")
-    if (decimate > 1 && isInteger(decimate) && plotdata) {
-      var data = JSON.parse(JSON.stringify(plotdata));
-      if (!Array.isArray(data)) data = [data];
-      if (timeaxis === "x" && graph === "linegraph") {
-        var out = [];
-        for (let i = 0; i < data.length; i++) {
-          var inner = { x: [], y: [], z: undefined };
-          for (let j = 0; j < data[i].x.length; j + decimate) {
-            if (data[i].x[j]) {
-              inner.x.push(data[i].x[j]);
-              inner.y.push(data[i].y[j]);
-            }
+  decimate1D = (arr, factor) => {
+    var x = [];
+    var y = [];
+    for (let i = 0; i < arr.x.length; i = i + factor) {
+      if (arr.x[i]) {
+        x.push(arr.x[i]);
+        y.push(arr.y[i]);
+      }
+    }
+    return { x, y, z: undefined };
+  };
+
+  decimate2D = (arr, factor, timeaxis) => {
+    var x, y, z;
+    if (timeaxis === "x") {
+      y = arr.y;
+      x = [];
+      z = [...Array(arr.y.length)].map((x) => []);
+      for (let i = 0; i < arr.x.length; i = i + factor) {
+        if (arr.x[i]) {
+          x.push(arr.x[i]);
+          for (let j = 0; j < arr.y.length; j++) {
+            z[j].push(arr.z[j][i]);
           }
-          out.push(inner);
+        }
+      }
+      return { x, y, z };
+    } else if (timeaxis === "y") {
+      x = arr.x;
+      y = [];
+      z = [];
+      for (let i = 0; i < arr.y.length; i = i + factor) {
+        if (arr.y[i]) {
+          y.push(arr.y[i]);
+          z.push(arr.z[i]);
+        }
+      }
+      return { x, y, z };
+    } else {
+      return arr;
+    }
+  };
+
+  decimateData = (plotdata, timeaxis, decimate, graph) => {
+    var out;
+    if (decimate > 1 && isInteger(decimate) && plotdata) {
+      if (graph === "linegraph") {
+        if (Array.isArray(plotdata)) {
+          out = [];
+          for (let i = 0; i < plotdata.length; i++) {
+            out.push(this.decimate1D(plotdata[i], decimate));
+          }
+        } else {
+          out = this.decimate1D(plotdata, decimate);
         }
         return out;
+      } else if (graph === "heatmap") {
+        if (Array.isArray(plotdata)) {
+          out = [];
+          for (let i = 0; i < plotdata.length; i++) {
+            out.push(this.decimate2D(plotdata[i], decimate, timeaxis));
+          }
+        } else {
+          out = this.decimate2D(plotdata, decimate, timeaxis);
+        }
+        return out;
+      } else {
+        return plotdata;
       }
     } else {
       return plotdata;
