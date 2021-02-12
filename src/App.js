@@ -15,7 +15,8 @@ import ThreeViewer from "./graphs/three/threeviewer";
 import NetCDF from "./pages/netcdf/netcdf";
 import ErrorBoundary from "./pages/errorboundary/errorboundary";
 import ReactGA from "react-ga";
-import Monitor from './pages/monitor/monitor';
+import Monitor from "./pages/monitor/monitor";
+import Lakes from './pages/lakes/lakes';
 ReactGA.initialize("UA-186400369-1");
 ReactGA.pageview(window.location.pathname + window.location.search);
 
@@ -50,6 +51,15 @@ class App extends Component {
               render={(props) => (
                 <ErrorBoundary {...props}>
                   <DataDetail {...props} />
+                </ErrorBoundary>
+              )}
+            />
+
+            <Route
+              path="/lakes"
+              render={(props) => (
+                <ErrorBoundary {...props}>
+                  <Lakes {...props} />
                 </ErrorBoundary>
               )}
             />

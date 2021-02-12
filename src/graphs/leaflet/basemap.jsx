@@ -1293,6 +1293,10 @@ class Basemap extends Component {
         }
       }
     }
+    if (prevProps.geojson !== this.props.geojson) {
+      if (this.geojson) this.map.removeLayer(this.geojson);
+      this.geojson = L.geoJSON(this.props.geojson).addTo(this.map);
+    }
     this.map.invalidateSize();
   }
 
@@ -1408,6 +1412,11 @@ class Basemap extends Component {
         passLocation({ lat, lng, alt });
       }
     });
+
+    // GeoJSON
+    if ("geojson" in this.props && this.props.geojson) {
+      this.geojson = L.geoJSON(this.props.geojson).addTo(map);
+    }
 
     if ("updateLocation" in this.props) {
       var { updateLocation } = this.props;
