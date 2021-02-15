@@ -27,30 +27,12 @@ class D3LineGraph extends Component {
     });
   };
 
-  getMax = (arr, param) => {
-    let max = -Infinity;
-    for (var i = 0; i < arr.length; i++) {
-      let len = arr[i][param].length;
-      while (len--) {
-        if (arr[i][param][len] !== null) {
-          max = arr[i][param][len] > max ? arr[i][param][len] : max;
-        }
-      }
-    }
-    return max;
-  };
-
-  getMin = (arr, param) => {
-    let min = Infinity;
-    for (var i = 0; i < arr.length; i++) {
-      let len = arr[i][param].length;
-      while (len--) {
-        if (arr[i][param][len] !== null) {
-          min = arr[i][param][len] < min ? arr[i][param][len] : min;
-        }
-      }
-    }
-    return min;
+  getDomain = (domain) => {
+    var minarr = domain.map((d) => d[0]);
+    var maxarr = domain.map((d) => d[1]);
+    var min = d3.extent(minarr)[0];
+    var max = d3.extent(maxarr)[1];
+    return [min, max];
   };
 
   formatDate = (raw) => {
@@ -159,34 +141,48 @@ class D3LineGraph extends Component {
           width = viswidth - margin.left - margin.right,
           height = visheight - margin.top - margin.bottom;
 
+        // Get data extents
+        var xdomain, ydomain;
+        if (Array.isArray(data)) {
+          var xdomarr = [];
+          var ydomarr = [];
+          for (var h = 0; h < data.length; h++) {
+            let xext = d3.extent(data[h].x);
+            let yext = d3.extent(data[h].y);
+            xdomarr.push(xext);
+            ydomarr.push(yext);
+          }
+          xdomain = this.getDomain(xdomarr);
+          ydomain = this.getDomain(ydomarr);
+        } else {
+          xdomain = d3.extent(data.x);
+          ydomain = d3.extent(data.y);
+        }
+
         // Format X-axis
         var x;
-        var minx = this.getMin(data, "x");
-        var maxx = this.getMax(data, "x");
         var xrange = [0, width];
         if (xReverse) xrange = [width, 0];
         if (xscale === "Time") {
-          x = d3.scaleTime().range(xrange).domain([minx, maxx]);
+          x = d3.scaleTime().range(xrange).domain(xdomain);
         } else if (xscale === "Log") {
-          x = d3.scaleLog().range(xrange).domain([minx, maxx]);
+          x = d3.scaleLog().range(xrange).domain(xdomain);
         } else {
-          x = d3.scaleLinear().range(xrange).domain([minx, maxx]);
+          x = d3.scaleLinear().range(xrange).domain(xdomain);
         }
         var xref = x.copy();
         var xbase = x.copy();
 
         // Format Y-axis
         var y;
-        var miny = this.getMin(data, "y");
-        var maxy = this.getMax(data, "y");
         var yrange = [height, 0];
         if (yReverse) yrange = [0, height];
         if (yscale === "Time") {
-          y = d3.scaleTime().range(yrange).domain([miny, maxy]);
+          y = d3.scaleTime().range(yrange).domain(ydomain);
         } else if (yscale === "Log") {
-          y = d3.scaleLog().range(yrange).domain([miny, maxy]);
+          y = d3.scaleLog().range(yrange).domain(ydomain);
         } else {
-          y = d3.scaleLinear().range(yrange).domain([miny, maxy]);
+          y = d3.scaleLinear().range(yrange).domain(ydomain);
         }
         var yref = y.copy();
         var ybase = y.copy();
@@ -322,6 +318,10 @@ class D3LineGraph extends Component {
             }
             xy.push(xyt);
           }
+
+          var xy_px = xy.map((p) =>
+            p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
+          );
 
           // Define the line
           var valueline = d3
@@ -611,7 +611,7 @@ class D3LineGraph extends Component {
             }
 
             function closestCoordinates(x0, y0, xy) {
-              var x, y, dist_t;
+              var x_px, y_px, dist_t;
               var dist = Infinity;
               for (var i = 0; i < xy.length; i++) {
                 dist_t = Math.sqrt(
@@ -619,46 +619,71 @@ class D3LineGraph extends Component {
                     Math.pow(Math.abs(xy[i].x - x0), 2)
                 );
                 if (dist_t < dist) {
-                  x = xy[i].x;
-                  y = xy[i].y;
+                  x_px = xy[i].x;
+                  y_px = xy[i].y;
                   dist = dist_t;
                 }
               }
-              return { x: x, y: y };
+              if (dist < 20) {
+                var xx = x.invert(x_px);
+                var yy = y.invert(y_px);
+                return { x: xx, y: yy, x_px, y_px };
+              } else {
+                return false;
+              }
             }
 
             function mousemove() {
               try {
-                var y0 = y.invert(d3.mouse(this)[1]);
-                var x0 = x.invert(d3.mouse(this)[0]);
                 var selectedData;
+                var visible = false;
                 var inner = `<tr><td>${
                   xunits ? xlabel + " (" + xunits + ")" : xlabel
                 }</td><td>${
                   yunits ? ylabel + " (" + yunits + ")" : ylabel
                 }</td></tr>`;
                 for (let f = 0; f < focus.length; f++) {
-                  selectedData = closestCoordinates(x0, y0, xy[f]);
-                  focus[f]
-                    .attr("cx", x(selectedData.x))
-                    .attr("cy", y(selectedData.y));
-                  var xtext;
-                  if (xlabel === "Time") {
-                    xtext = format(new Date(selectedData.x), "hh:mm dd MMM yy");
+                  selectedData = closestCoordinates(
+                    d3.mouse(this)[0],
+                    d3.mouse(this)[1],
+                    xy_px[f]
+                  );
+                  if (selectedData) {
+                    visible = true;
+                    focus[f]
+                      .attr("cx", selectedData.x_px)
+                      .attr("cy", selectedData.y_px);
+                    var xtext;
+                    if (xlabel === "Time") {
+                      xtext = format(
+                        new Date(selectedData.x),
+                        "hh:mm dd MMM yy"
+                      );
+                    } else {
+                      xtext = numberformat(selectedData.x);
+                    }
+                    var ytext;
+                    if (ylabel === "Time") {
+                      ytext = format(
+                        new Date(selectedData.y),
+                        "hh:mm dd MMM yy"
+                      );
+                    } else {
+                      ytext = numberformat(selectedData.y);
+                    }
+                    inner =
+                      inner +
+                      `<tr style="color:${lcolor[f]}"><td>${xtext}</td><td>${ytext}</td></tr>`;
+                    focus[f].style("opacity", 1);
                   } else {
-                    xtext = numberformat(selectedData.x);
+                    focus[f].style("opacity", 0);
                   }
-                  var ytext;
-                  if (ylabel === "Time") {
-                    ytext = format(new Date(selectedData.y), "hh:mm dd MMM yy");
-                  } else {
-                    ytext = numberformat(selectedData.y);
-                  }
-                  inner =
-                    inner +
-                    `<tr style="color:${lcolor[f]}"><td>${xtext}</td><td>${ytext}</td></tr>`;
                 }
-                document.getElementById("value" + graphid).innerHTML = inner;
+                if (visible) {
+                  document.getElementById("value" + graphid).innerHTML = inner;
+                } else {
+                  document.getElementById("value" + graphid).innerHTML = "";
+                }
               } catch (e) {}
             }
 

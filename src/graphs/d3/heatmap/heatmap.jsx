@@ -72,8 +72,8 @@ class D3HeatMap extends Component {
   };
 
   closest = (num, arr) => {
-    var curr = arr[0];
-    var diff = Math.abs(num - curr);
+    var curr = 0;
+    var diff = Math.abs(num - arr[curr]);
     for (var val = 0; val < arr.length; val++) {
       var newdiff = Math.abs(num - arr[val]);
       if (newdiff < diff) {
