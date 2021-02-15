@@ -190,7 +190,7 @@ class LakeData extends Component {
               )}
             </React.Fragment>
           }
-          rightNoScroll={<React.Fragment></React.Fragment>}
+          right={<React.Fragment></React.Fragment>}
         />
       </React.Fragment>
     );
@@ -276,14 +276,27 @@ class Lakes extends Component {
             }
             rightNoScroll={
               <React.Fragment>
-                {lakes.map((l) => (
-                  <div
-                    key={l.id}
-                    onClick={() => this.setLocation(l.name, l.id)}
-                  >
-                    {l.name}
-                  </div>
-                ))}
+                <div className="lakes-list">
+                  <table>
+                    <tbody>
+                      <tr>
+                        <th>Lake</th>
+                        <th>Depth (m)</th>
+                        <th>Elevation (mAOD)</th>
+                      </tr>
+                      {lakes.map((l) => (
+                        <tr
+                          key={l.id}
+                          onClick={() => this.setLocation(l.name, l.id)}
+                        >
+                          <td>{l.name}</td>
+                          <td>{l.depth}</td>
+                          <td>{l.elevation}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </React.Fragment>
             }
           />

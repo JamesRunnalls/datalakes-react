@@ -3,6 +3,19 @@
   height: 598px;
 }
 
+.lakes-list {
+  max-height: 570px;
+  overflow-y: auto;
+}
+
+.lakes-list table tr {
+  cursor: pointer;
+}
+
+.lakes-list table tr:hover {
+  text-decoration: underline;
+}
+
 .lakes-map-short {
   width: 100%;
   height: 350px;
