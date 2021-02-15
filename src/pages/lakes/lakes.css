@@ -7,3 +7,26 @@
   width: 100%;
   height: 350px;
 }
+
+.lake-morphology .interpolated {
+  display: inline-block;
+}
+
+.lake-morphology .xselect {
+  float: right;
+}
+
+.lake-morphology .xselect button {
+  padding: 1px 5px;
+  margin-left: 10px;
+}
+
+.lake-morphology .xselect button:hover {
+  background-color: azure;
+}
+
+.lake-morphology .lakes-graph-short {
+  width: 100%;
+  height: 350px;
+  margin-top: 20px;
+}
