@@ -319,6 +319,10 @@ class D3LineGraph extends Component {
             xy.push(xyt);
           }
 
+          var xy_px = xy.map((p) =>
+            p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
+          );
+
           // Define the line
           var valueline = d3
             .line()
@@ -607,7 +611,7 @@ class D3LineGraph extends Component {
             }
 
             function closestCoordinates(x0, y0, xy) {
-              var x, y, dist_t;
+              var x_px, y_px, dist_t;
               var dist = Infinity;
               for (var i = 0; i < xy.length; i++) {
                 dist_t = Math.sqrt(
@@ -615,46 +619,71 @@ class D3LineGraph extends Component {
                     Math.pow(Math.abs(xy[i].x - x0), 2)
                 );
                 if (dist_t < dist) {
-                  x = xy[i].x;
-                  y = xy[i].y;
+                  x_px = xy[i].x;
+                  y_px = xy[i].y;
                   dist = dist_t;
                 }
               }
-              return { x: x, y: y };
+              if (dist < 20) {
+                var xx = x.invert(x_px);
+                var yy = y.invert(y_px);
+                return { x: xx, y: yy, x_px, y_px };
+              } else {
+                return false;
+              }
             }
 
             function mousemove() {
               try {
-                var y0 = y.invert(d3.mouse(this)[1]);
-                var x0 = x.invert(d3.mouse(this)[0]);
                 var selectedData;
+                var visible = false;
                 var inner = `<tr><td>${
                   xunits ? xlabel + " (" + xunits + ")" : xlabel
                 }</td><td>${
                   yunits ? ylabel + " (" + yunits + ")" : ylabel
                 }</td></tr>`;
                 for (let f = 0; f < focus.length; f++) {
-                  selectedData = closestCoordinates(x0, y0, xy[f]);
-                  focus[f]
-                    .attr("cx", x(selectedData.x))
-                    .attr("cy", y(selectedData.y));
-                  var xtext;
-                  if (xlabel === "Time") {
-                    xtext = format(new Date(selectedData.x), "hh:mm dd MMM yy");
+                  selectedData = closestCoordinates(
+                    d3.mouse(this)[0],
+                    d3.mouse(this)[1],
+                    xy_px[f]
+                  );
+                  if (selectedData) {
+                    visible = true;
+                    focus[f]
+                      .attr("cx", selectedData.x_px)
+                      .attr("cy", selectedData.y_px);
+                    var xtext;
+                    if (xlabel === "Time") {
+                      xtext = format(
+                        new Date(selectedData.x),
+                        "hh:mm dd MMM yy"
+                      );
+                    } else {
+                      xtext = numberformat(selectedData.x);
+                    }
+                    var ytext;
+                    if (ylabel === "Time") {
+                      ytext = format(
+                        new Date(selectedData.y),
+                        "hh:mm dd MMM yy"
+                      );
+                    } else {
+                      ytext = numberformat(selectedData.y);
+                    }
+                    inner =
+                      inner +
+                      `<tr style="color:${lcolor[f]}"><td>${xtext}</td><td>${ytext}</td></tr>`;
+                    focus[f].style("opacity", 1);
                   } else {
-                    xtext = numberformat(selectedData.x);
+                    focus[f].style("opacity", 0);
                   }
-                  var ytext;
-                  if (ylabel === "Time") {
-                    ytext = format(new Date(selectedData.y), "hh:mm dd MMM yy");
-                  } else {
-                    ytext = numberformat(selectedData.y);
-                  }
-                  inner =
-                    inner +
-                    `<tr style="color:${lcolor[f]}"><td>${xtext}</td><td>${ytext}</td></tr>`;
                 }
-                document.getElementById("value" + graphid).innerHTML = inner;
+                if (visible) {
+                  document.getElementById("value" + graphid).innerHTML = inner;
+                } else {
+                  document.getElementById("value" + graphid).innerHTML = "";
+                }
               } catch (e) {}
             }
 

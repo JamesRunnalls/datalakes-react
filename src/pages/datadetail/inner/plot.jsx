@@ -943,22 +943,7 @@ class Plot extends Component {
 
   handleAxisSelect = (event) => {
     var { datasetparameters } = this.props;
-    var {
-      xaxis,
-      yaxis,
-      zaxis,
-      upperY,
-      lowerY,
-      maxY,
-      minY,
-      upperX,
-      lowerX,
-      minX,
-      maxX,
-      decimate,
-      average,
-      timeaxis,
-    } = this.state;
+    var { xaxis, yaxis, zaxis } = this.state;
     if (event.value.includes("x")) xaxis = event.value;
     if (event.value.includes("y")) yaxis = event.value;
     if (event.value.includes("z")) zaxis = event.value;
@@ -977,43 +962,7 @@ class Plot extends Component {
       zaxis
     );
 
-    // Reset upper and lower values
-    if (timeaxis === "x") {
-      upperY = maxY;
-      lowerY = minY;
-    } else if (timeaxis === "y") {
-      upperX = maxX;
-      lowerX = minX;
-    } else {
-      upperX = maxX;
-      lowerX = minX;
-      upperY = maxY;
-      lowerY = minY;
-    }
-
-    var plotdata = this.processPlotData(
-      xaxis,
-      yaxis,
-      zaxis,
-      upperY,
-      lowerY,
-      maxY,
-      minY,
-      upperX,
-      lowerX,
-      minX,
-      maxX,
-      decimate,
-      average,
-      datasetparameters,
-      timeaxis,
-      graph
-    );
-
-    var { minZ, maxZ } = this.getZBounds(plotdata);
-
     this.setState({
-      plotdata,
       xaxis,
       yaxis,
       zaxis,
@@ -1029,12 +978,7 @@ class Plot extends Component {
       zunits,
       yReverse,
       xReverse,
-      upperX,
-      lowerX,
-      upperY,
-      lowerY,
-      minZ,
-      maxZ,
+      refresh: true,
     });
   };
 
@@ -1412,12 +1356,12 @@ class Plot extends Component {
 
   sliceXArray = (data, lower, upper) => {
     var l = 0;
-    var u = data.x.length;
+    var u = data.x.length - 1;
     for (var i = 0; i < data.x.length; i++) {
       if (data.x[i] < lower) {
         l = i;
       }
-      if (data.x[i] > upper && u === data.x.length) {
+      if (data.x[i] > upper && u === data.x.length - 1) {
         u = i;
       }
     }
@@ -1446,12 +1390,12 @@ class Plot extends Component {
 
   sliceYArray = (data, lower, upper) => {
     var l = 0;
-    var u = data.y.length;
+    var u = data.y.length - 1;
     for (var i = 0; i < data.y.length; i++) {
       if (data.y[i] < lower) {
         l = i;
       }
-      if (data.y[i] > upper + 0.01 && u === data.y.length) {
+      if (data.y[i] > upper + 0.01 && u === data.y.length - 1) {
         u = i;
       }
     }
@@ -1524,31 +1468,36 @@ class Plot extends Component {
       } else {
         plotdata = this.sliceXYArray(plotdata, lowerX, upperX, lowerY, upperY);
       }
-    } else if (upperX < maxX || lowerX > minX) {
-      if (Array.isArray(plotdata)) {
-        var dataoutX = [];
-        for (let i = 0; i < plotdata.length; i++) {
-          let slice = this.sliceXArray(plotdata[i], lowerX, upperX);
-          if (slice) dataoutX.push(slice);
+      return plotdata;
+    } else if (graph === "heatmap") {
+      if (upperX < maxX || lowerX > minX) {
+        if (Array.isArray(plotdata)) {
+          var dataoutX = [];
+          for (let i = 0; i < plotdata.length; i++) {
+            let slice = this.sliceXArray(plotdata[i], lowerX, upperX);
+            if (slice) dataoutX.push(slice);
+          }
+          plotdata = dataoutX;
+        } else {
+          plotdata = this.sliceXArray(plotdata, lowerX, upperX);
         }
-        plotdata = dataoutX;
-      } else {
-        plotdata = this.sliceXArray(plotdata, lowerX, upperX);
       }
-    }
-    if (upperY < maxY || lowerY > minY) {
-      if (Array.isArray(plotdata)) {
-        var dataoutY = [];
-        for (let i = 0; i < plotdata.length; i++) {
-          let slice = this.sliceYArray(plotdata[i], lowerY, upperY);
-          if (slice) dataoutY.push(slice);
+      if (upperY < maxY || lowerY > minY) {
+        if (Array.isArray(plotdata)) {
+          var dataoutY = [];
+          for (let i = 0; i < plotdata.length; i++) {
+            let slice = this.sliceYArray(plotdata[i], lowerY, upperY);
+            if (slice) dataoutY.push(slice);
+          }
+          plotdata = dataoutY;
+        } else {
+          plotdata = this.sliceYArray(plotdata, lowerY, upperY);
         }
-        plotdata = dataoutY;
-      } else {
-        plotdata = this.sliceYArray(plotdata, lowerY, upperY);
       }
+      return plotdata;
+    } else {
+      return plotdata;
     }
-    return plotdata;
   };
 
   addGaps = (obj, timeaxis, gap) => {
@@ -1774,6 +1723,44 @@ class Plot extends Component {
     return { minZ, maxZ };
   };
 
+  getBounds = (data, xaxis, yaxis, timeaxis) => {
+    var { maxdatetime, mindatetime } = this.props;
+    var minX = Infinity;
+    var maxX = -Infinity;
+    var minY = Infinity;
+    var maxY = -Infinity;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i] !== 0) {
+        let xdomain = d3.extent(
+          [].concat.apply([], data[i][xaxis]).filter((f) => {
+            return !isNaN(parseFloat(f)) && isFinite(f);
+          })
+        );
+        let ydomain = d3.extent(
+          [].concat.apply([], data[i][yaxis]).filter((f) => {
+            return !isNaN(parseFloat(f)) && isFinite(f);
+          })
+        );
+        minX = Math.min(xdomain[0], minX);
+        maxX = Math.max(xdomain[1], maxX);
+        minY = Math.min(ydomain[0], minY);
+        maxY = Math.max(ydomain[1], maxY);
+      }
+    }
+
+    if (timeaxis === "x" && maxdatetime && mindatetime) {
+      minX = Math.min(minX, mindatetime);
+      maxX = Math.max(maxX, maxdatetime);
+    }
+
+    if (timeaxis === "y" && maxdatetime && mindatetime) {
+      minY = Math.min(minY, mindatetime);
+      maxY = Math.max(maxY, maxdatetime);
+    }
+
+    return { minX, maxX, minY, maxY };
+  };
+
   componentDidMount() {
     var { datasetparameters, dataset, file, data } = this.props;
     var { xaxis, yaxis, zaxis, decimate, average } = this.state;
@@ -1864,31 +1851,76 @@ class Plot extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    var { refresh } = this.state;
+    var {
+      refresh,
+      timeaxis,
+      upperY,
+      lowerY,
+      upperX,
+      lowerX,
+      xaxis,
+      yaxis,
+      zaxis,
+    } = this.state;
     if (refresh || this.props.fileChange !== prevProps.fileChange) {
+      var { minX, maxX, minY, maxY } = this.getBounds(
+        this.props.data,
+        xaxis,
+        yaxis,
+        timeaxis
+      );
+
+      // Reset upper and lower values
+      if (timeaxis === "x") {
+        upperY = maxY;
+        lowerY = minY;
+      } else if (timeaxis === "y") {
+        upperX = maxX;
+        lowerX = minX;
+      } else {
+        upperX = maxX;
+        lowerX = minX;
+        upperY = maxY;
+        lowerY = minY;
+      }
+
       var plotdata = this.processPlotData(
-        this.state.xaxis,
-        this.state.yaxis,
-        this.state.zaxis,
-        this.state.upperY,
-        this.state.lowerY,
-        this.state.maxY,
-        this.state.minY,
-        this.state.upperX,
-        this.state.lowerX,
-        this.state.minX,
-        this.state.maxX,
+        xaxis,
+        yaxis,
+        zaxis,
+        upperY,
+        lowerY,
+        maxY,
+        minY,
+        upperX,
+        lowerX,
+        minX,
+        maxX,
         this.state.decimate,
         this.state.average,
         this.props.datasetparameters,
-        this.state.timeaxis,
+        timeaxis,
         this.state.graph
       );
       var { minZ, maxZ } = this.state;
       if (refresh !== "z") {
         ({ minZ, maxZ } = this.getZBounds(plotdata));
       }
-      this.setState({ plotdata, refresh: false, minZ, maxZ });
+
+      this.setState({
+        plotdata,
+        refresh: false,
+        minZ,
+        maxZ,
+        minX,
+        maxX,
+        minY,
+        maxY,
+        upperX,
+        upperY,
+        lowerX,
+        lowerY,
+      });
     }
   }
 
