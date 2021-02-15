@@ -27,30 +27,12 @@ class D3LineGraph extends Component {
     });
   };
 
-  getMax = (arr, param) => {
-    let max = -Infinity;
-    for (var i = 0; i < arr.length; i++) {
-      let len = arr[i][param].length;
-      while (len--) {
-        if (arr[i][param][len] !== null) {
-          max = arr[i][param][len] > max ? arr[i][param][len] : max;
-        }
-      }
-    }
-    return max;
-  };
-
-  getMin = (arr, param) => {
-    let min = Infinity;
-    for (var i = 0; i < arr.length; i++) {
-      let len = arr[i][param].length;
-      while (len--) {
-        if (arr[i][param][len] !== null) {
-          min = arr[i][param][len] < min ? arr[i][param][len] : min;
-        }
-      }
-    }
-    return min;
+  getDomain = (domain) => {
+    var minarr = domain.map((d) => d[0]);
+    var maxarr = domain.map((d) => d[1]);
+    var min = d3.extent(minarr)[0];
+    var max = d3.extent(maxarr)[1];
+    return [min, max];
   };
 
   formatDate = (raw) => {
@@ -159,34 +141,48 @@ class D3LineGraph extends Component {
           width = viswidth - margin.left - margin.right,
           height = visheight - margin.top - margin.bottom;
 
+        // Get data extents
+        var xdomain, ydomain;
+        if (Array.isArray(data)) {
+          var xdomarr = [];
+          var ydomarr = [];
+          for (var h = 0; h < data.length; h++) {
+            let xext = d3.extent(data[h].x);
+            let yext = d3.extent(data[h].y);
+            xdomarr.push(xext);
+            ydomarr.push(yext);
+          }
+          xdomain = this.getDomain(xdomarr);
+          ydomain = this.getDomain(ydomarr);
+        } else {
+          xdomain = d3.extent(data.x);
+          ydomain = d3.extent(data.y);
+        }
+
         // Format X-axis
         var x;
-        var minx = this.getMin(data, "x");
-        var maxx = this.getMax(data, "x");
         var xrange = [0, width];
         if (xReverse) xrange = [width, 0];
         if (xscale === "Time") {
-          x = d3.scaleTime().range(xrange).domain([minx, maxx]);
+          x = d3.scaleTime().range(xrange).domain(xdomain);
         } else if (xscale === "Log") {
-          x = d3.scaleLog().range(xrange).domain([minx, maxx]);
+          x = d3.scaleLog().range(xrange).domain(xdomain);
         } else {
-          x = d3.scaleLinear().range(xrange).domain([minx, maxx]);
+          x = d3.scaleLinear().range(xrange).domain(xdomain);
         }
         var xref = x.copy();
         var xbase = x.copy();
 
         // Format Y-axis
         var y;
-        var miny = this.getMin(data, "y");
-        var maxy = this.getMax(data, "y");
         var yrange = [height, 0];
         if (yReverse) yrange = [0, height];
         if (yscale === "Time") {
-          y = d3.scaleTime().range(yrange).domain([miny, maxy]);
+          y = d3.scaleTime().range(yrange).domain(ydomain);
         } else if (yscale === "Log") {
-          y = d3.scaleLog().range(yrange).domain([miny, maxy]);
+          y = d3.scaleLog().range(yrange).domain(ydomain);
         } else {
-          y = d3.scaleLinear().range(yrange).domain([miny, maxy]);
+          y = d3.scaleLinear().range(yrange).domain(ydomain);
         }
         var yref = y.copy();
         var ybase = y.copy();

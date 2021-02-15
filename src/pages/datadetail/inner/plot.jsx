@@ -1475,8 +1475,26 @@ class Plot extends Component {
     }
   };
 
+  sliceXYArray = (data, lowerX, upperX, lowerY, upperY) => {
+    var x = [];
+    var y = [];
+    for (var i = 0; i < data.x.length; i++) {
+      if (
+        data.x[i] >= lowerX &&
+        data.x[i] <= upperX &&
+        data.y[i] >= lowerY &&
+        data.y[i] <= upperY
+      ) {
+        x.push(data.x[i]);
+        y.push(data.y[i]);
+      }
+    }
+    return { x, y, z: undefined };
+  };
+
   sliceData = (
     plotdata,
+    graph,
     upperX,
     lowerX,
     upperY,
@@ -1489,6 +1507,23 @@ class Plot extends Component {
   ) => {
     if (connect === "ind") {
       return plotdata;
+    } else if (graph === "linegraph") {
+      if (Array.isArray(plotdata)) {
+        var dataout = [];
+        for (let i = 0; i < plotdata.length; i++) {
+          let slice = this.sliceXYArray(
+            plotdata[i],
+            lowerX,
+            upperX,
+            lowerY,
+            upperY
+          );
+          if (slice) dataout.push(slice);
+        }
+        plotdata = dataout;
+      } else {
+        plotdata = this.sliceXYArray(plotdata, lowerX, upperX, lowerY, upperY);
+      }
     } else if (upperX < maxX || lowerX > minX) {
       if (Array.isArray(plotdata)) {
         var dataoutX = [];
@@ -1608,6 +1643,7 @@ class Plot extends Component {
     try {
       plotdata = this.sliceData(
         plotdata,
+        graph,
         upperX,
         lowerX,
         upperY,
