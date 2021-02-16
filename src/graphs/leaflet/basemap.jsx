@@ -1236,9 +1236,10 @@ class Basemap extends Component {
 
   addGeoJSON = () => {
     var style = {
-      color: "#ff7800",
+      color: "red",
       weight: 2,
-      opacity: 0.65,
+      opacity: 1,
+      fillOpacity: 0,
     };
     if (this.props.geojson_style) {
       style = this.props.geojson_style;
@@ -1330,7 +1331,6 @@ class Basemap extends Component {
       if (bounds) {
         this.map.flyToBounds(bounds);
       }
-      console.log(bounds);
     }
 
     this.map.invalidateSize();

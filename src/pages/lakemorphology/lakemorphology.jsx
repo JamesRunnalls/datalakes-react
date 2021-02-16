@@ -220,6 +220,10 @@ class LakeMorphologyGraph extends Component {
             </select>
             <button onClick={this.download}>Download</button>
           </div>
+          <div className="reference">
+            Please contact Isabel Kiefer (isabel.kiefer@epfl.ch) at EPFL for
+            more information on this dataset.
+          </div>
         </div>
       </React.Fragment>
     );
@@ -312,7 +316,7 @@ class LakeMorphology extends Component {
 
         <div className={lake ? "lakes-map" : "lakes-map full"}>
           <Basemap
-            basemap="datalakesmapgrey"
+            basemap="datalakesmap"
             geojson={geojson}
             geojson_function={this.setLake}
             geojson_zoom={id}

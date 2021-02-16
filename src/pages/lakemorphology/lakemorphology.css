@@ -39,12 +39,16 @@
   font-size: 22px;
 }
 
+.lakes-list table {
+  border-collapse: collapse;
+}
+
 .lakes-list table tr {
   cursor: pointer;
 }
 
 .lakes-list table tr:hover {
-  text-decoration: underline;
+  background-color: rgba(0,0,0,0.2);
 }
 
 .lakes-list table td.center {
@@ -62,6 +66,11 @@
 
 .lake-morphology .xselect {
   float: right;
+}
+
+.lake-morphology .reference {
+  font-weight: bold;
+  text-align: center;
 }
 
 .lake-morphology .xselect button {
