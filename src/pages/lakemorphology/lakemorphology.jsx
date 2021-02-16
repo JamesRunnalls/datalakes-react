@@ -1,12 +1,11 @@
 import React, { Component } from "react";
-import SidebarLayout from "../../format/sidebarlayout/sidebarlayout";
 import Basemap from "../../graphs/leaflet/basemap";
 import axios from "axios";
-import { apiUrl } from "../../../src/config.json";
-import "./lakes.css";
+import { apiUrl } from "../../config.json";
+import "./lakemorphology.css";
 import D3LineGraph from "../../graphs/d3/linegraph/linegraph";
 
-class LakeData extends Component {
+class LakeMorphologyGraph extends Component {
   state = {
     morphology: {},
     title: "",
@@ -84,6 +83,51 @@ class LakeData extends Component {
     return { data, xunits, yunits };
   };
 
+  async componentDidUpdate(prevProps) {
+    var { lake, lakename } = this.props;
+    if (prevProps.lakename !== lakename) {
+      var { interpolated } = this.state;
+      if (lake.morphology) {
+        var { data: morphology } = await axios.get(
+          `${apiUrl}/externaldata/morphology/${lake.id}`
+        );
+        for (var key of Object.keys(morphology)) {
+          if (!["id", "Interpolated"].includes(key)) {
+            morphology[key].values = morphology[key].values.map((d) =>
+              parseFloat(d)
+            );
+          }
+        }
+        var title = lake.name + " Morphology";
+        var ylabel = "Depth";
+
+        var xlabels = Object.keys(morphology).filter(
+          (m) => !["id", "Depth", "Interpolated"].includes(m)
+        );
+
+        var xlabel = xlabels[0];
+
+        var { data, xunits, yunits } = this.prepareGraph(
+          xlabel,
+          ylabel,
+          morphology,
+          interpolated
+        );
+
+        this.setState({
+          morphology,
+          title,
+          data,
+          xlabel,
+          xlabels,
+          ylabel,
+          xunits,
+          yunits,
+        });
+      }
+    }
+  }
+
   async componentDidMount() {
     var { lake } = this.props;
     var { interpolated } = this.state;
@@ -128,7 +172,6 @@ class LakeData extends Component {
   }
 
   render() {
-    var { lake, geojson } = this.props;
     var {
       data,
       title,
@@ -141,63 +184,49 @@ class LakeData extends Component {
     } = this.state;
     return (
       <React.Fragment>
-        <h1>Lake Information - {lake.name}</h1>
-        <SidebarLayout
-          sidebartitle="Lake Properties"
-          left={
-            <React.Fragment>
-              <div className="lakes-map-short">
-                <Basemap basemap="datalakesmapgrey" geojson={geojson} />
-              </div>
-              {lake.morphology && (
-                <div className="lake-morphology">
-                  <div className="lakes-graph-short">
-                    <D3LineGraph
-                      data={data}
-                      title={title}
-                      xlabel={xlabel}
-                      ylabel={ylabel}
-                      xunits={xunits}
-                      yunits={yunits}
-                      lcolor={["black"]}
-                      lweight={["1"]}
-                      bcolor={"white"}
-                      xscale={"linear"}
-                      yscale={"linear"}
-                      yReverse={true}
-                      xReverse={false}
-                    />
-                  </div>
-                  <div className="interpolated">
-                    Show interpolated values{" "}
-                    <input
-                      type="checkbox"
-                      checked={interpolated}
-                      onChange={this.toggleInterpolated}
-                    />
-                  </div>
-                  <div className="xselect">
-                    <select onChange={this.onChangeX} value={xlabel}>
-                      {xlabels.map((x) => (
-                        <option key={x} value={x}>
-                          {x}
-                        </option>
-                      ))}
-                    </select>
-                    <button onClick={this.download}>Download</button>
-                  </div>
-                </div>
-              )}
-            </React.Fragment>
-          }
-          right={<React.Fragment></React.Fragment>}
-        />
+        <div className="lake-morphology">
+          <div className="lakes-graph-short">
+            <D3LineGraph
+              data={data}
+              title={title}
+              xlabel={xlabel}
+              ylabel={ylabel}
+              xunits={xunits}
+              yunits={yunits}
+              lcolor={["black"]}
+              lweight={["1"]}
+              bcolor={"white"}
+              xscale={"linear"}
+              yscale={"linear"}
+              yReverse={true}
+              xReverse={false}
+            />
+          </div>
+          <div className="interpolated">
+            Show interpolated values{" "}
+            <input
+              type="checkbox"
+              checked={interpolated}
+              onChange={this.toggleInterpolated}
+            />
+          </div>
+          <div className="xselect">
+            <select onChange={this.onChangeX} value={xlabel}>
+              {xlabels.map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
+            </select>
+            <button onClick={this.download}>Download</button>
+          </div>
+        </div>
       </React.Fragment>
     );
   }
 }
 
-class Lakes extends Component {
+class LakeMorphology extends Component {
   state = {
     lakes: [],
     geojson: false,
@@ -251,59 +280,64 @@ class Lakes extends Component {
     this.setState({ lakes, geojson });
   }
   render() {
-    document.title = "Lakes - Datalakes";
+    document.title = "Lake Morphology - Datalakes";
     let { search } = this.props.location;
     var { lakes, geojson } = this.state;
 
+    lakes = lakes.filter((l) => l.morphology);
+    var lake;
     if (
       search &&
       lakes.map((l) => l.id).includes(parseInt(search.split("_")[1]))
     ) {
-      var lake = lakes.find((l) => l.id === parseInt(search.split("_")[1]));
-      return <LakeData lake={lake} geojson={geojson} />;
-    } else {
-      return (
-        <React.Fragment>
-          <h1>Lake Information</h1>
-          <SidebarLayout
-            sidebartitle="Lake List"
-            left={
-              <React.Fragment>
-                <div className="lakes-map">
-                  <Basemap basemap="datalakesmapgrey" geojson={geojson} />
-                </div>
-              </React.Fragment>
-            }
-            rightNoScroll={
-              <React.Fragment>
-                <div className="lakes-list">
-                  <table>
-                    <tbody>
-                      <tr>
-                        <th>Lake</th>
-                        <th>Depth (m)</th>
-                        <th>Elevation (mAOD)</th>
-                      </tr>
-                      {lakes.map((l) => (
-                        <tr
-                          key={l.id}
-                          onClick={() => this.setLocation(l.name, l.id)}
-                        >
-                          <td>{l.name}</td>
-                          <td>{l.depth}</td>
-                          <td>{l.elevation}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </React.Fragment>
-            }
-          />
-        </React.Fragment>
-      );
+      lake = lakes.find((l) => l.id === parseInt(search.split("_")[1]));
     }
+
+    return (
+      <React.Fragment>
+        {lake ? (
+          <h1>Lake Morphology - {lake.name}</h1>
+        ) : (
+          <h1>Lake Morphology</h1>
+        )}
+
+        <div className="lakes-map">
+          <Basemap basemap="datalakesmapgrey" geojson={geojson} />
+        </div>
+        <div className="lakes-list">
+          <table>
+            <tbody>
+              <tr>
+                <th>Lake</th>
+                <th>Depth (m)</th>
+                <th>Elevation (mAOD)</th>
+              </tr>
+              {lakes.map((l) => (
+                <tr key={l.id} onClick={() => this.setLocation(l.name, l.id)}>
+                  <td>{l.name}</td>
+                  <td className="center">{l.depth}</td>
+                  <td className="center">{l.elevation}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="lake-morphology">
+          {lake ? (
+            <LakeMorphologyGraph
+              lake={lake}
+              lakename={lake.name}
+              geojson={geojson}
+            />
+          ) : (
+            <div className="banner">
+              Select a lake to view and download its morphology.
+            </div>
+          )}
+        </div>
+      </React.Fragment>
+    );
   }
 }
 
-export default Lakes;
+export default LakeMorphology;

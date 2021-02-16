@@ -16,7 +16,7 @@ import NetCDF from "./pages/netcdf/netcdf";
 import ErrorBoundary from "./pages/errorboundary/errorboundary";
 import ReactGA from "react-ga";
 import Monitor from "./pages/monitor/monitor";
-import Lakes from './pages/lakes/lakes';
+import LakeMorphology from "./pages/lakemorphology/lakemorphology";
 ReactGA.initialize("UA-186400369-1");
 ReactGA.pageview(window.location.pathname + window.location.search);
 
@@ -56,10 +56,10 @@ class App extends Component {
             />
 
             <Route
-              path="/lakes"
+              path="/lakemorphology"
               render={(props) => (
                 <ErrorBoundary {...props}>
-                  <Lakes {...props} />
+                  <LakeMorphology {...props} />
                 </ErrorBoundary>
               )}
             />
