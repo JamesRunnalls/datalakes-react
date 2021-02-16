@@ -1232,6 +1232,9 @@ class Basemap extends Component {
         this.props.geojson_function(feature);
       });
     }
+    if (feature.properties.Name) {
+      layer.bindTooltip(feature.properties.Name);
+    }
   };
 
   addGeoJSON = () => {
