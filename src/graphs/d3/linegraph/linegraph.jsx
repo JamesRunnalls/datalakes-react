@@ -497,6 +497,9 @@ class D3LineGraph extends Component {
                 plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
                 yref = y;
                 xref = x;
+                xy_px = xy.map((p) =>
+                  p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
+                );
                 zoombox.call(zoom.transform, d3.zoomIdentity);
               }
             }
@@ -512,6 +515,9 @@ class D3LineGraph extends Component {
                 confInt.selectAll("path").remove();
                 plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
                 xref = x;
+                xy_px = xy.map((p) =>
+                  p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
+                );
                 zoomboxx.call(zoom.transform, d3.zoomIdentity);
               }
             }
@@ -527,6 +533,9 @@ class D3LineGraph extends Component {
                 confInt.selectAll("path").remove();
                 plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
                 yref = y;
+                xy_px = xy.map((p) =>
+                  p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
+                );
                 zoomboxy.call(zoom.transform, d3.zoomIdentity);
               }
             }
@@ -534,6 +543,9 @@ class D3LineGraph extends Component {
             zoombox.on("dblclick.zoom", null).on("dblclick", () => {
               x = xbase;
               y = ybase;
+              xy_px = xy.map((p) =>
+                p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
+              );
               xref = xbase;
               yref = ybase;
               yAxis.scale(ybase);
