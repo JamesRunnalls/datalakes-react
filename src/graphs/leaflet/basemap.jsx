@@ -1226,6 +1226,29 @@ class Basemap extends Component {
     }
   };
 
+  onEachFeature = (feature, layer) => {
+    if (this.props.geojson_function) {
+      layer.on("click", () => {
+        this.props.geojson_function(feature);
+      });
+    }
+  };
+
+  addGeoJSON = () => {
+    var style = {
+      color: "#ff7800",
+      weight: 2,
+      opacity: 0.65,
+    };
+    if (this.props.geojson_style) {
+      style = this.props.geojson_style;
+    }
+    this.geojson = L.geoJson(this.props.geojson, {
+      style: style,
+      onEachFeature: this.onEachFeature,
+    }).addTo(this.map);
+  };
+
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.loading && !this.props.loading) {
       var updatePlot = this.updatePlot;
@@ -1295,8 +1318,21 @@ class Basemap extends Component {
     }
     if (prevProps.geojson !== this.props.geojson) {
       if (this.geojson) this.map.removeLayer(this.geojson);
-      this.geojson = L.geoJSON(this.props.geojson).addTo(this.map);
+      this.addGeoJSON();
     }
+    if (
+      this.props.geojson_zoom &&
+      prevProps.geojson_zoom !== this.props.geojson_zoom
+    ) {
+      var bounds = Object.values(this.geojson["_layers"]).find(
+        (g) => g.feature.properties.id === this.props.geojson_zoom
+      )["_bounds"];
+      if (bounds) {
+        this.map.flyToBounds(bounds);
+      }
+      console.log(bounds);
+    }
+
     this.map.invalidateSize();
   }
 
@@ -1415,7 +1451,7 @@ class Basemap extends Component {
 
     // GeoJSON
     if ("geojson" in this.props && this.props.geojson) {
-      this.geojson = L.geoJSON(this.props.geojson).addTo(map);
+      this.addGeoJSON();
     }
 
     if ("updateLocation" in this.props) {

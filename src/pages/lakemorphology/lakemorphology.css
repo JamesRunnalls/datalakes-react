@@ -1,10 +1,14 @@
 .lakes-map {
-  height: calc(100vh - 155px);
-  width: 100%;
+  height: calc(100vh - 540px);
+  width: calc(100vw - 400px);
   box-sizing: border-box;
   position: absolute;
   z-index: 999;
   left: 0;
+}
+
+.lakes-map.full {
+  height: calc(100vh - 210px);
 }
 
 .lakes-list {
@@ -83,6 +87,10 @@
   .lake-morphology {
     width: 100vw;
   }
+
+  .lakes-map {
+    width: 100vw;
+  }
 }
 
 @media screen and (max-width: 500px) {
@@ -92,5 +100,8 @@
   .lake-morphology .lakes-graph-short {
     height: 200px;
     margin-top: 10px;
+  }
+  .lakes-map {
+    height: calc(100vh - 320px);
   }
 }

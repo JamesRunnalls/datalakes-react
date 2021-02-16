@@ -268,6 +268,10 @@ class LakeMorphology extends Component {
     });
   };
 
+  setLake = (feature) => {
+    this.setLocation(feature.properties.Name, feature.properties.id);
+  };
+
   async componentDidMount() {
     let server = await Promise.all([
       axios.get(apiUrl + "/selectiontables/lakes"),
@@ -277,6 +281,11 @@ class LakeMorphology extends Component {
     });
     var lakes = server[0].data;
     var geojson = server[1].data;
+    lakes = lakes.filter((l) => l.morphology);
+    var ids = lakes.map((l) => l.id);
+    geojson.features = geojson.features.filter((f) =>
+      ids.includes(f.properties.id)
+    );
     this.setState({ lakes, geojson });
   }
   render() {
@@ -284,15 +293,15 @@ class LakeMorphology extends Component {
     let { search } = this.props.location;
     var { lakes, geojson } = this.state;
 
-    lakes = lakes.filter((l) => l.morphology);
     var lake;
+    var id;
     if (
       search &&
       lakes.map((l) => l.id).includes(parseInt(search.split("_")[1]))
     ) {
       lake = lakes.find((l) => l.id === parseInt(search.split("_")[1]));
+      id = lake.id;
     }
-
     return (
       <React.Fragment>
         {lake ? (
@@ -301,8 +310,13 @@ class LakeMorphology extends Component {
           <h1>Lake Morphology</h1>
         )}
 
-        <div className="lakes-map">
-          <Basemap basemap="datalakesmapgrey" geojson={geojson} />
+        <div className={lake ? "lakes-map" : "lakes-map full"}>
+          <Basemap
+            basemap="datalakesmapgrey"
+            geojson={geojson}
+            geojson_function={this.setLake}
+            geojson_zoom={id}
+          />
         </div>
         <div className="lakes-list">
           <table>

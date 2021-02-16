@@ -70,7 +70,12 @@ class Dataset extends Component {
 
   render() {
     const { dataset, selected, onSelectDataset, getLabel } = this.props;
-    var url = "/datadetail/" + dataset.id;
+    var url;
+    if (dataset.id === 1) {
+      url = "/lakemorphology";
+    } else {
+      url = "/datadetail/" + dataset.id;
+    }
     var params = this.getParameters(dataset.id);
     params = params.filter(
       (x) => ![1, 2, 3, 4, 27, 28, 29, 30].includes(x.parameters_id)
