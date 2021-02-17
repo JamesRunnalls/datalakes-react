@@ -1871,13 +1871,26 @@ class Plot extends Component {
       );
 
       // Reset upper and lower values
-      if (timeaxis === "x") {
+      if (
+        timeaxis === "x" &&
+        prevProps.upperY === upperY &&
+        prevProps.lowerY === lowerY
+      ) {
         upperY = maxY;
         lowerY = minY;
-      } else if (timeaxis === "y") {
+      } else if (
+        timeaxis === "y" &&
+        prevProps.upperX === upperX &&
+        prevProps.lowerX === lowerX
+      ) {
         upperX = maxX;
         lowerX = minX;
-      } else {
+      } else if (
+        prevProps.upperY === upperY &&
+        prevProps.lowerY === lowerY &&
+        prevProps.upperX === upperX &&
+        prevProps.lowerX === lowerX
+      ) {
         upperX = maxX;
         lowerX = minX;
         upperY = maxY;

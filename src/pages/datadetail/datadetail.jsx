@@ -20,6 +20,7 @@ import Ch2018Graph from "./inner/ch2018graph";
 import RemoteSensingDownload from "./inner/remotesensingdownload";
 import LocationMap from "./inner/locationmap";
 import Plot from "./inner/plot";
+import { isArray } from 'lodash';
 
 class DataDetail extends Component {
   state = {
@@ -365,13 +366,11 @@ class DataDetail extends Component {
   };
 
   getShape = (arr) => {
-    var shape = [];
-    var inner = arr;
-    while (inner[0]) {
-      shape.push(inner.length);
-      inner = inner[0];
+    if (isArray(arr[0])){
+      return [arr.length, arr[0].length]
+    } else {
+      return [arr.length]
     }
-    return shape;
   };
 
   async componentDidMount() {
