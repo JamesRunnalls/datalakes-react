@@ -1330,9 +1330,9 @@ class Basemap extends Component {
     ) {
       var bounds = Object.values(this.geojson["_layers"]).find(
         (g) => g.feature.properties.id === this.props.geojson_zoom
-      )["_bounds"];
+      );
       if (bounds) {
-        this.map.flyToBounds(bounds);
+        this.map.flyToBounds(bounds["_bounds"]);
       }
     }
 
