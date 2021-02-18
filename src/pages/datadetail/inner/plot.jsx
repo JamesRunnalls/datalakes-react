@@ -12,7 +12,8 @@ import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import FilterBox from "../../../components/filterbox/filterbox";
 import colorlist from "../../../components/colorramp/colors";
-import { isArray, isInteger } from "lodash";
+import isArray from "lodash/isArray";
+import isInteger from "lodash/isInteger";
 
 class Graph extends Component {
   render() {

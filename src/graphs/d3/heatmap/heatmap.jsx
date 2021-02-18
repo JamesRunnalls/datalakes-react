@@ -8,7 +8,7 @@ import {
 } from "../../../components/gradients/gradients";
 import GraphHeader from "../graphheader/graphheader";
 import "./heatmap.css";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 import D3LineGraph from "../linegraph/linegraph";
 
 class D3HeatMap extends Component {

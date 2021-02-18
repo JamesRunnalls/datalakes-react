@@ -1,9 +1,16 @@
 import React, { Component } from "react";
 import { apiUrl } from "../../../../src/config.json";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import { github } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import "../datadetail.css";
+import { LightAsync as SyntaxHighlighter } from 'react-syntax-highlighter';
+import github from "react-syntax-highlighter/dist/esm/styles/hljs/github";
+import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
+import python from 'react-syntax-highlighter/dist/esm/languages/hljs/python';
+import r from 'react-syntax-highlighter/dist/esm/languages/hljs/r';
 import NetworkGraph from "../../../graphs/d3/networkgraph/networkgraph";
+import "../datadetail.css";
+
+SyntaxHighlighter.registerLanguage('javascript', js);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('r', r);
 
 class Pipeline extends Component {
   state = {

@@ -20,7 +20,7 @@ import Ch2018Graph from "./inner/ch2018graph";
 import RemoteSensingDownload from "./inner/remotesensingdownload";
 import LocationMap from "./inner/locationmap";
 import Plot from "./inner/plot";
-import { isArray } from 'lodash';
+import isArray from "lodash/isArray";
 
 class DataDetail extends Component {
   state = {

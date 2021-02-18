@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 
 class D3GroupedBarGraph extends Component {
   state = {

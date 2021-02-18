@@ -6,17 +6,22 @@ import Home from "./pages/home/home";
 import NotFound from "./pages/notfound/notfound";
 import DataPortal from "./pages/dataportal/dataportal";
 import Station from "./pages/station/station";
-import API from "./pages/api/api";
-import DataDetail from "./pages/datadetail/datadetail";
+
+
 import AddDataset from "./pages/adddataset/adddataset";
 import GIS from "./pages/gis/gis";
 import Footer from "./format/footer/footer";
-import ThreeViewer from "./graphs/three/threeviewer";
 import NetCDF from "./pages/netcdf/netcdf";
 import ErrorBoundary from "./pages/errorboundary/errorboundary";
 import ReactGA from "react-ga";
 import Monitor from "./pages/monitor/monitor";
 import LakeMorphology from "./pages/lakemorphology/lakemorphology";
+import asyncComponent from './components/asynccomponent/asynccomponent';
+
+const AsyncThreeViewer = asyncComponent(() => import("./graphs/three/threeviewer"));
+const AsyncDataDetail = asyncComponent(() => import("./pages/datadetail/datadetail"));
+const AsyncAPI = asyncComponent(() => import("./pages/api/api"));
+
 ReactGA.initialize("UA-186400369-1");
 ReactGA.pageview(window.location.pathname + window.location.search);
 
@@ -50,7 +55,7 @@ class App extends Component {
               path="/datadetail"
               render={(props) => (
                 <ErrorBoundary {...props}>
-                  <DataDetail {...props} />
+                  <AsyncDataDetail {...props} />
                 </ErrorBoundary>
               )}
             />
@@ -77,7 +82,7 @@ class App extends Component {
               path="/API"
               render={(props) => (
                 <ErrorBoundary {...props}>
-                  <API {...props} />
+                  <AsyncAPI {...props} />
                 </ErrorBoundary>
               )}
             />
@@ -101,19 +106,10 @@ class App extends Component {
             />
 
             <Route
-              path="/ch2018"
-              render={(props) => (
-                <ErrorBoundary {...props}>
-                  <ch2018Graph {...props} />
-                </ErrorBoundary>
-              )}
-            />
-
-            <Route
               path="/three"
               render={(props) => (
                 <ErrorBoundary {...props}>
-                  <ThreeViewer {...props} />
+                  <AsyncThreeViewer {...props} />
                 </ErrorBoundary>
               )}
             />

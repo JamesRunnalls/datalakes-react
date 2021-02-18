@@ -10,7 +10,7 @@ import ColorManipulation from "../../../components/colormanipulation/colormanipu
 import LoadDataSets from "../../../components/loaddatasets/loaddatasets";
 import colorlist from "../../../components/colorramp/colors";
 import "../datadetail.css";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 
 class DisplayOptions extends Component {
   state = {

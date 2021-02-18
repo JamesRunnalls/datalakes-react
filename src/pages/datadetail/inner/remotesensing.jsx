@@ -7,7 +7,6 @@ import Loading from "../../../components/loading/loading";
 import MapControl from "../../../components/mapcontrol/mapcontrol";
 import menuicon from "../img/menuicon.svg";
 import sliceicon from "../img/sliceicon.svg";
-import calcicon from "../img/calcicon.svg";
 import colorlist from "../../../components/colorramp/colors";
 import D3LineGraph from "../../../graphs/d3/linegraph/linegraph";
 import FilterBox from "../../../components/filterbox/filterbox";
@@ -17,112 +16,6 @@ import Legend from "../../../components/legend/legend";
 import DatetimeDepthSelector from "../../../components/datetimedepthselector/datetimedepthselector";
 import PrintLegend from "../../../components/legend/printlegend";
 import ErrorModal from "../../../components/errormodal/errormodal";
-import { cloneDeep } from "lodash";
-import { evaluate } from "mathjs";
-
-class RasterCalculator extends Component {
-  state = {
-    text: "",
-    name: "Raster Calculation",
-  };
-  appendText = (addText) => {
-    this.setState({ text: this.state.text + addText });
-  };
-  updateText = (event) => {
-    this.setState({ text: event.target.value });
-  };
-  updateName = (event) => {
-    this.setState({ name: event.target.value });
-  };
-  calculate = () => {
-    var { text, name } = this.state;
-    var { selectedlayers, toggle } = this.props;
-    var sl = selectedlayers.filter((sl) => !sl.equation);
-    if (text === "") {
-      alert("Badly formatted calculation string.");
-      return;
-    }
-    text = text.replaceAll("**", "^");
-    try {
-      var test = text;
-      test = test.replaceAll(`[${sl[0].name}]`, "1");
-      evaluate(test);
-    } catch (error) {
-      alert("Badly formatted calculation string.");
-      return;
-    }
-    var v = [];
-    for (let i = 0; i < sl[0].data.v.length; i++) {
-      let exp = text;
-      exp = exp.replaceAll(`[${sl[0].name}]`, sl[0].data.v[i].toString());
-      v.push(evaluate(exp));
-    }
-    var layer = cloneDeep(sl[0]);
-    layer.data.v = v;
-    layer.array = v;
-    layer.title = name;
-    layer.name = text;
-    layer.datasets_id = -selectedlayers.length;
-    layer.id = layer.datasets_id + "&" + layer.id.split("&")[1];
-    layer.datamax = Math.max(...v);
-    layer.max = Math.max(...v);
-    layer.datamin = Math.min(...v);
-    layer.min = Math.min(...v);
-    layer.equation = text;
-    selectedlayers.unshift(layer);
-    toggle();
-  };
-  render() {
-    var { text, name } = this.state;
-    var { selectedlayers, toggle } = this.props;
-    var sl = selectedlayers.filter((sl) => !sl.equation);
-    return (
-      <div className="raster-calculator">
-        <div className="inner">
-          <div className="title">Raster Calculator (Beta)</div>
-          <div className="close" onClick={toggle}>
-            &times;
-          </div>
-          <table>
-            <tbody>
-              <tr>
-                <td>
-                  <input value={name} onChange={this.updateName} />
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <button onClick={() => this.appendText(`[${sl[0].name}]`)}>
-                    {sl[0].name}
-                  </button>
-                  <button onClick={() => this.appendText("+")}>+</button>
-                  <button onClick={() => this.appendText("-")}>-</button>
-                  <br />
-                  <button onClick={() => this.appendText("*")}>&times;</button>
-                  <button onClick={() => this.appendText("/")}>&divide;</button>
-                  <button onClick={() => this.appendText("(")}>(</button>
-                  <button onClick={() => this.appendText(")")}>)</button>
-                  <button onClick={() => this.appendText("^")}>^</button>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <textarea
-                    value={text}
-                    onChange={this.updateText}
-                    placeholder={`[${sl[0].name}] * 2`}
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <button onClick={this.calculate}>Create</button>
-        </div>
-      </div>
-    );
-  }
-}
 
 class RemoteSensingMenu extends Component {
   render() {
@@ -259,20 +152,6 @@ class RemoteSensing extends Component {
           depth,
           downloads
         ));
-
-        if (selectedlayers[i].equation) {
-          let sl = selectedlayers.filter((sl) => !sl.equation);
-          let v = [];
-          for (let j = 0; j < data.v.length; j++) {
-            let exp = selectedlayers[i].equation.replaceAll("**", "^");
-            exp = exp.replaceAll(
-              `[${sl[0].name}]`,
-              selectedlayers[i].data.v[j].toString()
-            );
-            v.push(evaluate(exp));
-          }
-          data.v = v;
-        }
 
         var { filemin, filemax, filearray } = this.remoteSensingMinMax(data);
 
@@ -925,7 +804,6 @@ class RemoteSensing extends Component {
       point,
       line,
       slice,
-      calc,
       loading,
       graph,
       plotdata,
@@ -950,13 +828,7 @@ class RemoteSensing extends Component {
         active: slice,
         onClick: this.toggleSlice,
         img: sliceicon,
-      },
-      {
-        title: "Raster Calculator",
-        active: calc,
-        onClick: this.toggleCalc,
-        img: calcicon,
-      },
+      }
     ];
 
     var graphclass = "graphwrapper hide";
@@ -1061,12 +933,6 @@ class RemoteSensing extends Component {
               yscale={"Linear"}
             />
           </div>
-        )}
-        {calc && (
-          <RasterCalculator
-            selectedlayers={selectedlayers}
-            toggle={this.toggleCalc}
-          />
         )}
         <div className="printheader">
           <div>Datalakes Print</div>
