@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import epfl from './img/epfl.svg';
-import eawag from './img/eawag.svg';
-import geneve from './img/geneve.svg';
-import carrtel from './img/carrtel.svg';
-import sdsc from './img/sdsc.svg';
-import unil from './img/unil.svg';
-import twitter from './img/twitter.svg';
+import epfl from './img/epfl.png';
+import eawag from './img/eawag.png';
+import geneve from './img/geneve.png';
+import carrtel from './img/carrtel.png';
+import sdsc from './img/sdsc.png';
+import unil from './img/unil.png';
+import twitter from './img/twitter.png';
 import './footer.css';
 
 class Footer extends Component {
