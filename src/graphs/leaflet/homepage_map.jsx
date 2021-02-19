@@ -242,7 +242,7 @@ class HomepageMap extends Component {
     };
   };
 
-  async componentDidMount() {
+  loadMap = async () => {
     var zoom = 12;
     if (window.innerWidth < 800) zoom = 11;
     try {
@@ -271,6 +271,10 @@ class HomepageMap extends Component {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  async componentDidMount() {
+    setTimeout(this.loadMap, 1000);
   }
 
   render() {
