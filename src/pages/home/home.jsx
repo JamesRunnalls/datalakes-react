@@ -13,10 +13,10 @@ import carrtel from "./img/carrtel.svg";
 import carrtelc from "./img/carrtelc.svg";
 import sdsc from "./img/sdsc.svg";
 import sdscc from "./img/sdscc.svg";
-import map from "./img/map.png";
-import data from "./img/data.png";
-import api from "./img/api.png";
-import james from "./img/james.png";
+import map from "./img/map.webp";
+import data from "./img/data.webp";
+import api from "./img/api.webp";
+import james from "./img/james.webp";
 import damien from "./img/damien.jpg";
 import "./home.css";
 
@@ -195,7 +195,7 @@ class Home extends Component {
   };
 
   render() {
-    document.title = "Home - Datalakes";
+    document.title = "Datalakes - Search, visualise and download data on Swiss lakes";
     return (
       <React.Fragment>
         <div className="home">
