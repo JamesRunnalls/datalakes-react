@@ -366,10 +366,10 @@ class DataDetail extends Component {
   };
 
   getShape = (arr) => {
-    if (isArray(arr[0])){
-      return [arr.length, arr[0].length]
+    if (isArray(arr[0])) {
+      return [arr.length, arr[0].length];
     } else {
-      return [arr.length]
+      return [arr.length];
     }
   };
 
@@ -455,6 +455,11 @@ class DataDetail extends Component {
       var { mindatetime, maxdatetime, mindepth, maxdepth } = dataset;
       mindatetime = new Date(mindatetime).getTime() / 1000;
       maxdatetime = new Date(maxdatetime).getTime() / 1000;
+
+      for (let i = 0; i < files.length; i++) {
+        mindatetime = Math.min(mindatetime, files[i].ave / 1000);
+        maxdatetime = Math.max(maxdatetime, files[i].ave / 1000);
+      }
 
       var dataArray = new Array(files.length).fill(0);
       var { data } = await axios

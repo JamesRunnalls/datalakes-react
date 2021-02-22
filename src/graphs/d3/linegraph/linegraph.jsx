@@ -122,6 +122,17 @@ class D3LineGraph extends Component {
         if (!Array.isArray(lcolor)) lcolor = [lcolor];
         if (!Array.isArray(lweight)) lweight = [lweight];
 
+        // Verify data
+        var plotdata = [];
+        for (let d = 0; d < data.length; d++) {
+          if (data[d].x && data[d].y) {
+            plotdata.push(data[d]);
+          } else {
+            plotdata.push({ x: [], y: [] });
+          }
+        }
+        data = plotdata;
+
         // Set graph size
         var margin = {
             top: 10,
