@@ -113,6 +113,7 @@ class D3LineGraph extends Component {
           simple,
           yReverse,
           xReverse,
+          plotdots,
         } = this.props;
 
         if (!lcolor) lcolor = ["#000000"];
@@ -384,12 +385,30 @@ class D3LineGraph extends Component {
             .attr("id", "plotlines")
             .attr("clip-path", "url(#clip" + graphid + ")");
 
-          //
+          // Add the points
+          var points = svg
+            .append("g")
+            .attr("id", "plotpoints")
+            .attr("clip-path", "url(#clip" + graphid + ")");
 
-          plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+          plotLine(
+            line,
+            points,
+            confInt,
+            data,
+            confidence,
+            xy,
+            lcolor,
+            lweight
+          );
+
+          function filterNull(arr) {
+            return arr.filter((v) => v.x !== null && v.y !== null);
+          }
 
           function plotLine(
             line,
+            points,
             confInt,
             data,
             confidence,
@@ -431,6 +450,37 @@ class D3LineGraph extends Component {
                   .attr("d", valueline(value[l]));
               } catch (e) {
                 console.error("Failed to plot line " + l);
+              }
+            }
+            if (plotdots && data.length > 0) {
+              var pointdata = [];
+              for (let i = 0; i < value.length; i++) {
+                pointdata = pointdata.concat(
+                  value[i].map((v) => {
+                    v.c = lcolor[i];
+                    return v;
+                  })
+                );
+              }
+
+              try {
+                points
+                  .selectAll("dots")
+                  .data(filterNull(pointdata))
+                  .enter()
+                  .append("circle")
+                  .attr("style", function (d) {
+                    return "stroke:" + d.c + ";fill:none;fill-opacity:0; stroke-opacity:1;";
+                  })
+                  .attr("r", 2.5)
+                  .attr("cx", function (d) {
+                    return x(d.x);
+                  })
+                  .attr("cy", function (d) {
+                    return y(d.y);
+                  });
+              } catch (e) {
+                console.error("Failed to plot point group");
               }
             }
           }
@@ -504,8 +554,18 @@ class D3LineGraph extends Component {
                 gY.call(yAxis);
                 removeCommaFromLabels(gX);
                 line.selectAll("path").remove();
+                points.selectAll("circle").remove();
                 confInt.selectAll("path").remove();
-                plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+                plotLine(
+                  line,
+                  points,
+                  confInt,
+                  data,
+                  confidence,
+                  xy,
+                  lcolor,
+                  lweight
+                );
                 yref = y;
                 xref = x;
                 xy_px = xy.map((p) =>
@@ -523,8 +583,18 @@ class D3LineGraph extends Component {
                 gX.call(xAxis);
                 removeCommaFromLabels(gX);
                 line.selectAll("path").remove();
+                points.selectAll("circle").remove();
                 confInt.selectAll("path").remove();
-                plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+                plotLine(
+                  line,
+                  points,
+                  confInt,
+                  data,
+                  confidence,
+                  xy,
+                  lcolor,
+                  lweight
+                );
                 xref = x;
                 xy_px = xy.map((p) =>
                   p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
@@ -541,8 +611,18 @@ class D3LineGraph extends Component {
                 gY.call(yAxis);
                 removeCommaFromLabels(gX);
                 line.selectAll("path").remove();
+                points.selectAll("circle").remove();
                 confInt.selectAll("path").remove();
-                plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+                plotLine(
+                  line,
+                  points,
+                  confInt,
+                  data,
+                  confidence,
+                  xy,
+                  lcolor,
+                  lweight
+                );
                 yref = y;
                 xy_px = xy.map((p) =>
                   p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
@@ -565,8 +645,18 @@ class D3LineGraph extends Component {
               gX.call(xAxis);
               removeCommaFromLabels(gX);
               line.selectAll("path").remove();
+              points.selectAll("circle").remove();
               confInt.selectAll("path").remove();
-              plotLine(line, confInt, data, confidence, xy, lcolor, lweight);
+              plotLine(
+                line,
+                points,
+                confInt,
+                data,
+                confidence,
+                xy,
+                lcolor,
+                lweight
+              );
             });
             zoomboxx.on("dblclick.zoom", null);
             zoomboxy.on("dblclick.zoom", null);

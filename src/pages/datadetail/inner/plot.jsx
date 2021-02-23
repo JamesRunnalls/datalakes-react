@@ -29,6 +29,7 @@ class Graph extends Component {
       zunits,
       bcolor,
       colors,
+      plotdots,
       thresholdStep,
       minZ,
       maxZ,
@@ -109,6 +110,7 @@ class Graph extends Component {
               yscale={yscale}
               yReverse={yReverse}
               xReverse={xReverse}
+              plotdots={plotdots}
               setDownloadGraph={this.setDownloadGraph}
             />
           </React.Fragment>
@@ -455,9 +457,14 @@ class DisplayOptions extends Component {
     thresholdStep: this.props.thresholdStep,
     decimate: this.props.decimate,
     average: this.props.average,
+    plotdots: this.props.plotdots,
   };
   toggleMask = () => {
     this.setState({ mask: !this.state.mask });
+  };
+
+  togglePlotdots = () => {
+    this.setState({ plotdots: !this.state.plotdots });
   };
 
   onChangeDecimate = (event) => {
@@ -504,6 +511,7 @@ class DisplayOptions extends Component {
       thresholdStep,
       decimate,
       average,
+      plotdots,
     } = this.props;
     var updateZ = false;
     if (
@@ -519,7 +527,8 @@ class DisplayOptions extends Component {
       updateZ ||
       prevProps.thresholdStep !== thresholdStep ||
       prevProps.decimate !== decimate ||
-      prevProps.average !== average
+      prevProps.average !== average ||
+      prevProps.plotdots !== plotdots
     ) {
       this.setState({
         colors,
@@ -530,6 +539,7 @@ class DisplayOptions extends Component {
         thresholdStep,
         decimate,
         average,
+        plotdots,
       });
     }
   }
@@ -544,6 +554,7 @@ class DisplayOptions extends Component {
       mask,
       decimate,
       average,
+      plotdots,
     } = this.state;
     var { array, graph, timeaxis } = this.props;
     maxZ = maxZ === undefined ? 0 : maxZ;
@@ -661,8 +672,21 @@ class DisplayOptions extends Component {
                     />
                   </td>
                 </tr>
+                {graph === "linegraph" && (
+                  <tr>
+                    <td>Plot Points</td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={plotdots}
+                        onChange={this.togglePlotdots}
+                      />
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
+
             {graph === "heatmap" && (
               <ColorManipulation
                 onChange={this.onChangeLocalColors}
@@ -735,6 +759,7 @@ class Plot extends Component {
     decimate: 1,
     average: "None",
     mask: true,
+    plotdots: false,
     upperY: 1,
     lowerY: 0,
     upperX: 1,
@@ -1435,10 +1460,7 @@ class Plot extends Component {
     var y = [];
     if (upperX < maxX || lowerX > minX) {
       for (let i = 0; i < data.x.length; i++) {
-        if (
-          data.x[i] >= lowerX &&
-          data.x[i] <= upperX
-        ) {
+        if (data.x[i] >= lowerX && data.x[i] <= upperX) {
           x.push(data.x[i]);
           y.push(data.y[i]);
         }
@@ -1452,10 +1474,7 @@ class Plot extends Component {
     y = [];
     if (upperY < maxY || lowerY > minY) {
       for (let i = 0; i < d.y.length; i++) {
-        if (
-          d.y[i] >= lowerY &&
-          d.y[i] <= upperY
-        ) {
+        if (d.y[i] >= lowerY && d.y[i] <= upperY) {
           x.push(d.x[i]);
           y.push(d.y[i]);
         }
