@@ -1420,19 +1420,49 @@ class Plot extends Component {
     }
   };
 
-  sliceXYArray = (data, lowerX, upperX, lowerY, upperY) => {
+  sliceXYArray = (
+    data,
+    lowerX,
+    upperX,
+    lowerY,
+    upperY,
+    minX,
+    maxX,
+    minY,
+    maxY
+  ) => {
     var x = [];
     var y = [];
-    for (var i = 0; i < data.x.length; i++) {
-      if (
-        data.x[i] >= lowerX &&
-        data.x[i] <= upperX &&
-        data.y[i] >= lowerY &&
-        data.y[i] <= upperY
-      ) {
-        x.push(data.x[i]);
-        y.push(data.y[i]);
+    if (upperX < maxX || lowerX > minX) {
+      for (let i = 0; i < data.x.length; i++) {
+        if (
+          data.x[i] >= lowerX &&
+          data.x[i] <= upperX
+        ) {
+          x.push(data.x[i]);
+          y.push(data.y[i]);
+        }
       }
+    } else {
+      x = data.x;
+      y = data.y;
+    }
+    var d = { x, y };
+    x = [];
+    y = [];
+    if (upperY < maxY || lowerY > minY) {
+      for (let i = 0; i < d.y.length; i++) {
+        if (
+          d.y[i] >= lowerY &&
+          d.y[i] <= upperY
+        ) {
+          x.push(d.x[i]);
+          y.push(d.y[i]);
+        }
+      }
+    } else {
+      x = d.x;
+      y = d.y;
     }
     return { x, y, z: undefined };
   };
@@ -1461,13 +1491,27 @@ class Plot extends Component {
             lowerX,
             upperX,
             lowerY,
-            upperY
+            upperY,
+            minX,
+            maxX,
+            minY,
+            maxY
           );
           if (slice) dataout.push(slice);
         }
         plotdata = dataout;
       } else {
-        plotdata = this.sliceXYArray(plotdata, lowerX, upperX, lowerY, upperY);
+        plotdata = this.sliceXYArray(
+          plotdata,
+          lowerX,
+          upperX,
+          lowerY,
+          upperY,
+          minX,
+          maxX,
+          minY,
+          maxY
+        );
       }
       return plotdata;
     } else if (graph === "heatmap") {
