@@ -1914,7 +1914,7 @@ class Plot extends Component {
     });
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     var {
       refresh,
       timeaxis,
@@ -1937,23 +1937,23 @@ class Plot extends Component {
       // Reset upper and lower values
       if (
         timeaxis === "x" &&
-        prevProps.upperY === upperY &&
-        prevProps.lowerY === lowerY
+        prevState.upperY === upperY &&
+        prevState.lowerY === lowerY
       ) {
         upperY = maxY;
         lowerY = minY;
       } else if (
         timeaxis === "y" &&
-        prevProps.upperX === upperX &&
-        prevProps.lowerX === lowerX
+        prevState.upperX === upperX &&
+        prevState.lowerX === lowerX
       ) {
         upperX = maxX;
         lowerX = minX;
       } else if (
-        prevProps.upperY === upperY &&
-        prevProps.lowerY === lowerY &&
-        prevProps.upperX === upperX &&
-        prevProps.lowerX === lowerX
+        prevState.upperY === upperY &&
+        prevState.lowerY === lowerY &&
+        prevState.upperX === upperX &&
+        prevState.lowerX === lowerX
       ) {
         upperX = maxX;
         lowerX = minX;
