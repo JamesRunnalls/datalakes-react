@@ -345,7 +345,11 @@ class D3LineGraph extends Component {
               return y(d.y);
             })
             .defined(function (d) {
-              return d.x && d.y;
+              if (d.x === null || d.y === null){
+                return false
+              } else {
+                return true
+              }
             });
 
           // Define confidence interval
