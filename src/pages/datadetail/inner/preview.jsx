@@ -23,7 +23,7 @@ class Preview extends Component {
 
   tableBody = (i, l, datasetparameters, data) => {
     var out = datasetparameters[i] && data[datasetparameters[i].axis][l];
-    if (out === null) out = 0;
+    if (out === null) out = "";
     return out;
   };
 
@@ -44,7 +44,6 @@ class Preview extends Component {
       </tr>,
     ];
     var len = data.y ? data.y.length : data.x.length;
-    console.log(data);
     for (var l = 0; l < Math.min(50, len); l++) {
       inner.push(
         <tr key={"h" + l}>
