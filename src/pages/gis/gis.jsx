@@ -46,7 +46,9 @@ class SidebarGIS extends Component {
                 title="Edit the background map style"
               >
                 <option value="datalakesmap">Datalakes Map</option>
-                <option value="datalakesmapgrey">Datalakes Map Greyscale</option>
+                <option value="datalakesmapgrey">
+                  Datalakes Map Greyscale
+                </option>
                 <option value="swisstopo">Swisstopo</option>
                 <option value="satellite">Satellite</option>
                 <option value="dark">Dark</option>
@@ -104,6 +106,7 @@ class GIS extends Component {
     modal: false,
     modaltext: "",
     modaldetail: "",
+    lakejson: false,
   };
 
   closeModal = () => {
@@ -126,6 +129,7 @@ class GIS extends Component {
           datetime,
           depth,
           hidden,
+          lakejson,
         } = this.state;
         var { selected } = newState;
         var selectedlayers = [];
@@ -133,7 +137,12 @@ class GIS extends Component {
         for (var i = 0; i < fixedSelected.length; i++) {
           var datasets_id = fixedSelected[i][0];
           var parameters_id = fixedSelected[i][1];
-          ({ selectedlayers, datasets, selected } = await this.addNewLayer(
+          ({
+            selectedlayers,
+            datasets,
+            selected,
+            lakejson,
+          } = await this.addNewLayer(
             selected,
             datasets_id,
             parameters_id,
@@ -143,7 +152,8 @@ class GIS extends Component {
             parameters,
             datetime,
             depth,
-            hidden
+            hidden,
+            lakejson
           ));
         }
         var {
@@ -156,7 +166,7 @@ class GIS extends Component {
         newState["datasets"] = datasets;
       }
       newState["loading"] = false;
-      this.setState({ mindatetime, maxdatetime, mindepth, maxdepth });
+      this.setState({ mindatetime, maxdatetime, mindepth, maxdepth, lakejson });
       this.setState(newState);
     });
   };
@@ -207,11 +217,17 @@ class GIS extends Component {
         datetime,
         depth,
         hidden,
+        lakejson,
       } = this.state;
       for (var i = 0; i < ids.length; i++) {
         var { datasets_id, parameters_id } = ids[i];
         selected.unshift([datasets_id, parameters_id]);
-        ({ selectedlayers, datasets, selected } = await this.addNewLayer(
+        ({
+          selectedlayers,
+          datasets,
+          selected,
+          lakejson,
+        } = await this.addNewLayer(
           selected,
           datasets_id,
           parameters_id,
@@ -221,7 +237,8 @@ class GIS extends Component {
           parameters,
           datetime,
           depth,
-          hidden
+          hidden,
+          lakejson
         ));
       }
       var {
@@ -239,6 +256,7 @@ class GIS extends Component {
         maxdatetime,
         mindepth,
         maxdepth,
+        lakejson,
       });
     });
   };
@@ -308,10 +326,20 @@ class GIS extends Component {
   };
 
   simstratMinMax = (array) => {
-    array = array.map((x) => x.value);
-    var max = this.getMax(array);
-    var min = this.getMin(array);
-    return { filemin: min, filemax: max, filearray: array };
+    var filearray;
+    if (Object.keys(array).includes("time")) {
+      filearray = [];
+      for (var key in array) {
+        if (key !== "time") {
+          filearray = filearray.concat(array[key]);
+        }
+      }
+    } else {
+      filearray = array.map((x) => x.value);
+    }
+    var filemax = this.getMax(filearray);
+    var filemin = this.getMin(filearray);
+    return { filemin, filemax, filearray };
   };
 
   remoteSensingMinMax = (array) => {
@@ -755,7 +783,8 @@ class GIS extends Component {
     parameters,
     datetime,
     depth,
-    hidden
+    hidden,
+    lakejson
   ) => {
     // Check layer not already loaded
     if (
@@ -791,6 +820,13 @@ class GIS extends Component {
           dp,
           dataset
         );
+
+        // Special case download lakejson
+        if ([23].includes(datasets_id)) {
+          ({ data: lakejson } = await axios.get(
+            apiUrl + "/externaldata/lakejson"
+          ));
+        }
 
         // Update the parameter min and max value
         var { min, max, array } = this.getMinMax(
@@ -860,7 +896,7 @@ class GIS extends Component {
         );
       }
     }
-    return { selectedlayers, datasets, selected };
+    return { selectedlayers, datasets, selected, lakejson };
   };
 
   updateVariable = async (datetime, depth) => {
@@ -1046,6 +1082,7 @@ class GIS extends Component {
       zoom,
       center,
       basemap,
+      lakejson,
     } = this.state;
 
     var defaultSearchLocation = this.searchLocation(
@@ -1095,8 +1132,6 @@ class GIS extends Component {
       axios.get(apiUrl + "/selectiontables/parameters"),
       axios.get(apiUrl + "/datasets"),
       axios.get(apiUrl + "/datasetparameters"),
-      axios.get(apiUrl + "/externaldata/templates/meteoswiss"),
-      axios.get(apiUrl + "/externaldata/templates/foen"),
     ]).catch((error) => {
       this.setState({ step: "error" });
     });
@@ -1104,9 +1139,6 @@ class GIS extends Component {
     var parameters = server[0].data;
     var datasets = server[1].data;
     var datasetparameters = server[2].data;
-    var meteoswiss = server[3].data;
-    var foen = server[4].data;
-    var templates = { meteoswiss, foen };
 
     // Build selected layers object
     var selectedlayers = [];
@@ -1114,7 +1146,12 @@ class GIS extends Component {
     for (var i = fixedSelected.length - 1; i > -1; i--) {
       var datasets_id = fixedSelected[i][0];
       var parameters_id = fixedSelected[i][1];
-      ({ selectedlayers, datasets, selected } = await this.addNewLayer(
+      ({
+        selectedlayers,
+        datasets,
+        selected,
+        lakejson,
+      } = await this.addNewLayer(
         selected,
         datasets_id,
         parameters_id,
@@ -1124,7 +1161,8 @@ class GIS extends Component {
         parameters,
         datetime,
         depth,
-        hidden
+        hidden,
+        lakejson
       ));
     }
 
@@ -1141,7 +1179,6 @@ class GIS extends Component {
       datasets,
       datasetparameters,
       loading: false,
-      templates,
       selected,
       hidden,
       datetime,
@@ -1153,6 +1190,7 @@ class GIS extends Component {
       maxdatetime,
       mindepth,
       maxdepth,
+      lakejson,
     });
   }
 
@@ -1165,7 +1203,6 @@ class GIS extends Component {
       loading,
       datetime,
       depth,
-      templates,
       basemap,
       zoom,
       center,
@@ -1177,6 +1214,7 @@ class GIS extends Component {
       modal,
       modaltext,
       modaldetail,
+      lakejson,
     } = this.state;
     document.title = "Map Viewer - Datalakes";
     return (
@@ -1196,8 +1234,8 @@ class GIS extends Component {
           selectedlayers={selectedlayers}
           datasets={datasets}
           legend={<Legend selectedlayers={selectedlayers} open={true} />}
-          templates={templates}
           basemap={basemap}
+          lakejson={lakejson}
           updateLocation={this.updateLocation}
           updateState={this.updateState}
           timeselector={

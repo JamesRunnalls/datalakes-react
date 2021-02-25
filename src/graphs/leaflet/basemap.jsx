@@ -426,10 +426,40 @@ class Basemap extends Component {
     this.raster.push(L.layerGroup(polygons).addTo(this.map));
   };
 
+  swapCoord = (arr) => {
+    var newArr = [];
+    for (var i = 0; i < arr.length; i++) {
+      newArr.push([arr[i][1], arr[i][0]]);
+    }
+    return newArr;
+  };
+
+  findFeature = (features, key) => {
+    return features.find((f) => parseInt(f.properties.id) === parseInt(key));
+  };
+
   simstrat = async (layer, file) => {
-    var { maxdatetime } = file;
     var { min, max, data } = layer;
-    var layerData = JSON.parse(JSON.stringify(data));
+    var layerData, outdate;
+    if (Object.keys(data).includes("time")) {
+      var { lakejson, datetime } = this.props;
+      var di = this.indexClosest(datetime.getTime() / 1000, data["time"]);
+      outdate = new Date(data["time"][di] * 1000);
+      var value, name, latlng;
+      layerData = [];
+      for (var key in data) {
+        var lakefeature = this.findFeature(lakejson.features, key);
+        if (typeof lakefeature !== "undefined") {
+          value = data[key][di];
+          name = lakefeature.properties.Name;
+          latlng = this.swapCoord(lakefeature.geometry.coordinates[0]);
+          layerData.push({ value, name, latlng });
+        }
+      }
+    } else {
+      layerData = JSON.parse(JSON.stringify(data));
+      outdate = file.maxdatetime;
+    }
     var polygons = [];
     for (var i = 0; i < layerData.length; i++) {
       var pixelcolor = getColor(layerData[i].value, min, max, layer.colors);
@@ -452,20 +482,11 @@ class Basemap extends Component {
               "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>Simstrat 1D Model</td></tr>" +
               "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
               "<tr><td><strong>Datetime</strong></td><td>" +
-              maxdatetime.toLocaleString() +
+              outdate.toLocaleString() +
               "</td></tr>" +
               "<tr><td><strong>Surface water temperature</strong></td><td>" +
               layerData[i].value +
               "°C</td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Elevation</strong></td><td>" +
-              layerData[i].elevation +
-              "m</td></tr>" +
-              "<tr><td class='text-nowrap'><strong>Depth</strong></td><td>" +
-              layerData[i].depth +
-              " m</td></tr>" +
-              '<tr><td class=\'text-nowrap\'><strong>Link</strong></td><td><a target="_blank" href="' +
-              layerData[i].link +
-              '">Information about this lake model</a></td></tr>' +
               "</tbody></table>"
           )
           .bindTooltip(valuestring, {

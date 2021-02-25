@@ -90,6 +90,7 @@ class GISMap extends Component {
       templates,
       center,
       zoom,
+      lakejson,
     } = this.props;
     var controls = [
       {
@@ -131,6 +132,7 @@ class GISMap extends Component {
             zoom={zoom}
             templates={templates}
             updateLocation={updateLocation}
+            lakejson={lakejson}
             setZoomIn={this.setZoomIn}
             setZoomOut={this.setZoomOut}
           />
