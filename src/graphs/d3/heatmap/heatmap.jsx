@@ -1143,6 +1143,8 @@ class D3HeatMap extends Component {
       yunits,
       zunits,
       data,
+      xReverse,
+      yReverse,
     } = this.props;
 
     const TimeLabels = ["Time", "time", "datetime", "Datetime", "Date", "date"];
@@ -1205,6 +1207,8 @@ class D3HeatMap extends Component {
                     ylabel={ylabel}
                     xunits={zunits}
                     yunits={yunits}
+                    xReverse={xReverse}
+                    yReverse={yReverse}
                     lcolor={"black"}
                     lweight={1}
                     bcolor={"white"}
@@ -1224,6 +1228,8 @@ class D3HeatMap extends Component {
                   ylabel={zlabel}
                   xunits={xunits}
                   yunits={zunits}
+                  xReverse={xReverse}
+                  yReverse={yReverse}
                   lcolor={"black"}
                   lweight={1}
                   bcolor={"white"}
