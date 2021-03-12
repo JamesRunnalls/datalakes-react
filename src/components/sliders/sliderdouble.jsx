@@ -8,6 +8,10 @@ import AvailbilityBar from "./availabilitybar";
 import "./slider.css";
 
 class DateSliderDouble extends Component {
+  state = {
+    upper: this.props.upper,
+    lower: this.props.lower,
+  };
   formatDate = (raw) => {
     return new Date(raw * 1000);
   };
@@ -29,6 +33,15 @@ class DateSliderDouble extends Component {
     }
   };
 
+  onChange = (event) => {
+    var lower = event[0];
+    var upper = event[1];
+    if (lower !== this.state.lower || upper !== this.state.upper) {
+      this.props.onChange(event);
+      this.setState({ upper, lower });
+    }
+  };
+
   render() {
     const sliderStyle = {
       position: "relative",
@@ -43,7 +56,6 @@ class DateSliderDouble extends Component {
       max,
       lower,
       upper,
-      onChange,
       onChangeLower,
       onChangeUpper,
       files,
@@ -91,7 +103,7 @@ class DateSliderDouble extends Component {
           mode={3}
           domain={[+min, +max]}
           rootStyle={sliderStyle}
-          onChange={onChange}
+          onChange={this.onChange}
           values={[lower, upper]}
         >
           <AvailbilityBar min={min} max={max} files={files} />
