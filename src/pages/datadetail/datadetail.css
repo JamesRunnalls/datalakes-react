@@ -11,6 +11,24 @@
   display: none;
 }
 
+.z-edit {
+  width: 100%;
+}
+
+.z-edit input {
+  width: 60%;
+  display: inline-block;
+}
+
+.z-edit button {
+  margin: 0;
+  display: inline-block;
+  width: 30%;
+  padding: 2px 5px;
+  float: right;
+  border-color: grey;
+}
+
 .downsample {
   width: 200px;
 }

@@ -31,8 +31,8 @@ class Graph extends Component {
       colors,
       plotdots,
       thresholdStep,
-      minZ,
-      maxZ,
+      lowerZ,
+      upperZ,
       confidence,
       lcolor,
       lweight,
@@ -73,8 +73,8 @@ class Graph extends Component {
               bcolor={bcolor}
               colors={colors}
               thresholdStep={thresholdStep}
-              minvalue={minZ}
-              maxvalue={maxZ}
+              minvalue={lowerZ}
+              maxvalue={upperZ}
               yReverse={yReverse}
               xReverse={xReverse}
             />
@@ -451,8 +451,8 @@ class DisplayOptions extends Component {
     colors: this.props.colors,
     title: this.props.title,
     bcolor: this.props.bcolor,
-    minZ: this.props.minZ,
-    maxZ: this.props.maxZ,
+    upperZ: this.props.upperZ,
+    lowerZ: this.props.lowerZ,
     mask: this.props.mask,
     thresholdStep: this.props.thresholdStep,
     decimate: this.props.decimate,
@@ -465,6 +465,16 @@ class DisplayOptions extends Component {
 
   togglePlotdots = () => {
     this.setState({ plotdots: !this.state.plotdots });
+  };
+
+  resetLower = () => {
+    var lowerZ = this.props.minZ;
+    this.setState({ lowerZ });
+  };
+
+  resetUpper = () => {
+    var upperZ = this.props.maxZ;
+    this.setState({ upperZ });
   };
 
   onChangeDecimate = (event) => {
@@ -487,12 +497,12 @@ class DisplayOptions extends Component {
     this.setState({ thresholdStep });
   };
   onChangeLocalMin = (event) => {
-    var minZ = parseFloat(event.target.value);
-    this.setState({ minZ });
+    var lowerZ = parseFloat(event.target.value);
+    this.setState({ lowerZ });
   };
   onChangeLocalMax = (event) => {
-    var maxZ = parseFloat(event.target.value);
-    this.setState({ maxZ });
+    var upperZ = parseFloat(event.target.value);
+    this.setState({ upperZ });
   };
   onChangeLocalBcolor = (event) => {
     var bcolor = event.target.value;
@@ -506,8 +516,8 @@ class DisplayOptions extends Component {
       colors,
       title,
       bcolor,
-      minZ,
-      maxZ,
+      lowerZ,
+      upperZ,
       thresholdStep,
       decimate,
       average,
@@ -515,9 +525,9 @@ class DisplayOptions extends Component {
     } = this.props;
     var updateZ = false;
     if (
-      !isNaN(minZ) &&
-      !isNaN(maxZ) &&
-      (prevProps.minZ !== minZ || prevProps.maxZ !== maxZ)
+      !isNaN(lowerZ) &&
+      !isNaN(upperZ) &&
+      (prevProps.lowerZ !== lowerZ || prevProps.upperZ !== upperZ)
     ) {
       updateZ = true;
     }
@@ -534,8 +544,8 @@ class DisplayOptions extends Component {
         colors,
         title,
         bcolor,
-        minZ,
-        maxZ,
+        lowerZ,
+        upperZ,
         thresholdStep,
         decimate,
         average,
@@ -548,8 +558,8 @@ class DisplayOptions extends Component {
       colors,
       title,
       bcolor,
-      minZ,
-      maxZ,
+      lowerZ,
+      upperZ,
       thresholdStep,
       mask,
       decimate,
@@ -557,8 +567,8 @@ class DisplayOptions extends Component {
       plotdots,
     } = this.state;
     var { array, graph, timeaxis } = this.props;
-    maxZ = maxZ === undefined ? 0 : maxZ;
-    minZ = minZ === undefined ? 0 : minZ;
+    upperZ = upperZ === undefined ? 0 : upperZ;
+    lowerZ = lowerZ === undefined ? 0 : lowerZ;
     return (
       <FilterBox
         title="Display Options"
@@ -590,26 +600,32 @@ class DisplayOptions extends Component {
                 {graph === "heatmap" && (
                   <tr>
                     <td>Maximum</td>
-                    <td>
-                      <input
-                        type="number"
-                        id="maxZ"
-                        value={maxZ}
-                        onChange={this.onChangeLocalMax}
-                      />
+                    <td colSpan="2">
+                      <div className="z-edit">
+                        <input
+                          type="number"
+                          id="upperZ"
+                          value={upperZ}
+                          onChange={this.onChangeLocalMax}
+                        />
+                        <button onClick={this.resetUpper}>Reset</button>
+                      </div>
                     </td>
                   </tr>
                 )}
                 {graph === "heatmap" && (
                   <tr>
                     <td>Minimum</td>
-                    <td>
-                      <input
-                        type="number"
-                        id="minZ"
-                        value={minZ}
-                        onChange={this.onChangeLocalMin}
-                      />
+                    <td colSpan="2">
+                      <div className="z-edit">
+                        <input
+                          type="number"
+                          id="lowerZ"
+                          value={lowerZ}
+                          onChange={this.onChangeLocalMin}
+                        />
+                        <button onClick={this.resetLower}>Reset</button>
+                      </div>
                     </td>
                   </tr>
                 )}
@@ -1381,32 +1397,23 @@ class Plot extends Component {
   };
 
   sliceXArray = (data, lower, upper) => {
-    var l = 0;
-    var u = data.x.length - 1;
-    for (var i = 0; i < data.x.length; i++) {
-      if (data.x[i] < lower) {
-        l = i;
-      }
-      if (data.x[i] > upper && u === data.x.length - 1) {
-        u = i;
-      }
-    }
-
-    var x = data.x.slice(l, u);
-    if (data.x[0] === upper && data.x[0] === lower) {
-      x = data.x;
-    }
-
     var y = data.y;
-
-    var z;
-    if (data.z) {
-      z = [];
+    var x = [];
+    var z = [];
+    var mask = [];
+    if (data.z && data.y) {
+      for (var i = 0; i < data.x.length; i++) {
+        if (data.x[i] >= lower && data.x[i] <= upper) {
+          x.push(data.x[i]);
+          mask.push(true);
+        } else {
+          mask.push(false);
+        }
+      }
       for (var j = 0; j < data.y.length; j++) {
-        z.push(data.z[j].slice(l, u));
+        z.push(data.z[j].filter((item, i) => mask[i]));
       }
     }
-
     if (x.length > 0) {
       return { x: x, y: y, z: z };
     } else {
@@ -1415,29 +1422,17 @@ class Plot extends Component {
   };
 
   sliceYArray = (data, lower, upper) => {
-    var l = 0;
-    var u = data.y.length - 1;
-    for (var i = 0; i < data.y.length; i++) {
-      if (data.y[i] < lower) {
-        l = i;
-      }
-      if (data.y[i] > upper + 0.01 && u === data.y.length - 1) {
-        u = i;
-      }
-    }
-    var y = data.y.slice(l, u);
     var x = data.x;
-
-    var z;
-    if (data.z) {
-      z = [];
-      for (var j = 0; j < data.y.length; j++) {
-        if (j >= l && j <= u) {
-          z.push(data.z[j]);
+    var y = [];
+    var z = [];
+    if (data.z && data.y) {
+      for (var i = 0; i < data.y.length; i++) {
+        if (data.y[i] >= lower && data.y[i] <= upper) {
+          y.push(data.y[i]);
+          z.push(data.z[i]);
         }
       }
     }
-
     if (y.length > 0) {
       return { x: x, y: y, z: z };
     } else {
@@ -1922,9 +1917,14 @@ class Plot extends Component {
       lowerY,
       upperX,
       lowerX,
+      lowerZ,
+      upperZ,
       xaxis,
       yaxis,
       zaxis,
+      graph,
+      minZ,
+      maxZ,
     } = this.state;
     if (refresh || this.props.fileChange !== prevProps.fileChange) {
       var { minX, maxX, minY, maxY } = this.getBounds(
@@ -1934,31 +1934,33 @@ class Plot extends Component {
         timeaxis
       );
 
-      // Reset upper and lower values
-      if (
-        timeaxis === "x" &&
-        prevState.upperY === upperY &&
-        prevState.lowerY === lowerY
-      ) {
-        upperY = maxY;
-        lowerY = minY;
-      } else if (
-        timeaxis === "y" &&
-        prevState.upperX === upperX &&
-        prevState.lowerX === lowerX
-      ) {
-        upperX = maxX;
-        lowerX = minX;
-      } else if (
-        prevState.upperY === upperY &&
-        prevState.lowerY === lowerY &&
-        prevState.upperX === upperX &&
-        prevState.lowerX === lowerX
-      ) {
-        upperX = maxX;
-        lowerX = minX;
-        upperY = maxY;
-        lowerY = minY;
+      // Reset upper and lower values for linegraph
+      if (graph === "linegraph") {
+        if (
+          timeaxis === "x" &&
+          prevState.upperY === this.state.maxY &&
+          prevState.lowerY === this.state.minY
+        ) {
+          upperY = maxY;
+          lowerY = minY;
+        } else if (
+          timeaxis === "y" &&
+          prevState.upperX === this.state.maxX &&
+          prevState.lowerX === this.state.minX
+        ) {
+          upperX = maxX;
+          lowerX = minX;
+        } else if (
+          prevState.upperY === upperY &&
+          prevState.lowerY === lowerY &&
+          prevState.upperX === upperX &&
+          prevState.lowerX === lowerX
+        ) {
+          upperX = maxX;
+          lowerX = minX;
+          upperY = maxY;
+          lowerY = minY;
+        }
       }
 
       var plotdata = this.processPlotData(
@@ -1977,11 +1979,16 @@ class Plot extends Component {
         this.state.average,
         this.props.datasetparameters,
         timeaxis,
-        this.state.graph
+        graph
       );
-      var { minZ, maxZ } = this.state;
       if (refresh !== "z") {
-        ({ minZ, maxZ } = this.getZBounds(plotdata));
+        if (minZ === lowerZ && maxZ === upperZ) {
+          ({ minZ, maxZ } = this.getZBounds(plotdata));
+          upperZ = maxZ;
+          lowerZ = minZ;
+        } else {
+          ({ minZ, maxZ } = this.getZBounds(plotdata));
+        }
       }
 
       this.setState({
@@ -1995,8 +2002,10 @@ class Plot extends Component {
         maxY,
         upperX,
         upperY,
+        upperZ,
         lowerX,
         lowerY,
+        lowerZ,
       });
     }
   }
