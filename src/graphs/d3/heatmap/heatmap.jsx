@@ -1161,11 +1161,11 @@ class D3HeatMap extends Component {
     try {
       let linedata = data;
       if (Array.isArray(linedata)) linedata = linedata[idx];
-      if (xgraph && mousey && linedata) {
+      if (xgraph && mousey !== false && linedata) {
         dxx = linedata.x;
         dxy = linedata.z[mousey];
       }
-      if (ygraph && mousex && linedata) {
+      if (ygraph && mousex !== false && linedata) {
         dyx = linedata.z.map((z) => z[mousex]);
         dyy = linedata.y;
       }
