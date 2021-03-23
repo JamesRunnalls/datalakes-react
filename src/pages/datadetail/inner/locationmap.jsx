@@ -21,6 +21,18 @@ class LocationMap extends Component {
     var { onChangeFileInt } = this.props;
     onChangeFileInt(event.target.options.id);
   };
+  onChangeLower = (event) => {
+    let lower = event.getTime() / 1000;
+    if (lower !== this.state.lower) {
+      this.setState({ lower });
+    }
+  };
+  onChangeUpper = (event) => {
+    let upper = event.getTime() / 1000;
+    if (upper !== this.state.upper) {
+      this.setState({ upper });
+    }
+  };
   render() {
     var { files, file, removeFile, min, max } = this.props;
     var { lower, upper } = this.state;
@@ -28,9 +40,7 @@ class LocationMap extends Component {
       f["fileid"] = index;
       return f;
     });
-    plotfiles = plotfiles.filter(
-      (f) => f.mindt >= lower && f.maxdt <= upper
-    );
+    plotfiles = plotfiles.filter((f) => f.mindt >= lower && f.maxdt <= upper);
     var filecontrol = [];
     for (let i = 0; i < file.length; i++) {
       let value = new Date(files[file[i]].ave);
@@ -77,7 +87,7 @@ class LocationMap extends Component {
                     <SliderDouble
                       onChange={this.onChangeBounds}
                       onChangeLower={this.onChangeLower}
-                      onChangeUpper={this.props.onChangeUpper}
+                      onChangeUpper={this.onChangeUpper}
                       min={min}
                       max={max}
                       lower={lower}

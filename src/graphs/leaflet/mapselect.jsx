@@ -25,6 +25,7 @@ class MapSelect extends Component {
       center: center,
       zoom: zoom,
       minZoom: 2,
+      maxZoom: 30,
       layers: [
         //L.tileLayer('https://wmts20.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg', {attribution: '<a title="Swiss Federal Office of Topography" href="https://www.swisstopo.admin.ch/">swisstopo</a>'})
         L.tileLayer(
@@ -127,7 +128,7 @@ class MapSelect extends Component {
         html: `<div class="${shape}" style="background-color:red;box-shadow: 0px 0px 15px red;"></div> `,
       });
 
-      this.markers = L.markerClusterGroup();
+      this.markers = L.markerClusterGroup({disableClusteringAtZoom: 20});
       var bounds = L.latLngBounds();
       for (let i = 0; i < datasets.length; i++) {
         let dataset = datasets[i];
