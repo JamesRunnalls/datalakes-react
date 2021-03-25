@@ -128,7 +128,7 @@ class MapSelect extends Component {
         html: `<div class="${shape}" style="background-color:red;box-shadow: 0px 0px 15px red;"></div> `,
       });
 
-      this.markers = L.markerClusterGroup({disableClusteringAtZoom: 20});
+      this.markers = L.markerClusterGroup();
       var bounds = L.latLngBounds();
       for (let i = 0; i < datasets.length; i++) {
         let dataset = datasets[i];
