@@ -941,12 +941,12 @@ class Plot extends Component {
         extra = ` (${detail})`;
       }
 
-      if (datasetparameters[j]["axis"].includes("x")) {
+      if (datasetparameters[j]["axis"].includes("x") && datasetparameters[j].parameters_id !== 27) {
         xoptions.push({
           value: datasetparameters[j]["axis"],
           label: datasetparameters[j]["name"] + extra,
         });
-      } else if (datasetparameters[j]["axis"].includes("y")) {
+      } else if (datasetparameters[j]["axis"].includes("y") && datasetparameters[j].parameters_id !== 27) {
         yoptions.push({
           value: datasetparameters[j]["axis"],
           label: datasetparameters[j]["name"] + extra,
@@ -1031,7 +1031,7 @@ class Plot extends Component {
         for (let i = 0; i < arr.length; i++) {
           let inner = [];
           for (let j = 0; j < arr[i].length; j++) {
-            if (maskArr[i][j] < 1) {
+            if (maskArr[i][j] === 0) {
               inner.push(arr[i][j]);
             } else {
               inner.push(null);
@@ -1074,13 +1074,13 @@ class Plot extends Component {
     }
 
     if (yp && dp.find((dp) => dp.link === yp.id && dp.parameters_id === 27)) {
-      mxaxis = dp.find((dp) => dp.link === yp.id && dp.parameters_id === 27)[
+      myaxis = dp.find((dp) => dp.link === yp.id && dp.parameters_id === 27)[
         "axis"
       ];
     }
 
     if (zp && dp.find((dp) => dp.link === zp.id && dp.parameters_id === 27)) {
-      mxaxis = dp.find((dp) => dp.link === zp.id && dp.parameters_id === 27)[
+      mzaxis = dp.find((dp) => dp.link === zp.id && dp.parameters_id === 27)[
         "axis"
       ];
     }
