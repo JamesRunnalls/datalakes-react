@@ -11,11 +11,19 @@ class Monitor extends Component {
     var { data } = await axios.get(apiUrl + "/monitor").catch((error) => {
       console.error(error);
     });
+    var now = new Date().getTime();
     data.map((d) => {
       d.maxdatetime = new Date(d.maxdatetime);
+      d.timedif = now - d.maxdatetime.getTime() - d.monitor * 1000;
+      let color = "green";
+      if (now > d.maxdatetime.getTime() - d.monitor * 1000) {
+        color = "red";
+      }
+      d.color = color;
       return d;
     });
-    data = data.sort((a, b) => b.maxdatetime - a.maxdatetime);
+    data = data.sort((a, b) => b.timedif - a.timedif);
+
     this.setState({ monitor: data });
   }
   render() {
@@ -34,17 +42,12 @@ class Monitor extends Component {
             </tr>
             {monitor.map((m) => {
               let now = new Date().getTime();
-              let maxdatetime = new Date(m.maxdatetime).getTime();
-              let color = "green";
-              if (now > maxdatetime - m.monitor * 1000) {
-                color = "red";
-              }
               return (
                 <tr key={m.title}>
                   <td>
                     <div
                       className="circle"
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: m.color }}
                     />
                   </td>
                   <td>
