@@ -6,6 +6,7 @@ import "./leaflet_vectorField";
 import "./leaflet_vectorFieldAnim";
 import "./leaflet_customcontrol";
 import "./leaflet_colorpicker";
+import "./leaflet_contour";
 import { getColor } from "../../components/gradients/gradients";
 import "./css/leaflet.css";
 
@@ -606,6 +607,90 @@ class Basemap extends Component {
     }
   };
 
+  prepareContourData = (data, xi, yi, zi) => {
+    var x = [];
+    var y = [];
+    var z = [];
+    for (let i = 0; i < data.length; i++) {
+      var xx = [];
+      var yy = [];
+      var zz = [];
+      for (let j = 0; j < data[i].length; j++) {
+        if (data[i][j]) {
+          xx.push(data[i][j][xi]);
+          yy.push(data[i][j][yi]);
+          zz.push(data[i][j][zi]);
+        } else {
+          xx.push(data[i][j]);
+          yy.push(data[i][j]);
+          zz.push(data[i][j]);
+        }
+      }
+      x.push(xx);
+      y.push(yy);
+      z.push(zz);
+    }
+    return { x, y, z };
+  };
+
+  translate = (gridx, gridy, i, j) => {
+    var ii = Math.floor(i);
+    var jj = Math.floor(j);
+    var x, y;
+    if (
+      gridx[ii][jj] !== null &&
+      gridx[ii][jj + 1] !== null &&
+      gridx[ii + 1][jj] !== null &&
+      gridx[ii + 1][jj + 1] !== null
+    ) {
+      x =
+        ((gridx[ii + 1][jj + 1] - gridx[ii + 1][jj]) * (j - jj) +
+          gridx[ii + 1][jj] +
+          ((gridx[ii][jj + 1] - gridx[ii][jj]) * (j - jj) + gridx[ii][jj])) /
+        2;
+      y =
+        ((gridy[ii + 1][jj] - gridy[ii][jj]) * (i - ii) +
+          gridy[ii][jj] +
+          ((gridy[ii + 1][jj + 1] - gridy[ii][jj + 1]) * (i - ii) +
+            gridy[ii][jj + 1])) /
+        2;
+    } else {
+      x = gridx[ii][jj];
+      y = gridy[ii][jj];
+    }
+
+    var latlng = this.CHtoWGSlatlng([x, y]);
+    return [latlng[1], latlng[0]];
+  };
+
+  onEachContour = (info, datetime, depth) => {
+    return function onEachFeature(feature, layer) {
+      layer.bindPopup(
+        "<table><tbody>" +
+          '<tr><td colSpan="2"><strong>' +
+          info.title +
+          "</strong></td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+          info.datasource +
+          "</td></tr>" +
+          "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+          "<tr><td><strong>Datetime:</strong></td><td>" +
+          datetime.toLocaleString() +
+          "</td></tr>" +
+          "<tr><td><strong>Depth:</strong></td><td>" +
+          depth +
+          "m</td></tr>" +
+          "<tr><td><strong>Contour value:</strong></td><td>" +
+          feature.value.toFixed(2) +
+          info.unit +
+          `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${info.datasets_id}"` +
+          '">More information</a></td></tr>' +
+          "</tbody></table>"
+      );
+      //layer.bindTooltip(feature.value + info.unit);
+    };
+  };
+
   threeDmodel = async (layer, file, timeformat, locationformat) => {
     var { parameters_id, data: indata, id } = layer;
     var { datetime, depth, data } = indata;
@@ -623,6 +708,8 @@ class Basemap extends Component {
       vectorFlow,
       vectorFlowColor,
       vectorArrowColor,
+      contour,
+      thresholds,
       min,
       max,
       colors,
@@ -635,54 +722,71 @@ class Basemap extends Component {
     var polygons, i, j, coords, value, valuestring, pixelcolor;
     var map = this.map;
     if (parameters_id === 5) {
-      polygons = [];
-      for (i = 1; i < data.length - 1; i++) {
-        for (j = 1; j < data[i].length - 1; j++) {
-          if (data[i][j] !== null) {
-            coords = this.getCellCorners(data, i, j, locationformat);
-            if (coords) {
-              value = Math.round(data[i][j][2] * 1000) / 1000;
-              valuestring = String(value) + String(unit);
-              pixelcolor = getColor(data[i][j][2], min, max, colors);
-              polygons.push(
-                L.polygon(coords, {
-                  color: pixelcolor,
-                  fillColor: pixelcolor,
-                  fillOpacity: 1,
-                  title: data[i][j][2],
-                })
-                  .bindPopup(
-                    "<table><tbody>" +
-                      '<tr><td colSpan="2"><strong>' +
-                      layer.title +
-                      "</strong></td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
-                      datasource +
-                      "</td></tr>" +
-                      "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
-                      "<tr><td><strong>Datetime:</strong></td><td>" +
-                      datetime.toLocaleString() +
-                      "</td></tr>" +
-                      "<tr><td><strong>Depth:</strong></td><td>" +
-                      depth +
-                      "m</td></tr>" +
-                      "<tr><td><strong>Value at point:</strong></td><td>" +
-                      data[i][j][2] +
-                      unit +
-                      `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
-                      '">More information</a></td></tr>' +
-                      "</tbody></table>"
-                  )
-                  .bindTooltip(valuestring, {
-                    permanent: false,
-                    direction: "top",
+      if (contour) {
+        var contourData = this.prepareContourData(data, 0, 1, 2);
+        var contours = L.contour(contourData, {
+          thresholds: thresholds,
+          translate: this.translate,
+          style: (feature) => {
+            return {
+              color: getColor(feature.geometry.value, min, max, colors),
+              opacity: 0,
+              fillOpacity: 1,
+            };
+          },
+          onEachFeature: this.onEachContour(layer, datetime, depth),
+        });
+        this.raster.push(contours.addTo(this.map));
+      } else {
+        polygons = [];
+        for (i = 1; i < data.length - 1; i++) {
+          for (j = 1; j < data[i].length - 1; j++) {
+            if (data[i][j] !== null) {
+              coords = this.getCellCorners(data, i, j, locationformat);
+              if (coords) {
+                value = Math.round(data[i][j][2] * 1000) / 1000;
+                valuestring = String(value) + String(unit);
+                pixelcolor = getColor(data[i][j][2], min, max, colors);
+                polygons.push(
+                  L.polygon(coords, {
+                    color: pixelcolor,
+                    fillColor: pixelcolor,
+                    fillOpacity: 1,
+                    title: data[i][j][2],
                   })
-              );
+                    .bindPopup(
+                      "<table><tbody>" +
+                        '<tr><td colSpan="2"><strong>' +
+                        layer.title +
+                        "</strong></td></tr>" +
+                        "<tr><td class='text-nowrap'><strong>Lake Model</strong></td><td>" +
+                        datasource +
+                        "</td></tr>" +
+                        "<tr><td class='text-nowrap'><strong>Data Owner</strong></td><td>Eawag</td></tr>" +
+                        "<tr><td><strong>Datetime:</strong></td><td>" +
+                        datetime.toLocaleString() +
+                        "</td></tr>" +
+                        "<tr><td><strong>Depth:</strong></td><td>" +
+                        depth +
+                        "m</td></tr>" +
+                        "<tr><td><strong>Value at point:</strong></td><td>" +
+                        data[i][j][2] +
+                        unit +
+                        `</td></tr><tr><td class='text-nowrap'><strong>Link</strong></td><td><a target="_blank" href="/datadetail/${datasets_id}"` +
+                        '">More information</a></td></tr>' +
+                        "</tbody></table>"
+                    )
+                    .bindTooltip(valuestring, {
+                      permanent: false,
+                      direction: "top",
+                    })
+                );
+              }
             }
           }
         }
+        this.raster.push(L.featureGroup(polygons).addTo(this.map));
       }
-      this.raster.push(L.featureGroup(polygons).addTo(this.map));
       if (
         !("center" in this.props) &&
         !("zoom" in this.props) &&

@@ -744,6 +744,8 @@ class RemoteSensing extends Component {
       var { filemin, filemax, filearray } = this.remoteSensingMinMax(data);
 
       // Add Additional Parameters
+      layer["contour"] = false;
+      layer["thresholds"] = 200;
       layer["realdatetime"] = realdatetime;
       layer["realdepth"] = realdepth;
       layer["mapplot"] = mapplot;
@@ -828,7 +830,7 @@ class RemoteSensing extends Component {
         active: slice,
         onClick: this.toggleSlice,
         img: sliceicon,
-      }
+      },
     ];
 
     var graphclass = "graphwrapper hide";

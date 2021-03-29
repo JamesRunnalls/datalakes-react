@@ -21,6 +21,8 @@ class EditSettings extends Component {
     vectorFlow: this.props.display.vectorFlow,
     vectorMagnitude: this.props.display.vectorMagnitude,
     validpixelexpression: this.props.display.validpixelexpression,
+    contour: this.props.display.contour,
+    thresholds: this.props.display.thresholds,
   };
 
   capitalize = (s) => {
@@ -76,6 +78,8 @@ class EditSettings extends Component {
       "vectorFlow",
       "vectorMagnitude",
       "validpixelexpression",
+      "contour",
+      "thresholds",
     ];
     var { display, onUpdate, displayGroup } = this.props;
 
@@ -107,6 +111,8 @@ class EditSettings extends Component {
       vectorFlow,
       vectorMagnitude,
       validpixelexpression,
+      contour,
+      thresholds,
     } = this.state;
     var { removeSelected, id, display: displayProps } = this.props;
     var { mapplot, datasetparameters, data } = displayProps;
@@ -176,6 +182,38 @@ class EditSettings extends Component {
               {" " + yselectparam.unit}
             </div>
           )}
+        {["raster", "group"].includes(mapplot) && (
+          <div className="editsettings-markeroptions">
+            <div className="editsettings-title">Raster Options</div>
+            <table className="editsettings-table">
+              <tbody>
+                <tr>
+                  <td>Contour (Beta)</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={contour}
+                      onChange={() => this.toggle("contour")}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td>No. Contours</td>
+                  <td>
+                    <input
+                      type="number"
+                      min={10}
+                      max={10000}
+                      step={1}
+                      value={thresholds}
+                      onChange={(e) => this.onChangeInput(e, "thresholds")}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
         {["marker", "group"].includes(mapplot) && (
           <div className="editsettings-markeroptions">
             <div className="editsettings-title">Marker Options</div>

@@ -862,6 +862,8 @@ class GIS extends Component {
         //var optimisedcolors = this.optimisePoints(array, unoptimisedcolors);
 
         // Add Additional Parameters
+        layer["contour"] = false;
+        layer["thresholds"] = 200;
         layer["files"] = files;
         layer["data"] = data;
         layer["min"] = min;
