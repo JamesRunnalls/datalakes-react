@@ -182,38 +182,39 @@ class EditSettings extends Component {
               {" " + yselectparam.unit}
             </div>
           )}
-        {["raster", "group"].includes(mapplot) && (
-          <div className="editsettings-markeroptions">
-            <div className="editsettings-title">Raster Options</div>
-            <table className="editsettings-table">
-              <tbody>
-                <tr>
-                  <td>Contour (Beta)</td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={contour}
-                      onChange={() => this.toggle("contour")}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td>No. Contours</td>
-                  <td>
-                    <input
-                      type="number"
-                      min={10}
-                      max={10000}
-                      step={1}
-                      value={thresholds}
-                      onChange={(e) => this.onChangeInput(e, "thresholds")}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
+        {["raster", "group"].includes(mapplot) &&
+          validpixelexpression === "NA" && (
+            <div className="editsettings-markeroptions">
+              <div className="editsettings-title">Raster Options</div>
+              <table className="editsettings-table">
+                <tbody>
+                  <tr>
+                    <td>Contour (Beta)</td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={contour}
+                        onChange={() => this.toggle("contour")}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>No. Contours</td>
+                    <td>
+                      <input
+                        type="number"
+                        min={10}
+                        max={10000}
+                        step={1}
+                        value={thresholds}
+                        onChange={(e) => this.onChangeInput(e, "thresholds")}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
         {["marker", "group"].includes(mapplot) && (
           <div className="editsettings-markeroptions">
             <div className="editsettings-title">Marker Options</div>
@@ -370,7 +371,7 @@ class EditSettings extends Component {
             </table>
           </div>
         )}
-        {validpixelexpression !== null && (
+        {validpixelexpression !== "NA" && (
           <div>
             <table>
               <tbody>

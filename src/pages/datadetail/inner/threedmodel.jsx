@@ -793,7 +793,7 @@ class ThreeDModel extends Component {
       // Add Additional Parameters
       layer["contour"] = false;
       layer["thresholds"] = 200;
-      layer["validpixelexpression"] = false;
+      layer["validpixelexpression"] = "NA";
       layer["realdatetime"] = realdatetime;
       layer["realdepth"] = realdepth;
       layer["mapplot"] = mapplot;
