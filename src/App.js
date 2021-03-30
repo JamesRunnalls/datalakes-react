@@ -18,7 +18,6 @@ import Monitor from "./pages/monitor/monitor";
 import LakeMorphology from "./pages/lakemorphology/lakemorphology";
 import asyncComponent from './components/asynccomponent/asynccomponent';
 
-const AsyncThreeViewer = asyncComponent(() => import("./graphs/three/threeviewer"));
 const AsyncDataDetail = asyncComponent(() => import("./pages/datadetail/datadetail"));
 const AsyncAPI = asyncComponent(() => import("./pages/api/api"));
 
@@ -101,15 +100,6 @@ class App extends Component {
               render={(props) => (
                 <ErrorBoundary {...props}>
                   <AddDataset {...props} />
-                </ErrorBoundary>
-              )}
-            />
-
-            <Route
-              path="/three"
-              render={(props) => (
-                <ErrorBoundary {...props}>
-                  <AsyncThreeViewer {...props} />
                 </ErrorBoundary>
               )}
             />
