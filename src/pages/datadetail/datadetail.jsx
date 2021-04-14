@@ -155,11 +155,35 @@ class DataDetail extends Component {
     }
   };
 
+  selectFilesDatetime = (newfiles) => {
+    if (newfiles.length < 1 || newfiles.length > 20) {
+      window.alert(
+        "A maximum of 20 profiles can be plotted simultaneously, please select a sorted time period."
+      );
+    } else if (
+      window.confirm(
+        "You sure you want to select " + newfiles.length + " files?"
+      )
+    ) {
+      var file = newfiles.map((f) => f.fileid);
+      var { data } = this.state;
+      this.setState({ innerLoading: true });
+      for (var i = 0; i < newfiles.length; i++) {
+        if (data[newfiles[i].fileid] === 0) {
+          this.downloadFile(newfiles[i].fileid);
+        }
+      }
+      this.setState({ file, innerLoading: false });
+    }
+  };
+
   removeFile = (event) => {
     var { file } = this.state;
-    var index = parseInt(event.target.id);
-    file.splice(index, 1);
-    this.setState({ file });
+    if (file.length > 1) {
+      var index = parseInt(event.target.id);
+      file.splice(index, 1);
+      this.setState({ file });
+    }
   };
 
   toggleAddNewFile = () => {
@@ -735,6 +759,7 @@ class DataDetail extends Component {
               max={maxdatetime}
               onChangeFileInt={this.onChangeFileInt}
               removeFile={this.removeFile}
+              selectFilesDatetime={this.selectFilesDatetime}
             />
           </React.Fragment>
         );

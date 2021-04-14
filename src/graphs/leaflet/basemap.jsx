@@ -1231,12 +1231,14 @@ class Basemap extends Component {
 
   indexClosest = (num, arr) => {
     var index = 0;
-    var diff = Math.abs(num - arr[0]);
+    var diff = Infinity;
     for (var val = 0; val < arr.length; val++) {
-      var newdiff = Math.abs(num - arr[val]);
-      if (newdiff < diff) {
-        diff = newdiff;
-        index = val;
+      if (arr[val] !== null) {
+        var newdiff = Math.abs(num - arr[val]);
+        if (newdiff < diff) {
+          diff = newdiff;
+          index = val;
+        }
       }
     }
     return index;

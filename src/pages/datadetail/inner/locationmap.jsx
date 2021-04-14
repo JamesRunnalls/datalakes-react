@@ -34,7 +34,7 @@ class LocationMap extends Component {
     }
   };
   render() {
-    var { files, file, removeFile, min, max } = this.props;
+    var { files, file, removeFile, selectFilesDatetime, min, max } = this.props;
     var { lower, upper } = this.state;
     var plotfiles = files.map((f, index) => {
       f["fileid"] = index;
@@ -94,6 +94,13 @@ class LocationMap extends Component {
                       upper={upper}
                       files={files}
                     />
+                    <button
+                      onClick={() => selectFilesDatetime(plotfiles)}
+                      title="Select all profiles in time period."
+                    >
+                      Select files
+                    </button>
+                    {plotfiles.length} profiles
                   </div>
                 }
               />
