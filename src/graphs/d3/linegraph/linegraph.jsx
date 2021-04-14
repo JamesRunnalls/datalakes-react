@@ -320,7 +320,7 @@ class D3LineGraph extends Component {
                   CI_lower: confidence[i]["CI_lower"][j],
                 });
               } else {
-                if ((!isNaN(data[i]["x"][j]), !isNaN(data[i]["y"][j]))) {
+                if ((!isNaN(data[i]["x"][j]) && !isNaN(data[i]["y"][j]))) {
                   xyt.push({
                     x: data[i]["x"][j],
                     y: data[i]["y"][j],
