@@ -123,10 +123,24 @@ class D3HeatMap extends Component {
         zunits,
         title,
       } = this.props;
+      var printdata;
+      if (Array.isArray(data)) {
+        if (data.length !== 1) {
+          alert(
+            "Dataset too complex for single CSV download, please use the download interface for accessing CSV results for this dataset."
+          );
+          return
+        } else {
+          printdata = data[0];
+        }
+      } else {
+        printdata = data;
+      }
       var csvContent = `data:text/csv;charset=utf-8,,${xlabel} (${xunits})\n${ylabel} (${yunits}),${zlabel} (${zunits})\n`;
-      csvContent = csvContent + `,${data.x.join(",")}\n`;
-      for (var i = 0; i < data.y.length; i++) {
-        csvContent = csvContent + `${data.y[i]},${data.z[i].join(",")}\n`;
+      csvContent = csvContent + `,${printdata.x.join(",")}\n`;
+      for (var i = 0; i < printdata.y.length; i++) {
+        csvContent =
+          csvContent + `${printdata.y[i]},${printdata.z[i].join(",")}\n`;
       }
       var name = title + ".csv";
       var encodedUri = encodeURI(csvContent);
