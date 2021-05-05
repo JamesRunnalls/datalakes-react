@@ -874,50 +874,28 @@ class D3HeatMap extends Component {
           // Currently using closest (needs to be improved)
 
           var index = [];
-          var xpix = [];
-          var ypix = [];
-          var xstart = [];
-          var xend = [];
-          var ystart = [];
-          var yend = [];
-          for (let i = 0; i < data.length; i++) {
-            ypix.push(data[i].y.map((dy) => scaleY(dy)));
-            xpix.push(data[i].x.map((dx) => scaleX(dx)));
+          for (var i = 0; i < data.length; i++) {
+            let ypix = data[i].y.map((dy) => scaleY(dy));
+            let xpix = data[i].x.map((dx) => scaleX(dx));
 
-            xstart.push(
-              Math.max(...[0, Math.ceil(Math.min(...xpix[i])), loww])
-            );
-            xend.push(
-              Math.min(...[width, Math.floor(Math.max(...xpix[i])), highw])
-            );
-
-            ystart.push(
-              Math.max(...[0, Math.ceil(Math.min(...ypix[i])), lowh])
-            );
-            yend.push(
-              Math.min(...[height, Math.floor(Math.max(...ypix[i])), highh])
-            );
-          }
-          var xlim = Math.max(...xend) * 0.01;
-          var ylim = Math.max(...yend) * 0.01;
-          for (let i = 0; i < data.length; i++) {
-            let xdiff = xend.map((x) => Math.abs(x - xstart[i]));
-            let ydiff = yend.map((y) => Math.abs(y - ystart[i]));
-            if (Math.min(...xdiff) < xlim) {
-              xstart[i] = xend[xdiff.indexOf(Math.min(...xdiff))];
-            }
-            if (Math.min(...ydiff) < ylim) {
-              ystart[i] = yend[ydiff.indexOf(Math.min(...ydiff))];
-            }
-          }
-          for (let i = 0; i < data.length; i++) {
             let indexxpix = [];
-            for (var j = xstart[i]; j < xend[i]; j++) {
-              indexxpix.push([j, indexOfClosest(j, xpix[i])]);
-            }
+            let xstart = Math.max(...[0, Math.ceil(Math.min(...xpix)), loww]);
+            let xend = Math.min(
+              ...[width, Math.floor(Math.max(...xpix)), highw]
+            );
+
             let indexypix = [];
-            for (var k = ystart[i]; k < yend[i]; k++) {
-              indexypix.push([k, indexOfClosest(k, ypix[i])]);
+            let ystart = Math.max(...[0, Math.ceil(Math.min(...ypix)), lowh]);
+            let yend = Math.min(
+              ...[height, Math.floor(Math.max(...ypix)), highh]
+            );
+
+            for (var j = xstart; j < xend; j++) {
+              indexxpix.push([j, indexOfClosest(j, xpix)]);
+            }
+
+            for (var k = ystart; k < yend; k++) {
+              indexypix.push([k, indexOfClosest(k, ypix)]);
             }
 
             index.push({ indexxpix, indexypix });
@@ -1168,6 +1146,7 @@ class D3HeatMap extends Component {
       xReverse,
       yReverse,
     } = this.props;
+
     const TimeLabels = ["Time", "time", "datetime", "Datetime", "Date", "date"];
 
     var xy = " ";
@@ -1191,7 +1170,7 @@ class D3HeatMap extends Component {
         dyy = linedata.y;
       }
     } catch (e) {
-      console.error(e);
+      console.log(e);
     }
 
     var datax = [{ x: dxx, y: dxy }];

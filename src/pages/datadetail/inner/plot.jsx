@@ -941,12 +941,18 @@ class Plot extends Component {
         extra = ` (${detail})`;
       }
 
-      if (datasetparameters[j]["axis"].includes("x") && datasetparameters[j].parameters_id !== 27) {
+      if (
+        datasetparameters[j]["axis"].includes("x") &&
+        datasetparameters[j].parameters_id !== 27
+      ) {
         xoptions.push({
           value: datasetparameters[j]["axis"],
           label: datasetparameters[j]["name"] + extra,
         });
-      } else if (datasetparameters[j]["axis"].includes("y") && datasetparameters[j].parameters_id !== 27) {
+      } else if (
+        datasetparameters[j]["axis"].includes("y") &&
+        datasetparameters[j].parameters_id !== 27
+      ) {
         yoptions.push({
           value: datasetparameters[j]["axis"],
           label: datasetparameters[j]["name"] + extra,
@@ -1164,10 +1170,43 @@ class Plot extends Component {
         y.push(data[k].y);
       }
       return { x, y, z: undefined };
+    } else if (graph === "heatmap" && isArray(plotdata) && connect === "join") {
+      return this.joinHeatmapData(plotdata);
     } else {
       return plotdata;
     }
   };
+
+  joinHeatmapData(data) {
+    if (data.length > 1) {
+      if (
+        data.every((d) => JSON.stringify(d.y) === JSON.stringify(data[0].y))
+      ) {
+        var dataJoined = Object.create(data[0]);
+        for (let i = 1; i < data.length; i++) {
+          let minB = Math.min(...data[i - 1].x);
+          let maxB = Math.max(...data[i - 1].x);
+          let minA = Math.min(...data[i].x);
+          let maxA = Math.max(...data[i].x);
+          if (minA > maxB) {
+            dataJoined.x = dataJoined.x.concat(data[i].x);
+            dataJoined.z = dataJoined.z.map((d, index) =>
+              d.concat(data[i].z[index])
+            );
+          } else if (minB > maxA) {
+            dataJoined.x = data[i].x.concat(dataJoined.x);
+            dataJoined.z = data[i].z.map((d, index) =>
+              d.concat(dataJoined.z[index])
+            );
+          } else {
+            return data;
+          }
+        }
+        return dataJoined;
+      }
+    }
+    return data;
+  }
 
   roundFactor = (dt, factor) => {
     var year = dt.getFullYear();
