@@ -41,6 +41,20 @@
   border-color: grey;
 }
 
+.iframe {
+  margin-top: 10px;
+}
+
+.iframe img {
+  height: 15px;
+  transition: transform .2s;
+}
+
+.iframe img:hover {
+  height: 15px;
+  transform: scale(1.01);
+}
+
 .downsample {
   width: 200px;
 }

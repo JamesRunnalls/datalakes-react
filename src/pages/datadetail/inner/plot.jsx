@@ -14,6 +14,7 @@ import FilterBox from "../../../components/filterbox/filterbox";
 import colorlist from "../../../components/colorramp/colors";
 import isArray from "lodash/isArray";
 import isInteger from "lodash/isInteger";
+import logo from "../img/logo.svg";
 
 class Graph extends Component {
   render() {
@@ -2062,6 +2063,20 @@ class Plot extends Component {
               </div>
               <div className="detailgraph">
                 <Graph {...this.state} {...this.props} />
+                {this.props.iframe && (
+                  <div className="iframe">
+                    Powered by{"  "}
+                    <a
+                      href={
+                        "https://www.datalakes-eawag.ch/datadetail/" +
+                        this.props.dataset.id
+                      }
+                      title="For more information see this dataset on Datalakes."
+                    >
+                      <img src={logo} alt="logo" />
+                    </a>
+                  </div>
+                )}
               </div>
             </React.Fragment>
           }

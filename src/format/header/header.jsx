@@ -46,7 +46,7 @@ class Header extends Component {
   render() {
     var { showMenu, stuck } = this.state;
     return (
-      <header>
+      <header id="header">
         <div className={"header" + stuck}>
           <div className="header-inner">
             <div className="logo">

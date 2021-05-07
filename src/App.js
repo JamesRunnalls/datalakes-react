@@ -6,8 +6,6 @@ import Home from "./pages/home/home";
 import NotFound from "./pages/notfound/notfound";
 import DataPortal from "./pages/dataportal/dataportal";
 import Station from "./pages/station/station";
-
-
 import AddDataset from "./pages/adddataset/adddataset";
 import GIS from "./pages/gis/gis";
 import Footer from "./format/footer/footer";
@@ -16,9 +14,11 @@ import ErrorBoundary from "./pages/errorboundary/errorboundary";
 import ReactGA from "react-ga";
 import Monitor from "./pages/monitor/monitor";
 import LakeMorphology from "./pages/lakemorphology/lakemorphology";
-import asyncComponent from './components/asynccomponent/asynccomponent';
+import asyncComponent from "./components/asynccomponent/asynccomponent";
 
-const AsyncDataDetail = asyncComponent(() => import("./pages/datadetail/datadetail"));
+const AsyncDataDetail = asyncComponent(() =>
+  import("./pages/datadetail/datadetail")
+);
 const AsyncAPI = asyncComponent(() => import("./pages/api/api"));
 
 ReactGA.initialize("UA-186400369-1");
@@ -26,9 +26,10 @@ ReactGA.pageview(window.location.pathname + window.location.search);
 
 class App extends Component {
   render() {
+    var iframe = window.location.href.includes("?iframe");
     return (
       <BrowserRouter>
-        <Header />
+        {!iframe && <Header />}
         <main>
           <Switch>
             <Route
@@ -133,7 +134,7 @@ class App extends Component {
             />
           </Switch>
         </main>
-        <Footer />
+        {!iframe && <Footer />}
       </BrowserRouter>
     );
   }

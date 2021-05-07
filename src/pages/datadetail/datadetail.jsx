@@ -41,6 +41,7 @@ class DataDetail extends Component {
     file: [0],
     innerLoading: false,
     addnewfiles: true,
+    iframe: false,
   };
 
   // Download data
@@ -407,6 +408,8 @@ class DataDetail extends Component {
       dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
     }
 
+    var iframe = this.props.location.search.includes("iframe");
+
     let server = await Promise.all([
       axios.get(apiUrl + "/datasets/" + dataset_id),
       axios.get(apiUrl + "/files?datasets_id=" + dataset_id),
@@ -537,6 +540,7 @@ class DataDetail extends Component {
         step,
         allowedStep,
         scripts,
+        iframe,
       });
       //} else if (datasource === "Meteolakes") {
     } else if (mapplotfunction === "meteolakes") {
@@ -609,7 +613,7 @@ class DataDetail extends Component {
   }
 
   render() {
-    const {
+    var {
       renku,
       dataset,
       datasetparameters,
@@ -625,6 +629,7 @@ class DataDetail extends Component {
       innerLoading,
       scripts,
       addnewfiles,
+      iframe,
     } = this.state;
     document.title = dataset.title
       ? dataset.title + " - Datalakes"
@@ -635,8 +640,13 @@ class DataDetail extends Component {
     p = p.filter((x) => ![1, 2, 3, 4].includes(x.parameters_id));
     p = p.map((x) => [dataset.id, x.parameters_id]);
     var link = "/map?selected=" + JSON.stringify(p);
-    var monitor = Number.isInteger(dataset.monitor)
-    var title = <h1>{dataset.title} {monitor && <div className="title-live">LIVE</div>}</h1>
+    var monitor = Number.isInteger(dataset.monitor);
+    if (iframe && step !== "") step = "plot";
+    var title = (
+      <h1>
+        {dataset.title} {monitor && <div className="title-live">LIVE</div>}
+      </h1>
+    );
 
     switch (step) {
       default:
@@ -657,13 +667,17 @@ class DataDetail extends Component {
       case "plot":
         return (
           <React.Fragment>
-            {title}
-            <DataSubMenu
-              step={step}
-              allowedStep={allowedStep}
-              updateSelectedState={this.updateSelectedState}
-              link={link}
-            />
+            {!iframe && (
+              <React.Fragment>
+                {title}
+                <DataSubMenu
+                  step={step}
+                  allowedStep={allowedStep}
+                  updateSelectedState={this.updateSelectedState}
+                  link={link}
+                />
+              </React.Fragment>
+            )}
             <Plot
               datasetparameters={datasetparameters}
               dataset={dataset}
@@ -675,6 +689,7 @@ class DataDetail extends Component {
               mindatetime={mindatetime}
               removeFile={this.removeFile}
               downloadMultipleFiles={this.downloadMultipleFiles}
+              iframe={iframe}
             />
           </React.Fragment>
         );
