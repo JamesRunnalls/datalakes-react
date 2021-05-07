@@ -635,6 +635,8 @@ class DataDetail extends Component {
     p = p.filter((x) => ![1, 2, 3, 4].includes(x.parameters_id));
     p = p.map((x) => [dataset.id, x.parameters_id]);
     var link = "/map?selected=" + JSON.stringify(p);
+    var monitor = Number.isInteger(dataset.monitor)
+    var title = <h1>{dataset.title} {monitor && <div className="title-live">LIVE</div>}</h1>
 
     switch (step) {
       default:
@@ -655,7 +657,7 @@ class DataDetail extends Component {
       case "plot":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -679,7 +681,7 @@ class DataDetail extends Component {
       case "heatmap":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -710,7 +712,7 @@ class DataDetail extends Component {
       case "linegraph":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -744,7 +746,7 @@ class DataDetail extends Component {
       case "locationmap":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -766,7 +768,7 @@ class DataDetail extends Component {
       case "preview":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -783,7 +785,7 @@ class DataDetail extends Component {
       case "download":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -804,7 +806,7 @@ class DataDetail extends Component {
       case "pipeline":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -817,7 +819,7 @@ class DataDetail extends Component {
       case "information":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -834,7 +836,7 @@ class DataDetail extends Component {
       case "external":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -852,7 +854,7 @@ class DataDetail extends Component {
       case "threedmodel":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -871,7 +873,7 @@ class DataDetail extends Component {
       case "threedmodeldownload":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -890,7 +892,7 @@ class DataDetail extends Component {
       case "remotesensingdownload":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -909,7 +911,7 @@ class DataDetail extends Component {
       case "remotesensing":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}
@@ -928,7 +930,7 @@ class DataDetail extends Component {
       case "ch2018":
         return (
           <React.Fragment>
-            <h1>{dataset.title}</h1>
+            {title}
             <DataSubMenu
               step={step}
               allowedStep={allowedStep}

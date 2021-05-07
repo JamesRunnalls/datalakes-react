@@ -90,7 +90,6 @@ class Dataset extends Component {
       lake = lake + " | ";
     }
     if (selected.includes(dataset)) check = "checkbox checked";
-
     return (
       <div key={dataset.id} className="dataset">
         <div
@@ -109,8 +108,8 @@ class Dataset extends Component {
           className="text"
         >
           <div className="text-title">{dataset.title}</div>
-          {dataset.datasource !== "internal" && (
-            <div className="text-external">EXTERNAL</div>
+          {Number.isInteger(dataset.monitor) && (
+            <div className="text-live">LIVE</div>
           )}
           <div>
             <div className="innerdatasetleft">

@@ -10,7 +10,8 @@
 
 .filterbox .title {
   display: inline-block;
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .filterbox .symbol {
