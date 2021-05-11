@@ -78,16 +78,17 @@ class AddDataset extends Component {
   }
 
   // 1) Process input file
-  validateFile = async () => {
+  validateFile = async (id) => {
     var { dataset, step, dropdown } = this.state;
-
+    var post = {};
+    if (id) post = { id };
     // Add blank row to datasets table
     var { data: data1 } = await axios
-      .post(apiUrl + "/datasets", {})
+      .post(apiUrl + "/datasets", post)
       .catch((error) => {
-        console.error(error.message);
+        console.error(error);
         this.setState({ allowedStep: [1, 0, 0, 0, 0] });
-        throw new Error("Process failed please try again");
+        throw new Error(error.response.data.message);
       });
 
     // Clone git repo and add files to files table

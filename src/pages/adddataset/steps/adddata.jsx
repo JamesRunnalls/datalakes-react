@@ -6,6 +6,11 @@ class AddData extends Component {
   state = {
     message: "",
     loading: false,
+    optionalid: false,
+  };
+
+  toggleOptional = () => {
+    this.setState({ optionalid: !this.state.optionalid });
   };
 
   nextStep = async (e) => {
@@ -17,9 +22,13 @@ class AddData extends Component {
         message:
           "Downloading and analysing file. This might take a while for large files.",
       });
-      this.props.nextStep().catch((error) => {
+      var id = false;
+      if (document.getElementById("id").value !== ""){
+        id = document.getElementById("id").value
+      }
+      this.props.nextStep(id).catch((error) => {
         console.error(error.message);
-        console.log(error)
+        console.log(error);
         this.setState({
           message: error.message,
           loading: false,
@@ -51,7 +60,7 @@ class AddData extends Component {
 
     return (
       <React.Fragment>
-        <form className="adddataset-form" onSubmit={this.nextStep}>
+        <div className="adddataset-form">
           <div className="welcome-text">
             <p>
               Welcome to the Datalakes add dataset portal. Currently we only
@@ -76,9 +85,7 @@ class AddData extends Component {
               dataset they must be of the same format and in the same folder
               with no other files present.
             </p>
-            <p>
-              Data must be on the master branch.
-            </p>
+            <p>Data must be on the master branch.</p>
             <p>Enter a link below to the NetCDF file in your git repository.</p>
           </div>
           <div className="form-group">
@@ -91,12 +98,29 @@ class AddData extends Component {
               onChange={this.props.handleChange("datasourcelink")}
               defaultValue={dataset.datasourcelink}
             />
+            <label
+              className="optional-id"
+              htmlFor="id"
+              onClick={this.toggleOptional}
+            >
+              Specify id for dataset (not recommended)
+            </label>
+            <input
+              id="id"
+              className={
+                this.state.optionalid ? "optional-id" : "optional-id hide"
+              }
+              ref="id"
+              type="number"
+              min="0"
+              step="1"
+            />
           </div>
           <div className="error-message">{userMessage}</div>
           <div className="buttonnav">
             <button onClick={this.nextStep}>Process</button>
           </div>
-        </form>
+        </div>
       </React.Fragment>
     );
   }

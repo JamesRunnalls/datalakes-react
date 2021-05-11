@@ -92,7 +92,7 @@ form.adddataset-form select {
   margin: auto;
 }
 
-form.adddataset-form .form-group {
+.adddataset-form .form-group {
   display: inline-block;
   text-align: center;
   padding: 10px 20px;
@@ -100,13 +100,22 @@ form.adddataset-form .form-group {
   box-sizing: border-box;
 }
 
-form.adddataset-form .form-group label {
+.adddataset-form .form-group label {
   display: block;
   color: grey;
   padding-bottom: 3px;
 }
 
-form.adddataset-form input {
+.adddataset-form .form-group label.optional-id {
+  margin-top: 20px;
+  font-size: 10px;
+}
+
+.adddataset-form .form-group .optional-id.hide {
+  display: none;
+}
+
+.adddataset-form input {
   font-size: 14px;
   width: 100%;
   border: solid 1px rgb(169, 169, 169);
@@ -115,6 +124,10 @@ form.adddataset-form input {
   margin-bottom: 0;
   background-color: white;
   text-align: center;
+}
+
+.adddataset-form input.optional-id  {
+  width: 80px;
 }
 
 .repo-connection {
