@@ -61,11 +61,11 @@ class Download extends Component {
       );
     }
     var url;
-    if (filetype === "csv"){
+    if (filetype === "csv") {
       url = `${apiUrl}/download/csv?password=${datasetpassword}`;
     } else {
       url = `${apiUrl}/download?password=${datasetpassword}`;
-    } 
+    }
     var name =
       title.replace(/\s/g, "").toLowerCase() + "_datalakesdownload.zip";
     axios({
@@ -102,9 +102,12 @@ class Download extends Component {
       max,
       files,
       selectedFiles,
+      datasetparameters,
     } = this.props;
     var { upper, lower } = this.state;
-
+    var csv =
+      !/\d/.test(datasetparameters.map((dp) => dp.axis).join("")) ||
+      !datasetparameters.map((dp) => dp.axis).join("").includes("z");
     var selectedArray = [0];
     if (files.length > 1) {
       selectedArray = selectedFiles(upper, lower, files, "download");
@@ -176,15 +179,17 @@ class Download extends Component {
           >
             JSON
           </button>
-          <button
-            onClick={() =>
-              this.downloadFiles("csv", apiUrl, selectedArray, dataset.title)
-            }
-            className="download-button"
-            title="Download datasets in CSV format"
-          >
-            CSV (Beta)
-          </button>
+          {csv && (
+            <button
+              onClick={() =>
+                this.downloadFiles("csv", apiUrl, selectedArray, dataset.title)
+              }
+              className="download-button"
+              title="Download datasets in CSV format"
+            >
+              CSV (Beta)
+            </button>
+          )}
         </div>
         <div className="info-title">Parse Data</div>
         <div className="parsedata">
@@ -283,8 +288,8 @@ class Download extends Component {
             JSON is the native format of Javascript, data is stored in this
             format to allow fast access to the data for visualistion on the web
             platform. Significantly more metadata is available in the NetCDF
-            file. As with datetime, most languages have a native import
-            function for JSON.
+            file. As with datetime, most languages have a native import function
+            for JSON.
           </p>
         </div>
       </div>

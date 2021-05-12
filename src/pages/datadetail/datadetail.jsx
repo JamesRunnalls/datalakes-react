@@ -810,6 +810,7 @@ class DataDetail extends Component {
             <Download
               dataset={dataset}
               files={files}
+              datasetparameters={datasetparameters}
               selectedFiles={this.selectedFiles}
               getLabel={this.getLabel}
               max={maxdatetime}
