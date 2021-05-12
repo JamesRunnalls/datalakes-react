@@ -46,9 +46,29 @@ class D3LineGraph extends Component {
   downloadCSV = () => {
     try {
       var { data, xlabel, xunits, ylabel, yunits, title } = this.props;
-      var csvContent = `data:text/csv;charset=utf-8,${xlabel} (${xunits}),${ylabel} (${yunits})\n`;
-      for (var i = 0; i < data.x.length; i++) {
-        csvContent = csvContent + `${data.x[i]},${data.y[i]}\n`;
+      var csvContent = ""
+      if (!Array.isArray(data) || data.length === 1) {
+        if (Array.isArray(data)) data = data[0];
+        csvContent = csvContent + `data:text/csv;charset=utf-8,${xlabel} (${xunits}),${ylabel} (${yunits})\n`;
+        for (var i = 0; i < data.x.length; i++) {
+          csvContent = csvContent + `${data.x[i]},${data.y[i]}\n`;
+        }
+      } else {
+        csvContent = csvContent + "data:text/csv;charset=utf-8";
+        var rows = -Infinity;
+        for (let i = 0; i < data.length; i++) {
+          csvContent =
+            csvContent + `,${xlabel} (${xunits}),${ylabel} (${yunits})`;
+          rows = Math.max(rows, data[i].x.length);
+        }
+        csvContent = csvContent + "\n";
+        for (let j = 0; j < rows; j++) {
+          csvContent = csvContent + `${data[0].x[j]},${data[0].y[j]}`
+          for (let i = 1; i < data.length; i++) {
+            csvContent = csvContent + `,${data[i].x[j]},${data[i].y[j]}`;
+          }
+          csvContent = csvContent + "\n";
+        }
       }
       var name = title.split(" ").join("_") + ".csv";
       var encodedUri = encodeURI(csvContent);
@@ -59,6 +79,7 @@ class D3LineGraph extends Component {
       link.click();
       this.setState({ download: false });
     } catch (e) {
+      console.error(e);
       alert("Failed to convert data to .csv, please download in .json format.");
     }
   };
@@ -320,7 +341,7 @@ class D3LineGraph extends Component {
                   CI_lower: confidence[i]["CI_lower"][j],
                 });
               } else {
-                if ((!isNaN(data[i]["x"][j]) && !isNaN(data[i]["y"][j]))) {
+                if (!isNaN(data[i]["x"][j]) && !isNaN(data[i]["y"][j])) {
                   xyt.push({
                     x: data[i]["x"][j],
                     y: data[i]["y"][j],
@@ -345,10 +366,10 @@ class D3LineGraph extends Component {
               return y(d.y);
             })
             .defined(function (d) {
-              if (d.x === null || d.y === null){
-                return false
+              if (d.x === null || d.y === null) {
+                return false;
               } else {
-                return true
+                return true;
               }
             });
 
@@ -474,7 +495,11 @@ class D3LineGraph extends Component {
                   .enter()
                   .append("circle")
                   .attr("style", function (d) {
-                    return "stroke:" + d.c + ";fill:none;fill-opacity:0; stroke-opacity:1;";
+                    return (
+                      "stroke:" +
+                      d.c +
+                      ";fill:none;fill-opacity:0; stroke-opacity:1;"
+                    );
                   })
                   .attr("r", 2.5)
                   .attr("cx", function (d) {
