@@ -991,25 +991,34 @@ class Plot extends Component {
   };
 
   handleAxisSelect = (event) => {
-    var { datasetparameters } = this.props;
-    var { xaxis, yaxis, zaxis } = this.state;
+    var { datasetparameters, data } = this.props;
+    var { xaxis, yaxis, zaxis, timeaxis, lowerY, lowerX, upperY, upperX } =
+      this.state;
     if (event.value.includes("x")) xaxis = event.value;
     if (event.value.includes("y")) yaxis = event.value;
     if (event.value.includes("z")) zaxis = event.value;
-    var {
-      xoptions,
-      yoptions,
-      zoptions,
-      graph,
-      yReverse,
-      xReverse,
-    } = this.setAxisOptions(datasetparameters, xaxis, yaxis, zaxis);
+    var { xoptions, yoptions, zoptions, graph, yReverse, xReverse } =
+      this.setAxisOptions(datasetparameters, xaxis, yaxis, zaxis);
     var { xlabel, ylabel, zlabel, xunits, yunits, zunits } = this.getAxisLabels(
       datasetparameters,
       xaxis,
       yaxis,
       zaxis
     );
+    var { minX, maxX, minY, maxY } = this.getBounds(
+      data,
+      xaxis,
+      yaxis,
+      timeaxis
+    );
+    if (timeaxis !== "x") {
+      upperX = maxX;
+      lowerX = minX;
+    }
+    if (timeaxis !== "y") {
+      upperY = maxY;
+      lowerY = minY;
+    }
 
     this.setState({
       xaxis,
@@ -1025,8 +1034,16 @@ class Plot extends Component {
       xunits,
       yunits,
       zunits,
+      upperX,
+      lowerX,
+      upperY,
+      lowerY,
       yReverse,
       xReverse,
+      minX,
+      maxX,
+      minY,
+      maxY,
       refresh: true,
     });
   };
@@ -1864,14 +1881,8 @@ class Plot extends Component {
     var { datasetparameters, dataset, file, data } = this.props;
     var { xaxis, yaxis, zaxis, decimate, average } = this.state;
 
-    var {
-      xoptions,
-      yoptions,
-      zoptions,
-      graph,
-      yReverse,
-      xReverse,
-    } = this.setAxisOptions(datasetparameters, xaxis, yaxis, zaxis);
+    var { xoptions, yoptions, zoptions, graph, yReverse, xReverse } =
+      this.setAxisOptions(datasetparameters, xaxis, yaxis, zaxis);
 
     var { xlabel, ylabel, zlabel, xunits, yunits, zunits } = this.getAxisLabels(
       datasetparameters,
@@ -1973,36 +1984,6 @@ class Plot extends Component {
         yaxis,
         timeaxis
       );
-
-      // Reset upper and lower values for linegraph
-      if (graph === "linegraph") {
-        if (
-          timeaxis === "x" &&
-          prevState.upperY === this.state.maxY &&
-          prevState.lowerY === this.state.minY
-        ) {
-          upperY = maxY;
-          lowerY = minY;
-        } else if (
-          timeaxis === "y" &&
-          prevState.upperX === this.state.maxX &&
-          prevState.lowerX === this.state.minX
-        ) {
-          upperX = maxX;
-          lowerX = minX;
-        } else if (
-          prevState.upperY === upperY &&
-          prevState.lowerY === lowerY &&
-          prevState.upperX === upperX &&
-          prevState.lowerX === lowerX
-        ) {
-          upperX = maxX;
-          lowerX = minX;
-          upperY = maxY;
-          lowerY = minY;
-        }
-      }
-
       var plotdata = this.processPlotData(
         xaxis,
         yaxis,
