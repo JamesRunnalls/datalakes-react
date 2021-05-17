@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import * as d3 from "d3";
+import { interp2 } from "../../../components/interp2/interp2";
 import SidebarLayout from "../../../format/sidebarlayout/sidebarlayout";
 import ColorManipulation from "../../../components/colormanipulation/colormanipulation";
 import DataSelect from "../../../components/dataselect/dataselect";
@@ -459,6 +460,7 @@ class DisplayOptions extends Component {
     decimate: this.props.decimate,
     average: this.props.average,
     plotdots: this.props.plotdots,
+    interpolate: this.props.interpolate,
   };
   toggleMask = () => {
     this.setState({ mask: !this.state.mask });
@@ -481,6 +483,10 @@ class DisplayOptions extends Component {
   onChangeDecimate = (event) => {
     var decimate = parseInt(event.target.value);
     this.setState({ decimate });
+  };
+
+  onChangeInterpolate = (event) => {
+    this.setState({ interpolate: event.target.value });
   };
   onChangeAverage = (event) => {
     var average = event.target.value;
@@ -566,8 +572,9 @@ class DisplayOptions extends Component {
       decimate,
       average,
       plotdots,
+      interpolate,
     } = this.state;
-    var { array, graph, timeaxis } = this.props;
+    var { array, graph, timeaxis, interpolate_options } = this.props;
     upperZ = upperZ === undefined ? 0 : upperZ;
     lowerZ = lowerZ === undefined ? 0 : lowerZ;
     return (
@@ -641,6 +648,25 @@ class DisplayOptions extends Component {
                         value={thresholdStep}
                         onChange={this.onChangeLocalThreshold}
                       />
+                    </td>
+                  </tr>
+                )}
+                {graph === "heatmap" && (
+                  <tr>
+                    <td>Interpolate missing values</td>
+                    <td>
+                      <select
+                        id="interpolate"
+                        value={interpolate}
+                        onChange={this.onChangeInterpolate}
+                        className="scale-select"
+                      >
+                        {interpolate_options.map((op) => (
+                          <option key={op} value={op}>
+                            {op}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                   </tr>
                 )}
@@ -776,6 +802,14 @@ class Plot extends Component {
     decimate: 1,
     average: "None",
     mask: true,
+    interpolate: "none",
+    interpolate_options: [
+      "none",
+      "x-linear",
+      "y-linear",
+      "x-nearest",
+      "y-nearest",
+    ],
     plotdots: false,
     upperY: 1,
     lowerY: 0,
@@ -1688,7 +1722,8 @@ class Plot extends Component {
     average,
     datasetparameters,
     timeaxis,
-    graph
+    graph,
+    interpolate
   ) => {
     var { mask, gap } = this.state;
     var { data, files, file } = this.props;
@@ -1750,7 +1785,23 @@ class Plot extends Component {
       console.error(e);
     }
 
+    try {
+      plotdata = this.interpolate2D(plotdata, interpolate, graph);
+    } catch (e) {
+      console.error(e);
+    }
+
     return plotdata;
+  };
+
+  interpolate2D = (obj, interpolate, graph) => {
+    if (graph === "heatmap" && interpolate !== "none") {
+      if (!Array.isArray(obj)) obj = [obj];
+      for (let i = 0; i < obj.length; i++) {
+        obj[i] = interp2(obj[i].x, obj[i].y, obj[i].z, interpolate);
+      }
+    }
+    return obj;
   };
 
   getInitialBounds = (dataset, data, file, xaxis, yaxis) => {
@@ -1925,7 +1976,8 @@ class Plot extends Component {
       average,
       datasetparameters,
       timeaxis,
-      graph
+      graph,
+      this.state.interpolate
     );
 
     this.setState({
@@ -2000,7 +2052,8 @@ class Plot extends Component {
         this.state.average,
         this.props.datasetparameters,
         timeaxis,
-        graph
+        graph,
+        this.state.interpolate
       );
       if (refresh !== "z") {
         if (minZ === lowerZ && maxZ === upperZ) {
