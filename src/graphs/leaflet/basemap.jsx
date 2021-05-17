@@ -1066,7 +1066,7 @@ class Basemap extends Component {
       index = this.indexClosest(depth, data.y);
       value = this.numberformat(parseFloat(data[datasetparameter.axis][index]));
       dt = new Date(data[dp2.axis][index] * 1000);
-      dd = dd + data[dp3.axis][index];
+      dd = dd + data[dp3.axis][index] + "m";
     } else if (
       type.join(",").includes("z&") &&
       type.includes("x&1") &&
@@ -1077,7 +1077,7 @@ class Basemap extends Component {
       indexy = this.indexClosest(depth, data["y"]);
       value = this.numberformat(data[datasetparameter.axis][indexy][indexx]);
       dt = new Date(data["x"][indexx] * 1000);
-      dd = dd + data["y"][indexy];
+      dd = dd + data["y"][indexy] + "m";
     } else if (
       type.includes("x&1") &&
       type.includes("y&") &&
@@ -1087,7 +1087,7 @@ class Basemap extends Component {
       index = this.indexClosest(datetime.getTime() / 1000, data["x"]);
       value = this.numberformat(data[datasetparameter.axis][index]);
       dt = new Date(data["x"][index] * 1000);
-      dd = dd + maxdepth;
+      dd = dd + maxdepth + "m";
     } else if (
       type.includes("x&1") &&
       !type.includes("y&2") &&
@@ -1115,7 +1115,7 @@ class Basemap extends Component {
       alert("No plotting function defined");
     }
 
-    var valuestring = String(value) + String(datasetparameter.unit);
+    var valuestring = String(value) + " " + String(datasetparameter.unit) + "<br>" + this.parseDate(dt);
     var color = getColor(value, min, max, colors);
     var shape = markerSymbol;
     if (markerFixedSize) {
@@ -1158,6 +1158,14 @@ class Basemap extends Component {
     );
 
     this.marker.push(markerGroup);
+  };
+
+  parseDate = (input) => {
+    var date = new Date(input);
+    let day = ("0" + date.getDate()).slice(-2);
+    let month = ("0" + (date.getMonth() + 1)).slice(-2);
+    let year = date.getFullYear();
+    return day + "/" + month + "/" + year;
   };
 
   parseVectorData = (data, radius) => {
