@@ -166,6 +166,7 @@
 
 .selectormodal .selectorbox .editor {
   padding: 30px;
+  max-width: 650px;
 }
 
 .selectormodal .selectorbox .editor.time {
@@ -220,8 +221,13 @@
   background-color: rgba(0, 0, 0, 0.4);
 }
 
+.editor .react-calendar__month-view__days {
+  justify-content: center;
+}
+
 .editor .react-calendar button {
   color: white;
+  border: none;
 }
 
 .editor .react-calendar__tile:enabled:hover,
