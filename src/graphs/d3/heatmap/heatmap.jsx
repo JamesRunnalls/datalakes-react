@@ -113,23 +113,15 @@ class D3HeatMap extends Component {
 
   downloadCSV = () => {
     try {
-      var {
-        data,
-        xlabel,
-        ylabel,
-        zlabel,
-        xunits,
-        yunits,
-        zunits,
-        title,
-      } = this.props;
+      var { data, xlabel, ylabel, zlabel, xunits, yunits, zunits, title } =
+        this.props;
       var printdata;
       if (Array.isArray(data)) {
         if (data.length !== 1) {
           alert(
             "Dataset too complex for single CSV download, please use the download interface for accessing CSV results for this dataset."
           );
-          return
+          return;
         } else {
           printdata = data[0];
         }
@@ -156,16 +148,8 @@ class D3HeatMap extends Component {
   };
 
   downloadJSON = () => {
-    var {
-      data,
-      xlabel,
-      ylabel,
-      zlabel,
-      xunits,
-      yunits,
-      zunits,
-      title,
-    } = this.props;
+    var { data, xlabel, ylabel, zlabel, xunits, yunits, zunits, title } =
+      this.props;
     var arr = {
       ...{ xlabel, xunits, ylabel, yunits, zlabel, zunits, title },
       ...data,
@@ -498,6 +482,10 @@ class D3HeatMap extends Component {
           .style("font-size", `${fontSize}px`)
           .text(t2);
 
+        var zlabel_text = "";
+        if (zlabel) zlabel_text = zlabel;
+        if (zunits) zlabel_text = zlabel_text + " (" + zunits + ")";
+
         svg
           .append("text")
           .attr("transform", "rotate(-90)")
@@ -506,7 +494,7 @@ class D3HeatMap extends Component {
           .attr("dz", "1em")
           .style("text-anchor", "middle")
           .style("font-size", `${fontSize}px`)
-          .text(zlabel + " (" + zunits + ")");
+          .text(zlabel_text);
 
         svg
           .append("text")
@@ -703,20 +691,23 @@ class D3HeatMap extends Component {
             var xval, yval;
             var xu = "";
             var yu = "";
+            var zu = "";
 
             if (TimeLabels.includes(xlabel)) {
               xval = format(process.x[xi], "HH:mm dd MMM yy");
             } else {
               xval = numberformat(process.x[xi]);
-              xu = xunits;
+              if (typeof xlabel === "string") xu = xunits;
             }
 
             if (TimeLabels.includes(ylabel)) {
               yval = format(process.y[yi], "HH:mm dd MMM yy");
             } else {
               yval = numberformat(process.y[yi]);
-              yu = yunits;
+              if (typeof ylabel === "string") yu = yunits;
             }
+
+            if (typeof zlabel === "string") zu = zunits;
 
             var html =
               "<table><tbody>" +
@@ -724,7 +715,7 @@ class D3HeatMap extends Component {
               `<tr><td>y:</td><td>${yval} ${yu}</td></tr>` +
               `<tr><td>z:</td><td>${numberformat(
                 process.z[yi][xi]
-              )} ${zunits}</td></tr>` +
+              )} ${zu}</td></tr>` +
               "</tbody></table>";
 
             tooltip
