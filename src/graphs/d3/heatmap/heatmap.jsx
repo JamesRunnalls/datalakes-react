@@ -668,6 +668,21 @@ class D3HeatMap extends Component {
           .attr("id", "tooltip" + graphid)
           .attr("class", "graphtooltip");
 
+        // Add axis locators
+        var symbolGenerator = d3.symbol().type(d3.symbolTriangle).size(25);
+        svg
+          .append("g")
+          .attr("transform", "rotate(90)")
+          .append("g")
+          .style("opacity", 0)
+          .attr("id", "zpointer" + graphid)
+          .attr(
+            "transform",
+            "translate(" + height + ",-" + (width - 16 + margin.right / 3) + ")"
+          )
+          .append("path")
+          .attr("d", symbolGenerator());
+
         zoombox.on("mousemove", () => {
           try {
             var hoverX = x.invert(
@@ -692,6 +707,7 @@ class D3HeatMap extends Component {
             var xu = "";
             var yu = "";
             var zu = "";
+            var zval = process.z[yi][xi];
 
             if (TimeLabels.includes(xlabel)) {
               xval = format(process.x[xi], "HH:mm dd MMM yy");
@@ -713,9 +729,7 @@ class D3HeatMap extends Component {
               "<table><tbody>" +
               `<tr><td>y:</td><td>${xval} ${xu}</td></tr>` +
               `<tr><td>y:</td><td>${yval} ${yu}</td></tr>` +
-              `<tr><td>z:</td><td>${numberformat(
-                process.z[yi][xi]
-              )} ${zu}</td></tr>` +
+              `<tr><td>z:</td><td>${numberformat(zval)} ${zu}</td></tr>` +
               "</tbody></table>";
 
             tooltip
@@ -723,15 +737,27 @@ class D3HeatMap extends Component {
               .style("left", x(process.x[xi]) + margin.left + 10 + "px")
               .style("top", y(process.y[yi]) + margin.top - 20 + "px")
               .style("opacity", 1);
+            d3.select("#zpointer" + graphid)
+              .attr(
+                "transform",
+                "translate(" +
+                  ((zval - maxvalue) / (minvalue - maxvalue)) * height +
+                  ",-" +
+                  (width - 16 + margin.right / 3) +
+                  ")"
+              )
+              .style("opacity", 1);
             this.setState({ mousex: xi, mousey: yi, idx });
           } catch (e) {
             tooltip.style("opacity", 0);
+            d3.select("#zpointer" + graphid).style("opacity", 0);
             this.setState({ mousex: false, mousey: false });
           }
         });
 
         zoombox.on("mouseout", () => {
           tooltip.style("opacity", 0);
+          d3.select("#zpointer" + graphid).style("opacity", 0);
           this.setState({ mousex: false, mousey: false });
         });
 
