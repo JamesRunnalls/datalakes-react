@@ -1738,8 +1738,6 @@ class Plot extends Component {
       mask
     );
 
-    console.log(plotdata);
-
     plotdata = this.joinData(plotdata, graph, files[file[0]].connect, timeaxis);
 
     try {
