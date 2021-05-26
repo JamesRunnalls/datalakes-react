@@ -1738,6 +1738,8 @@ class Plot extends Component {
       mask
     );
 
+    console.log(plotdata);
+
     plotdata = this.joinData(plotdata, graph, files[file[0]].connect, timeaxis);
 
     try {
@@ -2036,6 +2038,15 @@ class Plot extends Component {
         yaxis,
         timeaxis
       );
+      if (prevState.minY === prevState.lowerY && prevState.lowerY === lowerY)
+        lowerY = minY;
+      if (prevState.maxY === prevState.upperY && prevState.upperY === upperY)
+        upperY = maxY;
+      if (prevState.minX === prevState.lowerX && prevState.lowerX === lowerX)
+        lowerX = minX;
+      if (prevState.maxX === prevState.upperX && prevState.upperX === upperX)
+        upperX = maxX;
+
       var plotdata = this.processPlotData(
         xaxis,
         yaxis,
@@ -2055,6 +2066,7 @@ class Plot extends Component {
         graph,
         this.state.interpolate
       );
+
       if (refresh !== "z") {
         if (minZ === lowerZ && maxZ === upperZ) {
           ({ minZ, maxZ } = this.getZBounds(plotdata));
