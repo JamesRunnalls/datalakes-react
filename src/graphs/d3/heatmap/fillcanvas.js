@@ -1,3 +1,4 @@
+import * as d3 from "d3";
 import { getRGBAColor, indexOfClosest } from "./functions";
 
 export const canvasGrid = (
@@ -32,7 +33,60 @@ export const canvasGrid = (
   }
 };
 
-export const canvasContour = (scaleX, scaleY, data) => {};
+export const canvasContour = (
+  data,
+  scaleX,
+  scaleY,
+  zDomain,
+  context,
+  options
+) => {
+  const colorScale = (v) => {
+    return getRGBAColor(v, options.zMin, options.zMax, options.colors);
+  };
+  var thresholds = d3.range(
+    zDomain[0],
+    zDomain[1],
+    (zDomain[1] - zDomain[0]) / options.thresholdStep
+  );
+
+  data.forEach((d) => {
+    let crough = d3.contours().size([d.z[0].length, d.z.length]).smooth(false);
+    let contours = d3.contours().size([d.z[0].length, d.z.length]);
+    let values = d.z.flat();
+    fill(crough.thresholds(thresholds)(values)[0], d);
+    contours
+      .thresholds(thresholds)(values)
+      .forEach((contour, index) => {
+        if (index !== 0) fill(contour, d);
+      });
+  });
+
+  function fill(geometry, plotdata) {
+    let color = colorScale(geometry.value);
+    context.fillStyle = `rgb(
+      ${color[0]},
+      ${color[1]},
+      ${color[2]})`;
+    geometry.coordinates.forEach((a) => {
+      a.forEach((b) => {
+        context.beginPath();
+        context.moveTo(
+          scaleX(getXfromIndex(b[0][0], plotdata, options)),
+          scaleY(getYfromIndex(b[0][1], plotdata, options))
+        );
+        b.forEach((c) => {
+          context.lineTo(
+            scaleX(getXfromIndex(c[0], plotdata, options)),
+            scaleY(getYfromIndex(c[1], plotdata, options))
+          );
+        });
+        context.closePath();
+        context.fill();
+      });
+    });
+  }
+};
 
 const pixelMapping = (data, scaleX, scaleY, options) => {
   var dataypix = data.y.map((dy) => scaleY(dy));
@@ -200,4 +254,46 @@ const putImgDataMultMatrix = (
     }
   }
   context.putImageData(imgData, 1, 0);
+};
+
+const getXfromIndex = (index, plotdata, options) => {
+  if (index <= plotdata.x.length - 1) {
+    if (options.xTime) {
+      return new Date(
+        (plotdata.x[Math.ceil(index)].getTime() -
+          plotdata.x[Math.floor(index)].getTime()) *
+          (index - Math.floor(index)) +
+          plotdata.x[Math.floor(index)].getTime()
+      );
+    } else {
+      return (
+        (plotdata.x[Math.ceil(index)] - plotdata.x[Math.floor(index)]) *
+          (index - Math.floor(index)) +
+        plotdata.x[Math.floor(index)]
+      );
+    }
+  } else {
+    return plotdata.x[plotdata.x.length - 1];
+  }
+};
+
+const getYfromIndex = (index, plotdata, options) => {
+  if (index <= plotdata.y.length - 1) {
+    if (options.yTime) {
+      return new Date(
+        (plotdata.y[Math.ceil(index)].getTime() -
+          plotdata.y[Math.floor(index)].getTime()) *
+          (index - Math.floor(index)) +
+          plotdata.y[Math.floor(index)].getTime()
+      );
+    } else {
+      return (
+        (plotdata.y[Math.ceil(index)] - plotdata.y[Math.floor(index)]) *
+          (index - Math.floor(index)) +
+        plotdata.y[Math.floor(index)]
+      );
+    }
+  } else {
+    return plotdata.y[plotdata.y.length - 1];
+  }
 };

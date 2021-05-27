@@ -73,3 +73,12 @@ export const indexOfClosest = (num, arr) => {
   }
   return index;
 };
+
+export const getFileIndex = (scales, p) => {
+  for (var i = 0; i < scales.length; i++) {
+    if (p >= Math.min(...scales[i]) && p <= Math.max(...scales[i])) {
+      return i;
+    }
+  }
+  return NaN;
+};

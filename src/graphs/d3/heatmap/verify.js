@@ -16,6 +16,10 @@ export const verifyColors = (colors) => {
   return true;
 };
 
+export const verifyFunction = (f) => {
+  return typeof f === "function";
+};
+
 export const verifyDiv = (div) => {
   if (d3.select("#" + div)._groups[0][0] === null) {
     throw new Error(

@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { format } from "date-fns";
 import "d3-contour";
 import {
   verifyString,
@@ -7,13 +8,9 @@ import {
   verifyColors,
   verifyDiv,
   verifyData,
+  verifyFunction,
 } from "./verify";
-import {
-  convertToRGB,
-  getRGBAColor,
-  closest,
-  indexOfClosest,
-} from "./functions";
+import { convertToRGB, getFileIndex, closest } from "./functions";
 import { canvasGrid, canvasContour } from "./fillcanvas";
 
 export const heatmap = (div, data, options = {}) => {
@@ -28,22 +25,16 @@ export const heatmap = (div, data, options = {}) => {
     verifyDiv(div);
     verifyData(data);
 
-    options = processOptions(div, options);
+    options = processOptions(div, data, options);
 
-    const {
-      xDomain,
-      yDomain,
-      zDomain,
-      xFileDomain,
-      yFileDomainr,
-      zFileDomain,
-    } = dataExtents(data);
+    const { xDomain, yDomain, zDomain, xFileDomain, yFileDomain } =
+      dataExtents(data);
 
     if (!options.zMin) options.zMin = zDomain[0];
     if (!options.zMax) options.zMax = zDomain[1];
 
     const svg = addSVG(div, options);
-    const { canvas, context } = addCanvas(div, options);
+    const context = addCanvas(div, options);
 
     var xAxis = addXAxis(svg, xDomain, options);
     var yAxis = addYAxis(svg, yDomain, options);
@@ -53,9 +44,17 @@ export const heatmap = (div, data, options = {}) => {
     if (options.legendRight) addLegendRight(svg, options);
     if (options.setDownloadGraph)
       options.setDownloadGraph(() => downloadGraph(div, options));
+    if (options.setDownloadGraphDiv)
+      d3.select("#" + options.setDownloadGraphDiv).on("click", function () {
+        downloadGraph(div, options);
+      });
 
     var contour;
-    if (options.contour) contour = data.map((d) => autoDownSample(d));
+    if (options.contour && options.autoDownsample) {
+      contour = data.map((d) => autoDownSample(d, options.autoDownsample));
+    } else {
+      contour = data;
+    }
 
     var { zoombox } = addZoom(
       svg,
@@ -66,23 +65,28 @@ export const heatmap = (div, data, options = {}) => {
       yAxis,
       xDomain,
       yDomain,
+      zDomain,
       context,
       options
     );
 
+    if (options.tooltip)
+      addTooltip(
+        svg,
+        data,
+        div,
+        zoombox,
+        xAxis,
+        yAxis,
+        xFileDomain,
+        yFileDomain,
+        options
+      );
+
     setTimeout(() => {
       context.clearRect(0, 0, options.canvasWidth, options.canvasHeight);
       if (options.contour) {
-        canvasContour(
-          contour,
-          xAxis.ax,
-          yAxis.ax,
-          xDomain,
-          yDomain,
-          zDomain,
-          context,
-          options
-        );
+        canvasContour(contour, xAxis.ax, yAxis.ax, zDomain, context, options);
       } else {
         canvasGrid(
           data,
@@ -100,7 +104,7 @@ export const heatmap = (div, data, options = {}) => {
   }
 };
 
-const processOptions = (div, userOptions) => {
+const processOptions = (div, data, userOptions) => {
   var defaultOptions = [
     { name: "xLabel", default: false, verify: verifyString },
     { name: "yLabel", default: false, verify: verifyString },
@@ -108,12 +112,9 @@ const processOptions = (div, userOptions) => {
     { name: "xUnit", default: false, verify: verifyString },
     { name: "yUnit", default: false, verify: verifyString },
     { name: "zUnit", default: false, verify: verifyString },
-    { name: "xTime", default: false, verify: verifyBool },
-    { name: "yTime", default: false, verify: verifyBool },
     { name: "xLog", default: false, verify: verifyBool },
     { name: "yLog", default: false, verify: verifyBool },
     { name: "tooltip", default: true, verify: verifyBool },
-    { name: "locator", default: true, verify: verifyBool },
     { name: "title", default: false, verify: verifyString },
     { name: "zMin", default: false, verify: verifyNumber },
     { name: "zMax", default: false, verify: verifyNumber },
@@ -128,8 +129,10 @@ const processOptions = (div, userOptions) => {
     { name: "legendRight", default: true, verify: verifyBool },
     { name: "thresholdStep", default: 20, verify: verifyNumber },
     { name: "backgroundColor", default: false, verify: verifyString },
-    { name: "contourAutoDownsample", default: 500, verify: verifyString },
-    { name: "setDownloadGraph", default: false, verify: verifyNumber },
+    { name: "autoDownsample", default: false, verify: verifyNumber },
+    { name: "setDownloadGraph", default: false, verify: verifyFunction },
+    { name: "setDownloadGraphDiv", default: false, verify: verifyString },
+    { name: "hover", default: false, verify: verifyFunction },
 
     {
       name: "colors",
@@ -195,6 +198,11 @@ const processOptions = (div, userOptions) => {
     }
   }
 
+  options.xTime = false;
+  options.yTime = false;
+  if (data[0].x[0] instanceof Date) options.xTime = true;
+  if (data[0].y[0] instanceof Date) options.yTime = true;
+
   options.colors = options.colors.map((c) => {
     c.rgba = convertToRGB(c.color);
     return c;
@@ -220,7 +228,7 @@ const getDomain = (domain) => {
 const dataExtents = (data) => {
   var xDomain, yDomain, zDomain;
   var xFileDomain = [];
-  var yFileDomainr = [];
+  var yFileDomain = [];
   var zFileDomain = [];
   for (var h = 0; h < data.length; h++) {
     let xext = d3.extent(data[h].x);
@@ -232,10 +240,10 @@ const dataExtents = (data) => {
       xFileDomain.push(xext);
     }
     if (
-      !yFileDomainr.map((y) => y[0]).includes(yext[0]) &&
-      !yFileDomainr.map((y) => y[1]).includes(yext[1])
+      !yFileDomain.map((y) => y[0]).includes(yext[0]) &&
+      !yFileDomain.map((y) => y[1]).includes(yext[1])
     ) {
-      yFileDomainr.push(yext);
+      yFileDomain.push(yext);
     }
 
     zFileDomain.push(
@@ -247,9 +255,9 @@ const dataExtents = (data) => {
     );
   }
   xDomain = getDomain(xFileDomain);
-  yDomain = getDomain(yFileDomainr);
+  yDomain = getDomain(yFileDomain);
   zDomain = getDomain(zFileDomain);
-  return { xDomain, yDomain, zDomain, xFileDomain, yFileDomainr, zFileDomain };
+  return { xDomain, yDomain, zDomain, xFileDomain, yFileDomain, zFileDomain };
 };
 
 const addSVG = (div, options) => {
@@ -281,8 +289,7 @@ const addCanvas = (div, options) => {
     .style("cursor", "grab")
     .attr("id", "canvas_" + div)
     .attr("class", "canvas-plot");
-  const context = canvas.node().getContext("2d");
-  return { canvas, context };
+  return canvas.node().getContext("2d");
 };
 
 const addXAxis = (svg, xDomain, options) => {
@@ -401,8 +408,9 @@ const addTitle = (svg, div, options) => {
 const addBackground = (svg, options) => {
   svg
     .append("rect")
-    .attr("width", options.width)
-    .attr("height", options.height)
+    .attr("x", 1)
+    .attr("width", options.canvasWidth)
+    .attr("height", options.canvasHeight)
     .attr("fill", options.backgroundColor);
 };
 
@@ -486,14 +494,143 @@ const addLegendRight = (svg, options) => {
   }
 };
 
+const addTooltip = (
+  svg,
+  data,
+  div,
+  zoombox,
+  xAxis,
+  yAxis,
+  xFileDomain,
+  yFileDomain,
+  options
+) => {
+  var tooltip = d3
+    .select("#" + div)
+    .append("div")
+    .style("opacity", 0)
+    .attr("id", "tooltip_" + div)
+    .attr("class", "graphtooltip");
+
+  // Add axis locators
+  var symbolGenerator = d3.symbol().type(d3.symbolTriangle).size(25);
+  svg
+    .append("g")
+    .attr("transform", "rotate(90)")
+    .append("g")
+    .style("opacity", 0)
+    .attr("id", "zpointer_" + div)
+    .attr(
+      "transform",
+      "translate(" +
+        options.canvasHeight +
+        ",-" +
+        (options.canvasWidth - 16 + options.marginRight / 3) +
+        ")"
+    )
+    .append("path")
+    .attr("d", symbolGenerator());
+
+  zoombox.on("mousemove", () => {
+    try {
+      var hoverX = xAxis.ax.invert(
+        d3.event.layerX - options.marginLeft ||
+          d3.event.offsetX - options.marginLeft
+      );
+      var hoverY = yAxis.ax.invert(
+        d3.event.layerY - options.marginTop ||
+          d3.event.offsetY - options.marginTop
+      );
+
+      var idx = Math.max(
+        getFileIndex(xFileDomain, hoverX),
+        getFileIndex(yFileDomain, hoverY)
+      );
+      var process = data[idx];
+
+      var yi = closest(hoverY, process.y);
+      var xi = closest(hoverX, process.x);
+
+      var xval, yval;
+      var xu = "";
+      var yu = "";
+      var zu = "";
+      var zval = process.z[yi][xi];
+
+      if (options.xTime) {
+        xval = format(process.x[xi], "HH:mm dd MMM yy");
+      } else {
+        xval = numberformat(process.x[xi]);
+        if (typeof options.xLabel === "string") xu = options.xUnit;
+      }
+
+      if (options.yTime) {
+        yval = format(process.y[yi], "HH:mm dd MMM yy");
+      } else {
+        yval = numberformat(process.y[yi]);
+        if (typeof options.yLabel === "string") yu = options.yUnit;
+      }
+
+      if (typeof options.zLabel === "string") zu = options.zUnit;
+
+      var html =
+        "<table><tbody>" +
+        `<tr><td>y:</td><td>${xval} ${xu}</td></tr>` +
+        `<tr><td>y:</td><td>${yval} ${yu}</td></tr>` +
+        `<tr><td>z:</td><td>${numberformat(zval)} ${zu}</td></tr>` +
+        "</tbody></table>";
+
+      tooltip
+        .html(html)
+        .style("left", xAxis.ax(process.x[xi]) + options.marginLeft + 10 + "px")
+        .style("top", yAxis.ax(process.y[yi]) + options.marginTop - 20 + "px")
+        .style("opacity", 1);
+      d3.select("#zpointer_" + div)
+        .attr(
+          "transform",
+          "translate(" +
+            ((zval - options.zMax) / (options.zMin - options.zMax)) *
+              options.canvasHeight +
+            ",-" +
+            (options.canvasWidth - 16 + options.marginRight / 3) +
+            ")"
+        )
+        .style("opacity", 1);
+      if (options.hover) options.hover({ mousex: xi, mousey: yi, idx });
+    } catch (e) {
+      tooltip.style("opacity", 0);
+      d3.select("#zpointer_" + div).style("opacity", 0);
+      if (options.hover) options.hover({ mousex: false, mousey: false });
+    }
+  });
+
+  zoombox.on("mouseout", () => {
+    tooltip.style("opacity", 0);
+    d3.select("#zpointer_" + div).style("opacity", 0);
+    if (options.hover) options.hover({ mousex: false, mousey: false });
+  });
+
+  function numberformat(num) {
+    num = parseFloat(num);
+    if (num > 9999 || (num < 0.01 && num > -0.01) || num < -9999) {
+      num = num.toExponential(3);
+    } else {
+      num = Math.round(num * 10000) / 10000;
+    }
+    return num;
+  }
+};
+
 const addZoom = (
   svg,
   data,
+  contour,
   div,
   xAxis,
   yAxis,
   xDomain,
   yDomain,
+  zDomain,
   context,
   options
 ) => {
@@ -564,7 +701,7 @@ const addZoom = (
       yAxis.g.call(yAxis.axis);
       context.clearRect(0, 0, options.canvasWidth, options.canvasHeight);
       if (options.contour) {
-        canvasContour(xAxis.ax, yAxis.ax);
+        canvasContour(contour, xAxis.ax, yAxis.ax, zDomain, context, options);
       } else {
         canvasGrid(
           data,
@@ -590,7 +727,7 @@ const addZoom = (
       xAxis.g.call(xAxis.axis);
       context.clearRect(0, 0, options.canvasWidth, options.canvasHeight);
       if (options.contour) {
-        canvasContour(xAxis.ax, yAxis.ax);
+        canvasContour(contour, xAxis.ax, yAxis.ax, zDomain, context, options);
       } else {
         canvasGrid(
           data,
@@ -615,7 +752,7 @@ const addZoom = (
       yAxis.g.call(yAxis.axis);
       context.clearRect(0, 0, options.canvasWidth, options.canvasHeight);
       if (options.contour) {
-        canvasContour(xAxis.ax, yAxis.ax);
+        canvasContour(contour, xAxis.ax, yAxis.ax, zDomain, context, options);
       } else {
         canvasGrid(
           data,
@@ -643,7 +780,7 @@ const addZoom = (
     xAxis.g.call(xAxis.axis);
     context.clearRect(0, 0, options.canvasWidth, options.canvasHeight);
     if (options.contour) {
-      canvasContour(xAxis.ax, yAxis.ax);
+      canvasContour(contour, xAxis.ax, yAxis.ax, zDomain, context, options);
     } else {
       canvasGrid(data, xAxis.ax, yAxis.ax, xDomain, yDomain, context, options);
     }
@@ -683,4 +820,28 @@ const downloadGraph = (div, options) => {
   };
   image.src = "data:image/svg+xml;charset=utf8," + encodeURIComponent(str);
   title.style("opacity", "0");
+};
+
+const autoDownSample = (arr, ads) => {
+  var l1 = arr.z.length;
+  var l2 = arr.z[0].length;
+  if (l1 <= ads && l2 <= ads) {
+    return arr;
+  } else {
+    var d1 = Math.max(1, Math.floor(l1 / ads));
+    var d2 = Math.max(1, Math.floor(l2 / ads));
+    var z_ds = [];
+    var y_ds = [];
+    for (let i = 0; i < l1; i = i + d1) {
+      let zz_ds = [];
+      var x_ds = [];
+      for (let j = 0; j < l2; j = j + d2) {
+        zz_ds.push(arr.z[i][j]);
+        x_ds.push(arr.x[j]);
+      }
+      y_ds.push(arr.y[i]);
+      z_ds.push(zz_ds);
+    }
+    return { x: x_ds, y: y_ds, z: z_ds };
+  }
 };
