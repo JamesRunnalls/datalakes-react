@@ -10,6 +10,7 @@ import GraphHeader from "../graphheader/graphheader";
 import "./heatmap.css";
 import isEqual from "lodash/isEqual";
 import D3LineGraph from "../linegraph/linegraph";
+import { heatmap } from "./canvas-heatmap";
 
 class D3HeatMap extends Component {
   state = {
@@ -209,6 +210,8 @@ class D3HeatMap extends Component {
           thresholdStep,
           setDownloadGraph,
         } = this.props;
+
+        heatmap("vis2" + graphid, data);
 
         const { closest, indexOfClosest } = this;
         const TimeLabels = [
@@ -1250,6 +1253,7 @@ class D3HeatMap extends Component {
                 )}
               </div>
               <div className={"heatmap-right" + xy} id={"vis" + graphid} />
+              <div className={"heatmap-right" + xy} id={"vis2" + graphid} />
             </div>
             <div className={"heatmap-bottom" + xy}>
               {xgraph && (
