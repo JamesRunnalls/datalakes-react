@@ -1,5 +1,5 @@
 import L from "leaflet";
-import * as d3 from "d3";
+import { timer } from "d3";
 
 L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
   options: {
@@ -109,11 +109,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     this._ctx.clearRect(0, 0, this._width, this._height);
     this._paths = this._prepareParticlePaths();
     let self = this;
-    /*for (var i = 0; i < 200; i++) {
-      self._moveParticles();
-      self._drawParticles();
-    }*/
-    this.timer = d3.timer(function () {
+    this.timer = timer(function () {
       self._moveParticles();
       self._drawParticles();
     }, this.options.duration);
@@ -206,15 +202,8 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
   },
 
   _getIndexAtPoint(x, y) {
-    let {
-      xSize,
-      ySize,
-      xllcorner,
-      yllcorner,
-      nCols,
-      nRows,
-      vectordata,
-    } = this._inputdata;
+    let { xSize, ySize, xllcorner, yllcorner, nCols, nRows, vectordata } =
+      this._inputdata;
     var i = vectordata.length - Math.round((y - yllcorner) / ySize);
     var j = Math.round((x - xllcorner) / xSize);
     if (
@@ -241,19 +230,14 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     }
     return paths;
   },
+
   _randomAge: function () {
     return Math.floor(Math.random() * this.options.maxAge);
   },
+
   _randomPosition: function (o = {}) {
-    let {
-      xSize,
-      ySize,
-      xllcorner,
-      yllcorner,
-      nCols,
-      nRows,
-      vectordata,
-    } = this._inputdata;
+    let { xSize, ySize, xllcorner, yllcorner, nCols, nRows, vectordata } =
+      this._inputdata;
 
     delete o.xt;
     delete o.yt;
@@ -278,6 +262,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
     }
     return null;
   },
+
   _CHtolatlng: function (yx) {
     var y_aux = (yx[0] - 600000) / 1000000;
     var x_aux = (yx[1] - 200000) / 1000000;
@@ -299,6 +284,7 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
 
     return [lat, lng];
   },
+
   _WGSlatlngtoCH: function (lat, lng) {
     lat = lat * 3600;
     lng = lng * 3600;
@@ -321,19 +307,27 @@ L.VectorFieldAnim = (L.Layer ? L.Layer : L.Class).extend({
       1000000;
     return { x, y };
   },
+
   _stopAnimation: function () {
     if (this.timer) {
       this.timer.stop();
     }
   },
+
   _onMousemove: function (t) {
     var e = this._queryValue(t);
     this.fire("mousemove", e);
   },
+
+  getLatLng: function () {
+    return false;
+  },
+
   _onClick: function (t) {
     var e = this._queryValue(t);
     this.fire("click", e);
   },
+
   _queryValue: function (click) {
     var { vectordata } = this._inputdata;
     var point = this._WGSlatlngtoCH(click.latlng.lat, click.latlng.lng);
