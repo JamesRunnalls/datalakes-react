@@ -1,4 +1,4 @@
-.tooltip {
+.timetooltip {
   position: absolute;
   z-index: 10;
   top: -110px;
@@ -13,7 +13,7 @@
   pointer-events: none;
 }
 
-.tooltip:after {
+.timetooltip:after {
   content: "";
   position: absolute;
   left: 0;
@@ -28,7 +28,7 @@
   right: 0;
 }
 
-.tooltip .tooltip-title {
+.timetooltip .tooltip-title {
   width: 100%;
   font-size: 14px;
   font-weight: bold;

@@ -47,8 +47,8 @@ class TimeSelector extends Component {
           ])
           .on("zoom", zoomed);
 
-        function zoomed() {
-          x.domain(d3.event.transform.rescaleX(xx).domain());
+        function zoomed(event) {
+          x.domain(event.transform.rescaleX(xx).domain());
           plotdata();
           current.attr("cx", x(datetime));
           gX.call(xAxis);
@@ -133,7 +133,7 @@ class TimeSelector extends Component {
           .select("#timeselector")
           .append("div")
           .attr("id", "tooltip")
-          .attr("class", "tooltip");
+          .attr("class", "timetooltip");
 
         svg
           .append("rect")
@@ -146,10 +146,10 @@ class TimeSelector extends Component {
           .on("mouseout", mouseout)
           .on("click", onClick);
 
-        function onClick() {
+        function onClick(event) {
           tooltip.style("visibility", "hidden");
           focus.style("opacity", 0);
-          var date = x.invert(d3.mouse(this)[0]);
+          var date = x.invert(d3.pointer(event)[0]);
           if (typeof date.getMonth === "function") {
             onChangeDatetime(date);
           }
@@ -167,12 +167,12 @@ class TimeSelector extends Component {
 
         function mousemove(event) {
           try {
-            focus.attr("cx", d3.mouse(this)[0]);
+            focus.attr("cx", d3.pointer(event)[0]);
           } catch (e) {}
           try {
-            tooltip
-              .style("left", d3.mouse(this)[0] - 75 + "px")
-              .html(tooltiptext(x.invert(d3.mouse(this)[0])))
+           tooltip
+              .style("left", d3.pointer(event)[0] - 75 + "px")
+              .html(tooltiptext(x.invert(d3.pointer(event)[0])))
               .style(
                 "top",
                 `-${

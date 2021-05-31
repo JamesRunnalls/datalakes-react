@@ -572,8 +572,8 @@ class D3LineGraph extends Component {
               .attr("x", -margin.left)
               .call(zoomy);
 
-            function normalzoom() {
-              let t = d3.event.transform;
+            function normalzoom(event) {
+              let t = event.transform;
               if (t !== d3.zoomIdentity) {
                 x = t.rescaleX(xref);
                 y = t.rescaleY(yref);
@@ -604,8 +604,8 @@ class D3LineGraph extends Component {
               }
             }
 
-            function normalzoomx() {
-              let t = d3.event.transform;
+            function normalzoomx(event) {
+              let t = event.transform;
               if (t !== d3.zoomIdentity) {
                 x = t.rescaleX(xref);
                 xAxis.scale(x);
@@ -632,8 +632,8 @@ class D3LineGraph extends Component {
               }
             }
 
-            function normalzoomy() {
-              let t = d3.event.transform;
+            function normalzoomy(event) {
+              let t = event.transform;
               if (t !== d3.zoomIdentity) {
                 y = t.rescaleX(yref);
                 yAxis.scale(y);
@@ -775,7 +775,7 @@ class D3LineGraph extends Component {
               }
             }
 
-            function mousemove() {
+            function mousemove(event) {
               try {
                 var selectedData;
                 var visible = false;
@@ -786,8 +786,8 @@ class D3LineGraph extends Component {
                 }</td></tr>`;
                 for (let f = 0; f < focus.length; f++) {
                   selectedData = closestCoordinates(
-                    d3.mouse(this)[0],
-                    d3.mouse(this)[1],
+                    d3.pointer(event)[0],
+                    d3.pointer(event)[1],
                     xy_px[f]
                   );
                   if (selectedData) {

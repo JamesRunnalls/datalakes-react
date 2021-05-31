@@ -47,8 +47,8 @@ class DepthSelector extends Component {
           ])
           .on("zoom", zoomed);
 
-        function zoomed() {
-          y.domain(d3.event.transform.rescaleY(yy).domain());
+        function zoomed(event) {
+          y.domain(event.transform.rescaleY(yy).domain());
           plotdata();
           current.attr("cy", y(depth));
           gY.call(yAxis);
@@ -150,10 +150,10 @@ class DepthSelector extends Component {
           .on("mouseout", mouseout)
           .on("click", onClick);
 
-        function onClick() {
-          var depth = y.invert(d3.mouse(this)[1]);
+        function onClick(event) {
+          var depth = y.invert(d3.pointer(event)[1]);
           depth = Math.round(depth * 100) / 100;
-          current.attr("cy", d3.mouse(this)[1]);
+          current.attr("cy", d3.pointer(event)[1]);
           onChangeDepth(depth);
         }
 
@@ -169,12 +169,12 @@ class DepthSelector extends Component {
 
         function mousemove(event) {
           try {
-            focus.attr("cy", d3.mouse(this)[1]);
+            focus.attr("cy", d3.pointer(event)[1]);
           } catch (e) {}
           try {
             tooltip
-              .style("top", d3.mouse(this)[1] - 30 + "px")
-              .html(tooltiptext(y.invert(d3.mouse(this)[1])))
+              .style("top", d3.pointer(event)[1] - 30 + "px")
+              .html(tooltiptext(y.invert(d3.pointer(event)[1])))
               .style("left", "75px");
           } catch (e) {}
         }

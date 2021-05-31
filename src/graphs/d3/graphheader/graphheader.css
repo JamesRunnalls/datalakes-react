@@ -114,31 +114,6 @@
   padding: 2px 0;
 }
 
-.graphtooltip {
-  position: absolute;
-  left: 0;
-  top: 0;
-  pointer-events: none;
-  background-color: rgba(255, 255, 255, 0.7);
-  padding: 5px;
-  font-size: 12px;
-}
-
-.graphtooltip:after {
-  content: " ";
-  position: absolute;
-  left: -10px;
-  top: 10px;
-  border-top: 10px solid transparent;
-  border-right: 10px solid rgba(255, 255, 255, 0.7);
-  border-left: none;
-  border-bottom: 10px solid transparent;
-}
-
-.graphtooltip tr {
-  height: 1px;
-}
-
 .graphhelpbar {
   font-size: 18px;
   cursor: pointer;

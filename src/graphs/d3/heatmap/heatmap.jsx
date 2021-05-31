@@ -5,7 +5,7 @@ import GraphHeader from "../graphheader/graphheader";
 import "./heatmap.css";
 import isEqual from "lodash/isEqual";
 import D3LineGraph from "../linegraph/linegraph";
-import { heatmap } from "./canvas-heatmap";
+import { plot as heatmap } from "canvas-heatmap";
 
 class D3HeatMap extends Component {
   state = {
@@ -232,8 +232,6 @@ class D3HeatMap extends Component {
         };
 
         heatmap("vis" + graphid, data, options);
-
-        
       } catch (e) {
         console.log("Heatmap failed to plot", e);
       }
