@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import L from "leaflet";
 import * as d3 from "d3";
 import "leaflet-draw";
+import "leaflet-contour";
 import "./leaflet_vectorField";
 import "./leaflet_vectorFieldAnim";
 import "./leaflet_customcontrol";
 import "./leaflet_colorpicker";
-import "./leaflet_contour";
+
 import { getColor } from "../../components/gradients/gradients";
 import "./css/leaflet.css";
 
@@ -617,8 +618,9 @@ class Basemap extends Component {
       var zz = [];
       for (let j = 0; j < data[i].length; j++) {
         if (data[i][j]) {
-          xx.push(data[i][j][xi]);
-          yy.push(data[i][j][yi]);
+          let latlng = this.CHtoWGSlatlng([data[i][j][xi], data[i][j][yi]])
+          xx.push(latlng[1]);
+          yy.push(latlng[0]);
           zz.push(data[i][j][zi]);
         } else {
           xx.push(data[i][j]);
@@ -631,36 +633,6 @@ class Basemap extends Component {
       z.push(zz);
     }
     return { x, y, z };
-  };
-
-  translate = (gridx, gridy, i, j) => {
-    var ii = Math.floor(i);
-    var jj = Math.floor(j);
-    var x, y;
-    if (
-      gridx[ii][jj] !== null &&
-      gridx[ii][jj + 1] !== null &&
-      gridx[ii + 1][jj] !== null &&
-      gridx[ii + 1][jj + 1] !== null
-    ) {
-      x =
-        ((gridx[ii + 1][jj + 1] - gridx[ii + 1][jj]) * (j - jj) +
-          gridx[ii + 1][jj] +
-          ((gridx[ii][jj + 1] - gridx[ii][jj]) * (j - jj) + gridx[ii][jj])) /
-        2;
-      y =
-        ((gridy[ii + 1][jj] - gridy[ii][jj]) * (i - ii) +
-          gridy[ii][jj] +
-          ((gridy[ii + 1][jj + 1] - gridy[ii][jj + 1]) * (i - ii) +
-            gridy[ii][jj + 1])) /
-        2;
-    } else {
-      x = gridx[ii][jj];
-      y = gridy[ii][jj];
-    }
-
-    var latlng = this.CHtoWGSlatlng([x, y]);
-    return [latlng[1], latlng[0]];
   };
 
   onEachContour = (info, datetime, depth) => {
@@ -726,7 +698,6 @@ class Basemap extends Component {
         var contourData = this.prepareContourData(data, 0, 1, 2);
         var contours = L.contour(contourData, {
           thresholds: thresholds,
-          translate: this.translate,
           style: (feature) => {
             return {
               color: getColor(feature.geometry.value, min, max, colors),
