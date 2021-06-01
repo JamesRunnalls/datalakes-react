@@ -3,8 +3,8 @@ import L from "leaflet";
 import * as d3 from "d3";
 import axios from "axios";
 import "leaflet-draw";
+import "leaflet-streamlines";
 import "./leaflet_vectorField";
-import "./leaflet_vectorFieldAnim";
 import "./leaflet_customcontrol";
 import "./leaflet_colorpicker";
 import { getColor } from "../../components/gradients/gradients";
@@ -213,7 +213,12 @@ class HomepageMap extends Component {
       ])
       .addAll(quadtreedata);
 
-    var outdata = createAndFillTwoDArray({
+    var u = createAndFillTwoDArray({
+      rows: nRows + 1,
+      columns: nCols + 1,
+      defaultValue: null,
+    });
+    var v = createAndFillTwoDArray({
       rows: nRows + 1,
       columns: nCols + 1,
       defaultValue: null,
@@ -224,21 +229,24 @@ class HomepageMap extends Component {
       for (var j = 0; j < nCols + 1; j++) {
         x = min_x + j * xSize;
         if (quadtree.find(x, y, radius) !== undefined) {
-          outdata[i][j] = [
-            JSON.stringify(quadtree.find(x, y, radius)[2]),
-            JSON.stringify(quadtree.find(x, y, radius)[3]),
-          ];
+          u[i][j] = parseFloat(JSON.stringify(quadtree.find(x, y, radius)[2]));
+          v[i][j] = parseFloat(JSON.stringify(quadtree.find(x, y, radius)[3]));
         }
       }
     }
+    var minLatLng = this.CHtoWGSlatlng([min_x, min_y]);
+    var maxLatLng = this.CHtoWGSlatlng([max_x, max_y]);
+
     return {
       nCols,
       nRows,
       xSize,
       ySize,
-      xllcorner: min_x,
-      yllcorner: min_y,
-      vectordata: outdata,
+      xMin: minLatLng[1],
+      xMax: maxLatLng[1],
+      yMin: minLatLng[0],
+      yMax: maxLatLng[0],
+      data: { u, v },
     };
   };
 
@@ -262,9 +270,12 @@ class HomepageMap extends Component {
 
       // Flow paths
       var vectordata = this.meteolakesParseVectorData(data.data, 150);
-      L.vectorFieldAnim(vectordata, {
+      L.streamlines(vectordata.data, {
         paths: 5000,
-        color: "white",
+        xMin: vectordata.xMin,
+        xMax: vectordata.xMax,
+        yMin: vectordata.yMin,
+        yMax: vectordata.yMax,
       }).addTo(this.map);
 
       document.getElementById("lakesim").style.background = "none";
