@@ -5,7 +5,7 @@ import GraphHeader from "../graphheader/graphheader";
 import "./heatmap.css";
 import isEqual from "lodash/isEqual";
 import D3LineGraph from "../linegraph/linegraph";
-import { plot as heatmap } from "canvas-heatmap";
+import heatmap from "canvas-heatmap";
 
 class D3HeatMap extends Component {
   state = {
