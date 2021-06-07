@@ -7,28 +7,28 @@ class AddMetadata extends Component {
   state = {
     modal: false,
     modalValue: "",
-    message: ""
+    message: "",
   };
 
   // Modal for adding to dropdown lists
-  showModal = value => {
+  showModal = (value) => {
     this.setState({
       modal: !this.state.modal,
-      modalValue: value
+      modalValue: value,
     });
   };
 
-  nextStep = e => {
+  nextStep = (e) => {
     e.preventDefault();
-    this.props.nextStep().catch(error => {
+    this.props.nextStep().catch((error) => {
       console.error(error.message);
       this.setState({
-        message: error.message
+        message: error.message,
       });
     });
   };
 
-  prevStep = e => {
+  prevStep = (e) => {
     e.preventDefault();
     this.props.prevStep();
   };
@@ -40,7 +40,6 @@ class AddMetadata extends Component {
       dataset,
       handleChange,
       handleSelect,
-      datasetparameters
     } = this.props;
     const { lakes, persons, projects, organisations, licenses } = dropdown;
     const modalInfo = {
@@ -48,12 +47,12 @@ class AddMetadata extends Component {
       projects: projects,
       lakes: lakes,
       organisations: organisations,
-      licenses: licenses
+      licenses: licenses,
     };
     const { modal, modalValue, message } = this.state;
     return (
       <React.Fragment>
-        <form className="adddataset-form"  onSubmit={this.nextStep}>
+        <form className="adddataset-form" onSubmit={this.nextStep}>
           <table className="addmetadata">
             <tbody>
               <tr>
@@ -72,9 +71,10 @@ class AddMetadata extends Component {
                   </a>
                 </th>
                 <td>
-                  {datasetparameters.filter(dp => dp.parameters_id === 1)
-                    .length > 0 ? (
-                    <div>{new Date(dataset["mindatetime"]*1000).toString()}</div>
+                  {dataset["mindatetime"] !== -9999 ? (
+                    <div>
+                      {new Date(dataset["mindatetime"] * 1000).toString()}
+                    </div>
                   ) : (
                     <input
                       type="number"
@@ -101,9 +101,10 @@ class AddMetadata extends Component {
                   </a>
                 </th>
                 <td>
-                  {datasetparameters.filter(dp => dp.parameters_id === 1)
-                    .length > 0 ? (
-                    <div>{new Date(dataset["maxdatetime"]*1000).toString()}</div>
+                  {dataset["maxdatetime"] !== -9999 ? (
+                    <div>
+                      {new Date(dataset["maxdatetime"] * 1000).toString()}
+                    </div>
                   ) : (
                     <input
                       type="number"
@@ -117,61 +118,57 @@ class AddMetadata extends Component {
               <tr>
                 <th>Location</th>
                 <td>
-                {datasetparameters.filter(dp => dp.parameters_id === 3)
-                    .length > 0 ? (
+                  {dataset["latitude"] !== -9999 ? (
                     <div>{dataset["latitude"]}</div>
                   ) : (
-                  <input
-                    type="number"
-                    name="latitude"
-                    style={{ width: "calc(50% - 3px)", marginRight: "3px" }}
-                    placeholder="Latitude"
-                    onChange={handleChange("latitude")}
-                  />
+                    <input
+                      type="number"
+                      name="latitude"
+                      style={{ width: "calc(50% - 3px)", marginRight: "3px" }}
+                      placeholder="Latitude"
+                      onChange={handleChange("latitude")}
+                    />
                   )}
-                  {datasetparameters.filter(dp => dp.parameters_id === 4)
-                    .length > 0 ? (
+                  {dataset["longitude"] !== -9999 ? (
                     <div>{dataset["longitude"]}</div>
                   ) : (
-                  <input
-                    type="number"
-                    name="longitude"
-                    style={{ width: "calc(50% - 3px)", marginLeft: "3px" }}
-                    placeholder="Longitude"
-                    onChange={handleChange("longitude")}
-                  />
+                    <input
+                      type="number"
+                      name="longitude"
+                      style={{ width: "calc(50% - 3px)", marginLeft: "3px" }}
+                      placeholder="Longitude"
+                      onChange={handleChange("longitude")}
+                    />
                   )}
                 </td>
               </tr>
               <tr>
                 <th>Minimum Depth (m)</th>
                 <td>
-                {datasetparameters.filter(dp => dp.parameters_id === 2)
-                    .length > 0 ? (
+                  {dataset["mindepth"] !== 0 ? (
                     <div>{dataset["mindepth"]}</div>
                   ) : (
-                  <input
-                    type="number"
-                    name="mindepth"
-                    placeholder="Meters below lake surface"
-                    onChange={handleChange("mindepth")}
-                  />
+                    <input
+                      type="number"
+                      name="mindepth"
+                      placeholder="Meters below lake surface"
+                      onChange={handleChange("mindepth")}
+                    />
                   )}
                 </td>
               </tr>
               <tr>
                 <th>Maximum Depth (m)</th>
                 <td>
-                {datasetparameters.filter(dp => dp.parameters_id === 2)
-                    .length > 0 ? (
+                  {dataset["maxdepth"] !== 0 ? (
                     <div>{dataset["maxdepth"]}</div>
                   ) : (
-                  <input
-                    type="number"
-                    name="maxdepth"
-                    placeholder="Meters below lake surface"
-                    onChange={handleChange("maxdepth")}
-                  />
+                    <input
+                      type="number"
+                      name="maxdepth"
+                      placeholder="Meters below lake surface"
+                      onChange={handleChange("maxdepth")}
+                    />
                   )}
                 </td>
               </tr>

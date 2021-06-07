@@ -66,6 +66,15 @@ class ReviewData extends Component {
     this.props.prevStep();
   };
 
+  listMatch = (l1, l2) => {
+    for (let i of l1) {
+      if (l2.includes(i.toLowerCase())) {
+        return i;
+      }
+    }
+    return false;
+  };
+
   dpfilter = (datasetparameters, pid) => {
     return datasetparameters.filter((dp) => dp.parameters_id !== pid);
   };
@@ -84,6 +93,7 @@ class ReviewData extends Component {
       handleDataset,
       moveParameterUp,
       moveParameterDown,
+      fileInformation,
     } = this.props;
     const { parameters, sensors, axis } = dropdown;
     var { modal, modalValue, message, loading } = this.state;
@@ -206,7 +216,16 @@ class ReviewData extends Component {
 
     // Multiple files
     var fT = datasetparameters.filter((dp) => dp.parameters_id === 1);
-    var filesTime = fT.length > 0 && fT[0].included;
+    var filesTime =
+      (fT.length > 0 && fT[0].included) ||
+      this.listMatch(Object.keys(fileInformation.attributes), [
+        "time",
+        "datetime",
+        "unix",
+        "unix time",
+        "unix datetime",
+        "date",
+      ]);
     //var fD = datasetparameters.filter(dp => dp.parameters_id === 2);
     //var filesDepth = fD.length > 0 && fD[0].included;
 

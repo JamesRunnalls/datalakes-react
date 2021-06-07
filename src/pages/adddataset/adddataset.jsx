@@ -290,6 +290,8 @@ class AddDataset extends Component {
       latitude = this.getAve(arr_latitude);
     }
 
+    console.log(mindatetime, maxdatetime, longitude, latitude);
+
     // Logic for continuing to next step
     dataset["mindatetime"] = mindatetime;
     dataset["maxdatetime"] = maxdatetime;
