@@ -218,7 +218,7 @@ class D3HeatMap extends Component {
           zUnit: zunits,
           yReverse,
           xReverse,
-          thresholdStep,
+          thresholdStep: parseFloat(thresholdStep),
           zMin: minvalue,
           zMax: maxvalue,
           colors,
@@ -230,7 +230,7 @@ class D3HeatMap extends Component {
           hover: this.hover,
           setDownloadGraphDiv: "png" + graphid,
         };
-
+        console.log("vis" + graphid, data, options)
         heatmap("vis" + graphid, data, options);
       } catch (e) {
         console.log("Heatmap failed to plot", e);
