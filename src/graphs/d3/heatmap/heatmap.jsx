@@ -230,7 +230,6 @@ class D3HeatMap extends Component {
           hover: this.hover,
           setDownloadGraphDiv: "png" + graphid,
         };
-        console.log("vis" + graphid, data, options)
         heatmap("vis" + graphid, data, options);
       } catch (e) {
         console.log("Heatmap failed to plot", e);
@@ -349,7 +348,7 @@ class D3HeatMap extends Component {
                     ylabel={ylabel}
                     xunits={zunits}
                     yunits={yunits}
-                    xReverse={xReverse}
+                    xReverse={false}
                     yReverse={yReverse}
                     lcolor={"black"}
                     lweight={1}
@@ -371,7 +370,7 @@ class D3HeatMap extends Component {
                   xunits={xunits}
                   yunits={zunits}
                   xReverse={xReverse}
-                  yReverse={yReverse}
+                  yReverse={false}
                   lcolor={"black"}
                   lweight={1}
                   bcolor={"white"}
