@@ -43,6 +43,8 @@ class Graph extends Component {
       yReverse,
       file,
       files,
+      xScale,
+      yScale,
     } = this.props;
     switch (graph) {
       default:
@@ -83,10 +85,8 @@ class Graph extends Component {
           </React.Fragment>
         );
       case "linegraph":
-        var xscale = "Linear";
-        var yscale = "Linear";
-        if (timeaxis === "x") xscale = "Time";
-        if (timeaxis === "y") yscale = "Time";
+        if (timeaxis === "x") xScale = "Time";
+        if (timeaxis === "y") yScale = "Time";
         var legend = [];
         for (var i = 0; i < file.length; i++) {
           var value = new Date(files[file[i]].ave);
@@ -108,8 +108,8 @@ class Graph extends Component {
               lcolor={lcolor}
               lweight={lweight}
               bcolor={bcolor}
-              xscale={xscale}
-              yscale={yscale}
+              xscale={xScale}
+              yscale={yScale}
               yReverse={yReverse}
               xReverse={xReverse}
               plotdots={plotdots}
@@ -461,6 +461,8 @@ class DisplayOptions extends Component {
     average: this.props.average,
     plotdots: this.props.plotdots,
     interpolate: this.props.interpolate,
+    xScale: this.props.xScale,
+    yScale: this.props.yScale,
   };
   toggleMask = () => {
     this.setState({ mask: !this.state.mask });
@@ -491,6 +493,14 @@ class DisplayOptions extends Component {
   onChangeAverage = (event) => {
     var average = event.target.value;
     this.setState({ average });
+  };
+  onChangexScale = (event) => {
+    var xScale = event.target.value;
+    this.setState({ xScale });
+  };
+  onChangeyScale = (event) => {
+    var yScale = event.target.value;
+    this.setState({ yScale });
   };
   onChangeLocalColors = (colors) => {
     this.setState({ colors });
@@ -573,6 +583,8 @@ class DisplayOptions extends Component {
       average,
       plotdots,
       interpolate,
+      xScale,
+      yScale,
     } = this.state;
     var { array, graph, timeaxis, interpolate_options } = this.props;
     upperZ = upperZ === undefined ? 0 : upperZ;
@@ -727,6 +739,28 @@ class DisplayOptions extends Component {
                     </td>
                   </tr>
                 )}
+                {graph === "linegraph" && timeaxis !== "x" && (
+                  <tr>
+                    <td>xScale</td>
+                    <td>
+                      <select value={xScale} onChange={this.onChangexScale}>
+                        <option value="Linear">Linear</option>
+                        <option value="Log">Log</option>
+                      </select>
+                    </td>
+                  </tr>
+                )}
+                {graph === "linegraph" && timeaxis !== "y" && (
+                  <tr>
+                    <td>yScale</td>
+                    <td>
+                      <select value={yScale} onChange={this.onChangeyScale}>
+                        <option value="Linear">Linear</option>
+                        <option value="Log">Log</option>
+                      </select>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 
@@ -823,6 +857,8 @@ class Plot extends Component {
     minX: 0,
     maxZ: 1,
     minZ: 0,
+    xScale: "Linear",
+    yScale: "Linear",
     yReverse: false,
     xReverse: false,
     timeaxis: "",
