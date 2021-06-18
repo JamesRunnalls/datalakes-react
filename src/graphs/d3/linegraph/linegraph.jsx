@@ -44,28 +44,57 @@ class D3LineGraph extends Component {
   };
 
   downloadCSV = () => {
+    function normalparse(value) {
+      return value;
+    }
+    function dateparse(date) {
+      let day = ("0" + date.getDate()).slice(-2);
+      let month = ("0" + (date.getMonth() + 1)).slice(-2);
+      let year = date.getFullYear();
+      let hour = ("0" + date.getHours()).slice(-2);
+      let minutes = ("0" + date.getMinutes()).slice(-2);
+      let seconds =
+        date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+      return `${year}-${month}-${day} ${hour}:${minutes}:${seconds}`;
+    }
     try {
       var { data, xlabel, xunits, ylabel, yunits, title } = this.props;
-      var csvContent = ""
+      var x_units = ` (${xunits})`;
+      var y_units = ` (${yunits})`;
+      var x_parse = normalparse;
+      var y_parse = normalparse;
+      if (xlabel === "Time") {
+        x_units = "";
+        x_parse = dateparse;
+      }
+      if (ylabel === "Time") {
+        y_units = "";
+        y_parse = dateparse;
+      }
+      var csvContent = "";
       if (!Array.isArray(data) || data.length === 1) {
         if (Array.isArray(data)) data = data[0];
-        csvContent = csvContent + `data:text/csv;charset=utf-8,${xlabel} (${xunits}),${ylabel} (${yunits})\n`;
+        csvContent =
+          csvContent +
+          `data:text/csv;charset=utf-8,${xlabel}${x_units},${ylabel}${y_units}\n`;
         for (var i = 0; i < data.x.length; i++) {
-          csvContent = csvContent + `${data.x[i]},${data.y[i]}\n`;
+          csvContent =
+            csvContent + `${x_parse(data.x[i])},${y_parse(data.y[i])}\n`;
         }
       } else {
         csvContent = csvContent + "data:text/csv;charset=utf-8";
         var rows = -Infinity;
         for (let i = 0; i < data.length; i++) {
-          csvContent =
-            csvContent + `,${xlabel} (${xunits}),${ylabel} (${yunits})`;
+          csvContent = csvContent + `,${xlabel}${x_units},${ylabel}${y_units}`;
           rows = Math.max(rows, data[i].x.length);
         }
         csvContent = csvContent + "\n";
         for (let j = 0; j < rows; j++) {
-          csvContent = csvContent + `${data[0].x[j]},${data[0].y[j]}`
+          csvContent =
+            csvContent + `${x_parse(data[0].x[j])},${y_parse(data[0].y[j])}`;
           for (let i = 1; i < data.length; i++) {
-            csvContent = csvContent + `,${data[i].x[j]},${data[i].y[j]}`;
+            csvContent =
+              csvContent + `,${x_parse(data[i].x[j])},${y_parse(data[i].y[j])}`;
           }
           csvContent = csvContent + "\n";
         }
@@ -779,10 +808,12 @@ class D3LineGraph extends Component {
               try {
                 var selectedData;
                 var visible = false;
-                var inner = `<tr><td>${
-                  xunits ? xlabel + " (" + xunits + ")" : xlabel
-                }</td><td>${
-                  yunits ? ylabel + " (" + yunits + ")" : ylabel
+                var x_units = ` (${xunits})`;
+                var y_units = ` (${yunits})`;
+                if (xlabel === "Time") x_units = "";
+                if (ylabel === "Time") y_units = "";
+                var inner = `<tr><td>${xlabel + x_units}</td><td>${
+                  ylabel + y_units
                 }</td></tr>`;
                 for (let f = 0; f < focus.length; f++) {
                   selectedData = closestCoordinates(

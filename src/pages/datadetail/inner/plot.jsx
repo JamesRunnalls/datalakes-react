@@ -880,7 +880,7 @@ class Plot extends Component {
   };
 
   average = (nums) => {
-    return nums.reduce((a, b) => a + b) / nums.length;
+    return d3.mean(nums)
   };
 
   toggleAddNewFile = () => {
