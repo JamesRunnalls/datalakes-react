@@ -28,6 +28,39 @@
       ]
     },
     {
+      "name": "Bafu",
+      "data": [
+        { "color": "#0069a6", "point": 0.0 },
+        { "color": "#0069a6", "point": 0.167 },
+
+        { "color": "#00a2e8", "point": 0.167 },
+        { "color": "#00a2e8", "point": 0.333 },
+
+        { "color": "#98d4e1", "point": 0.333 },
+        { "color": "#98d4e1", "point": 0.5 },
+
+        { "color": "#ecad87", "point": 0.5 },
+        { "color": "#ecad87", "point": 0.667},
+
+        { "color": "#dd6355", "point": 0.667},
+        { "color": "#dd6355", "point": 0.833 },
+
+        { "color": "#9d3543", "point": 0.833 },
+        { "color": "#9d3543", "point": 1 }
+      ]
+    },
+    {
+      "name": "Bafu Continuous",
+      "data": [
+        { "color": "#0069a6", "point": 0.0 },
+        { "color": "#00a2e8", "point": 0.167 },
+        { "color": "#98d4e1", "point": 0.333 },
+        { "color": "#ecad87", "point": 0.5 },
+        { "color": "#dd6355", "point": 0.667},
+        { "color": "#9d3543", "point": 1 }
+      ]
+    },
+    {
       "name": "cc chl",
       "data": [
         { "color": "#000080", "point": 0.0 },
