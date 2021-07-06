@@ -16,6 +16,7 @@ import colorlist from "../../../components/colorramp/colors";
 import isArray from "lodash/isArray";
 import isInteger from "lodash/isInteger";
 import logo from "../img/logo.svg";
+import Bafu from "./bafu";
 
 class Graph extends Component {
   render() {
@@ -880,7 +881,7 @@ class Plot extends Component {
   };
 
   average = (nums) => {
-    return d3.mean(nums)
+    return d3.mean(nums);
   };
 
   toggleAddNewFile = () => {
@@ -1964,9 +1965,47 @@ class Plot extends Component {
     return { minX, maxX, minY, maxY };
   };
 
+  processUrlAxis = (url, datasetparameters, xaxis, yaxis, zaxis) => {
+    var search = url.replace("?", "").split("&");
+    var validAxis = datasetparameters.map((d) => d.axis);
+    for (let s of search) {
+      if (s.includes("axis")) {
+        try {
+          let axis = s.replace("axis:[", "").replace("]", "").split(",");
+          for (let a of axis) {
+            if (validAxis.includes(a)) {
+              if (a.includes("x")) xaxis = a;
+              if (a.includes("y")) yaxis = a;
+              if (a.includes("z")) zaxis = a;
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse axis from url");
+        }
+      }
+    }
+    return { xaxis, yaxis, zaxis };
+  };
+
+  processUrlBounds = (url, lowerX, upperX) => {
+    if (url.includes("&latest")) {
+      let newLower = upperX - 7 * 24 * 60 * 60;
+      if (newLower > lowerX) lowerX = newLower;
+    }
+    return { lowerX, upperX };
+  };
+
   componentDidMount() {
     var { datasetparameters, dataset, file, data } = this.props;
     var { xaxis, yaxis, zaxis, decimate, average } = this.state;
+
+    ({ xaxis, yaxis, zaxis } = this.processUrlAxis(
+      this.props.search,
+      datasetparameters,
+      xaxis,
+      yaxis,
+      zaxis
+    ));
 
     var { xoptions, yoptions, zoptions, graph, yReverse, xReverse } =
       this.setAxisOptions(datasetparameters, xaxis, yaxis, zaxis);
@@ -1996,6 +2035,12 @@ class Plot extends Component {
       timeaxis,
     } = this.getInitialBounds(dataset, data, file, xaxis, yaxis);
 
+    ({ lowerX, upperX } = this.processUrlBounds(
+      this.props.search,
+      lowerX,
+      upperX
+    ));
+
     var plotdata = this.processPlotData(
       xaxis,
       yaxis,
@@ -2018,6 +2063,9 @@ class Plot extends Component {
 
     this.setState({
       plotdata,
+      xaxis,
+      yaxis,
+      zaxis,
       xoptions,
       yoptions,
       zoptions,
@@ -2131,50 +2179,62 @@ class Plot extends Component {
   }
 
   render() {
-    return (
-      <React.Fragment>
-        <SidebarLayout
-          sidebartitle="Plot Controls"
-          left={
-            <React.Fragment>
-              <div className="detailloading" id="detailloading">
-                <Loading />
-                Downloading extra files.
-              </div>
-              <div className="detailgraph">
-                <Graph {...this.state} {...this.props} />
-                {this.props.iframe && (
-                  <div className="iframe">
-                    Powered by{"  "}
-                    <a
-                      href={
-                        "https://www.datalakes-eawag.ch/datadetail/" +
-                        this.props.dataset.id
-                      }
-                      title="For more information see this dataset on Datalakes."
-                    >
-                      <img src={logo} alt="logo" />
-                    </a>
-                  </div>
-                )}
-              </div>
-            </React.Fragment>
-          }
-          rightNoScroll={
-            <Sidebar
-              {...this.state}
-              {...this.props}
-              onChangeState={this.onChangeState}
-              onChangeFile={this.onChangeFile}
-              onChangeX={this.onChangeX}
-              onChangeY={this.onChangeY}
-              toggleAddNewFile={this.toggleAddNewFile}
-              handleAxisSelect={this.handleAxisSelect}
-            />
-          }
-        />
-      </React.Fragment>
-    );
+    if (this.props.search.toLowerCase().includes("bafu")) {
+      return (
+        <React.Fragment>
+          <div className="detailloading" id="detailloading">
+            <Loading />
+            Downloading extra files.
+          </div>
+          <Bafu {...this.state} {...this.props} onChangeX={this.onChangeX} />
+        </React.Fragment>
+      );
+    } else {
+      return (
+        <React.Fragment>
+          <SidebarLayout
+            sidebartitle="Plot Controls"
+            left={
+              <React.Fragment>
+                <div className="detailloading" id="detailloading">
+                  <Loading />
+                  Downloading extra files.
+                </div>
+                <div className="detailgraph">
+                  <Graph {...this.state} {...this.props} />
+                  {this.props.iframe && (
+                    <div className="iframe">
+                      Powered by{"  "}
+                      <a
+                        href={
+                          "https://www.datalakes-eawag.ch/datadetail/" +
+                          this.props.dataset.id
+                        }
+                        title="For more information see this dataset on Datalakes."
+                      >
+                        <img src={logo} alt="logo" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </React.Fragment>
+            }
+            rightNoScroll={
+              <Sidebar
+                {...this.state}
+                {...this.props}
+                onChangeState={this.onChangeState}
+                onChangeFile={this.onChangeFile}
+                onChangeX={this.onChangeX}
+                onChangeY={this.onChangeY}
+                toggleAddNewFile={this.toggleAddNewFile}
+                handleAxisSelect={this.handleAxisSelect}
+              />
+            }
+          />
+        </React.Fragment>
+      );
+    }
   }
 }
 

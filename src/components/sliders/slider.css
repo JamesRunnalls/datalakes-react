@@ -44,6 +44,10 @@
   box-sizing: border-box;
 }
 
+.datetime-selector .datetime-picker {
+  text-align: center;
+}
+
 .datetime-picker .datetime-value {
   display: inline-block;
 }

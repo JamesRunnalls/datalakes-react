@@ -10,7 +10,7 @@ class D3LineGraph extends Component {
     graphid: Math.round(Math.random() * 100000),
     download: false,
     fullscreen: false,
-    fontSize: 12,
+    fontSize: this.props.fontSize ? this.props.fontSize : 12,
   };
 
   editFontSize = (fontSize) => {
@@ -164,6 +164,8 @@ class D3LineGraph extends Component {
           yReverse,
           xReverse,
           plotdots,
+          box,
+          grid,
         } = this.props;
 
         if (!lcolor) lcolor = ["#000000"];
@@ -253,6 +255,11 @@ class D3LineGraph extends Component {
         var xAxis = d3.axisBottom(x).ticks(5);
         var yAxis = d3.axisLeft(y).ticks(5);
 
+        if (grid) {
+          xAxis.tickSize(-height);
+          yAxis.tickSize(-width);
+        }
+
         // Adds the svg canvas
         var svg = d3
           .select("#vis" + graphid)
@@ -337,6 +344,28 @@ class D3LineGraph extends Component {
             .style("font-size", `${fontSize}px`)
             .style("text-anchor", "middle")
             .text(yunits ? `${ylabel} (${yunits})` : ylabel);
+        }
+
+        if (grid) {
+          gX.selectAll(".tick line")
+            .attr("stroke", "grey")
+            .attr("stroke-dasharray", "4");
+          gY.selectAll(".tick line")
+            .attr("stroke", "grey")
+            .attr("stroke-dasharray", "4");
+        }
+
+        // Surrounding box
+        if (box) {
+          svg
+            .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("stroke", "black")
+            .attr("stroke-width", 2)
+            .attr("fill", "none");
         }
 
         // Add title
@@ -630,6 +659,14 @@ class D3LineGraph extends Component {
                   p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
                 );
                 zoombox.call(zoom.transform, d3.zoomIdentity);
+                if (grid) {
+                  gX.selectAll(".tick line")
+                    .attr("stroke", "grey")
+                    .attr("stroke-dasharray", "4");
+                  gY.selectAll(".tick line")
+                    .attr("stroke", "grey")
+                    .attr("stroke-dasharray", "4");
+                }
               }
             }
 
@@ -658,6 +695,14 @@ class D3LineGraph extends Component {
                   p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
                 );
                 zoomboxx.call(zoom.transform, d3.zoomIdentity);
+                if (grid) {
+                  gX.selectAll(".tick line")
+                    .attr("stroke", "grey")
+                    .attr("stroke-dasharray", "4");
+                  gY.selectAll(".tick line")
+                    .attr("stroke", "grey")
+                    .attr("stroke-dasharray", "4");
+                }
               }
             }
 
@@ -686,6 +731,14 @@ class D3LineGraph extends Component {
                   p.map((pp) => ({ x: x(pp.x), y: y(pp.y) }))
                 );
                 zoomboxy.call(zoom.transform, d3.zoomIdentity);
+                if (grid) {
+                  gX.selectAll(".tick line")
+                    .attr("stroke", "grey")
+                    .attr("stroke-dasharray", "4");
+                  gY.selectAll(".tick line")
+                    .attr("stroke", "grey")
+                    .attr("stroke-dasharray", "4");
+                }
               }
             }
 
@@ -715,6 +768,14 @@ class D3LineGraph extends Component {
                 lcolor,
                 lweight
               );
+              if (grid) {
+                gX.selectAll(".tick line")
+                  .attr("stroke", "grey")
+                  .attr("stroke-dasharray", "4");
+                gY.selectAll(".tick line")
+                  .attr("stroke", "grey")
+                  .attr("stroke-dasharray", "4");
+              }
             });
             zoomboxx.on("dblclick.zoom", null);
             zoomboxy.on("dblclick.zoom", null);
@@ -950,20 +1011,25 @@ class D3LineGraph extends Component {
     ) : (
       <div className={fullscreen ? "vis-main full" : "vis-main"}>
         <div className="linegraph-main">
-          <div className="linegraph-header">
-            <GraphHeader
-              id={graphid}
-              title={title}
-              download={download}
-              fullscreen={fullscreen}
-              fontSize={fontSize}
-              toggleDownload={this.toggleDownload}
-              toggleFullscreen={this.toggleFullscreen}
-              editFontSize={this.editFontSize}
-              downloadJSON={this.downloadJSON}
-              downloadCSV={this.downloadCSV}
-            />
-          </div>
+          {this.props.header !== false && (
+            <div className="linegraph-header">
+              <GraphHeader
+                id={graphid}
+                title={title}
+                download={download}
+                fullscreen={fullscreen}
+                fontSize={fontSize}
+                toggleDownload={this.toggleDownload}
+                toggleFullscreen={this.toggleFullscreen}
+                editFontSize={this.editFontSize}
+                downloadJSON={this.downloadJSON}
+                downloadCSV={this.downloadCSV}
+              />
+            </div>
+          )}
+          <table className="vis-data">
+            <tbody id={"value" + graphid}></tbody>
+          </table>
           <div className="linegraph-graph" id={"vis" + graphid} />
         </div>
       </div>

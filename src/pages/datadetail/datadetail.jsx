@@ -42,6 +42,7 @@ class DataDetail extends Component {
     innerLoading: false,
     addnewfiles: true,
     iframe: false,
+    search: false,
   };
 
   // Download data
@@ -408,6 +409,7 @@ class DataDetail extends Component {
       dataset_id = this.props.location.pathname.split("/").slice(-1)[0];
     }
 
+    var search = this.props.location.search;
     var iframe = this.props.location.search.includes("iframe");
 
     let server = await Promise.all([
@@ -541,6 +543,7 @@ class DataDetail extends Component {
         allowedStep,
         scripts,
         iframe,
+        search,
       });
       //} else if (datasource === "Meteolakes") {
     } else if (mapplotfunction === "meteolakes") {
@@ -630,6 +633,7 @@ class DataDetail extends Component {
       scripts,
       addnewfiles,
       iframe,
+      search,
     } = this.state;
     document.title = dataset.title
       ? dataset.title + " - Datalakes"
@@ -690,6 +694,7 @@ class DataDetail extends Component {
               removeFile={this.removeFile}
               downloadMultipleFiles={this.downloadMultipleFiles}
               iframe={iframe}
+              search={search}
             />
           </React.Fragment>
         );

@@ -197,9 +197,6 @@ class GraphHeader extends Component {
               </tr>
             </tbody>
           </table>
-          <table className="vis-data">
-            <tbody id={"value" + id}></tbody>
-          </table>
         </div>
       </React.Fragment>
     );

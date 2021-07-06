@@ -12,7 +12,7 @@ class D3HeatMap extends Component {
     graphid: Math.round(Math.random() * 100000),
     download: false,
     fullscreen: false,
-    display: "heatmap",
+    display: this.props.display ? this.props.display : "heatmap",
     zoom: false,
     fontSize: 12,
     xgraph: false,
@@ -320,24 +320,27 @@ class D3HeatMap extends Component {
     return (
       <div className={fullscreen ? "vis-main full" : "vis-main"}>
         <div className="heatmap-main">
-          <div className="heatmap-header">
-            <GraphHeader
-              id={graphid}
-              title={title}
-              download={download}
-              display={display}
-              fontSize={fontSize}
-              fullscreen={fullscreen}
-              toggleDownload={this.toggleDownload}
-              editFontSize={this.editFontSize}
-              toggleDisplay={this.toggleDisplay}
-              toggleFullscreen={this.toggleFullscreen}
-              downloadJSON={this.downloadJSON}
-              downloadCSV={this.downloadCSV}
-              toggleXgraph={this.toggleXgraph}
-              toggleYgraph={this.toggleYgraph}
-            />
-          </div>
+          {this.props.header !== false && (
+            <div className="heatmap-header">
+              <GraphHeader
+                id={graphid}
+                title={title}
+                download={download}
+                display={display}
+                fontSize={fontSize}
+                fullscreen={fullscreen}
+                toggleDownload={this.toggleDownload}
+                editFontSize={this.editFontSize}
+                toggleDisplay={this.toggleDisplay}
+                toggleFullscreen={this.toggleFullscreen}
+                downloadJSON={this.downloadJSON}
+                downloadCSV={this.downloadCSV}
+                toggleXgraph={this.toggleXgraph}
+                toggleYgraph={this.toggleYgraph}
+              />
+            </div>
+          )}
+
           <div className="heatmap-graphs">
             <div className={"heatmap-top" + xy}>
               <div className={"heatmap-left" + xy}>
