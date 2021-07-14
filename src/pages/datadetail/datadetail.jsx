@@ -21,6 +21,7 @@ import RemoteSensingDownload from "./inner/remotesensingdownload";
 import LocationMap from "./inner/locationmap";
 import Plot from "./inner/plot";
 import isArray from "lodash/isArray";
+import ReportIssue from "../../components/reportissue/reportissue";
 
 class DataDetail extends Component {
   state = {
@@ -696,6 +697,7 @@ class DataDetail extends Component {
               iframe={iframe}
               search={search}
             />
+            <ReportIssue dataset={dataset.title} />
           </React.Fragment>
         );
       case "heatmap":
